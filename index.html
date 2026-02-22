@@ -550,7 +550,13 @@ body::before{
   color:var(--text);
   box-shadow:inset 0 0 0 1px var(--rim);
 }
-.nav-tab svg{flex-shrink:0;}
+.nav-tab svg{flex-shrink:0;transition:transform .25s var(--spring);}
+.nav-tab:active svg,.nav-tab.icon-pop svg{transform:scale(0.85);animation:iconBounce .4s var(--spring) forwards;}
+@keyframes iconBounce{0%{transform:scale(0.85);}50%{transform:scale(1.15);}100%{transform:scale(1);}}
+.icon-btn svg{transition:transform .2s var(--spring);}
+.icon-btn:active svg,.icon-btn.icon-pop svg{transform:scale(0.9);animation:iconBounce .35s var(--spring) forwards;}
+.user-pill{transition:transform .2s var(--spring);}
+.user-pill.icon-pop{animation:iconBounce .35s var(--spring) forwards;}
 .nav-r{display:flex;align-items:center;gap:8px;}
 
 .icon-btn{
@@ -738,7 +744,17 @@ body::before{
 }
 .cal-header-row p{font-size:11px;color:var(--text-2);margin-top:2px;}
 
+.mnav-wrap{display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
 .mnav{display:flex;align-items:center;gap:6px;}
+.mnav-add-cal{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 14px;border-radius:var(--r-pill);
+  background:rgba(0,255,217,.12);border:1px solid rgba(0,255,217,.35);
+  color:var(--teal);font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .2s var(--ease);
+}
+.mnav-add-cal:hover{background:rgba(0,255,217,.2);border-color:var(--teal);transform:translateY(-1px);}
+.mnav-add-cal svg{flex-shrink:0;}
 .mnav-btn{
   width:32px;height:32px;border-radius:50%;
   background:var(--surface);border:1px solid var(--rim-2);
@@ -809,36 +825,64 @@ body::before{
 .ok {background:rgba(0,255,217,.10);color:var(--teal);border:1px solid rgba(0,255,217,.24);}
 
 /* ═══════════════════════════════════════════════
-   SETTINGS TAB
+   SETTINGS TAB — compact single-page layout
 ═══════════════════════════════════════════════ */
-#p-set{max-width:660px;margin:0 auto;padding:32px 20px 100px;}
+#p-set{
+  max-width:900px;margin:0 auto;padding:20px 16px 40px;
+  grid-template-columns:1fr 1fr;gap:16px 24px;
+  align-content:start;min-height:0;overflow-y:auto;
+}
+#p-set.show{
+  display:grid;
+}
 #p-set h1{
+  grid-column:1/-1;
   font-family:var(--ff-head);
-  font-size:clamp(30px,5vw,44px);font-weight:800;
-  letter-spacing:-1.5px;margin-bottom:6px;
+  font-size:clamp(24px,4vw,32px);font-weight:800;
+  letter-spacing:-1px;margin-bottom:2px;
 }
-#p-set .sub{font-size:14px;color:var(--text-2);margin-bottom:32px;}
-
-.sg{margin-bottom:14px;}
-.sg-lbl{
-  font-size:11px;font-weight:700;letter-spacing:.9px;
+#p-set .sub{grid-column:1/-1;font-size:13px;color:var(--text-2);margin-bottom:12px;}
+#p-set .sg{margin-bottom:0;}
+#p-set .sg-lbl{
+  font-size:10px;font-weight:700;letter-spacing:.8px;
   text-transform:uppercase;color:var(--text-3);
-  padding:0 4px;margin-bottom:8px;
+  padding:0 4px;margin-bottom:6px;
 }
-.sg-body{
-  border-radius:var(--r-xl);
+#p-set .sg-body{
+  border-radius:var(--r-lg);
   background:var(--card-bg);border:1px solid var(--rim-2);
   backdrop-filter:var(--blur);overflow:hidden;
 }
-.srow{
+#p-set .srow{
   display:flex;align-items:center;justify-content:space-between;
-  padding:15px 20px;border-bottom:1px solid var(--rim-2);
+  padding:10px 14px;border-bottom:1px solid var(--rim-2);
   transition:background .15s;
 }
-.srow:last-child{border-bottom:none;}
-.srow:hover{background:var(--surface-2);}
-.srow-info h4{font-size:14px;font-weight:600;margin-bottom:2px;}
-.srow-info p{font-size:12px;color:var(--text-3);line-height:1.4;}
+#p-set .srow:last-child{border-bottom:none;}
+#p-set .srow:hover{background:var(--surface-2);}
+#p-set .srow-info h4{font-size:13px;font-weight:600;margin-bottom:1px;}
+#p-set .srow-info p{font-size:11px;color:var(--text-3);line-height:1.3;}
+#p-set .prof-row{padding:12px 14px;}
+#p-set .prof-ava{width:40px;height:40px;font-size:16px;}
+#p-set .prof-name{font-size:14px;}
+#p-set .prof-email{font-size:11px;}
+#p-set .cls-row{padding:10px 14px;}
+#p-set .cls-swatch{width:28px;height:28px;font-size:10px;}
+#p-set .cls-info b{font-size:12px;}
+.sg-account{grid-column:1/-1;}
+.sg-notify{grid-column:1;}
+.sg-delivery{grid-column:2;}
+.sg-classes{grid-column:1/-1;}
+.srow-quiet{display:flex;align-items:center;gap:12px;}
+.quiet-times{display:inline-flex;align-items:center;gap:6px;}
+.quiet-times input[type="time"]{
+  padding:5px 8px;border-radius:var(--r-sm);
+  background:var(--surface);border:1px solid var(--rim-2);
+  color:var(--text);font-size:12px;font-family:inherit;
+}
+.quiet-sep{color:var(--text-3);font-size:12px;font-weight:500;}
+.srow-quiet-inline .srow-quiet{flex-shrink:0;}
+@media(max-width:700px){#p-set{grid-template-columns:1fr;}}
 
 /* Toggle */
 .tog{position:relative;width:44px;height:25px;flex-shrink:0;}
@@ -900,25 +944,29 @@ body::before{
 .cls-info span{font-size:11px;color:var(--text-3);}
 
 /* ═══════════════════════════════════════════════
-   BOTTOM SHEET (detail)
+   FLOATING DETAIL CARD (centered, blurred bg)
 ═══════════════════════════════════════════════ */
 .sheet-veil{
   position:fixed;inset:0;z-index:150;
-  background:rgba(0,0,0,.55);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,.4);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   opacity:0;pointer-events:none;transition:opacity .3s var(--ease);
+  padding:24px;
 }
 .sheet-veil.open{opacity:1;pointer-events:all;}
 .sheet{
-  position:absolute;bottom:0;left:0;right:0;
-  max-height:86svh;
-  border-radius:28px 28px 0 0;
+  position:relative;
+  width:100%;max-width:480px;max-height:85vh;
+  border-radius:var(--r-xl);
   background:var(--sheet-bg);
-  border:1px solid var(--rim);border-bottom:none;
+  border:1px solid var(--rim);
+  box-shadow:0 24px 80px rgba(0,0,0,.5);
   overflow-y:auto;
-  transform:translateY(100%);
-  transition:transform .38s var(--spring);
+  transform:scale(.92) translateY(20px);
+  opacity:0;
+  transition:transform .35s var(--spring),opacity .3s var(--ease);
 }
-.sheet-veil.open .sheet{transform:translateY(0);}
+.sheet-veil.open .sheet{transform:scale(1) translateY(0);opacity:1;}
 .sheet-grip{width:36px;height:4px;background:var(--rim);border-radius:4px;margin:14px auto 0;}
 .sheet-top{padding:22px 26px 18px;border-bottom:1px solid var(--rim-2);}
 .sheet-eyebrow{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
@@ -1884,7 +1932,7 @@ body::before{
 
 /* ── Surgical cyan→indigo: only SVGs tagged .icon-teal swap color in light ── */
 [data-theme="light"] .icon-teal path,
-[data-theme="light"] .icon-teal circle { stroke: #3533cd !important; }
+[data-theme="light"] .icon-teal circle { stroke: #42d3bd !important; }
 
 /* ── Open in Classroom button — clean solid style ── */
 .sa-primary {
@@ -2386,8 +2434,8 @@ body::before{
         <div class="compare-item"><div class="compare-dot" style="background:#00c97a"></div>New assignments posted</div>
         <div class="compare-item"><div class="compare-dot" style="background:#00c97a"></div>Grades returned</div>
         <div class="compare-item"><div class="compare-dot" style="background:#00c97a"></div>New announcements (if app installed)</div>
+        <div class="compare-item"><div class="compare-dot" style="background:#00c97a"></div>New materials &amp; PDFs uploaded</div>
         <div class="compare-item" style="opacity:.38"><div class="compare-dot" style="background:var(--text-3)"></div><s>Teacher comments on your work</s></div>
-        <div class="compare-item" style="opacity:.38"><div class="compare-dot" style="background:var(--text-3)"></div><s>New materials &amp; PDFs uploaded</s></div>
         <div class="compare-item" style="opacity:.38"><div class="compare-dot" style="background:var(--text-3)"></div><s>Deadline changes &amp; extensions</s></div>
         <div class="compare-item" style="opacity:.38"><div class="compare-dot" style="background:var(--text-3)"></div><s>Edits to existing posts</s></div>
       </div>
@@ -2478,9 +2526,9 @@ body::before{
                   <svg class="icon-teal" width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="#00ffd9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>
                 <div class="pn-body">
-                  <div class="pn-app">Aulert · CS101</div>
-                  <div class="pn-title">Lab 4 deadline extended 🎉</div>
-                  <div class="pn-msg">Submission window moved to Friday night</div>
+                  <div class="pn-app">Aulert · Chemistry</div>
+                  <div class="pn-title">School wiped out chemistry subject</div>
+                  <div class="pn-msg">No more chemistry classes — all students are being moved to Physics.</div>
                   <div class="pn-time">just now</div>
                 </div>
               </div>
@@ -2489,10 +2537,10 @@ body::before{
                   <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="9" y1="10" x2="15" y2="10" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round"/><line x1="9" y1="13" x2="13" y2="13" stroke="#8B5CF6" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </div>
                 <div class="pn-body">
-                  <div class="pn-app">Aulert · Biology</div>
-                  <div class="pn-title">Dr. Nattapon left feedback</div>
-                  <div class="pn-msg">Expand your conclusion on the cell lab</div>
-                  <div class="pn-time">2 min ago</div>
+                  <div class="pn-app">Aulert · Advanced Mathemathics</div>
+                  <div class="pn-title">Quiz 3 — Integration Techniques</div>
+                  <div class="pn-msg">Due February 25 at 11:59 PM. Two attempts allowed — highest score counts.</div>
+                  <div class="pn-time">2 hrs ago</div>
                 </div>
               </div>
               <div class="phone-notif" id="pn-3">
@@ -2500,10 +2548,10 @@ body::before{
                   <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="#FCD34D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14,2 14,8 20,8" stroke="#FCD34D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="9" y1="13" x2="15" y2="13" stroke="#FCD34D" stroke-width="1.5" stroke-linecap="round"/></svg>
                 </div>
                 <div class="pn-body">
-                  <div class="pn-app">Aulert · Math Analysis</div>
-                  <div class="pn-title">Quiz 3 is now open</div>
-                  <div class="pn-msg">Integration techniques · Due Feb 25</div>
-                  <div class="pn-time">15 min ago</div>
+                  <div class="pn-app">Aulert · Innovation project</div>
+                  <div class="pn-title">Feedback on your innovation</div>
+                  <div class="pn-msg">Ms. Chaowanee commented on your submission — expand your conclusion.</div>
+                  <div class="pn-time">3 hrs ago</div>
                 </div>
               </div>
               <div class="phone-notif" id="pn-4">
@@ -2511,10 +2559,10 @@ body::before{
                   <svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="#FB7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="#FB7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>
                 <div class="pn-body">
-                  <div class="pn-app">Aulert · English Lit</div>
-                  <div class="pn-title">New reading uploaded</div>
-                  <div class="pn-msg">Mrs Dalloway Ch. 5–8 + annotation guide</div>
-                  <div class="pn-time">1 hr ago</div>
+                  <div class="pn-app">Aulert · iELTS</div>
+                  <div class="pn-title">Reading: Teacher Dominic Torretto Ch. 5–8</div>
+                  <div class="pn-msg">PDF and annotation guide uploaded for next week's Socratic circle.</div>
+                  <div class="pn-time">Yesterday</div>
                 </div>
               </div>
             </div>
@@ -2657,33 +2705,33 @@ body::before{
   <nav class="app-nav">
     <div class="nav-logo">Aulert</div>
     <div class="nav-tabs">
-      <button class="nav-tab on" id="tb-feed" onclick="goTab('feed',this)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <button class="nav-tab on" id="tb-feed" onclick="iconPop(this);goTab('feed',this)">
+        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <span>Notifications</span>
       </button>
-      <button class="nav-tab" id="tb-cal" onclick="goTab('cal',this)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <button class="nav-tab" id="tb-cal" onclick="iconPop(this);goTab('cal',this)">
+        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <span>Calendar</span>
       </button>
-      <button class="nav-tab" id="tb-set" onclick="goTab('set',this)">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <button class="nav-tab" id="tb-set" onclick="iconPop(this);goTab('set',this)">
+        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <span>Settings</span>
       </button>
     </div>
     <div class="nav-r">
       <!-- Theme toggle (in-nav) -->
-      <div class="icon-btn" id="navThemeBtn" onclick="toggleTheme()" title="Toggle theme">
+      <div class="icon-btn icon-btn-animate" id="navThemeBtn" onclick="iconPop(this);toggleTheme()" title="Toggle theme">
         <svg id="navThemeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
           <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </div>
-      <div class="icon-btn" id="bellBtn" onclick="toggleNotifPanel(event)" title="Notifications">
+      <div class="icon-btn icon-btn-animate" id="bellBtn" onclick="iconPop(this);toggleNotifPanel(event)" title="Notifications">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <div class="notif-pip" id="pip" style="display:none"></div>
       </div>
       <!-- User -->
-      <div class="user-pill" onclick="goTab('set',document.getElementById('tb-set'))">
+      <div class="user-pill icon-btn-animate" onclick="iconPop(this);goTab('set',document.getElementById('tb-set'))">
         <div class="ava">S</div>
         <span class="user-pill-name">Student</span>
       </div>
@@ -2707,7 +2755,7 @@ body::before{
     </div>
     <div class="np-list" id="npList"></div>
     <div class="np-footer">
-      <button class="np-view-all" onclick="closeNotifPanel();goTab('feed',document.getElementById('tb-feed'))">
+      <button class="np-view-all icon-btn-animate" onclick="iconPop(this);closeNotifPanel();goTab('feed',document.getElementById('tb-feed'))">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         View all in feed
       </button>
@@ -2829,14 +2877,20 @@ body::before{
           <h1>Deadlines</h1>
           <p>All due dates across every class in one view</p>
         </div>
-        <div class="mnav">
-          <div class="mnav-btn" onclick="navMo(-1)">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="15,18 9,12 15,6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="mnav-wrap">
+          <div class="mnav">
+            <div class="mnav-btn" onclick="navMo(-1)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="15,18 9,12 15,6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="mnav-label" id="moLabel">February 2026</div>
+            <div class="mnav-btn" onclick="navMo(1)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="9,18 15,12 9,6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
           </div>
-          <div class="mnav-label" id="moLabel">February 2026</div>
-          <div class="mnav-btn" onclick="navMo(1)">
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="9,18 15,12 9,6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          </div>
+          <button class="mnav-add-cal icon-btn-animate" onclick="iconPop(this);exportToGoogleCalendar()" title="Add deadlines to Google Calendar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 14v4M10 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Add to Calendar
+          </button>
         </div>
       </div>
       <div class="cal-card">
@@ -2855,7 +2909,7 @@ body::before{
       <h1>Settings</h1>
       <p class="sub">Control your account, notifications, and connected classes</p>
 
-      <div class="sg">
+      <div class="sg sg-account">
         <div class="sg-lbl">Account</div>
         <div class="prof-row">
           <div class="prof-ava" id="profAva">S</div>
@@ -2870,28 +2924,27 @@ body::before{
         </div>
       </div>
 
-      <div class="sg">
+      <div class="sg sg-notify">
         <div class="sg-lbl">Notify me about</div>
         <div class="sg-body">
-          <div class="srow"><div class="srow-info"><h4>Stream Posts</h4><p>New posts in the class stream</p></div><label class="tog"><input type="checkbox" checked onchange="saved()"><div class="tog-track"></div></label></div>
-          <div class="srow"><div class="srow-info"><h4>Announcements</h4><p>Important teacher announcements</p></div><label class="tog"><input type="checkbox" checked onchange="saved()"><div class="tog-track"></div></label></div>
-          <div class="srow"><div class="srow-info"><h4>New Assignments</h4><p>When new work is posted</p></div><label class="tog"><input type="checkbox" checked onchange="saved()"><div class="tog-track"></div></label></div>
-          <div class="srow"><div class="srow-info"><h4>Grades Posted</h4><p>When your work is graded</p></div><label class="tog"><input type="checkbox" checked onchange="saved()"><div class="tog-track"></div></label></div>
-          <div class="srow"><div class="srow-info"><h4>Comments</h4><p>Comments on posts and submissions</p></div><label class="tog"><input type="checkbox" checked onchange="saved()"><div class="tog-track"></div></label></div>
-          <div class="srow"><div class="srow-info"><h4>New Materials</h4><p>Study resources and files added</p></div><label class="tog"><input type="checkbox" onchange="saved()"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Stream Posts</h4><p>Class stream</p></div><label class="tog"><input type="checkbox" id="set_stream" onchange="saveSetting('stream',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Announcements</h4><p>Teacher announcements</p></div><label class="tog"><input type="checkbox" id="set_announcements" onchange="saveSetting('announcements',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Assignments</h4><p>New work posted</p></div><label class="tog"><input type="checkbox" id="set_assignments" onchange="saveSetting('assignments',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Grades</h4><p>When graded</p></div><label class="tog"><input type="checkbox" id="set_grades" onchange="saveSetting('grades',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Materials</h4><p>Study resources</p></div><label class="tog"><input type="checkbox" id="set_materials" onchange="saveSetting('materials',this.checked)"><div class="tog-track"></div></label></div>
         </div>
       </div>
 
-      <div class="sg">
+      <div class="sg sg-delivery">
         <div class="sg-lbl">Delivery</div>
         <div class="sg-body">
-          <div class="srow"><div class="srow-info"><h4>Browser Push Notifications</h4><p>Get alerts even when Aulert isn't open</p></div><label class="tog"><input type="checkbox" checked onchange="reqPush(this)"><div class="tog-track"></div></label></div>
-          <div class="srow"><div class="srow-info"><h4>Quiet Hours</h4><p>Pause notifications 10 PM – 7 AM</p></div><label class="tog"><input type="checkbox" onchange="saved()"><div class="tog-track"></div></label></div>
-          <div class="srow"><div class="srow-info"><h4>Sound Alerts</h4><p>Play a sound when notifications arrive</p></div><label class="tog"><input type="checkbox" onchange="saved()"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Push Notifications</h4><p>Alerts when tab closed</p></div><label class="tog"><input type="checkbox" id="set_push" onchange="reqPush(this)"><div class="tog-track"></div></label></div>
+          <div class="srow srow-quiet-inline"><div class="srow-info"><h4>Quiet Hours</h4><p>Pause notifications during set times</p></div><div class="srow-quiet"><label class="tog"><input type="checkbox" id="set_quietHours" onchange="saveSetting('quietHours',this.checked)"><div class="tog-track"></div></label><span class="quiet-times"><input type="time" id="quietStart" title="Start" onchange="saveQuietTime()"><span class="quiet-sep">–</span><input type="time" id="quietEnd" title="End" onchange="saveQuietTime()"></span></div></div>
+          <div class="srow"><div class="srow-info"><h4>Sound Alerts</h4><p>Sound on new alert</p></div><label class="tog"><input type="checkbox" id="set_sound" onchange="saveSetting('sound',this.checked)"><div class="tog-track"></div></label></div>
         </div>
       </div>
 
-      <div class="sg">
+      <div class="sg sg-classes">
         <div class="sg-lbl">Connected Classes</div>
         <div class="sg-body" id="clsBody"></div>
       </div>
@@ -2955,6 +3008,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/classroom.courses.readonly',
   'https://www.googleapis.com/auth/classroom.announcements.readonly',
   'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
+  'https://www.googleapis.com/auth/classroom.student-submissions.me.readonly',
   'https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly',
   'https://www.googleapis.com/auth/userinfo.profile',
   'https://www.googleapis.com/auth/userinfo.email',
@@ -2988,8 +3042,8 @@ let S = {
   readIds:  new Set(JSON.parse(localStorage.getItem('aul_read')  || '[]')),
   seenIds:  new Set(JSON.parse(localStorage.getItem('aul_seen')  || '[]')),
   settings: JSON.parse(localStorage.getItem('aul_settings') || JSON.stringify({
-    announcements:true, assignments:true, materials:true,
-    push:false, quietHours:false, sound:false,
+    stream:true, announcements:true, assignments:true, grades:true, comments:true, materials:true,
+    push:false, quietHours:false, quietStart:'22:00', quietEnd:'07:00', sound:false,
   })),
 };
 
@@ -3188,12 +3242,13 @@ async function fetchAllContent(initial = false) {
       }
     });
     // Detect and surface genuinely new items
+    const inQuiet = isQuietHours();
     newNotifs
       .filter(n => !S.seenIds.has(n.id))
       .forEach(n => {
         const c = courseById(n.courseId);
-        showToast(`New ${TYPE_META[n.type]?.label}`, `${c.name} — ${n.title}`);
-        if (S.settings.push && Notification.permission === 'granted') {
+        if (!inQuiet) showToast(`New ${TYPE_META[n.type]?.label}`, `${c.name} — ${n.title}`);
+        if (!inQuiet && S.settings.push && Notification.permission === 'granted') {
           new Notification(`Aulert · ${c.name}`, { body: n.title });
         }
         S.seenIds.add(n.id);
@@ -3219,11 +3274,19 @@ async function fetchCourse(course) {
   const notifs    = [];
   const deadlines = [];
 
-  const [ann, cw, mat] = await Promise.allSettled([
+  const [ann, cw, mat, subs] = await Promise.allSettled([
     classroomApi(`courses/${course.id}/announcements?pageSize=30&orderBy=updateTime+desc`),
     classroomApi(`courses/${course.id}/courseWork?pageSize=50&orderBy=updateTime+desc`),
     classroomApi(`courses/${course.id}/courseWorkMaterials?pageSize=30&orderBy=updateTime+desc`),
+    classroomApi(`courses/${course.id}/courseWork/-/studentSubmissions?userId=me`),
   ]);
+
+  const turnedInIds = new Set();
+  if (subs.status === 'fulfilled' && subs.value.studentSubmissions) {
+    subs.value.studentSubmissions.forEach(s => {
+      if (s.state === 'TURNED_IN' || s.state === 'RETURNED') turnedInIds.add(s.courseWorkId);
+    });
+  }
 
   if (ann.status === 'fulfilled') {
     (ann.value.announcements || []).forEach(a => {
@@ -3244,6 +3307,7 @@ async function fetchCourse(course) {
 
   if (cw.status === 'fulfilled') {
     (cw.value.courseWork || []).forEach(w => {
+      if (turnedInIds.has(w.id)) return; // skip assignments already turned in
       const obj = {
         id:        `cw-${w.id}`,
         type:      'assignment',
@@ -3318,8 +3382,17 @@ function launchApp() {
   renderClasses();
   renderCal();
   updatePip();
+  renderSettings();
   startPolling();
   showToast('Connected!', `Monitoring ${S.courses.length} course${S.courses.length !== 1 ? 's' : ''}`);
+  // Ask for notification permission on first dashboard login
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission().then(p => {
+      S.settings.push = p === 'granted';
+      saveSettings();
+      if (p === 'granted') new Notification('Aulert', { body: 'Push notifications enabled! You\'ll get alerts for new classroom updates.' });
+    });
+  }
 }
 
 function renderAccount() {
@@ -3414,14 +3487,26 @@ function toggleTheme() {
 }
 
 /* ════════════════════════════════════════════
+   ICON CLICK ANIMATION
+════════════════════════════════════════════ */
+function iconPop(el) {
+  if (!el) return;
+  el.classList.add('icon-pop');
+  setTimeout(() => el.classList.remove('icon-pop'), 400);
+}
+
+/* ════════════════════════════════════════════
    TABS
 ════════════════════════════════════════════ */
 function goTab(name) {
   ['feed','cal','set'].forEach(t => {
-    document.getElementById('p-'+t).classList.toggle('show', t === name);
-    document.getElementById('tb-'+t).classList.toggle('on',  t === name);
+    const panel = document.getElementById('p-'+t);
+    const tab = document.getElementById('tb-'+t);
+    if (panel) panel.classList.toggle('show', t === name);
+    if (tab) tab.classList.toggle('on', t === name);
   });
   if (name === 'cal') renderCal();
+  if (name === 'set') renderSettings();
 }
 
 /* ════════════════════════════════════════════
@@ -3726,7 +3811,7 @@ function toggleRead() {
 }
 
 function closeSheet(e) {
-  if (e && e.target !== document.getElementById('sheetVeil')) return;
+  if (e && e.target.closest('.sheet')) return; // don't close when clicking inside card
   document.getElementById('sheetVeil').classList.remove('open');
 }
 
@@ -3777,6 +3862,40 @@ function pickDay(d, el) {
   renderDl(d);
 }
 
+function exportToGoogleCalendar() {
+  const nowDay = new Date(); nowDay.setHours(0,0,0,0);
+  const list = S.deadlines.filter(dl => dl.date >= nowDay).sort((a,b) => a.date - b.date);
+  if (!list.length) {
+    showToast('No deadlines', 'Add some assignments first to export to Google Calendar');
+    return;
+  }
+  const pad = n => String(n).padStart(2,'0');
+  const toICSDate = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T235900Z`;
+  const dtstamp = () => {
+    const n = new Date();
+    return `${n.getFullYear()}${pad(n.getMonth()+1)}${pad(n.getDate())}T${pad(n.getHours())}${pad(n.getMinutes())}${pad(n.getSeconds())}Z`;
+  };
+  let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Aulert//Classroom Deadlines//EN\r\n';
+  list.forEach((dl, i) => {
+    const c = courseById(dl.courseId);
+    const start = toICSDate(dl.date);
+    const end = new Date(dl.date); end.setDate(end.getDate()+1);
+    const endStr = toICSDate(end);
+    const esc = s => String(s).replace(/[\\,;]/g, '\\$&');
+    const summary = esc(dl.title || 'Deadline');
+    const desc = esc(`${c.name} — ${dl.title || 'Deadline'}`);
+    ics += `BEGIN:VEVENT\r\nUID:aulert-${dl.notifId || i}-${Date.now()}@aulert.app\r\nDTSTAMP:${dtstamp()}\r\nDTSTART:${start}\r\nDTEND:${endStr}\r\nSUMMARY:${summary}\r\nDESCRIPTION:${desc}\r\nEND:VEVENT\r\n`;
+  });
+  ics += 'END:VCALENDAR';
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'Aulert-Deadlines.ics';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  showToast('Exported!', `Add ${list.length} deadline${list.length!==1?'s':''} to Google Calendar via import`);
+}
+
 function renderDl(day) {
   const nowDay = new Date(); nowDay.setHours(0,0,0,0);
   const list = day
@@ -3817,6 +3936,48 @@ function saved() {
   s.classList.add('show');
   S.snackTimer = setTimeout(() => s.classList.remove('show'), 2200);
   saveSettings();
+}
+
+function saveSetting(key, val) {
+  S.settings[key] = val;
+  saveSettings();
+  saved();
+}
+
+function saveQuietTime() {
+  S.settings.quietStart = document.getElementById('quietStart')?.value || '22:00';
+  S.settings.quietEnd = document.getElementById('quietEnd')?.value || '07:00';
+  saveSettings();
+  saved();
+}
+
+function isQuietHours() {
+  if (!S.settings.quietHours) return false;
+  const now = new Date();
+  const [sh, sm] = (S.settings.quietStart || '22:00').split(':').map(Number);
+  const [eh, em] = (S.settings.quietEnd || '07:00').split(':').map(Number);
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+  let startMins = sh * 60 + sm;
+  let endMins = eh * 60 + em;
+  if (startMins > endMins) return nowMins >= startMins || nowMins < endMins;
+  return nowMins >= startMins && nowMins < endMins;
+}
+
+function renderSettings() {
+  const m = S.settings;
+  const set = (id, val) => { const e = document.getElementById(id); if (e) e.checked = !!val; };
+  set('set_stream', m.stream);
+  set('set_announcements', m.announcements);
+  set('set_assignments', m.assignments);
+  set('set_grades', m.grades);
+  set('set_materials', m.materials);
+  set('set_push', m.push);
+  set('set_quietHours', m.quietHours);
+  set('set_sound', m.sound);
+  const qs = document.getElementById('quietStart');
+  const qe = document.getElementById('quietEnd');
+  if (qs) qs.value = m.quietStart || '22:00';
+  if (qe) qe.value = m.quietEnd || '07:00';
 }
 
 function reqPush(el) {
@@ -4070,7 +4231,7 @@ function toggleFaq(btn){
     'catches everything','watches 24/7','never misses a beat',
     'fills the gaps','notifies instantly','has your back',
     'never sleeps','sees it all','keeps you ahead',
-    'catches every update','tracks it all','stays alert'
+    'tracks it all','stays alert'
   ];
   const el = document.getElementById('heroVerb');
   if(!el) return;

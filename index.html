@@ -4347,7 +4347,7 @@ const _fd = ['Y','e','l','l','0','w','C','i','r','c','l','e','1','2','3','4','5'
 const AKISMET_CONFIG = {
   /* Set this to your deployed proxy URL to enable Akismet checking.
      Leave as empty string ('') to skip Akismet and rely on local filters only. */
-  proxyUrl: 'https://aulert.vercel.app/api/akismet-check',   // e.g. 'https://your-site.vercel.app/api/akismet-check'
+  proxyUrl: 'https://aulert.vercel.app/api/akismet-check',
   timeoutMs: 5000 // If proxy takes longer than this, we skip the check (fail-open)
 };
 
@@ -4755,31 +4755,85 @@ function fbkScoreText(subject, detail) {
   if (words.length >= 2 && words.every(w => isKeyboardMash(w.replace(/[^a-zA-Z]/g,''))))
     return block('Your message looks like a keyboard smash. Please write actual feedback.');
 
-  // 6. Single word that's clearly a keyboard mash or common spam term
-  const SPAM_EXACT = new Set(['spam','fake','test','idk','idc','na','nothing','lol','lmao',
-    'asdf','qwerty','zxcv','asd','qwe','hjkl','fgh','dfgh','sdfgh','xcvb','bnm',
-    'hello','hey','hi','ok','okay','sure','yes','no','nope','yep']);
-  if (words.length <= 2 && SPAM_EXACT.has(lc.replace(/[^a-z]/g,'')))
+  // 6. Single word / short message that's clearly spam or meaningless
+  const SPAM_EXACT = new Set([
+    // keyboard mashes
+    'asdf','qwerty','zxcv','asd','qwe','hjkl','fgh','dfgh','sdfgh','xcvb','bnm','zxcvbn',
+    // filler / non-feedback
+    'spam','fake','test','idk','idc','na','nothing','lol','lmao','lol','rofl',
+    'hello','hey','hi','ok','okay','sure','yes','no','nope','yep','yup','nah',
+    'good','bad','nice','cool','great','fine','meh','k','kk','thx','ty','np',
+    'whatever','idc','idgaf','bruh','bro','lmk','imo','tbh','fyi','omg','wtf',
+    'pls','plz','pleas','plez','dunno','hmm','hm','uh','um','er','ah','oh',
+    'null','undefined','none','empty','blank','void','random','stuff','thing',
+    '123','1234','12345','000','111','abc','abcd','abcde','xyz'
+  ]);
+  if (words.length <= 2 && SPAM_EXACT.has(lc.replace(/[^a-z0-9]/g,'')))
     return block('Your message doesn\'t contain meaningful feedback. Please describe what you\'d like to share.');
 
-  // 7. Very low plausibility score — gibberish text
-  // Using 0.35 threshold (was 0.22 — much stricter now)
-  if (words.length >= 2 && plausib < 0.35)
+  // 7. Profanity / abusive content block
+  const PROFANITY = new Set([
+    'fuck','fucking','fucker','fucks','fucked','fuk','fck',
+    'shit','shits','shitting','shitty','sht',
+    'bitch','bitches','bitching',
+    'ass','asses','asshole','assholes',
+    'cunt','cunts',
+    'dick','dicks','dickhead',
+    'cock','cocks',
+    'bastard','bastards',
+    'crap','damn','piss','pissed',
+    'wtf','stfu','gtfo','kys',
+    'idiot','idiots','stupid','dumb','moron','retard','retarded',
+    'ugly','hate','suck','sucks','sucked','garbage','trash','terrible','awful','worst',
+    'scam','scammer','fraud','cheater','liar','lies','lie'
+  ]);
+  const wordTokens = lc.replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean);
+  if (wordTokens.some(w => PROFANITY.has(w)))
+    return block('Your message contains inappropriate language. Please keep feedback respectful and constructive.');
+
+  // 8. URL / link spam
+  if (/https?:\/\/|www\.|\.com|\.net|\.org|\.io|\.co\b/i.test(combined))
+    return block('Links are not allowed in feedback. Please describe your thoughts in plain text.');
+
+  // 9. Repeated word spam (e.g. "good good good good")
+  if (words.length >= 3) {
+    const cleanWords = wordTokens.filter(w => w.length > 1);
+    if (cleanWords.length >= 3) {
+      const freq = {};
+      cleanWords.forEach(w => freq[w] = (freq[w] || 0) + 1);
+      const maxFreq = Math.max(...Object.values(freq));
+      if (maxFreq / cleanWords.length > 0.55)
+        return block('Your message contains too many repeated words. Please write varied, descriptive feedback.');
+    }
+  }
+
+  // 10. Excessive ALL CAPS (shouting / spam signal)
+  const upperCount = (combined.match(/[A-Z]/g) || []).length;
+  const lowerCount = (combined.match(/[a-z]/g) || []).length;
+  if (letters > 15 && upperCount / (upperCount + lowerCount) > 0.75)
+    return block('Please avoid writing in ALL CAPS. Write your feedback normally.');
+
+  // 11. Very low plausibility score — gibberish text
+  if (words.length >= 2 && plausib < 0.38)
     return block('Your message looks like random characters. Please write readable sentences describing your feedback.');
 
-  // 8. Single long gibberish word
-  if (words.length === 1 && letters > 4 && plausib < 0.30)
+  // 12. Single long gibberish word
+  if (words.length === 1 && letters > 4 && plausib < 0.32)
     return block('That doesn\'t look like a real word or sentence. Please write your feedback clearly.');
 
-  // 9. Most words are unknown and have poor transitions
-  // Even if plausib isn't extreme, if ZERO real words in a multi-word message, it's suspect
+  // 13. Most words are unknown and have poor transitions
   if (words.length >= 3 && rwRatio < 0.08 && plausib < 0.52)
     return block('Your message appears to contain mostly unrecognizable text. Please write in plain English.');
 
-  // 10. Alternating consonant pattern with no real words (like "sdfsdf", "asdqwe")
+  // 14. Alternating consonant pattern (like "sdfsdf", "asdqwe")
   const repeatingChunk = /^([a-zA-Z]{2,5})\1{2,}$/.test(combined.replace(/\s/g,''));
   if (repeatingChunk)
     return block('Your message contains a repeating pattern. Please write actual feedback.');
+
+  // 15. Too short — minimum 5 meaningful words for text feedback
+  const meaningfulWords = wordTokens.filter(w => w.length > 2 && !['the','and','for','but','are','was','its'].includes(w));
+  if (meaningfulWords.length < 4)
+    return block('Your message is too short. Please write at least a sentence or two describing your feedback.');
 
   // ─── QUALITY SCORING ────────────────────────────────────────
   let score = 0;
@@ -4820,23 +4874,39 @@ function fbkScoreText(subject, detail) {
   score += Math.min(kwHits * 2.2, 12);
 
   // Penalise low-effort one-liners
-  const LOW_EFFORT = ['fix it','pls fix','pls add','update it','add it','its bad','its good',
-    'make it better','doesnt work','not working','broken','please fix','just fix'];
-  if (LOW_EFFORT.some(le => lc.includes(le)) && detWords < 6) score = Math.min(score, 24);
+  const LOW_EFFORT = [
+    'fix it','pls fix','pls add','update it','add it','its bad','its good',
+    'make it better','doesnt work','not working','broken','please fix','just fix',
+    'very bad','very good','so bad','so good','not good','not bad','too slow',
+    'doesnt load','wont load','cant load','not load','no work','dont work'
+  ];
+  if (LOW_EFFORT.some(le => lc.includes(le)) && detWords < 8) score = Math.min(score, 22);
+
+  // Penalise excessive punctuation / emoji spam
+  const punctCount = (combined.match(/[!?]{2,}|\.{3,}/g) || []).length;
+  if (punctCount >= 3) score -= 10;
+
+  // Penalise very short detail (< 5 words)
+  if (detWords < 5) score -= 15;
 
   // Cap: low plausibility can't achieve high score via length alone
   if (plausib < 0.50 && score > 35) score = Math.min(score, 35);
   if (plausib < 0.42 && score > 28) score = Math.min(score, 28);
 
-  score = Math.round(Math.min(score, 100));
+  score = Math.round(Math.min(Math.max(score, 0), 100));
+
+  // ── Hard block if final score is too low ──
+  // Score < 22 means even the quality scoring thinks this is worthless
+  if (score < 22)
+    return block('Your message is too vague or low-quality. Please add more detail so the developer can understand and act on your feedback.');
 
   let status, color, hint;
-  if (score < 30) {
+  if (score < 35) {
     status = 'Low Quality'; color = '#FB7185';
-    hint = detWords < 4
-      ? 'Too short — describe your feedback with at least a full sentence or two.'
+    hint = detWords < 6
+      ? 'Too short — describe your feedback with at least a couple of sentences.'
       : 'Add more specific detail so the developer can understand and act on your message.';
-  } else if (score < 56) {
+  } else if (score < 58) {
     status = 'Moderate'; color = '#FCD34D';
     hint = 'Decent start — adding more context and specifics will make this much more useful.';
   } else if (score < 80) {

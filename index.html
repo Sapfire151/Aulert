@@ -875,13 +875,177 @@ body::before{
 .sg-classes{grid-column:1/-1;}
 .srow-quiet{display:flex;align-items:center;gap:12px;}
 .quiet-times{display:inline-flex;align-items:center;gap:6px;}
-.quiet-times input[type="time"]{
-  padding:5px 8px;border-radius:var(--r-sm);
-  background:var(--surface);border:1px solid var(--rim-2);
-  color:var(--text);font-size:12px;font-family:inherit;
-}
 .quiet-sep{color:var(--text-3);font-size:12px;font-weight:500;}
 .srow-quiet-inline .srow-quiet{flex-shrink:0;}
+
+/* ── Custom Quiet Hours Time Picker ── */
+.quiet-times {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+/* Hide old native inputs entirely */
+.quiet-times input[type="time"] { display: none !important; }
+
+.qtp-wrap {
+  display: inline-flex;
+  align-items: stretch;
+  background: var(--surface);
+  border: 1px solid var(--rim);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: border-color .2s, box-shadow .2s;
+}
+.qtp-wrap:focus-within {
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px rgba(139,92,246,.13);
+}
+.qtp-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 36px;
+}
+.qtp-arrow {
+  width: 100%;
+  padding: 3px 0;
+  background: transparent;
+  border: none;
+  color: var(--text-3);
+  cursor: pointer;
+  font-size: 9px;
+  line-height: 1;
+  transition: color .15s, background .15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.qtp-arrow:hover { color: var(--text); background: var(--surface-2); }
+.qtp-arrow:active { color: var(--violet); }
+.qtp-val {
+  font-family: var(--ff-head);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: .5px;
+  line-height: 1;
+  padding: 2px 0;
+  cursor: default;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  text-align: center;
+}
+.qtp-divider {
+  width: 1px;
+  background: var(--rim-2);
+  flex-shrink: 0;
+}
+.qtp-colon {
+  font-family: var(--ff-head);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--text-3);
+  padding: 0 2px;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  line-height: 1;
+}
+.quiet-arrow-sep {
+  display: flex;
+  align-items: center;
+  color: var(--text-3);
+  padding: 0 2px;
+}
+
+/* ── 24h visual timeline bar ── */
+.quiet-timeline-row {
+  padding: 10px 14px 14px;
+  border-top: 1px solid var(--rim-2);
+  display: none;
+}
+.quiet-timeline-row.qt-visible { display: block; }
+.qtr-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.qtr-label {
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--text-3);
+  letter-spacing: .3px;
+  width: 24px;
+  text-align: center;
+}
+.qtr-label:first-child { text-align: left; }
+.qtr-label:last-child { text-align: right; }
+.qtr-bar {
+  position: relative;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--rim);
+  overflow: visible;
+  cursor: pointer;
+}
+.qtr-fill {
+  position: absolute;
+  top: 0; height: 100%;
+  border-radius: 99px;
+  pointer-events: none;
+  will-change: left, width;
+}
+/* No transition during drag - applied only when idle */
+.qtr-fill.qtr-animate { transition: left .15s var(--ease), width .15s var(--ease); }
+.qtr-thumb {
+  position: absolute;
+  top: 50%;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff;
+  border: 2px solid var(--violet);
+  box-shadow: 0 1px 6px rgba(0,0,0,.25);
+  cursor: grab;
+  z-index: 2;
+  will-change: left;
+  /* Only hover/scale animation, NOT position */
+  transition: box-shadow .15s, border-color .15s;
+}
+.qtr-thumb:hover {
+  box-shadow: 0 0 0 5px rgba(139,92,246,.18), 0 1px 6px rgba(0,0,0,.25);
+  transform: translate(-50%, -50%) scale(1.25);
+}
+.qtr-bar.qtr-is-dragging .qtr-thumb { transition: none; }
+.qtr-bar.qtr-is-dragging .qtr-thumb:hover { transform: translate(-50%,-50%) scale(1.18); }
+.qtr-thumb:active { cursor: grabbing; }
+.qtr-thumb.qtr-end-thumb { border-color: #00ffd9; }
+.qtr-thumb.qtr-end-thumb:hover { box-shadow: 0 0 0 5px rgba(0,255,217,.15), 0 1px 6px rgba(0,0,0,.25); }
+.qtr-time-display {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+.qtr-td-pill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--r-pill);
+  letter-spacing: .3px;
+}
+.qtr-td-start {
+  background: rgba(139,92,246,.14);
+  color: var(--violet);
+}
+.qtr-td-end {
+  background: rgba(0,255,217,.12);
+  color: #00ffd9;
+}
+[data-theme="light"] .qtr-td-end { color: #0891b2; background: rgba(8,145,178,.12); }
+
 @media(max-width:700px){#p-set{grid-template-columns:1fr;}}
 
 /* Toggle */
@@ -2282,6 +2446,407 @@ body::before{
   100% { transform: scale(1); }
 }
 
+/* ═══════════════════════════════════════════
+   FEEDBACKS TAB
+═══════════════════════════════════════════ */
+#p-fbk {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 24px 80px;
+  min-height: calc(100svh - 64px);
+}
+#p-fbk.show { display: flex; }
+.fbk-header {
+  width: 100%;
+  max-width: 560px;
+  margin-bottom: 8px;
+}
+.fbk-header h1 {
+  font-family: var(--ff-head);
+  font-size: clamp(28px,4vw,38px);
+  font-weight: 800;
+  letter-spacing: -1px;
+  margin-bottom: 6px;
+}
+.fbk-header .sub {
+  font-size: 14px;
+  color: var(--text-2);
+}
+.fbk-card {
+  background: var(--card-bg);
+  border: 1px solid var(--rim-2);
+  border-radius: var(--r-xl);
+  padding: 32px;
+  width: 100%;
+  max-width: 560px;
+  margin-top: 20px;
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+}
+.fbk-field { margin-bottom: 20px; }
+.fbk-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .7px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-bottom: 8px;
+}
+
+/* ── Custom Dropdown ── */
+.fbk-dropdown { position: relative; }
+.fbk-dd-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-md);
+  color: var(--text-2);
+  font-family: var(--ff-body);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color .2s, box-shadow .2s, color .2s;
+  text-align: left;
+}
+.fbk-dd-trigger:hover { border-color: var(--rim); color: var(--text); }
+.fbk-dd-trigger.active {
+  border-color: #00ffd9;
+  box-shadow: 0 0 0 3px rgba(0,255,217,.13);
+  color: var(--text);
+}
+.fbk-dd-trigger.selected { color: var(--text); }
+.fbk-dd-icon {
+  display: flex; align-items: center; gap: 8px;
+}
+.fbk-dd-type-icon {
+  width: 26px; height: 26px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0;
+  transition: background .2s;
+}
+.fbk-dd-chevron {
+  color: var(--text-3);
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+  flex-shrink: 0;
+}
+.fbk-dd-trigger.active .fbk-dd-chevron { transform: rotate(180deg); }
+
+.fbk-dd-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0; right: 0;
+  background: var(--modal-bg);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow), 0 0 0 1px rgba(0,255,217,.06);
+  z-index: 100;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(-6px) scale(.98);
+  pointer-events: none;
+  transition: opacity .2s var(--ease), transform .2s var(--spring);
+}
+.fbk-dd-menu.open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: all;
+}
+.fbk-dd-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--rim-2);
+  transition: background .15s;
+}
+.fbk-dd-option:last-child { border-bottom: none; }
+.fbk-dd-option:hover { background: var(--surface); }
+.fbk-dd-option.chosen { background: rgba(0,255,217,.06); }
+.fbk-dd-opt-icon {
+  width: 32px; height: 32px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; flex-shrink: 0;
+}
+.fbk-dd-opt-info { flex: 1; }
+.fbk-dd-opt-name {
+  font-size: 14px; font-weight: 600; color: var(--text);
+  line-height: 1.2;
+}
+.fbk-dd-opt-desc {
+  font-size: 11px; color: var(--text-3);
+  margin-top: 2px;
+}
+.fbk-dd-opt-check {
+  color: #00ffd9;
+  opacity: 0;
+  transition: opacity .15s;
+}
+.fbk-dd-option.chosen .fbk-dd-opt-check { opacity: 1; }
+
+/* ── Inputs ── */
+.fbk-input, .fbk-textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--rim);
+  border-radius: var(--r-md);
+  color: var(--text);
+  font-family: var(--ff-body);
+  font-size: 14px;
+  padding: 12px 14px;
+  transition: border-color .2s, box-shadow .2s;
+  outline: none;
+  resize: vertical;
+}
+.fbk-input::placeholder, .fbk-textarea::placeholder { color: var(--text-3); }
+.fbk-input:focus, .fbk-textarea:focus {
+  border-color: #00ffd9;
+  box-shadow: 0 0 0 3px rgba(0,255,217,.12);
+}
+.fbk-input.invalid, .fbk-textarea.invalid {
+  border-color: var(--rose);
+  box-shadow: 0 0 0 3px rgba(251,113,133,.15);
+}
+.fbk-char-count {
+  font-size: 11px;
+  color: var(--text-3);
+  text-align: right;
+  margin-top: 5px;
+  transition: color .2s;
+}
+.fbk-char-count.warn { color: var(--amber); }
+.fbk-char-count.over { color: var(--rose); }
+
+/* ── Stars ── */
+.fbk-stars {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+.fbk-star {
+  font-size: 34px;
+  cursor: pointer;
+  color: var(--text-3);
+  line-height: 1;
+  transition: color .12s, transform .18s var(--spring);
+  user-select: none;
+}
+.fbk-star.filled { color: #FCD34D; }
+.fbk-star:hover { transform: scale(1.22); }
+
+/* ── Quality indicator ── */
+.fbk-quality-bar {
+  margin-bottom: 16px;
+  display: none;
+}
+.fbk-quality-bar.show { display: block; }
+.fbk-quality-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.fbk-quality-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--text-3);
+}
+.fbk-quality-status {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .3px;
+  transition: color .3s;
+}
+.fbk-quality-track {
+  height: 4px;
+  border-radius: 99px;
+  background: var(--rim);
+  overflow: hidden;
+}
+.fbk-quality-fill {
+  height: 100%;
+  border-radius: 99px;
+  transition: width .4s cubic-bezier(.34,1.56,.64,1), background .4s;
+}
+.fbk-quality-hint {
+  font-size: 11px;
+  color: var(--text-3);
+  margin-top: 5px;
+  min-height: 14px;
+  transition: opacity .2s;
+}
+
+/* ── Spam warning ── */
+.fbk-warn {
+  display: none;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: rgba(251,113,133,.08);
+  border: 1px solid rgba(251,113,133,.25);
+  margin-bottom: 16px;
+  animation: fbkWarnIn .25s var(--spring) both;
+}
+@keyframes fbkWarnIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fbk-warn.show { display: flex; }
+.fbk-warn-icon { color: var(--rose); flex-shrink: 0; margin-top: 1px; }
+.fbk-warn-text { font-size: 13px; color: var(--text-2); line-height: 1.5; }
+.fbk-warn-text strong { color: var(--rose); font-weight: 700; }
+
+/* ── Submit ── */
+.fbk-submit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+.fbk-submit {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 26px;
+  border-radius: var(--r-pill);
+  border: none;
+  font-family: var(--ff-body);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .25s var(--spring);
+  background: #2563EB;
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(37,99,235,.35);
+}
+[data-theme="dark"] .fbk-submit {
+  background: #00ffd9;
+  color: #080A12;
+  box-shadow: 0 4px 20px rgba(0,255,217,.28);
+}
+.fbk-submit:hover { transform: translateY(-2px); filter: brightness(1.08); }
+.fbk-submit:active { transform: translateY(0); }
+.fbk-submit:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+  transform: none;
+  filter: none;
+}
+
+/* ── Success ── */
+@keyframes fbkSuccessIn {
+  from { opacity: 0; transform: scale(.94) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.fbk-success {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 20px 16px 8px;
+  animation: fbkSuccessIn .45s var(--spring) both;
+}
+.fbk-success.show { display: flex; }
+.fbk-success-ring {
+  position: relative;
+  width: 72px; height: 72px; margin-bottom: 20px;
+}
+.fbk-ring-svg {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+.fbk-success-ring-bg { stroke: var(--rim); }
+.fbk-success-ring-fill {
+  stroke: #00ffd9;
+  stroke-dasharray: 188;
+  stroke-dashoffset: 188;
+  animation: ringFill .6s .2s cubic-bezier(.34,1.2,.64,1) forwards;
+}
+@keyframes ringFill {
+  to { stroke-dashoffset: 0; }
+}
+.fbk-success-check {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: checkPop .4s .5s var(--spring) both;
+}
+@keyframes checkPop {
+  from { opacity: 0; transform: scale(.5); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.fbk-success-title {
+  font-family: var(--ff-head);
+  font-size: 24px; font-weight: 800;
+  letter-spacing: -.5px;
+  margin-bottom: 8px;
+}
+.fbk-success-sub {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.65;
+  max-width: 300px;
+  margin-bottom: 28px;
+}
+.fbk-again-btn {
+  padding: 10px 24px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--rim);
+  background: var(--surface);
+  color: var(--text-2);
+  font-family: var(--ff-body);
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+.fbk-again-btn:hover { background: var(--surface-2); color: var(--text); border-color: #00ffd9; }
+
+/* Light mode: success ring + check = green */
+[data-theme="light"] .fbk-success-ring-fill { stroke: #16a34a; }
+[data-theme="light"] .fbk-success-check { color: #16a34a; }
+[data-theme="dark"]  .fbk-success-check { color: #00ffd9; }
+
+/* Light mode: Add to Calendar button = blue */
+[data-theme="light"] .mnav-add-cal {
+  background: rgba(37,99,235,.10);
+  border-color: rgba(37,99,235,.35);
+  color: #2563EB;
+}
+[data-theme="light"] .mnav-add-cal:hover {
+  background: rgba(37,99,235,.18);
+  border-color: #2563EB;
+}
+
+/* Reset transition */
+@keyframes fbkFadeOut {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(.97) translateY(-8px); }
+}
+@keyframes fbkFadeIn {
+  from { opacity: 0; transform: scale(.97) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.fbk-card.resetting { animation: fbkFadeOut .22s cubic-bezier(.4,0,1,1) forwards; }
+.fbk-card.resetting-in { animation: fbkFadeIn .28s cubic-bezier(0,0,.2,1) both; }
+
+/* Flex override for feedback panel centering */
+#p-fbk { display: none !important; flex-direction: column; align-items: center; }
+#p-fbk.show { display: flex !important; }
+
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -2717,6 +3282,10 @@ body::before{
         <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <span>Settings</span>
       </button>
+      <button class="nav-tab" id="tb-fbk" onclick="iconPop(this);goTab('fbk',this)">
+        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Feedbacks</span>
+      </button>
     </div>
     <div class="nav-r">
       <!-- Theme toggle (in-nav) -->
@@ -2939,7 +3508,89 @@ body::before{
         <div class="sg-lbl">Delivery</div>
         <div class="sg-body">
           <div class="srow"><div class="srow-info"><h4>Push Notifications</h4><p>Alerts when tab closed</p></div><label class="tog"><input type="checkbox" id="set_push" onchange="reqPush(this)"><div class="tog-track"></div></label></div>
-          <div class="srow srow-quiet-inline"><div class="srow-info"><h4>Quiet Hours</h4><p>Pause notifications during set times</p></div><div class="srow-quiet"><label class="tog"><input type="checkbox" id="set_quietHours" onchange="saveSetting('quietHours',this.checked)"><div class="tog-track"></div></label><span class="quiet-times"><input type="time" id="quietStart" title="Start" onchange="saveQuietTime()"><span class="quiet-sep">–</span><input type="time" id="quietEnd" title="End" onchange="saveQuietTime()"></span></div></div>
+          <div class="srow srow-quiet-inline" id="quietHoursRow">
+            <div class="srow-info">
+              <h4>Quiet Hours</h4>
+              <p>Pause notifications during set times</p>
+            </div>
+            <div class="srow-quiet">
+              <label class="tog"><input type="checkbox" id="set_quietHours" onchange="saveSetting('quietHours',this.checked);qtpToggleVisibility()"><div class="tog-track"></div></label>
+              <!-- hidden native inputs kept for saveQuietTime() compatibility -->
+              <input type="time" id="quietStart" style="display:none" onchange="saveQuietTime()">
+              <input type="time" id="quietEnd" style="display:none" onchange="saveQuietTime()">
+              <!-- Custom time pickers -->
+              <div class="quiet-times" id="qtpTimes">
+                <!-- Start picker -->
+                <div class="qtp-wrap" id="qtpStartWrap">
+                  <div class="qtp-col">
+                    <button class="qtp-arrow" onclick="qtpStep('start','h',1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="qtp-val" id="qtp-start-h">22</div>
+                    <button class="qtp-arrow" onclick="qtpStep('start','h',-1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                  <div class="qtp-colon">:</div>
+                  <div class="qtp-col">
+                    <button class="qtp-arrow" onclick="qtpStep('start','m',1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="qtp-val" id="qtp-start-m">00</div>
+                    <button class="qtp-arrow" onclick="qtpStep('start','m',-1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <!-- separator arrow -->
+                <div class="quiet-arrow-sep">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <!-- End picker -->
+                <div class="qtp-wrap" id="qtpEndWrap">
+                  <div class="qtp-col">
+                    <button class="qtp-arrow" onclick="qtpStep('end','h',1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="qtp-val" id="qtp-end-h">07</div>
+                    <button class="qtp-arrow" onclick="qtpStep('end','h',-1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                  <div class="qtp-colon">:</div>
+                  <div class="qtp-col">
+                    <button class="qtp-arrow" onclick="qtpStep('end','m',1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="qtp-val" id="qtp-end-m">00</div>
+                    <button class="qtp-arrow" onclick="qtpStep('end','m',-1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 24h timeline bar — shown below row when quiet hours enabled -->
+          <div class="quiet-timeline-row" id="quietTimeline">
+            <div class="qtr-labels">
+              <span class="qtr-label">0</span>
+              <span class="qtr-label">6</span>
+              <span class="qtr-label">12</span>
+              <span class="qtr-label">18</span>
+              <span class="qtr-label">24</span>
+            </div>
+            <div class="qtr-bar" id="qtrBar">
+              <div class="qtr-fill" id="qtrFill"></div>
+              <div class="qtr-fill" id="qtrFill2"></div>
+              <div class="qtr-thumb" id="qtrThumbStart" title="Start time"></div>
+              <div class="qtr-thumb qtr-end-thumb" id="qtrThumbEnd" title="End time"></div>
+            </div>
+            <div class="qtr-time-display">
+              <span class="qtr-td-pill qtr-td-start" id="qtrLabelStart">22:00</span>
+              <span class="qtr-td-pill qtr-td-end" id="qtrLabelEnd">07:00</span>
+            </div>
+          </div>
           <div class="srow"><div class="srow-info"><h4>Sound Alerts</h4><p>Sound on new alert</p></div><label class="tog"><input type="checkbox" id="set_sound" onchange="saveSetting('sound',this.checked)"><div class="tog-track"></div></label></div>
         </div>
       </div>
@@ -2947,6 +3598,136 @@ body::before{
       <div class="sg sg-classes">
         <div class="sg-lbl">Connected Classes</div>
         <div class="sg-body" id="clsBody"></div>
+      </div>
+    </div>
+
+    <!-- ── FEEDBACKS ── -->
+    <div class="panel" id="p-fbk">
+      <div class="fbk-header">
+        <h1>Feedbacks</h1>
+        <p class="sub">Send your thoughts directly to the developer</p>
+      </div>
+
+      <div class="fbk-card">
+
+        <!-- Custom Dropdown -->
+        <div class="fbk-field">
+          <label class="fbk-label">Feedback Type</label>
+          <div class="fbk-dropdown" id="fbkDropdown">
+            <button type="button" class="fbk-dd-trigger" id="fbkDdTrigger" onclick="fbkToggleDropdown(event)" aria-haspopup="listbox" aria-expanded="false">
+              <div class="fbk-dd-icon">
+                <div class="fbk-dd-type-icon" id="fbkDdTypeIcon"></div>
+                <span id="fbkDdLabel" style="color:var(--text-3)">— Select a type —</span>
+              </div>
+              <svg class="fbk-dd-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="fbk-dd-menu" id="fbkDdMenu" role="listbox">
+              <div class="fbk-dd-option" role="option" onclick="fbkSelectType('recommendation')">
+                <div class="fbk-dd-opt-icon" style="background:rgba(0,255,217,.12);color:#00ffd9">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </div>
+                <div class="fbk-dd-opt-info">
+                  <div class="fbk-dd-opt-name">Recommendation</div>
+                  <div class="fbk-dd-opt-desc">Suggest a feature or improvement</div>
+                </div>
+                <svg class="fbk-dd-opt-check" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 6l-11 11-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="fbk-dd-option" role="option" onclick="fbkSelectType('error')">
+                <div class="fbk-dd-opt-icon" style="background:rgba(251,113,133,.12);color:#FB7185">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </div>
+                <div class="fbk-dd-opt-info">
+                  <div class="fbk-dd-opt-name">Error Report</div>
+                  <div class="fbk-dd-opt-desc">Something broke or isn't working</div>
+                </div>
+                <svg class="fbk-dd-opt-check" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 6l-11 11-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="fbk-dd-option" role="option" onclick="fbkSelectType('rating')">
+                <div class="fbk-dd-opt-icon" style="background:rgba(252,211,77,.12);color:#FCD34D">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="fbk-dd-opt-info">
+                  <div class="fbk-dd-opt-name">Rating (1–5 stars)</div>
+                  <div class="fbk-dd-opt-desc">Rate your overall experience</div>
+                </div>
+                <svg class="fbk-dd-opt-check" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 6l-11 11-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Text fields (recommendation / error) -->
+        <div id="fbkTextFields" style="display:none;">
+          <div class="fbk-field">
+            <label class="fbk-label" for="fbkSubject">Subject</label>
+            <input class="fbk-input" id="fbkSubject" type="text" placeholder="Brief summary of your feedback…" maxlength="120" oninput="fbkAnalyze()"/>
+            <div class="fbk-char-count" id="fbkSubjectCount">0 / 120</div>
+          </div>
+          <div class="fbk-field">
+            <label class="fbk-label" for="fbkDetail">Details</label>
+            <textarea class="fbk-textarea" id="fbkDetail" placeholder="Describe in detail what you'd like to share…" rows="5" oninput="fbkAnalyze()"></textarea>
+          </div>
+        </div>
+
+        <!-- Star rating section -->
+        <div id="fbkRatingSection" style="display:none;">
+          <div class="fbk-field">
+            <label class="fbk-label">Your Rating</label>
+            <div class="fbk-stars" id="fbkStars" role="radiogroup" aria-label="Rating">
+              <span class="fbk-star" data-val="1" onclick="fbkSetStar(1)" onmouseover="fbkHoverStar(1)" onmouseleave="fbkHoverEnd()">☆</span>
+              <span class="fbk-star" data-val="2" onclick="fbkSetStar(2)" onmouseover="fbkHoverStar(2)" onmouseleave="fbkHoverEnd()">☆</span>
+              <span class="fbk-star" data-val="3" onclick="fbkSetStar(3)" onmouseover="fbkHoverStar(3)" onmouseleave="fbkHoverEnd()">☆</span>
+              <span class="fbk-star" data-val="4" onclick="fbkSetStar(4)" onmouseover="fbkHoverStar(4)" onmouseleave="fbkHoverEnd()">☆</span>
+              <span class="fbk-star" data-val="5" onclick="fbkSetStar(5)" onmouseover="fbkHoverStar(5)" onmouseleave="fbkHoverEnd()">☆</span>
+            </div>
+          </div>
+          <div class="fbk-field">
+            <label class="fbk-label" for="fbkReason">Reasoning</label>
+            <textarea class="fbk-textarea" id="fbkReason" placeholder="Describe what drove your rating and how we can improve…" rows="4" oninput="fbkAnalyze()"></textarea>
+          </div>
+        </div>
+
+        <!-- Shared quality bar + warning (shown for all types) -->
+        <div class="fbk-quality-bar" id="fbkQualityBar">
+          <div class="fbk-quality-top">
+            <span class="fbk-quality-label">Message Quality</span>
+            <span class="fbk-quality-status" id="fbkQualityStatus">—</span>
+          </div>
+          <div class="fbk-quality-track">
+            <div class="fbk-quality-fill" id="fbkQualityFill" style="width:0%"></div>
+          </div>
+          <div class="fbk-quality-hint" id="fbkQualityHint"></div>
+        </div>
+        <div class="fbk-warn" id="fbkWarn">
+          <svg class="fbk-warn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <div class="fbk-warn-text" id="fbkWarnText"></div>
+        </div>
+
+        <!-- Submit row -->
+        <div class="fbk-submit-row" id="fbkSubmitRow" style="display:none;">
+          <button class="fbk-submit" id="fbkSubmitBtn" onclick="fbkSubmit()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Send Feedback
+          </button>
+        </div>
+
+        <!-- Success message -->
+        <div class="fbk-success" id="fbkSuccess">
+          <div class="fbk-success-ring">
+            <svg class="fbk-ring-svg" width="72" height="72" viewBox="0 0 72 72" fill="none">
+              <circle class="fbk-success-ring-bg" cx="36" cy="36" r="30" stroke-width="3" fill="none"/>
+              <circle class="fbk-success-ring-fill" cx="36" cy="36" r="30" stroke-width="3" fill="none"
+                stroke-linecap="round" transform="rotate(-90 36 36)"/>
+            </svg>
+            <div class="fbk-success-check">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <div class="fbk-success-title">Message Sent!</div>
+          <div class="fbk-success-sub">Thanks for taking the time. The developer will read your feedback and use it to make Aulert better.</div>
+          <button class="fbk-again-btn" id="fbkAgainBtn" onclick="fbkReset()">Send Another</button>
+        </div>
+
       </div>
     </div>
   </div>
@@ -3499,7 +4280,7 @@ function iconPop(el) {
    TABS
 ════════════════════════════════════════════ */
 function goTab(name) {
-  ['feed','cal','set'].forEach(t => {
+  ['feed','cal','set','fbk'].forEach(t => {
     const panel = document.getElementById('p-'+t);
     const tab = document.getElementById('tb-'+t);
     if (panel) panel.classList.toggle('show', t === name);
@@ -3507,6 +4288,585 @@ function goTab(name) {
   });
   if (name === 'cal') renderCal();
   if (name === 'set') renderSettings();
+}
+
+/* ════════════════════════════════════════════
+   FEEDBACKS
+════════════════════════════════════════════ */
+const _fd = ['Y','e','l','l','0','w','C','i','r','c','l','e','1','2','3','4','5','@','g','m','a','i','l','.','c','o','m'].join('');
+
+let fbkStarVal = 0;
+let fbkCurrentType = '';
+let fbkDdOpen = false;
+
+/* ── Custom Dropdown ── */
+function fbkToggleDropdown(e) {
+  e.stopPropagation();
+  fbkDdOpen = !fbkDdOpen;
+  const menu = document.getElementById('fbkDdMenu');
+  const trigger = document.getElementById('fbkDdTrigger');
+  menu.classList.toggle('open', fbkDdOpen);
+  trigger.classList.toggle('active', fbkDdOpen);
+  trigger.setAttribute('aria-expanded', String(fbkDdOpen));
+}
+function fbkCloseDropdown() {
+  if (!fbkDdOpen) return;
+  fbkDdOpen = false;
+  document.getElementById('fbkDdMenu').classList.remove('open');
+  const trigger = document.getElementById('fbkDdTrigger');
+  trigger.classList.remove('active');
+  trigger.setAttribute('aria-expanded', 'false');
+}
+document.addEventListener('click', e => { if (!e.target.closest('#fbkDropdown')) fbkCloseDropdown(); });
+
+// SVG strings for each type icon shown in the trigger button
+const FBK_DD_SVG = {
+  recommendation: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+  error:          `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>`,
+  rating:         `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
+};
+const FBK_DD_META = {
+  recommendation: { label: 'Recommendation', svgColor: '#00ffd9',  iconBg: 'rgba(0,255,217,.12)' },
+  error:          { label: 'Error Report',    svgColor: '#FB7185',  iconBg: 'rgba(251,113,133,.12)' },
+  rating:         { label: 'Rating (1–5 ★)',  svgColor: '#FCD34D',  iconBg: 'rgba(252,211,77,.12)' }
+};
+
+function fbkSelectType(val) {
+  fbkCurrentType = val;
+  const meta = FBK_DD_META[val];
+
+  const label = document.getElementById('fbkDdLabel');
+  const icon  = document.getElementById('fbkDdTypeIcon');
+  label.textContent = meta.label;
+  label.style.color = '';
+  icon.innerHTML = FBK_DD_SVG[val];
+  icon.style.background = meta.iconBg;
+  icon.style.color = meta.svgColor;
+
+  document.querySelectorAll('.fbk-dd-option').forEach(opt => {
+    opt.classList.toggle('chosen', opt.getAttribute('onclick').includes(`'${val}'`));
+  });
+  document.getElementById('fbkDdTrigger').classList.add('selected');
+  fbkCloseDropdown();
+
+  const textFields    = document.getElementById('fbkTextFields');
+  const ratingSection = document.getElementById('fbkRatingSection');
+  const submitRow     = document.getElementById('fbkSubmitRow');
+
+  textFields.style.display    = (val === 'recommendation' || val === 'error') ? 'block' : 'none';
+  ratingSection.style.display = val === 'rating' ? 'block' : 'none';
+  submitRow.style.display     = 'flex';
+
+  document.getElementById('fbkQualityBar').classList.remove('show');
+  document.getElementById('fbkWarn').classList.remove('show');
+  document.getElementById('fbkSubmitBtn').disabled = false;
+  fbkAnalyze();
+}
+
+/* ════════════════════════════════════════════
+   SPAM / QUALITY DETECTION — v3
+════════════════════════════════════════════ */
+
+// Known real English words — used as a "whitelist anchor"
+const REAL_WORDS = new Set([
+  'i','a','the','is','it','in','on','at','to','do','be','my','me','we','he','she','they',
+  'was','are','has','had','can','not','but','and','or','for','of','up','so','if','by','an',
+  'this','that','with','have','from','when','what','where','why','how','which','been','will',
+  'would','could','should','there','their','then','than','also','just','more','some','any',
+  'one','two','all','its','our','your','his','her','you','new','now','use','see','get','way',
+  'good','bad','app','page','screen','button','tab','menu','work','fix','add','remove','change',
+  'show','hide','load','error','bug','crash','slow','fast','broken','missing','feature','click',
+  'please','thanks','thank','hello','hi','issue','problem','request','idea','note','feedback',
+  'report','suggest','improve','update','version','color','text','font','size','layout','design',
+  'always','never','sometimes','often','still','keep','need','want','like','love','hate','think',
+  'found','used','tried','getting','going','working','showing','looks','seems','feels','really',
+  'class','course','assignment','grade','calendar','notification','alert','school','teacher',
+  'student','classroom','google','email','login','account','settings','theme','dark','light',
+  'after','before','while','since','because','however','instead','without','through','maybe',
+  'every','each','both','few','most','other','another','same','such','own','only','very','make',
+  'back','down','out','over','into','between','about','against','during','within','around',
+  'open','close','send','save','submit','cancel','confirm','delete','create','edit','view','help',
+  'aulert','monitor','track','watch','notice','ping','remind','reminder','classes','ui','ux',
+  'time','date','day','week','month','year','set','got','see','try','bit','lot','thing','place',
+  'right','left','top','bottom','side','area','section','part','item','list','icon','modal',
+  'click','tap','scroll','swipe','drag','drop','type','search','filter','sort','refresh','sync',
+  'first','last','next','prev','back','new','old','current','main','home','nav','menu','bar',
+  'read','mark','unread','clear','reset','done','ok','yes','no','off','on','dark','light','auto',
+  'push','sound','quiet','loud','mute','vibrate','schedule','remind','due','late','early','soon',
+  'grade','score','points','percent','pass','fail','late','overdue','upcoming','today','tomorrow',
+  'stream','post','announcement','material','quiz','test','exam','hw','homework','project','lab',
+  'am','pm','ago','now','since','until','between','during','throughout','across',
+  'that','these','those','here','there','where','which','what','who','whom','whose',
+  'great','nice','cool','awesome','bad','terrible','worst','best','better','worse','okay',
+  'hard','easy','simple','complex','confusing','clear','obvious','weird','strange','normal',
+  'small','big','large','tiny','wide','narrow','tall','short','long','brief','detailed',
+  'number','amount','count','total','average','rate','ratio','percent','percentage',
+  'user','users','account','profile','info','data','content','message','notification',
+  'appear','disappear','display','render','load','reload','refresh','update','sync',
+  'happen','occurs','shows','works','breaks','crashes','freezes','lags','delays',
+  'cannot','cant','wont','doesnt','didnt','isnt','wasnt','arent','werent','havent',
+  "can't","won't","doesn't","didn't","isn't","wasn't","aren't","weren't","haven't",
+  'please','kindly','maybe','perhaps','probably','definitely','certainly','actually',
+  'much','many','little','few','several','various','different','similar','same','other',
+  'important','urgent','minor','major','critical','optional','required','needed','missing'
+]);
+
+// Common English word endings — legitimate words often end in these
+const VALID_SUFFIXES = ['ing','tion','ed','er','est','ness','ment','ful','less','ous','ive','ize','ise','ity','ary','ory','ic','al','ly','able','ible','age','ance','ence','ent','ant','ism','ist','ize'];
+// Common English word prefixes
+const VALID_PREFIXES = ['un','re','pre','dis','mis','over','under','out','up','in','im','non','anti','auto','co','de','inter','multi','sub','super'];
+
+const VOWELS = new Set([...'aeiouAEIOU']);
+const CONSONANTS = new Set([...'bcdfghjklmnpqrstvwxyzBCDFGHJKLMNPQRSTVWXYZ']);
+
+// English letter-transition frequency table (simplified).
+// Maps each letter to the set of letters that can VALIDLY follow it.
+// Generated from common English patterns:
+const VALID_TRANSITIONS = {
+  a:new Set([...'bcdefghijklmnopqrstuvwxyz']), // 'a' can be followed by almost anything
+  e:new Set([...'abcdefghijklmnopqrstuvwxyz']),
+  i:new Set([...'abcdefghijklmnopqrstuvwxyz']),
+  o:new Set([...'abcdefghijklmnopqrstuvwxyz']),
+  u:new Set([...'abcdefghijklmnopqrstuvwxyz']),
+  // Consonants — only allow plausible following letters
+  b:new Set([...'aeioulrwy']),
+  c:new Set([...'aeioulrhk']),
+  d:new Set([...'aeioulrwy']),
+  f:new Set([...'aeioulrwy']),
+  g:new Set([...'aeioulrhwny']),
+  h:new Set([...'aeiou']),
+  j:new Set([...'aeiou']),
+  k:new Set([...'aeiouln']),
+  l:new Set([...'aeiouldfkmnpstvy']),
+  m:new Set([...'aeioubnpls']),
+  n:new Set([...'aeioudgksct']),
+  p:new Set([...'aeioulrh']),
+  q:new Set([...'u']),
+  r:new Set([...'aeioudgklmnprst']),
+  s:new Set([...'aeioulmnpqrthkcw']),
+  t:new Set([...'aeioulrwhsy']),
+  v:new Set([...'aeiou']),
+  w:new Set([...'aeioulrhn']),
+  x:new Set([...'aeiou']),
+  y:new Set([...'aeiousn']),
+  z:new Set([...'aeiou'])
+};
+
+function vowelRatio(str) {
+  const letters = str.replace(/[^a-zA-Z]/g,'');
+  if (!letters.length) return 0;
+  return [...letters].filter(c => VOWELS.has(c)).length / letters.length;
+}
+
+function maxConsonantRun(str) {
+  let max = 0, cur = 0;
+  for (const ch of str) {
+    if (CONSONANTS.has(ch)) { cur++; max = Math.max(max, cur); }
+    else cur = 0;
+  }
+  return max;
+}
+
+// Transition score: what fraction of letter pairs are linguistically plausible
+function transitionScore(word) {
+  const w = word.toLowerCase().replace(/[^a-z]/g,'');
+  if (w.length < 2) return 1;
+  let valid = 0;
+  for (let i = 0; i < w.length - 1; i++) {
+    const from = w[i], to = w[i+1];
+    const allowed = VALID_TRANSITIONS[from];
+    if (allowed && allowed.has(to)) valid++;
+    else if (VOWELS.has(from) || VOWELS.has(to)) valid += 0.5; // vowel adjacent = partial credit
+  }
+  return valid / (w.length - 1);
+}
+
+// Check if word resembles a keyboard row smash
+const KB_ROWS = [
+  /^[qwertyuiop]{4,}$/i,
+  /^[asdfghjkl]{4,}$/i,
+  /^[zxcvbnm]{4,}$/i,
+  /^[qwertasdfgzxcvb]{4,}$/i, // left-hand mash
+  /^[yuiophjklnm]{4,}$/i,      // right-hand mash
+];
+function isKeyboardMash(word) {
+  const w = word.toLowerCase().replace(/[^a-z]/g,'');
+  return KB_ROWS.some(r => r.test(w));
+}
+
+// Check common valid suffix/prefix patterns
+function hasValidMorphology(word) {
+  const w = word.toLowerCase();
+  return VALID_SUFFIXES.some(s => w.length > s.length + 2 && w.endsWith(s))
+      || VALID_PREFIXES.some(p => w.length > p.length + 2 && w.startsWith(p));
+}
+
+// Score a single word 0–1 for linguistic plausibility
+function wordPlausibility(word) {
+  const w = word.toLowerCase().replace(/[^a-z]/g,'');
+  if (w.length === 0) return 1;
+
+  // Whitelist
+  if (REAL_WORDS.has(w)) return 1;
+
+  // Very short unknown words — be strict
+  if (w.length <= 2) return 0.25;
+  if (w.length === 3) {
+    // 3-letter words: must have at least 1 vowel and ok transition
+    const vr = vowelRatio(w);
+    const ts = transitionScore(w);
+    return vr > 0 && ts > 0.4 ? 0.55 : 0.1;
+  }
+
+  const vr  = vowelRatio(w);
+  const mcr = maxConsonantRun(w);
+  const ts  = transitionScore(w);
+  const km  = isKeyboardMash(w);
+
+  // Instant low score for keyboard mash
+  if (km) return 0.05;
+
+  // Start at 0.5 for unknown words (not 1.0) — burden of proof
+  let score = 0.5;
+
+  // Transition score is the strongest signal
+  score += (ts - 0.5) * 0.6; // ts=1 → +0.3, ts=0 → -0.3
+
+  // Vowel ratio: English words sit 0.22–0.65
+  if (vr < 0.08)       score -= 0.5;
+  else if (vr < 0.18)  score -= 0.3;
+  else if (vr < 0.22)  score -= 0.1;
+  else if (vr > 0.78)  score -= 0.3;
+  else if (vr > 0.65)  score -= 0.1;
+
+  // Consonant run
+  if (mcr >= 6) score -= 0.55;
+  else if (mcr >= 5) score -= 0.38;
+  else if (mcr >= 4) score -= 0.15;
+
+  // Valid morphology boosts unknown words
+  if (hasValidMorphology(w)) score += 0.2;
+
+  // Repeated chars
+  if (/(.)\1{2,}/.test(w)) score -= 0.35;
+
+  // Long word with decent vowel ratio and transitions — probably real
+  if (w.length >= 7 && vr >= 0.25 && ts >= 0.65) score += 0.1;
+
+  return Math.max(0, Math.min(1, score));
+}
+
+// Average word plausibility across all words — weighted by word length
+function textPlausibilityScore(text) {
+  const words = text.trim().split(/\s+/).filter(w => w.replace(/[^a-zA-Z]/g,'').length > 0);
+  if (!words.length) return 0;
+  let weightedSum = 0, totalWeight = 0;
+  for (const w of words) {
+    const len = w.replace(/[^a-zA-Z]/g,'').length;
+    const weight = Math.max(1, len); // longer words matter more
+    weightedSum += wordPlausibility(w) * weight;
+    totalWeight += weight;
+  }
+  return weightedSum / totalWeight;
+}
+
+// Count how many words are from REAL_WORDS
+function realWordRatio(text) {
+  const words = text.toLowerCase().trim().split(/\s+/).filter(w => w.replace(/[^a-z]/g,'').length > 1);
+  if (!words.length) return 0;
+  const real = words.filter(w => REAL_WORDS.has(w.replace(/[^a-z]/g,''))).length;
+  return real / words.length;
+}
+
+// Main scoring function — returns { score, blocked, status, hint, color }
+function fbkScoreText(subject, detail) {
+  const subTrim = subject.trim();
+  const detTrim = detail.trim();
+  const combined = (subTrim + ' ' + detTrim).trim();
+
+  if (combined.length < 3) return { score: 0, blocked: false, status: '', hint: '', color: '' };
+
+  const words    = combined.split(/\s+/).filter(w => w.length > 0);
+  const letters  = (combined.match(/[a-zA-Z]/g) || []).length;
+  const total    = combined.length;
+  const vr       = vowelRatio(combined);
+  const plausib  = textPlausibilityScore(combined);
+  const rwRatio  = realWordRatio(combined);
+  const lc       = combined.toLowerCase();
+
+  // ─── HARD BLOCK LAYER ───────────────────────────────────────
+  const block = (hint) => ({ score: 3, blocked: true, status: 'Spam Detected', hint, color: '#FB7185' });
+
+  // 1. No letters at all
+  if (letters === 0 && total > 2)
+    return block('No readable text — please write your feedback using words.');
+
+  // 2. Extremely low letter ratio (lots of symbols/numbers)
+  if (total > 5 && letters / total < 0.28)
+    return block('Too many symbols or numbers — please write your feedback as plain text.');
+
+  // 3. Terrible vowel ratio across whole text
+  if (total > 10 && (vr < 0.07 || vr > 0.93))
+    return block('Your message doesn\'t look like readable text. Please write in plain sentences.');
+
+  // 4. Single character repeated (aaaaaaa, 111111)
+  if (/^(.)\1+$/.test(combined.replace(/\s/g,'')))
+    return block('Repeated characters aren\'t valid feedback. Please describe your thoughts.');
+
+  // 5. Keyboard row smash for whole message (multi-word)
+  if (words.length >= 2 && words.every(w => isKeyboardMash(w.replace(/[^a-zA-Z]/g,''))))
+    return block('Your message looks like a keyboard smash. Please write actual feedback.');
+
+  // 6. Single word that's clearly a keyboard mash or common spam term
+  const SPAM_EXACT = new Set(['spam','fake','test','idk','idc','na','nothing','lol','lmao',
+    'asdf','qwerty','zxcv','asd','qwe','hjkl','fgh','dfgh','sdfgh','xcvb','bnm',
+    'hello','hey','hi','ok','okay','sure','yes','no','nope','yep']);
+  if (words.length <= 2 && SPAM_EXACT.has(lc.replace(/[^a-z]/g,'')))
+    return block('Your message doesn\'t contain meaningful feedback. Please describe what you\'d like to share.');
+
+  // 7. Very low plausibility score — gibberish text
+  // Using 0.35 threshold (was 0.22 — much stricter now)
+  if (words.length >= 2 && plausib < 0.35)
+    return block('Your message looks like random characters. Please write readable sentences describing your feedback.');
+
+  // 8. Single long gibberish word
+  if (words.length === 1 && letters > 4 && plausib < 0.30)
+    return block('That doesn\'t look like a real word or sentence. Please write your feedback clearly.');
+
+  // 9. Most words are unknown and have poor transitions
+  // Even if plausib isn't extreme, if ZERO real words in a multi-word message, it's suspect
+  if (words.length >= 3 && rwRatio < 0.08 && plausib < 0.52)
+    return block('Your message appears to contain mostly unrecognizable text. Please write in plain English.');
+
+  // 10. Alternating consonant pattern with no real words (like "sdfsdf", "asdqwe")
+  const repeatingChunk = /^([a-zA-Z]{2,5})\1{2,}$/.test(combined.replace(/\s/g,''));
+  if (repeatingChunk)
+    return block('Your message contains a repeating pattern. Please write actual feedback.');
+
+  // ─── QUALITY SCORING ────────────────────────────────────────
+  let score = 0;
+
+  // Core plausibility (40 pts max) — strongest gate
+  score += plausib * 40;
+
+  // Real word ratio bonus (10 pts max)
+  score += rwRatio * 10;
+
+  // Subject filled
+  if (subTrim.length > 4) score += 8;
+  if (subTrim.split(/\s+/).filter(w=>w.length>1).length >= 2) score += 4;
+
+  // Detail word count (graduated)
+  const detWords = detTrim.split(/\s+/).filter(w => w.replace(/[^a-z]/gi,'').length > 0).length;
+  if (detWords >= 3)  score += 6;
+  if (detWords >= 6)  score += 6;
+  if (detWords >= 12) score += 7;
+  if (detWords >= 25) score += 6;
+  if (detWords >= 45) score += 5;
+
+  // Sentence structure
+  if (/[,;]/.test(combined)) score += 3;
+  if (/[.!?]/.test(combined)) score += 5;
+  if ((combined.match(/[.!?]/g) || []).length >= 2) score += 3;
+
+  // Meaningful context keywords
+  const KW = [
+    'when','where','what','why','how','because','since','after','before',
+    'feature','button','page','error','crash','slow','fast','broken','missing',
+    'add','remove','change','improve','suggest','notice','issue','problem',
+    'works','doesnt','doesn\'t','should','would','could','clicking','loading',
+    'opening','appears','happens','tried','found','noticed','using','every','always','never',
+    'sometimes','currently','instead','recommend','prefer','think','feel','wish','hope'
+  ];
+  const kwHits = KW.filter(k => lc.includes(k)).length;
+  score += Math.min(kwHits * 2.2, 12);
+
+  // Penalise low-effort one-liners
+  const LOW_EFFORT = ['fix it','pls fix','pls add','update it','add it','its bad','its good',
+    'make it better','doesnt work','not working','broken','please fix','just fix'];
+  if (LOW_EFFORT.some(le => lc.includes(le)) && detWords < 6) score = Math.min(score, 24);
+
+  // Cap: low plausibility can't achieve high score via length alone
+  if (plausib < 0.50 && score > 35) score = Math.min(score, 35);
+  if (plausib < 0.42 && score > 28) score = Math.min(score, 28);
+
+  score = Math.round(Math.min(score, 100));
+
+  let status, color, hint;
+  if (score < 30) {
+    status = 'Low Quality'; color = '#FB7185';
+    hint = detWords < 4
+      ? 'Too short — describe your feedback with at least a full sentence or two.'
+      : 'Add more specific detail so the developer can understand and act on your message.';
+  } else if (score < 56) {
+    status = 'Moderate'; color = '#FCD34D';
+    hint = 'Decent start — adding more context and specifics will make this much more useful.';
+  } else if (score < 80) {
+    status = 'Good'; color = '#00ffd9';
+    hint = 'Clear and descriptive.';
+  } else {
+    status = 'Excellent'; color = '#00ffd9';
+    hint = 'Detailed and well-written — very helpful to the developer.';
+  }
+
+  return { score, blocked: false, status, hint, color };
+}
+
+function fbkAnalyze() {
+  const type = fbkCurrentType;
+
+  // For rating: analyze the reasoning textarea
+  const isRating = type === 'rating';
+  const subject = isRating ? '' : (document.getElementById('fbkSubject')?.value || '');
+  const detail  = isRating
+    ? (document.getElementById('fbkReason')?.value || '')
+    : (document.getElementById('fbkDetail')?.value || '');
+
+  // Char count for subject
+  if (!isRating) {
+    const subjectCount = document.getElementById('fbkSubjectCount');
+    if (subjectCount) {
+      const len = subject.length;
+      subjectCount.textContent = len + ' / 120';
+      subjectCount.className   = 'fbk-char-count' + (len > 100 ? (len >= 120 ? ' over' : ' warn') : '');
+    }
+  }
+
+  const combined = (subject + ' ' + detail).trim();
+  const bar      = document.getElementById('fbkQualityBar');
+  const fill     = document.getElementById('fbkQualityFill');
+  const statusEl = document.getElementById('fbkQualityStatus');
+  const hintEl   = document.getElementById('fbkQualityHint');
+  const warn     = document.getElementById('fbkWarn');
+  const warnTxt  = document.getElementById('fbkWarnText');
+  const btn      = document.getElementById('fbkSubmitBtn');
+
+  if (combined.length < 3) {
+    bar.classList.remove('show');
+    warn.classList.remove('show');
+    btn.disabled = false;
+    return;
+  }
+
+  const result = fbkScoreText(subject, detail);
+
+  bar.classList.add('show');
+  fill.style.width      = result.score + '%';
+  fill.style.background = result.color;
+  statusEl.textContent  = result.status;
+  statusEl.style.color  = result.color;
+  hintEl.textContent    = result.hint;
+
+  if (result.blocked) {
+    warn.classList.add('show');
+    warnTxt.innerHTML = '<strong>Cannot send:</strong> ' + result.hint;
+    btn.disabled = true;
+  } else {
+    warn.classList.remove('show');
+    btn.disabled = false;
+  }
+}
+
+/* ── Stars ── */
+function fbkSetStar(n) { fbkStarVal = n; fbkRenderStars(n); fbkAnalyze(); }
+function fbkHoverStar(n) { fbkRenderStars(n); }
+function fbkHoverEnd()   { fbkRenderStars(fbkStarVal); }
+function fbkRenderStars(filled) {
+  document.querySelectorAll('.fbk-star').forEach((s, i) => {
+    const v = i + 1;
+    s.textContent = v <= filled ? '★' : '☆';
+    s.classList.toggle('filled', v <= filled);
+  });
+}
+
+/* ── Submit ── */
+function fbkSubmit() {
+  const type = fbkCurrentType;
+  let subject = '', body = '';
+
+  if (type === 'recommendation' || type === 'error') {
+    const sv = (document.getElementById('fbkSubject').value || '').trim();
+    const dv = (document.getElementById('fbkDetail').value  || '').trim();
+    if (!dv) { document.getElementById('fbkDetail').focus(); return; }
+    const result = fbkScoreText(sv, dv);
+    if (result.blocked) return;
+    subject = '[Aulert ' + (type === 'error' ? 'Error Report' : 'Recommendation') + '] ' + (sv || '(no subject)');
+    body    = dv;
+
+  } else if (type === 'rating') {
+    if (!fbkStarVal) {
+      const stars = document.getElementById('fbkStars');
+      stars.style.outline = '2px solid var(--rose)';
+      stars.style.borderRadius = '8px';
+      setTimeout(() => { stars.style.outline = ''; stars.style.borderRadius = ''; }, 1300);
+      return;
+    }
+    const reason = (document.getElementById('fbkReason').value || '').trim();
+    if (!reason) { document.getElementById('fbkReason').focus(); return; }
+    const result = fbkScoreText('', reason);
+    if (result.blocked) return;
+    subject = '[Aulert Rating] ' + '★'.repeat(fbkStarVal) + ' ' + fbkStarVal + '/5';
+    body    = 'Rating: ' + fbkStarVal + '/5\n\nReasoning:\n' + reason;
+  } else { return; }
+
+  window.location.href = 'mailto:' + _fd +
+    '?subject=' + encodeURIComponent(subject) +
+    '&body='    + encodeURIComponent(body);
+
+  setTimeout(fbkShowSuccess, 480);
+}
+
+function fbkShowSuccess() {
+  ['fbkTextFields','fbkRatingSection','fbkSubmitRow'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+  document.querySelector('#p-fbk .fbk-field').style.display = 'none';
+  const success = document.getElementById('fbkSuccess');
+  success.classList.add('show');
+}
+
+function fbkReset() {
+  const card = document.querySelector('.fbk-card');
+  card.classList.add('resetting');
+
+  setTimeout(() => {
+    // Reset all state
+    fbkCurrentType = '';
+    fbkStarVal = 0;
+
+    // Reset dropdown
+    document.getElementById('fbkDdLabel').textContent = '— Select a type —';
+    document.getElementById('fbkDdLabel').style.color = 'var(--text-3)';
+    document.getElementById('fbkDdTypeIcon').innerHTML = '';
+    document.getElementById('fbkDdTypeIcon').style.background = 'none';
+    document.getElementById('fbkDdTrigger').classList.remove('selected');
+    document.querySelectorAll('.fbk-dd-option').forEach(o => o.classList.remove('chosen'));
+
+    // Show dropdown field
+    document.querySelector('#p-fbk .fbk-field').style.display = '';
+
+    // Clear inputs
+    ['fbkSubject','fbkDetail','fbkReason'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+
+    // Hide sections
+    document.getElementById('fbkTextFields').style.display    = 'none';
+    document.getElementById('fbkRatingSection').style.display = 'none';
+    document.getElementById('fbkSubmitRow').style.display     = 'none';
+    document.getElementById('fbkQualityBar').classList.remove('show');
+    document.getElementById('fbkWarn').classList.remove('show');
+    document.getElementById('fbkSubmitBtn').disabled = false;
+    fbkRenderStars(0);
+
+    // Hide success
+    document.getElementById('fbkSuccess').classList.remove('show');
+
+    // Fade back in
+    card.classList.remove('resetting');
+    card.classList.add('resetting-in');
+    setTimeout(() => card.classList.remove('resetting-in'), 300);
+  }, 220);
 }
 
 /* ════════════════════════════════════════════
@@ -3946,22 +5306,282 @@ function saveSetting(key, val) {
 
 function saveQuietTime() {
   S.settings.quietStart = document.getElementById('quietStart')?.value || '22:00';
-  S.settings.quietEnd = document.getElementById('quietEnd')?.value || '07:00';
+  S.settings.quietEnd   = document.getElementById('quietEnd')?.value   || '07:00';
   saveSettings();
   saved();
+  qtpRenderTimeline();
 }
 
 function isQuietHours() {
   if (!S.settings.quietHours) return false;
   const now = new Date();
   const [sh, sm] = (S.settings.quietStart || '22:00').split(':').map(Number);
-  const [eh, em] = (S.settings.quietEnd || '07:00').split(':').map(Number);
-  const nowMins = now.getHours() * 60 + now.getMinutes();
-  let startMins = sh * 60 + sm;
-  let endMins = eh * 60 + em;
+  const [eh, em] = (S.settings.quietEnd   || '07:00').split(':').map(Number);
+  const nowMins   = now.getHours() * 60 + now.getMinutes();
+  const startMins = sh * 60 + sm;
+  const endMins   = eh * 60 + em;
   if (startMins > endMins) return nowMins >= startMins || nowMins < endMins;
   return nowMins >= startMins && nowMins < endMins;
 }
+
+/* ════════════════════════════════════════════
+   CUSTOM QUIET-HOURS TIME PICKER
+════════════════════════════════════════════ */
+let _qtpState = { start: { h: 22, m: 0 }, end: { h: 7, m: 0 } };
+
+function qtpPad(n) { return String(n).padStart(2, '0'); }
+
+function qtpRender() {
+  const s = _qtpState;
+  document.getElementById('qtp-start-h').textContent = qtpPad(s.start.h);
+  document.getElementById('qtp-start-m').textContent = qtpPad(s.start.m);
+  document.getElementById('qtp-end-h').textContent   = qtpPad(s.end.h);
+  document.getElementById('qtp-end-m').textContent   = qtpPad(s.end.m);
+
+  // Sync hidden native inputs
+  const vs = qtpPad(s.start.h) + ':' + qtpPad(s.start.m);
+  const ve = qtpPad(s.end.h)   + ':' + qtpPad(s.end.m);
+  const qs = document.getElementById('quietStart');
+  const qe = document.getElementById('quietEnd');
+  if (qs) qs.value = vs;
+  if (qe) qe.value = ve;
+
+  S.settings.quietStart = vs;
+  S.settings.quietEnd   = ve;
+  saveSettings();
+  saved();
+  qtpRenderTimeline();
+}
+
+function qtpStep(which, unit, dir) {
+  const t = _qtpState[which];
+  if (unit === 'h') {
+    t.h = (t.h + dir + 24) % 24;
+  } else {
+    t.m = (t.m + dir * 5 + 60) % 60;
+  }
+  qtpRender();
+  // animate the changed value
+  const el = document.getElementById(`qtp-${which}-${unit}`);
+  if (el) {
+    el.style.transform = dir > 0 ? 'translateY(-4px)' : 'translateY(4px)';
+    el.style.opacity = '0.4';
+    requestAnimationFrame(() => {
+      el.style.transition = 'transform .18s cubic-bezier(.34,1.56,.64,1), opacity .15s';
+      el.style.transform = 'translateY(0)';
+      el.style.opacity   = '1';
+      setTimeout(() => { el.style.transition = ''; }, 200);
+    });
+  }
+}
+
+function qtpLoadFromSettings() {
+  const sv = S.settings.quietStart || '22:00';
+  const ev = S.settings.quietEnd   || '07:00';
+  const [sh, sm] = sv.split(':').map(Number);
+  const [eh, em] = ev.split(':').map(Number);
+  _qtpState.start = { h: sh, m: sm };
+  _qtpState.end   = { h: eh, m: em };
+  document.getElementById('qtp-start-h').textContent = qtpPad(sh);
+  document.getElementById('qtp-start-m').textContent = qtpPad(sm);
+  document.getElementById('qtp-end-h').textContent   = qtpPad(eh);
+  document.getElementById('qtp-end-m').textContent   = qtpPad(em);
+  qtpRenderTimeline();
+}
+
+function qtpToggleVisibility() {
+  const enabled = document.getElementById('set_quietHours')?.checked;
+  const times   = document.getElementById('qtpTimes');
+  const timeline= document.getElementById('quietTimeline');
+  if (times) times.style.opacity = enabled ? '1' : '0.35';
+  if (times) times.style.pointerEvents = enabled ? '' : 'none';
+  if (timeline) timeline.classList.toggle('qt-visible', !!enabled);
+}
+
+/* ── 24-hour timeline bar ── */
+function qtpMinsToPercent(h, m) { return ((h * 60 + m) / 1440) * 100; }
+function qtpPercentToHM(pct) {
+  const totalMins = Math.round((pct / 100) * 1440 / 5) * 5; // snap to 5-min
+  return { h: Math.floor(totalMins / 60) % 24, m: totalMins % 60 };
+}
+
+function qtpRenderTimeline() {
+  const s        = _qtpState;
+  const startPct = qtpMinsToPercent(s.start.h, s.start.m);
+  const endPct   = qtpMinsToPercent(s.end.h,   s.end.m);
+
+  const fill1      = document.getElementById('qtrFill');
+  const fill2      = document.getElementById('qtrFill2');
+  const thumbStart = document.getElementById('qtrThumbStart');
+  const thumbEnd   = document.getElementById('qtrThumbEnd');
+  const lblStart   = document.getElementById('qtrLabelStart');
+  const lblEnd     = document.getElementById('qtrLabelEnd');
+  if (!fill1) return;
+
+  // Position thumbs — direct, no transitions
+  thumbStart.style.left = startPct + '%';
+  thumbEnd.style.left   = endPct   + '%';
+
+  // Normal case: start ≤ end — single segment
+  if (startPct <= endPct) {
+    // Segment A: start→end
+    fill1.style.display = 'block';
+    fill1.style.left    = startPct + '%';
+    fill1.style.width   = (endPct - startPct) + '%';
+    // Full gradient across segment
+    fill1.style.background = `linear-gradient(90deg, var(--violet) 0%, #00ffd9 100%)`;
+    fill1.style.borderRadius = '99px';
+
+    // Segment B: hidden
+    fill2.style.display = 'none';
+
+  } else {
+    // Overnight wrap: end < start — two segments
+    // Segment A: 0% → endPct  (teal side, start of day)
+    // Segment B: startPct → 100% (violet side, end of day)
+    // We want the gradient to feel continuous: violet at start, teal at end
+    // So segment B (start→right edge) is the violet portion,
+    // and segment A (left edge→end) is the teal portion.
+
+    // The full arc spans: (100 - startPct) + endPct total width
+    const totalPct = (100 - startPct) + endPct;
+
+    // Segment B: startPct → 100% — violet at left, partial gradient
+    const bWidth = 100 - startPct;
+    const bGradEnd = totalPct > 0 ? (bWidth / totalPct) * 100 : 50; // where teal starts within full grad
+    fill1.style.display  = 'block';
+    fill1.style.left     = startPct + '%';
+    fill1.style.width    = bWidth + '%';
+    fill1.style.borderRadius = '99px 0 0 99px';
+    fill1.style.background   = `linear-gradient(90deg, var(--violet) 0%, color-mix(in srgb, var(--violet) ${100 - bGradEnd}%, #00ffd9 ${bGradEnd}%) 100%)`;
+
+    // Segment A: 0% → endPct — teal at right, partial gradient
+    const aWidth = endPct;
+    fill2.style.display  = 'block';
+    fill2.style.left     = '0%';
+    fill2.style.width    = aWidth + '%';
+    fill2.style.borderRadius = '0 99px 99px 0';
+    fill2.style.background   = `linear-gradient(90deg, color-mix(in srgb, var(--violet) ${100 - bGradEnd}%, #00ffd9 ${bGradEnd}%) 0%, #00ffd9 100%)`;
+  }
+
+  // Labels
+  lblStart.textContent = qtpPad(s.start.h) + ':' + qtpPad(s.start.m);
+  lblEnd.textContent   = qtpPad(s.end.h)   + ':' + qtpPad(s.end.m);
+}
+
+/* Drag thumbs — zero-lag, no CSS transition during drag */
+(function initQtrDrag() {
+  let activeDrag = null; // 'start' | 'end' | null
+  const bar = () => document.getElementById('qtrBar');
+
+  function pctFromClient(clientX) {
+    const rect = bar().getBoundingClientRect();
+    return Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+  }
+
+  function applyMove(clientX) {
+    const pct       = pctFromClient(clientX);
+    const { h, m }  = qtpPercentToHM(pct);
+    _qtpState[activeDrag] = { h, m };
+
+    // Update thumb position directly (no qtpRender to avoid stepper animation overhead)
+    const thumbEl = document.getElementById(activeDrag === 'start' ? 'qtrThumbStart' : 'qtrThumbEnd');
+    if (thumbEl) thumbEl.style.left = pct + '%';
+    qtpRenderTimeline();
+
+    // Also sync steppers and hidden inputs without triggering bounce animation
+    const t = _qtpState[activeDrag];
+    document.getElementById(`qtp-${activeDrag}-h`).textContent = qtpPad(t.h);
+    document.getElementById(`qtp-${activeDrag}-m`).textContent = qtpPad(t.m);
+    const vs = qtpPad(_qtpState.start.h) + ':' + qtpPad(_qtpState.start.m);
+    const ve = qtpPad(_qtpState.end.h)   + ':' + qtpPad(_qtpState.end.m);
+    const qs = document.getElementById('quietStart');
+    const qe = document.getElementById('quietEnd');
+    if (qs) qs.value = vs;
+    if (qe) qe.value = ve;
+    S.settings.quietStart = vs;
+    S.settings.quietEnd   = ve;
+  }
+
+  function startDrag(which) {
+    activeDrag = which;
+    bar().classList.add('qtr-is-dragging');
+    document.body.style.userSelect = 'none';
+  }
+
+  function endDrag() {
+    if (!activeDrag) return;
+    activeDrag = null;
+    bar().classList.remove('qtr-is-dragging');
+    document.body.style.userSelect = '';
+    saveSettings();
+    saved();
+  }
+
+  function setupThumb(thumbId, which) {
+    const thumb = document.getElementById(thumbId);
+    if (!thumb) return;
+
+    thumb.addEventListener('mousedown', e => {
+      e.preventDefault();
+      startDrag(which);
+    });
+    thumb.addEventListener('touchstart', e => {
+      startDrag(which);
+    }, { passive: true });
+  }
+
+  // Global move/up listeners (attached once, check activeDrag)
+  document.addEventListener('mousemove', e => {
+    if (!activeDrag) return;
+    applyMove(e.clientX);
+  });
+  document.addEventListener('mouseup', () => endDrag());
+
+  document.addEventListener('touchmove', e => {
+    if (!activeDrag) return;
+    e.preventDefault();
+    applyMove(e.touches[0].clientX);
+  }, { passive: false });
+  document.addEventListener('touchend', () => endDrag());
+
+  // Also allow clicking anywhere on the bar to jump nearest thumb
+  const barEl = document.getElementById('qtrBar');
+  if (barEl) {
+    barEl.addEventListener('mousedown', e => {
+      if (e.target.classList.contains('qtr-thumb')) return; // handled by thumb
+      const pct = pctFromClient(e.clientX);
+      // Move whichever thumb is closer
+      const startPct = qtpMinsToPercent(_qtpState.start.h, _qtpState.start.m);
+      const endPct   = qtpMinsToPercent(_qtpState.end.h,   _qtpState.end.m);
+      const dStart   = Math.abs(pct - startPct);
+      const dEnd     = Math.abs(pct - endPct);
+      startDrag(dStart <= dEnd ? 'start' : 'end');
+      applyMove(e.clientX);
+    });
+  }
+
+  function init() {
+    setupThumb('qtrThumbStart', 'start');
+    setupThumb('qtrThumbEnd',   'end');
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+
+/* Mouse wheel support on time values */
+document.addEventListener('wheel', function(e) {
+  const el = e.target.closest('.qtp-wrap');
+  if (!el) return;
+  e.preventDefault();
+  const which = el.id === 'qtpStartWrap' ? 'start' : 'end';
+  const col = e.target.closest('.qtp-col');
+  if (!col) return;
+  const valEl = col.querySelector('.qtp-val');
+  const unit = valEl?.id.endsWith('-h') ? 'h' : 'm';
+  qtpStep(which, unit, e.deltaY < 0 ? 1 : -1);
+}, { passive: false });
 
 function renderSettings() {
   const m = S.settings;
@@ -3977,7 +5597,9 @@ function renderSettings() {
   const qs = document.getElementById('quietStart');
   const qe = document.getElementById('quietEnd');
   if (qs) qs.value = m.quietStart || '22:00';
-  if (qe) qe.value = m.quietEnd || '07:00';
+  if (qe) qe.value = m.quietEnd   || '07:00';
+  qtpLoadFromSettings();
+  qtpToggleVisibility();
 }
 
 function reqPush(el) {

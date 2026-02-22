@@ -6,6 +6,8 @@
 <title>Aulert</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<!-- EmailJS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@300;400;500;600;700&family=Pridi:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
 /* ═══════════════════════════════════════════════
@@ -4325,6 +4327,22 @@ function goTab(name) {
 const _fd = ['Y','e','l','l','0','w','C','i','r','c','l','e','1','2','3','4','5','@','g','m','a','i','l','.','c','o','m'].join('');
 
 /* ─────────────────────────────────────────────────────────────────
+   EMAILJS CONFIG — fills in these 3 values after setup
+   See setup guide for instructions on getting these values
+   ───────────────────────────────────────────────────────────────── */
+const EMAILJS_CONFIG = {
+  publicKey:   'O4_hTTrlFQhhcSe2e',   // from EmailJS dashboard → Account → Public Key
+  serviceId:   'service_ixxcvmr',   // from EmailJS dashboard → Email Services
+  templateId:  'template_d5yk49e',  // from EmailJS dashboard → Email Templates
+};
+// Initialise EmailJS
+(function() {
+  if (typeof emailjs !== 'undefined') {
+    emailjs.init({ publicKey: EMAILJS_CONFIG.publicKey });
+  }
+})();
+
+/* ─────────────────────────────────────────────────────────────────
    AKISMET SPAM FILTER  (second-layer after client-side checks)
    ─────────────────────────────────────────────────────────────────
    Akismet's API must be called server-side to protect your API key.
@@ -4410,6 +4428,16 @@ function fbkSetSubmitState(state) {
                 stroke-dasharray="32" stroke-dashoffset="10"/>
       </svg>
       Checking…`;
+  } else if (state === 'sending') {
+    btn.disabled = true;
+    if (!btn.dataset.originalHtml) btn.dataset.originalHtml = btn.innerHTML;
+    btn.innerHTML = `
+      <svg class="fbk-spin" width="15" height="15" viewBox="0 0 24 24" fill="none"
+           style="animation:fbkSpinAnim .8s linear infinite">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5"
+                stroke-dasharray="32" stroke-dashoffset="10"/>
+      </svg>
+      Sending…`;
   } else {
     btn.disabled = false;
     if (btn.dataset.originalHtml) {
@@ -4772,23 +4800,53 @@ function fbkScoreText(subject, detail) {
     return block('Your message doesn\'t contain meaningful feedback. Please describe what you\'d like to share.');
 
   // 7. Profanity / abusive content block
-  const PROFANITY = new Set([
-    'fuck','fucking','fucker','fucks','fucked','fuk','fck',
-    'shit','shits','shitting','shitty','sht',
-    'bitch','bitches','bitching',
-    'ass','asses','asshole','assholes',
-    'cunt','cunts',
-    'dick','dicks','dickhead',
-    'cock','cocks',
-    'bastard','bastards',
-    'crap','damn','piss','pissed',
-    'wtf','stfu','gtfo','kys',
-    'idiot','idiots','stupid','dumb','moron','retard','retarded',
-    'ugly','hate','suck','sucks','sucked','garbage','trash','terrible','awful','worst',
-    'scam','scammer','fraud','cheater','liar','lies','lie'
-  ]);
-  const wordTokens = lc.replace(/[^a-z\s]/g,' ').split(/\s+/).filter(Boolean);
-  if (wordTokens.some(w => PROFANITY.has(w)))
+  // Normalise leet-speak & common substitutions before checking
+  // e.g. f*ck → fuck, sh!t → shit, a$$ → ass, ph → f, etc.
+  function normalizeLeet(str) {
+    return str.toLowerCase()
+      .replace(/[@4]/g, 'a')
+      .replace(/[3]/g, 'e')
+      .replace(/[1!|]/g, 'i')
+      .replace(/[0]/g, 'o')
+      .replace(/[5$]/g, 's')
+      .replace(/[7]/g, 't')
+      .replace(/[6]/g, 'g')
+      .replace(/[8]/g, 'b')
+      .replace(/[9]/g, 'g')
+      .replace(/ph/g, 'f')
+      .replace(/[^a-z\s]/g, ''); // strip remaining non-letters
+  }
+
+  // Profanity root patterns — checked as substrings so f**king, fvuking etc. all match
+  const PROFANITY_ROOTS = [
+    'fuck','fck','fuk','fuq','phuck',
+    'shit','sht','shyt',
+    'bitch','biatch','bytch',
+    'asshole','ashole','arsehole',
+    'cunt','cvnt',
+    'dickhead','dikhead',
+    'bastard',
+    'nigger','nigga',
+    'faggot','fagot',
+    'retard',
+    'kys','killurself','killyourself',
+    'stfu','gtfo',
+    'whore','whor','slut',
+    'pedo','pedophile',
+    'rape','rapist',
+  ];
+
+  const normalizedCombined = normalizeLeet(combined);
+  const wordTokens = normalizedCombined.split(/\s+/).filter(Boolean);
+
+  // Check each token: does it CONTAIN any profanity root?
+  const hasProfanity = wordTokens.some(token =>
+    PROFANITY_ROOTS.some(root => token.includes(root))
+  );
+  // Also check the full normalized string for run-together words like "whatthefuck"
+  const hasRunTogether = PROFANITY_ROOTS.some(root => normalizedCombined.replace(/\s/g,'').includes(root));
+
+  if (hasProfanity || hasRunTogether)
     return block('Your message contains inappropriate language. Please keep feedback respectful and constructive.');
 
   // 8. URL / link spam
@@ -5037,14 +5095,40 @@ async function fbkSubmit() {
   }
 
   // 'ham' or 'skipped' (proxy not configured / timed out) → proceed
-  fbkSetSubmitState('idle');
   /* ─────────────────────────────────────────────────────────── */
 
-  window.location.href = 'mailto:' + _fd +
-    '?subject=' + encodeURIComponent(subject) +
-    '&body='    + encodeURIComponent(body);
+  /* ── Send via EmailJS (actual email delivery) ── */
+  fbkSetSubmitState('sending');
 
-  setTimeout(fbkShowSuccess, 480);
+  try {
+    if (typeof emailjs === 'undefined') throw new Error('EmailJS not loaded');
+
+    await emailjs.send(
+      EMAILJS_CONFIG.serviceId,
+      EMAILJS_CONFIG.templateId,
+      {
+        to_email  : _fd,
+        subject   : subject,
+        message   : body,
+        reply_to  : _fd,
+        sent_at   : new Date().toLocaleString(),
+      }
+    );
+
+    fbkSetSubmitState('idle');
+    fbkShowSuccess();
+
+  } catch (err) {
+    console.error('[EmailJS] Send failed:', err);
+    fbkSetSubmitState('idle');
+
+    // Fallback to mailto if EmailJS fails or isn't configured yet
+    window.location.href = 'mailto:' + _fd +
+      '?subject=' + encodeURIComponent(subject) +
+      '&body='    + encodeURIComponent(body);
+
+    setTimeout(fbkShowSuccess, 600);
+  }
 }
 
 function fbkShowSuccess() {

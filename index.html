@@ -3682,6 +3682,10 @@ body::before{
         <!-- Text fields (recommendation / error) -->
         <div id="fbkTextFields" style="display:none;">
           <div class="fbk-field">
+            <label class="fbk-label" for="fbkUserEmail">Your Email <span style="color:var(--rose)">*</span></label>
+            <input class="fbk-input" id="fbkUserEmail" type="email" placeholder="your@email.com" oninput="fbkAnalyze()"/>
+          </div>
+          <div class="fbk-field">
             <label class="fbk-label" for="fbkSubject">Subject</label>
             <input class="fbk-input" id="fbkSubject" type="text" placeholder="Brief summary of your feedback…" maxlength="120" oninput="fbkAnalyze()"/>
             <div class="fbk-char-count" id="fbkSubjectCount">0 / 120</div>
@@ -3694,6 +3698,10 @@ body::before{
 
         <!-- Star rating section -->
         <div id="fbkRatingSection" style="display:none;">
+          <div class="fbk-field">
+            <label class="fbk-label" for="fbkUserEmailRating">Your Email <span style="color:var(--rose)">*</span></label>
+            <input class="fbk-input" id="fbkUserEmailRating" type="email" placeholder="your@email.com" oninput="fbkAnalyze()"/>
+          </div>
           <div class="fbk-field">
             <label class="fbk-label">Your Rating</label>
             <div class="fbk-stars" id="fbkStars" role="radiogroup" aria-label="Rating">
@@ -4523,6 +4531,13 @@ function fbkSelectType(val) {
   ratingSection.style.display = val === 'rating' ? 'block' : 'none';
   submitRow.style.display     = 'flex';
 
+  // Auto-fill email from Google login if available
+  if (S.user?.email) {
+    const emailId = val === 'rating' ? 'fbkUserEmailRating' : 'fbkUserEmail';
+    const emailEl = document.getElementById(emailId);
+    if (emailEl && !emailEl.value) emailEl.value = S.user.email;
+  }
+
   document.getElementById('fbkQualityBar').classList.remove('show');
   document.getElementById('fbkWarn').classList.remove('show');
   document.getElementById('fbkSubmitBtn').disabled = false;
@@ -5050,6 +5065,22 @@ async function fbkSubmit() {
   const type = fbkCurrentType;
   let subject = '', body = '', commentAuthor = '';
 
+  // Get user email from the visible email field (or fall back to Google login email)
+  const isRatingType = type === 'rating';
+  const emailInputId = isRatingType ? 'fbkUserEmailRating' : 'fbkUserEmail';
+  const userEmail = (document.getElementById(emailInputId)?.value || '').trim()
+    || (S.user?.email || '');
+
+  if (!userEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userEmail)) {
+    const emailEl = document.getElementById(emailInputId);
+    if (emailEl) {
+      emailEl.classList.add('invalid');
+      emailEl.focus();
+      setTimeout(() => emailEl.classList.remove('invalid'), 2000);
+    }
+    return;
+  }
+
   if (type === 'recommendation' || type === 'error') {
     const sv = (document.getElementById('fbkSubject').value || '').trim();
     const dv = (document.getElementById('fbkDetail').value  || '').trim();
@@ -5107,11 +5138,11 @@ async function fbkSubmit() {
       EMAILJS_CONFIG.serviceId,
       EMAILJS_CONFIG.templateId,
       {
-        user_email: _fd,
-        to_email  : _fd,
+        user_email: userEmail,
+        to_email  : userEmail,
         subject   : subject,
         message   : body,
-        reply_to  : _fd,
+        reply_to  : userEmail,
         sent_at   : new Date().toLocaleString(),
       }
     );

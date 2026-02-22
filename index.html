@@ -2743,6 +2743,27 @@ body::before{
   transform: none;
   filter: none;
 }
+/* ── Akismet checking state ── */
+@keyframes fbkSpinAnim {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.fbk-submit[disabled] .fbk-spin {
+  animation: fbkSpinAnim .8s linear infinite;
+}
+.fbk-akismet-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  color: var(--text-3);
+  margin-top: 8px;
+  opacity: .7;
+}
+.fbk-akismet-badge svg { opacity: .5; }
 
 /* ── Success ── */
 @keyframes fbkSuccessIn {
@@ -3486,7 +3507,7 @@ body::before{
             <div class="prof-name" id="profName">Student User</div>
             <div class="prof-email" id="profEmail" style="display:flex;align-items:center;gap:6px;margin-top:3px;">
               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-              <span id="profEmailText">student@school.edu</span>
+              <span id="profEmailText"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="82f1f6f7e6e7ecf6c2f1e1eaededeeace7e6f7">[email&#160;protected]</a></span>
             </div>
           </div>
           <button class="disc-btn" onclick="disconnect()">Disconnect</button>
@@ -3709,6 +3730,14 @@ body::before{
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
             Send Feedback
           </button>
+          <div class="fbk-akismet-badge">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+                    stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Protected by Akismet
+          </div>
         </div>
 
         <!-- Success message -->
@@ -3773,7 +3802,7 @@ body::before{
 
 <div class="snack" id="snack">Setting saved ✓</div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 /* ════════════════════════════════════════════
    CONFIGURATION
    ─────────────────────────────────────────────
@@ -4295,6 +4324,115 @@ function goTab(name) {
 ════════════════════════════════════════════ */
 const _fd = ['Y','e','l','l','0','w','C','i','r','c','l','e','1','2','3','4','5','@','g','m','a','i','l','.','c','o','m'].join('');
 
+/* ─────────────────────────────────────────────────────────────────
+   AKISMET SPAM FILTER  (second-layer after client-side checks)
+   ─────────────────────────────────────────────────────────────────
+   Akismet's API must be called server-side to protect your API key.
+   Point AKISMET_CONFIG.proxyUrl at a small serverless function that:
+
+     POST body (JSON):  { comment_content, comment_author, user_ip, user_agent, referrer }
+     Expected response: { isSpam: true|false } or 400/5xx on error
+
+   Example Node.js / Vercel edge function (deploy separately):
+   ─────────────────────────────────────────────────────────────────
+   import Akismet from 'akismet-api';
+   const client = Akismet.client({ blog: 'https://your-site.com', apiKey: process.env.AKISMET_KEY });
+   export default async function handler(req, res) {
+     const body = await req.json();
+     const isSpam = await client.checkSpam({ user_ip: body.user_ip, user_agent: body.user_agent,
+       referrer: body.referrer, comment_content: body.comment_content, comment_type: 'comment' });
+     res.json({ isSpam });
+   }
+   ───────────────────────────────────────────────────────────────── */
+const AKISMET_CONFIG = {
+  /* Set this to your deployed proxy URL to enable Akismet checking.
+     Leave as empty string ('') to skip Akismet and rely on local filters only. */
+  proxyUrl: '',   // e.g. 'https://your-site.vercel.app/api/akismet-check'
+  timeoutMs: 5000 // If proxy takes longer than this, we skip the check (fail-open)
+};
+
+/**
+ * Calls the Akismet proxy and resolves to:
+ *   'spam'    – Akismet flagged the content
+ *   'ham'     – Akismet says it's legitimate
+ *   'skipped' – proxy not configured or request timed out (fail-open)
+ */
+async function akismetCheck(commentContent, commentAuthor = '') {
+  if (!AKISMET_CONFIG.proxyUrl) return 'skipped';
+
+  const controller = new AbortController();
+  const tid = setTimeout(() => controller.abort(), AKISMET_CONFIG.timeoutMs);
+
+  try {
+    const resp = await fetch(AKISMET_CONFIG.proxyUrl, {
+      method : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal : controller.signal,
+      body   : JSON.stringify({
+        comment_content: commentContent,
+        comment_author : commentAuthor,
+        user_ip        : '',   // The proxy will read this from req headers server-side
+        user_agent     : navigator.userAgent,
+        referrer       : document.referrer
+      })
+    });
+    clearTimeout(tid);
+
+    if (!resp.ok) {
+      console.warn('[Akismet] Proxy returned', resp.status, '— failing open');
+      return 'skipped';
+    }
+    const data = await resp.json();
+    return data.isSpam ? 'spam' : 'ham';
+
+  } catch (err) {
+    clearTimeout(tid);
+    if (err.name === 'AbortError') {
+      console.warn('[Akismet] Request timed out — failing open');
+    } else {
+      console.warn('[Akismet] Network error:', err.message, '— failing open');
+    }
+    return 'skipped';
+  }
+}
+
+/** Show / hide the Akismet checking overlay on the submit button */
+function fbkSetSubmitState(state) {
+  const btn = document.getElementById('fbkSubmitBtn');
+  if (!btn) return;
+  if (state === 'checking') {
+    btn.disabled = true;
+    btn.dataset.originalHtml = btn.innerHTML;
+    btn.innerHTML = `
+      <svg class="fbk-spin" width="15" height="15" viewBox="0 0 24 24" fill="none"
+           style="animation:fbkSpinAnim .8s linear infinite">
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2.5"
+                stroke-dasharray="32" stroke-dashoffset="10"/>
+      </svg>
+      Checking…`;
+  } else {
+    btn.disabled = false;
+    if (btn.dataset.originalHtml) {
+      btn.innerHTML = btn.dataset.originalHtml;
+      delete btn.dataset.originalHtml;
+    }
+  }
+}
+
+/** Show an Akismet-specific block warning */
+function fbkShowAkismetBlock() {
+  const warn    = document.getElementById('fbkWarn');
+  const warnTxt = document.getElementById('fbkWarnText');
+  const btn     = document.getElementById('fbkSubmitBtn');
+  if (warn && warnTxt) {
+    warn.classList.add('show');
+    warnTxt.innerHTML =
+      '<strong>Spam Detected by Akismet:</strong> Your message was flagged as spam by our ' +
+      'automated filter. Please revise your message and try again.';
+  }
+  if (btn) btn.disabled = true;
+}
+
 let fbkStarVal = 0;
 let fbkCurrentType = '';
 let fbkDdOpen = false;
@@ -4779,19 +4917,23 @@ function fbkRenderStars(filled) {
   });
 }
 
-/* ── Submit ── */
-function fbkSubmit() {
+/* ── Submit (async — includes Akismet check as second-layer filter) ── */
+async function fbkSubmit() {
   const type = fbkCurrentType;
-  let subject = '', body = '';
+  let subject = '', body = '', commentAuthor = '';
 
   if (type === 'recommendation' || type === 'error') {
     const sv = (document.getElementById('fbkSubject').value || '').trim();
     const dv = (document.getElementById('fbkDetail').value  || '').trim();
     if (!dv) { document.getElementById('fbkDetail').focus(); return; }
+
+    // Layer 1: client-side linguistic filter
     const result = fbkScoreText(sv, dv);
     if (result.blocked) return;
-    subject = '[Aulert ' + (type === 'error' ? 'Error Report' : 'Recommendation') + '] ' + (sv || '(no subject)');
-    body    = dv;
+
+    subject       = '[Aulert ' + (type === 'error' ? 'Error Report' : 'Recommendation') + '] ' + (sv || '(no subject)');
+    body          = dv;
+    commentAuthor = sv;
 
   } else if (type === 'rating') {
     if (!fbkStarVal) {
@@ -4803,11 +4945,30 @@ function fbkSubmit() {
     }
     const reason = (document.getElementById('fbkReason').value || '').trim();
     if (!reason) { document.getElementById('fbkReason').focus(); return; }
+
+    // Layer 1: client-side linguistic filter
     const result = fbkScoreText('', reason);
     if (result.blocked) return;
+
     subject = '[Aulert Rating] ' + '★'.repeat(fbkStarVal) + ' ' + fbkStarVal + '/5';
     body    = 'Rating: ' + fbkStarVal + '/5\n\nReasoning:\n' + reason;
   } else { return; }
+
+  /* ── Layer 2: Akismet API check ─────────────────────────────── */
+  fbkSetSubmitState('checking');
+
+  const akismetResult = await akismetCheck(body, commentAuthor);
+
+  if (akismetResult === 'spam') {
+    // Akismet flagged this message — block and notify user
+    fbkSetSubmitState('idle');
+    fbkShowAkismetBlock();
+    return;
+  }
+
+  // 'ham' or 'skipped' (proxy not configured / timed out) → proceed
+  fbkSetSubmitState('idle');
+  /* ─────────────────────────────────────────────────────────── */
 
   window.location.href = 'mailto:' + _fd +
     '?subject=' + encodeURIComponent(subject) +
@@ -5934,9 +6095,4 @@ function toggleFaq(btn){
   </svg>
 </button>
 
-<button class="btt" id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-</button>
-
-</body>
-</html>
+<button class="btt" id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})" tit

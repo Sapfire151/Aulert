@@ -3724,14 +3724,11 @@ body::before{
         <div class="hw-form">
           <div class="hw-form-row">
             <input class="hw-input" id="hwSubject" placeholder="Subject (e.g. Math, Biology)" maxlength="80"/>
-            <div class="hw-date-wrap">
-              <input type="date" class="hw-input hw-date" id="hwDate" onclick="try{this.showPicker()}catch(e){}"/>
-              <input type="date" class="hw-input hw-date" id="hwDateEnd" placeholder="End date (optional)" onclick="try{this.showPicker()}catch(e){}"/>
-            </div>
+            <input type="datetime-local" class="hw-input hw-date" id="hwDate" onclick="try{this.showPicker()}catch(e){}"/>
           </div>
           <textarea class="hw-textarea" id="hwDesc" placeholder="Description — what needs to be done?" rows="3"></textarea>
           <div class="hw-form-footer">
-            <span class="hw-form-hint">Date range optional — leave end date blank for a single deadline</span>
+            <span class="hw-form-hint">Date &amp; time optional — pick your exact deadline</span>
             <button class="hw-btn hw-btn-add" onclick="hwAdd()">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
               Add Task
@@ -4614,8 +4611,7 @@ function hwSave() {
 function hwAdd() {
   const subject = document.getElementById('hwSubject').value.trim();
   const desc    = document.getElementById('hwDesc').value.trim();
-  const date    = document.getElementById('hwDate').value;
-  const dateEnd = document.getElementById('hwDateEnd').value;
+  const date    = document.getElementById('hwDate').value; // format: YYYY-MM-DDTHH:MM or YYYY-MM-DD
 
   if (!subject) {
     document.getElementById('hwSubject').focus();
@@ -4629,7 +4625,6 @@ function hwAdd() {
     subject,
     desc,
     date,
-    dateEnd,
     done: false,
     created: new Date().toISOString()
   });
@@ -4640,7 +4635,6 @@ function hwAdd() {
   document.getElementById('hwSubject').value = '';
   document.getElementById('hwDesc').value = '';
   document.getElementById('hwDate').value = '';
-  document.getElementById('hwDateEnd').value = '';
 }
 
 function hwDelete(id) {
@@ -4661,14 +4655,22 @@ function hwToggleDone(id) {
   if (task) { task.done = !task.done; hwSave(); hwRender(); }
 }
 
-function hwFormatDate(date, dateEnd) {
+function hwFormatDate(date) {
   if (!date) return '';
-  const fmt = d => {
-    const [y,m,day] = d.split('-');
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  // Support both 'YYYY-MM-DDTHH:MM' (datetime-local) and 'YYYY-MM-DD' (legacy)
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if (date.includes('T')) {
+    const [datePart, timePart] = date.split('T');
+    const [y, m, day] = datePart.split('-');
+    const [hh, mm] = timePart.split(':');
+    const hour = +hh;
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const h12 = hour % 12 || 12;
+    return `${months[+m-1]} ${+day} at ${h12}:${mm} ${ampm}`;
+  } else {
+    const [y, m, day] = date.split('-');
     return `${months[+m-1]} ${+day}`;
-  };
-  return dateEnd ? `${fmt(date)} → ${fmt(dateEnd)}` : fmt(date);
+  }
 }
 
 function hwRender() {
@@ -4701,16 +4703,17 @@ function hwRender() {
   });
 
   sorted.forEach(task => {
-    const dateLabel = hwFormatDate(task.date, task.dateEnd);
+    const dateLabel = hwFormatDate(task.date);
     const card = document.createElement('div');
 
     // Determine urgency level
     let urgencyClass = '';
     let dueBadgeText = '';
     if (task.date && !task.done) {
-      const [y, m, d] = task.date.split('-').map(Number);
-      const dueDate = new Date(y, m - 1, d);
-      const diffDays = Math.ceil((dueDate - todayMidnight) / 86400000);
+      const datePart = task.date.includes('T') ? task.date.split('T')[0] : task.date;
+      const [y, m, d] = datePart.split('-').map(Number);
+      const dueDate = task.date.includes('T') ? new Date(task.date) : new Date(y, m - 1, d);
+      const diffDays = Math.ceil(((task.date.includes('T') ? new Date(y,m-1,d) : dueDate) - todayMidnight) / 86400000);
       if (diffDays < 0) {
         urgencyClass = 'hw-due-urgent';
         dueBadgeText = 'Overdue';
@@ -4799,7 +4802,7 @@ function hwExportPDF() {
   const win = window.open('', '_blank');
   const now = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
   const rows = _hwTasks.map(t => {
-    const date = hwFormatDate(t.date, t.dateEnd);
+    const date = hwFormatDate(t.date);
     const statusIcon = t.done ? '✓' : '○';
     const statusColor = t.done ? '#16a34a' : '#6b7280';
     return `
@@ -4862,7 +4865,7 @@ function hwExportPDF() {
 function hwShare() {
   if (!_hwTasks.length) { alert('No homework tasks to share.'); return; }
   const text = _hwTasks.map(t => {
-    const date = hwFormatDate(t.date, t.dateEnd);
+    const date = hwFormatDate(t.date);
     const status = t.done ? '✓' : '•';
     return `${status} ${t.subject}${date ? ' [' + date + ']' : ''}${t.desc ? '\n  ' + t.desc : ''}`;
   }).join('\n');
@@ -6957,4 +6960,8 @@ function toggleFaq(btn){
   </svg>
 </button>
 
-<button class="btt" id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})" tit
+<button class="btt" id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+    <path d="M12 4L12 20M12 4L5 11M12 4L19 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+</button>

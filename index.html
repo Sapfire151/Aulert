@@ -2261,34 +2261,38 @@ body::before{
   position: fixed;
   top: 16px; right: 16px;
   z-index: 1000;
-  width: 42px; height: 42px;
-  border-radius: 50%;
+  height: 36px;
+  padding: 0 16px;
+  border-radius: var(--r-pill);
   background: var(--surface);
   border: 1px solid var(--rim);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  display: flex; align-items: center; justify-content: center;
+  display: flex; align-items: center; gap: 7px;
   cursor: pointer;
   color: var(--text-2);
-  box-shadow: 0 4px 20px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.07);
-  transition: background .25s, color .25s, box-shadow .25s, opacity .3s;
+  font-family: var(--ff-body);
+  font-size: 13px; font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.06);
+  transition: background .2s, color .2s, box-shadow .2s, opacity .3s;
   opacity: 1;
+  white-space: nowrap;
 }
 .theme-switcher-btn:hover {
   background: var(--surface-2);
   color: var(--text);
-  box-shadow: 0 6px 28px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.1);
+  box-shadow: 0 6px 24px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.08);
 }
-.theme-switcher-btn:active { transform: scale(.92); }
+.theme-switcher-btn:active { transform: scale(.96); }
 .theme-switcher-btn svg {
-  transition: transform .45s cubic-bezier(.34,1.56,.64,1);
-  pointer-events: none;
+  transition: transform .4s cubic-bezier(.34,1.56,.64,1);
+  pointer-events: none; flex-shrink: 0;
 }
-/* Hover tilt only when not in tilted state */
-.theme-switcher-btn:not([data-tilted]):hover svg { transform: rotate(20deg); }
-/* Persistent click tilt — alternates each toggle */
-.theme-switcher-btn[data-tilted="1"] svg { transform: rotate(180deg); }
-.theme-switcher-btn[data-tilted="2"] svg { transform: rotate(360deg); }
+/* Hover: gentle tilt only when not persisted */
+.theme-switcher-btn:not([data-tilted]):hover svg { transform: rotate(18deg); }
+/* Persistent tilt — small, alternates so it always animates */
+.theme-switcher-btn[data-tilted="1"] svg { transform: rotate(25deg); }
+.theme-switcher-btn[data-tilted="2"] svg { transform: rotate(-25deg); }
 
 
 
@@ -2317,11 +2321,16 @@ body::before{
 }
 .hw-btn-export:hover { background: var(--surface-2); color: var(--text); }
 .hw-btn-share {
-  background: linear-gradient(135deg, #3533cd, #00ffd9);
+  background: linear-gradient(135deg, #111 0%, #3533cd 60%, #00ffd9 100%);
   color: #fff; border: none;
-  box-shadow: 0 4px 14px rgba(53,51,205,.3);
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
 }
-.hw-btn-share:hover { opacity: .9; box-shadow: 0 6px 20px rgba(53,51,205,.4); }
+.hw-btn-share:hover { opacity: .9; box-shadow: 0 6px 20px rgba(0,0,0,.3); }
+[data-theme="dark"] .hw-btn-share {
+  background: linear-gradient(135deg, #2563eb 0%, #0ea5e9 50%, #00ffd9 100%);
+  box-shadow: 0 4px 14px rgba(37,99,235,.35);
+}
+[data-theme="dark"] .hw-btn-share:hover { box-shadow: 0 6px 20px rgba(37,99,235,.45); }
 .hw-btn-add {
   background: #3b82f6; color: #fff;
   border: none; font-weight: 700;
@@ -3294,6 +3303,31 @@ body::before{
 #p-fbk { display: none !important; flex-direction: column; align-items: center; }
 #p-fbk.show { display: flex !important; }
 
+
+/* ── Bell ring animation ── */
+@keyframes bellRing {
+  0%   { transform: rotate(0deg); }
+  10%  { transform: rotate(18deg); }
+  20%  { transform: rotate(-16deg); }
+  30%  { transform: rotate(14deg); }
+  40%  { transform: rotate(-12deg); }
+  50%  { transform: rotate(8deg); }
+  60%  { transform: rotate(-5deg); }
+  75%  { transform: rotate(3deg); }
+  100% { transform: rotate(0deg); }
+}
+.bell-ringing svg {
+  animation: bellRing .7s cubic-bezier(.36,.07,.19,.97) both !important;
+  transform-origin: 50% 10% !important;
+}
+/* ── Gear spin animation ── */
+@keyframes gearSpin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.gear-spinning svg {
+  animation: gearSpin .55s cubic-bezier(.4,0,.2,1) both !important;
+}
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -3718,7 +3752,7 @@ body::before{
   <nav class="app-nav">
     <div class="nav-logo">Aulert</div>
     <div class="nav-tabs">
-      <button class="nav-tab on" id="tb-feed" onclick="iconPop(this);goTab('feed',this)">
+      <button class="nav-tab on" id="tb-feed" onclick="iconPop(this);bellRingAnim(this);goTab('feed',this)">
         <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <span>Notifications</span>
       </button>
@@ -3730,7 +3764,7 @@ body::before{
         <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="2"/><path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <span>Homework</span>
       </button>
-      <button class="nav-tab" id="tb-set" onclick="iconPop(this);goTab('set',this)">
+      <button class="nav-tab" id="tb-set" onclick="iconPop(this);gearSpinAnim(this);goTab('set',this)">
         <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span>Settings</span>
       </button>
@@ -3747,7 +3781,7 @@ body::before{
           <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </div>
-      <div class="icon-btn icon-btn-animate" id="bellBtn" onclick="iconPop(this);toggleNotifPanel(event)" title="Notifications">
+      <div class="icon-btn icon-btn-animate" id="bellBtn" onclick="iconPop(this);bellRingAnim(this);toggleNotifPanel(event)" title="Notifications">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <div class="notif-pip" id="pip" style="display:none"></div>
       </div>
@@ -4836,12 +4870,15 @@ function toggleTheme() {
   root.setAttribute('data-theme', next);
   localStorage.setItem('aul_theme', next);
   updateThemeIcon(next);
-  // Advance persistent tilt — cycles 1→2→1→2 so transform always moves
+  // Advance persistent tilt — cycles 1→2→1→2 so SVG always animates
   const btn = document.getElementById('globalThemeBtn');
   if (btn) {
     const cur = btn.getAttribute('data-tilted');
     btn.setAttribute('data-tilted', cur === '1' ? '2' : '1');
   }
+  // Update pill label
+  const lbl = document.getElementById('globalThemeLabel');
+  if (lbl) lbl.textContent = next === 'dark' ? 'Dark mode' : 'Light mode';
 }
 
 function setThemeMode(mode) { toggleTheme(); } // compat shim
@@ -4853,6 +4890,8 @@ function updateThemeIcon(mode) {
     const el = document.getElementById(id);
     if (el) el.innerHTML = mode === 'dark' ? moonSvg : sunSvg;
   });
+  const lbl = document.getElementById('globalThemeLabel');
+  if (lbl) lbl.textContent = mode === 'dark' ? 'Dark mode' : 'Light mode';
 }
 
 /* ── Init theme on load ── */
@@ -4870,6 +4909,22 @@ function iconPop(el) {
   if (!el) return;
   el.classList.add('icon-pop');
   setTimeout(() => el.classList.remove('icon-pop'), 400);
+}
+
+function bellRingAnim(el) {
+  if (!el) return;
+  el.classList.remove('bell-ringing');
+  void el.offsetWidth;
+  el.classList.add('bell-ringing');
+  el.addEventListener('animationend', () => el.classList.remove('bell-ringing'), { once: true });
+}
+
+function gearSpinAnim(el) {
+  if (!el) return;
+  el.classList.remove('gear-spinning');
+  void el.offsetWidth;
+  el.classList.add('gear-spinning');
+  el.addEventListener('animationend', () => el.classList.remove('gear-spinning'), { once: true });
 }
 
 /* ════════════════════════════════════════════
@@ -7529,10 +7584,11 @@ function toggleFaq(btn){
 
 <!-- Advanced Theme Switcher -->
 <button class="theme-switcher-btn" id="globalThemeBtn" onclick="toggleTheme()" aria-label="Toggle theme">
-  <svg id="themeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+  <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none">
     <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
     <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
   </svg>
+  <span id="globalThemeLabel">Dark mode</span>
 </button>
 
 <button class="btt" id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})" tit

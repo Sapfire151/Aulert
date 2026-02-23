@@ -2321,10 +2321,13 @@ body::before{
 }
 .hw-btn-share:hover { opacity: .9; box-shadow: 0 6px 20px rgba(53,51,205,.4); }
 .hw-btn-add {
-  background: var(--teal); color: #0B0C14;
+  background: #3b82f6; color: #fff;
   border: none; font-weight: 700;
 }
-.hw-btn-add:hover { filter: brightness(1.1); }
+.hw-btn-add:hover { filter: brightness(1.08); }
+[data-theme="dark"] .hw-btn-add {
+  background: var(--teal); color: #0B0C14;
+}
 
 /* Form */
 .hw-form {
@@ -2517,15 +2520,28 @@ body::before{
 }
 .hwdtp-time-val {
   font-size: 22px; font-weight: 700; font-family: var(--ff-head);
-  color: #0d0f1e; min-width: 52px; text-align: center;
+  color: #0d0f1e; width: 54px; text-align: center;
   background: rgba(0,0,0,.05);
   border: 1.5px solid rgba(0,0,0,.10);
   border-radius: 10px; padding: 6px 4px; letter-spacing: 1px;
+  outline: none; cursor: text;
+  transition: border-color .15s, background .15s;
+  -moz-appearance: textfield;
+}
+.hwdtp-time-val::-webkit-outer-spin-button,
+.hwdtp-time-val::-webkit-inner-spin-button { -webkit-appearance: none; }
+.hwdtp-time-val:focus {
+  border-color: #3b82f6;
+  background: rgba(59,130,246,.06);
 }
 [data-theme="dark"] .hwdtp-time-val {
   color: #eef0ff;
   background: rgba(255,255,255,.07);
   border-color: rgba(255,255,255,.10);
+}
+[data-theme="dark"] .hwdtp-time-val:focus {
+  border-color: var(--teal);
+  background: rgba(0,255,217,.06);
 }
 .hwdtp-colon {
   font-size: 22px; font-weight: 700; color: rgba(13,15,30,.35);
@@ -3957,13 +3973,21 @@ body::before{
                   <div class="hwdtp-time-row">
                     <div class="hwdtp-time-col">
                       <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(1)">▲</button>
-                      <span class="hwdtp-time-val" id="hwDtpHourVal">23</span>
+                      <input class="hwdtp-time-val" id="hwDtpHourVal" type="text" inputmode="numeric" maxlength="2" value="23"
+                        onfocus="this.select()"
+                        oninput="hwDtpHourInput(this)"
+                        onblur="hwDtpHourBlur(this)"
+                        onkeydown="hwDtpTimeKey(event,'hour')"/>
                       <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(-1)">▼</button>
                     </div>
                     <span class="hwdtp-colon">:</span>
                     <div class="hwdtp-time-col">
                       <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(5)">▲</button>
-                      <span class="hwdtp-time-val" id="hwDtpMinVal">59</span>
+                      <input class="hwdtp-time-val" id="hwDtpMinVal" type="text" inputmode="numeric" maxlength="2" value="59"
+                        onfocus="this.select()"
+                        oninput="hwDtpMinInput(this)"
+                        onblur="hwDtpMinBlur(this)"
+                        onkeydown="hwDtpTimeKey(event,'min')"/>
                       <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(-5)">▼</button>
                     </div>
                   </div>
@@ -4891,10 +4915,12 @@ function hwDtpClose() {
   if (panel) panel.classList.remove('open');
 }
 
-// Auto-save + close when clicking outside
+// Close when clicking outside — guard against detached nodes (e.g. after calendar rebuild)
 document.addEventListener('click', function(e) {
   const wrap = document.getElementById('hwDtpWrap');
   if (!wrap) return;
+  // If target is no longer in the DOM (removed by rebuild), treat as inside click
+  if (!document.body.contains(e.target)) return;
   if (!wrap.contains(e.target)) {
     const panel = document.getElementById('hwDtpPanel');
     if (panel && panel.classList.contains('open')) {
@@ -5007,8 +5033,51 @@ function hwDtpShiftMin(delta) {
 function hwDtpSyncTime() {
   const hv = document.getElementById('hwDtpHourVal');
   const mv = document.getElementById('hwDtpMinVal');
-  if (hv) hv.textContent = String(hwDtp.hour).padStart(2,'0');
-  if (mv) mv.textContent = String(hwDtp.min).padStart(2,'0');
+  // Only update if not currently focused (don't clobber typing)
+  if (hv && document.activeElement !== hv) hv.value = String(hwDtp.hour).padStart(2,'0');
+  if (mv && document.activeElement !== mv) mv.value = String(hwDtp.min).padStart(2,'0');
+}
+
+/* ── Typed time input handlers ── */
+function hwDtpHourInput(el) {
+  const v = parseInt(el.value, 10);
+  if (!isNaN(v) && v >= 0 && v <= 23) {
+    hwDtp.hour = v;
+    hwDtpUpdateTriggerLabel(false);
+  }
+  // Auto-jump to minutes when 2 valid digits typed
+  if (el.value.length === 2 && !isNaN(parseInt(el.value,10))) {
+    document.getElementById('hwDtpMinVal').focus();
+    document.getElementById('hwDtpMinVal').select();
+  }
+}
+function hwDtpHourBlur(el) {
+  const v = parseInt(el.value, 10);
+  hwDtp.hour = (!isNaN(v) && v >= 0 && v <= 23) ? v : 0;
+  el.value = String(hwDtp.hour).padStart(2,'0');
+  hwDtpUpdateTriggerLabel(false);
+}
+function hwDtpMinInput(el) {
+  const v = parseInt(el.value, 10);
+  if (!isNaN(v) && v >= 0 && v <= 59) {
+    hwDtp.min = v;
+    hwDtpUpdateTriggerLabel(false);
+  }
+}
+function hwDtpMinBlur(el) {
+  const v = parseInt(el.value, 10);
+  hwDtp.min = (!isNaN(v) && v >= 0 && v <= 59) ? v : 0;
+  el.value = String(hwDtp.min).padStart(2,'0');
+  hwDtpUpdateTriggerLabel(false);
+}
+function hwDtpTimeKey(e, field) {
+  if (e.key === 'ArrowUp')   { e.preventDefault(); field === 'hour' ? hwDtpShiftHour(1)  : hwDtpShiftMin(1);  }
+  if (e.key === 'ArrowDown') { e.preventDefault(); field === 'hour' ? hwDtpShiftHour(-1) : hwDtpShiftMin(-1); }
+  if (e.key === 'Enter') { hwDtpConfirm(); }
+  // Block non-numeric keys (allow backspace, delete, arrows, tab)
+  if (!/[\d\b]/.test(e.key) && !['Backspace','Delete','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Tab','Enter'].includes(e.key)) {
+    e.preventDefault();
+  }
 }
 
 // Build the ISO value string

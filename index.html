@@ -2318,11 +2318,41 @@ body::before{
   box-shadow: 0 4px 14px rgba(53,51,205,.3);
 }
 .hw-btn-share:hover { opacity: .9; box-shadow: 0 6px 20px rgba(53,51,205,.4); }
+[data-theme="light"] .hw-btn-share {
+  background: linear-gradient(135deg, #000 0%, #3533cd 52%, #00c4ff 100%);
+  box-shadow: 0 4px 14px rgba(0,0,0,.28);
+}
+[data-theme="light"] .hw-btn-share:hover { opacity: .88; box-shadow: 0 6px 22px rgba(0,0,0,.35); }
+.hw-share-wrap { position: relative; display: inline-flex; }
+.hw-share-menu {
+  position: absolute; top: calc(100% + 8px); right: 0;
+  background: var(--modal-bg); border: 1px solid var(--rim);
+  border-radius: 14px; padding: 6px;
+  display: flex; flex-direction: column; gap: 2px; min-width: 190px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.35);
+  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+  opacity: 0; transform: translateY(-6px) scale(.96); pointer-events: none;
+  transition: opacity .2s var(--ease), transform .2s var(--spring); z-index: 50;
+}
+.hw-share-wrap:hover .hw-share-menu { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+.hw-share-label { font-size: 9px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--text-3); padding: 4px 10px 2px; }
+.hw-share-opt {
+  display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px;
+  font-size: 12px; font-weight: 600; color: var(--text-2); cursor: pointer;
+  transition: background .15s, color .15s; background: transparent; border: none;
+  width: 100%; text-align: left; font-family: var(--ff-body);
+}
+.hw-share-opt:hover { background: var(--surface-2); color: var(--text); }
+.hw-share-opt-icon { width: 26px; height: 26px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.hw-share-opt-inner { display: flex; flex-direction: column; gap: 1px; }
+.hw-share-opt-sub { font-size: 10px; color: var(--text-3); }
 .hw-btn-add {
   background: var(--teal); color: #0B0C14;
   border: none; font-weight: 700;
 }
 .hw-btn-add:hover { filter: brightness(1.1); }
+[data-theme="light"] .hw-btn-add { background: #2563EB; color: #fff; }
+[data-theme="light"] .hw-btn-add:hover { filter: brightness(1.08); }
 
 /* Form */
 .hw-form {
@@ -2345,10 +2375,56 @@ body::before{
 }
 .hw-input:focus { border-color: rgba(0,255,217,.4); background: var(--surface); }
 .hw-input::placeholder { color: var(--text-3); }
-.hw-date-wrap { display: flex; gap: 8px; flex-shrink: 0; }
-.hw-date { flex: none; width: auto; min-width: 0; cursor: pointer; }
-.hw-date::-webkit-calendar-picker-indicator { opacity: .5; cursor: pointer; filter: invert(var(--date-invert, 1)); }
-[data-theme="light"] { --date-invert: 0; }
+.hw-date-wrap { display: none; }
+.hw-drp-wrap { position: relative; flex-shrink: 0; }
+.hw-drp-trigger {
+  display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 12px;
+  background: var(--surface-2); border: 1px solid var(--rim); font-size: 13px; font-family: var(--ff-body);
+  color: var(--text-2); cursor: pointer; transition: border-color .15s, color .15s, background .15s;
+  white-space: nowrap; min-width: 186px; justify-content: space-between; user-select: none;
+}
+.hw-drp-trigger:hover, .hw-drp-trigger.active { border-color: rgba(0,255,217,.5); color: var(--text); }
+[data-theme="light"] .hw-drp-trigger:hover, [data-theme="light"] .hw-drp-trigger.active { border-color: rgba(37,99,235,.5); }
+.hw-drp-trigger-icon { color: var(--text-3); flex-shrink: 0; }
+.hw-drp-trigger-text { flex: 1; }
+.hw-drp-chevron { color: var(--text-3); flex-shrink: 0; transition: transform .2s; }
+.hw-drp-wrap.open .hw-drp-chevron { transform: rotate(180deg); }
+.hw-drp-popup {
+  position: absolute; top: calc(100% + 8px); right: 0; z-index: 60;
+  background: var(--modal-bg); border: 1px solid var(--rim); border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.4); backdrop-filter: blur(32px); -webkit-backdrop-filter: blur(32px);
+  padding: 16px; width: 296px; opacity: 0; transform: translateY(-8px) scale(.97);
+  pointer-events: none; transition: opacity .22s var(--ease), transform .22s var(--spring);
+}
+.hw-drp-wrap.open .hw-drp-popup { opacity: 1; transform: none; pointer-events: all; }
+.hw-drp-mode-row { display: flex; gap: 4px; margin-bottom: 14px; background: var(--surface); border-radius: 10px; padding: 3px; }
+.hw-drp-mode-btn { flex: 1; padding: 6px; border-radius: 8px; font-size: 11px; font-weight: 700; border: none; background: transparent; color: var(--text-3); cursor: pointer; transition: all .18s var(--ease); font-family: var(--ff-body); }
+.hw-drp-mode-btn.active { background: var(--surface-2); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.hw-drp-cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.hw-drp-nav-btn { width: 28px; height: 28px; border-radius: 8px; background: var(--surface); border: 1px solid var(--rim-2); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-2); transition: all .15s; }
+.hw-drp-nav-btn:hover { background: var(--surface-2); color: var(--text); }
+.hw-drp-cal-month { font-family: var(--ff-head); font-size: 13px; font-weight: 800; color: var(--text); letter-spacing: -.3px; }
+.hw-drp-dow { display: grid; grid-template-columns: repeat(7,1fr); margin-bottom: 4px; }
+.hw-drp-dow span { text-align: center; font-size: 9px; font-weight: 700; text-transform: uppercase; color: var(--text-3); padding: 2px 0; }
+.hw-drp-days { display: grid; grid-template-columns: repeat(7,1fr); gap: 1px; }
+.hw-drp-day { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; color: var(--text-2); border-radius: 8px; cursor: pointer; transition: all .12s; position: relative; }
+.hw-drp-day:hover:not(.hw-drp-day-other):not(.hw-drp-day-empty) { background: var(--surface-2); color: var(--text); }
+.hw-drp-day-other { opacity: .3; pointer-events: none; }
+.hw-drp-day-empty { pointer-events: none; }
+.hw-drp-day-today { color: var(--violet); font-weight: 800; }
+.hw-drp-day-sel { background: rgba(0,255,217,.15); color: #00ffd9; font-weight: 700; border: 1px solid rgba(0,255,217,.35); }
+[data-theme="light"] .hw-drp-day-sel { background: rgba(37,99,235,.12); color: #2563EB; border-color: rgba(37,99,235,.3); }
+.hw-drp-day-range-mid { background: rgba(0,255,217,.07); border-radius: 0; color: var(--text); }
+[data-theme="light"] .hw-drp-day-range-mid { background: rgba(37,99,235,.07); }
+.hw-drp-day-range-start { border-radius: 8px 0 0 8px !important; }
+.hw-drp-day-range-end { border-radius: 0 8px 8px 0 !important; }
+.hw-drp-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--rim-2); gap: 8px; }
+.hw-drp-selected-display { font-size: 11px; color: var(--text-3); font-weight: 500; flex: 1; }
+.hw-drp-clear { font-size: 11px; font-weight: 600; color: var(--text-3); background: none; border: none; cursor: pointer; padding: 4px 6px; border-radius: 6px; transition: color .15s, background .15s; font-family: var(--ff-body); }
+.hw-drp-clear:hover { color: var(--rose); background: rgba(251,113,133,.1); }
+.hw-drp-apply { font-size: 11px; font-weight: 700; padding: 6px 14px; border-radius: 8px; background: rgba(0,255,217,.12); border: 1px solid rgba(0,255,217,.3); color: #00ffd9; cursor: pointer; transition: all .15s; font-family: var(--ff-body); }
+[data-theme="light"] .hw-drp-apply { background: rgba(37,99,235,.1); border-color: rgba(37,99,235,.3); color: #2563EB; }
+.hw-drp-apply:hover { filter: brightness(1.12); }
 .hw-textarea {
   background: var(--surface-2);
   border: 1px solid var(--rim);
@@ -3663,10 +3739,33 @@ body::before{
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="7 10 12 15 17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               Export PDF
             </button>
-            <button class="hw-btn hw-btn-share" onclick="hwShare()" title="Share">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5" r="3" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="12" r="3" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="19" r="3" stroke="currentColor" stroke-width="2"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              Share
-            </button>
+            <div class="hw-share-wrap">
+              <button class="hw-btn hw-btn-share" title="Copy Link">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Copy Link
+              </button>
+              <div class="hw-share-menu">
+                <div class="hw-share-label">Copy as</div>
+                <button class="hw-share-opt" onclick="hwCopyLink('readonly')">
+                  <div class="hw-share-opt-icon" style="background:rgba(139,92,246,.12);color:#8B5CF6">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  </div>
+                  <div class="hw-share-opt-inner">
+                    <span>Read Only</span>
+                    <span class="hw-share-opt-sub">Others can view, not edit</span>
+                  </div>
+                </button>
+                <button class="hw-share-opt" onclick="hwCopyLink('editable')">
+                  <div class="hw-share-opt-icon" style="background:rgba(0,255,217,.1);color:#00ffd9">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                  <div class="hw-share-opt-inner">
+                    <span>Editable</span>
+                    <span class="hw-share-opt-sub">Others can add &amp; change tasks</span>
+                  </div>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -3674,14 +3773,36 @@ body::before{
         <div class="hw-form">
           <div class="hw-form-row">
             <input class="hw-input" id="hwSubject" placeholder="Subject (e.g. Math, Biology)" maxlength="80"/>
-            <div class="hw-date-wrap">
-              <input type="date" class="hw-input hw-date" id="hwDate"/>
-              <input type="date" class="hw-input hw-date" id="hwDateEnd" placeholder="End date (optional)"/>
+            <div style="display:none"><input type="date" id="hwDate"/><input type="date" id="hwDateEnd"/></div>
+            <div class="hw-drp-wrap" id="hwDrpWrap">
+              <div class="hw-drp-trigger" id="hwDrpTrigger" onclick="hwDrpToggle()">
+                <svg class="hw-drp-trigger-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/></svg>
+                <span class="hw-drp-trigger-text" id="hwDrpLabel">Pick a date&hellip;</span>
+                <svg class="hw-drp-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="hw-drp-popup">
+                <div class="hw-drp-mode-row">
+                  <button class="hw-drp-mode-btn active" id="hwDrpModeSingle" onclick="hwDrpSetMode('single')">Single Date</button>
+                  <button class="hw-drp-mode-btn" id="hwDrpModeRange" onclick="hwDrpSetMode('range')">Date Range</button>
+                </div>
+                <div class="hw-drp-cal-nav">
+                  <button class="hw-drp-nav-btn" onclick="hwDrpNavMonth(-1)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+                  <span class="hw-drp-cal-month" id="hwDrpMonthLabel"></span>
+                  <button class="hw-drp-nav-btn" onclick="hwDrpNavMonth(1)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+                </div>
+                <div class="hw-drp-dow"><span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span></div>
+                <div class="hw-drp-days" id="hwDrpDays"></div>
+                <div class="hw-drp-footer">
+                  <span class="hw-drp-selected-display" id="hwDrpDisplay">No date selected</span>
+                  <button class="hw-drp-clear" onclick="hwDrpClear()">Clear</button>
+                  <button class="hw-drp-apply" onclick="hwDrpApply()">Apply</button>
+                </div>
+              </div>
             </div>
           </div>
           <textarea class="hw-textarea" id="hwDesc" placeholder="Description — what needs to be done?" rows="3"></textarea>
           <div class="hw-form-footer">
-            <span class="hw-form-hint">Date range optional — leave end date blank for a single deadline</span>
+            <span class="hw-form-hint" id="hwDrpHint">Date optional — pick single date or range</span>
             <button class="hw-btn hw-btn-add" onclick="hwAdd()">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
               Add Task
@@ -4735,6 +4856,102 @@ function hwExportPDF() {
   <script>window.onload=()=>window.print();<\/script>
   </body></html>`);
   win.document.close();
+}
+
+/* ── Custom Date Range Picker ── */
+(function(){
+  var drpOpen=false,drpMode='single',drpYear,drpMonth,drpSelStart=null,drpSelEnd=null,drpHoverDay=null;
+  function today(){var d=new Date();return{y:d.getFullYear(),m:d.getMonth(),d:d.getDate()};}
+  function dateKey(y,m,d){return y*10000+m*100+d;}
+  function parseKey(k){return{y:Math.floor(k/10000),m:Math.floor((k%10000)/100),d:k%100};}
+  var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  function init(){var t=today();drpYear=t.y;drpMonth=t.m;renderCal();}
+  function renderCal(){
+    var label=document.getElementById('hwDrpMonthLabel');
+    if(label)label.textContent=MONTHS[drpMonth]+' '+drpYear;
+    var grid=document.getElementById('hwDrpDays');if(!grid)return;
+    var firstDay=new Date(drpYear,drpMonth,1).getDay();
+    var dim=new Date(drpYear,drpMonth+1,0).getDate();
+    var t=today(),todayKey=dateKey(t.y,t.m,t.d);
+    var html='';
+    for(var i=0;i<firstDay;i++)html+='<div class="hw-drp-day hw-drp-day-empty"></div>';
+    for(var d=1;d<=dim;d++){
+      var key=dateKey(drpYear,drpMonth,d);
+      var cls='hw-drp-day';
+      if(key===todayKey)cls+=' hw-drp-day-today';
+      if(drpMode==='range'&&drpSelStart&&!drpSelEnd&&drpHoverDay){
+        var lo=Math.min(drpSelStart,drpHoverDay),hi=Math.max(drpSelStart,drpHoverDay);
+        if(key>=lo&&key<=hi){if(key===lo)cls+=' hw-drp-day-sel hw-drp-day-range-start';else if(key===hi)cls+=' hw-drp-day-sel hw-drp-day-range-end';else cls+=' hw-drp-day-range-mid';}
+      }else if(drpMode==='range'&&drpSelStart&&drpSelEnd){
+        var lo2=Math.min(drpSelStart,drpSelEnd),hi2=Math.max(drpSelStart,drpSelEnd);
+        if(key>=lo2&&key<=hi2){if(key===lo2)cls+=' hw-drp-day-sel hw-drp-day-range-start';else if(key===hi2)cls+=' hw-drp-day-sel hw-drp-day-range-end';else cls+=' hw-drp-day-range-mid';}
+      }else if(key===drpSelStart)cls+=' hw-drp-day-sel';
+      html+='<div class="'+cls+'" onclick="hwDrpDayClick('+key+')" onmouseenter="hwDrpDayHover('+key+')">'+d+'</div>';
+    }
+    grid.innerHTML=html;updateDisplay();
+  }
+  function fmt(k){var p=parseKey(k);return MONTHS[p.m].slice(0,3)+' '+p.d+', '+p.y;}
+  function updateDisplay(){
+    var disp=document.getElementById('hwDrpDisplay'),lbl=document.getElementById('hwDrpLabel'),tr=document.getElementById('hwDrpTrigger');
+    if(!disp)return;
+    if(!drpSelStart){disp.textContent='No date selected';if(lbl)lbl.textContent='Pick a date\u2026';if(tr)tr.classList.remove('active');return;}
+    var text;
+    if(drpMode==='range'&&drpSelEnd&&drpSelEnd!==drpSelStart){var lo=Math.min(drpSelStart,drpSelEnd),hi=Math.max(drpSelStart,drpSelEnd);text=fmt(lo)+' \u2192 '+fmt(hi);}
+    else{text=fmt(drpSelStart);}
+    disp.textContent=text;if(lbl)lbl.textContent=text;if(tr)tr.classList.add('active');
+  }
+  window.hwDrpToggle=function(){var w=document.getElementById('hwDrpWrap');drpOpen=!drpOpen;w.classList.toggle('open',drpOpen);if(drpOpen)renderCal();};
+  window.hwDrpSetMode=function(mode){
+    drpMode=mode;drpSelEnd=null;
+    document.getElementById('hwDrpModeSingle').classList.toggle('active',mode==='single');
+    document.getElementById('hwDrpModeRange').classList.toggle('active',mode==='range');
+    var h=document.getElementById('hwDrpHint');
+    if(h)h.textContent=mode==='range'?'Click start then end date for a range':'Date optional \u2014 pick a single date';
+    renderCal();
+  };
+  window.hwDrpNavMonth=function(dir){drpMonth+=dir;if(drpMonth<0){drpMonth=11;drpYear--;}if(drpMonth>11){drpMonth=0;drpYear++;}renderCal();};
+  window.hwDrpDayClick=function(key){
+    if(drpMode==='single'){drpSelStart=key;drpSelEnd=null;renderCal();hwDrpApply();}
+    else{
+      if(!drpSelStart||drpSelEnd){drpSelStart=key;drpSelEnd=null;renderCal();}
+      else{drpSelEnd=key;if(drpSelEnd<drpSelStart){var t=drpSelStart;drpSelStart=drpSelEnd;drpSelEnd=t;}renderCal();hwDrpApply();}
+    }
+  };
+  window.hwDrpDayHover=function(key){if(drpMode==='range'&&drpSelStart&&!drpSelEnd){drpHoverDay=key;renderCal();}};
+  window.hwDrpClear=function(){drpSelStart=null;drpSelEnd=null;drpHoverDay=null;var d1=document.getElementById('hwDate'),d2=document.getElementById('hwDateEnd');if(d1)d1.value='';if(d2)d2.value='';renderCal();};
+  window.hwDrpApply=function(){
+    function toISO(k){var p=parseKey(k);return p.y+'-'+String(p.m+1).padStart(2,'0')+'-'+String(p.d).padStart(2,'0');}
+    var d1=document.getElementById('hwDate'),d2=document.getElementById('hwDateEnd');
+    if(drpSelStart&&d1)d1.value=toISO(drpSelStart);
+    if(drpMode==='range'&&drpSelEnd&&d2)d2.value=toISO(drpSelEnd);else if(d2)d2.value='';
+    updateDisplay();
+    if(drpMode==='single'||(drpMode==='range'&&drpSelEnd)){var w=document.getElementById('hwDrpWrap');drpOpen=false;w.classList.remove('open');}
+  };
+  window._hwDrpReset=function(){
+    drpSelStart=null;drpSelEnd=null;drpHoverDay=null;
+    var l=document.getElementById('hwDrpLabel');if(l)l.textContent='Pick a date\u2026';
+    var t=document.getElementById('hwDrpTrigger');if(t)t.classList.remove('active');
+    var d=document.getElementById('hwDrpDisplay');if(d)d.textContent='No date selected';
+  };
+  document.addEventListener('click',function(e){var w=document.getElementById('hwDrpWrap');if(w&&drpOpen&&!w.contains(e.target)){drpOpen=false;w.classList.remove('open');}});
+  init();
+})();
+
+setTimeout(function(){var orig=window.hwAdd;if(orig)window.hwAdd=function(){orig();if(window._hwDrpReset)window._hwDrpReset();};},200);
+
+function hwCopyLink(mode){
+  if(!window._hwTasks||!_hwTasks.length)return;
+  var modeLabel=mode==='readonly'?'[Read Only]':'[Editable]';
+  var text=_hwTasks.map(function(t){
+    var date=hwFormatDate(t.date,t.dateEnd);
+    var status=t.done?'\u2713':'\u2022';
+    return status+' '+t.subject+(date?' ['+date+']':'')+(t.desc?'\n  '+t.desc:'');
+  }).join('\n');
+  var full='\uD83D\uDCDA Homework List '+modeLabel+'\n'+'\u2500'.repeat(30)+'\n'+text+'\n'+'\u2500'.repeat(30)+'\nShared via Aulert';
+  navigator.clipboard.writeText(full).then(function(){
+    var btn=document.querySelector('.hw-btn-share');
+    if(btn){var orig=btn.innerHTML;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Copied!';setTimeout(function(){btn.innerHTML=orig;},2000);}
+  }).catch(function(){var ta=document.createElement('textarea');ta.value=full;document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();});
 }
 
 function hwShare() {

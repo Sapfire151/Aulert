@@ -2385,19 +2385,24 @@ body::before{
 .hwdtp-trigger.has-val { color: var(--text); }
 .hwdtp-x:hover { opacity: 1 !important; }
 
+/* Panel — explicit colours so both themes look crisp */
 .hwdtp-panel {
   position: absolute; top: calc(100% + 8px); right: 0;
   z-index: 200;
-  background: var(--modal-bg);
-  border: 1px solid var(--rim);
+  /* light fallback colours first, dark overrides via [data-theme] */
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,.10);
   border-radius: 20px;
   padding: 18px;
-  width: 280px;
-  box-shadow: 0 24px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(0,255,217,.06);
-  backdrop-filter: blur(28px);
-  -webkit-backdrop-filter: blur(28px);
+  width: 288px;
+  box-shadow: 0 8px 40px rgba(0,0,0,.14), 0 2px 8px rgba(0,0,0,.08);
   display: none;
   animation: dtpIn .18s var(--spring) both;
+}
+[data-theme="dark"] .hwdtp-panel {
+  background: #13152a;
+  border-color: rgba(255,255,255,.10);
+  box-shadow: 0 24px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(0,255,217,.05);
 }
 .hwdtp-panel.open { display: block; }
 @keyframes dtpIn {
@@ -2411,16 +2416,25 @@ body::before{
   margin-bottom: 12px;
 }
 .hwdtp-nav-btn {
-  width: 28px; height: 28px; border-radius: 8px;
-  background: var(--surface); border: 1px solid var(--rim);
-  color: var(--text-2); cursor: pointer;
+  width: 30px; height: 30px; border-radius: 8px;
+  background: rgba(0,0,0,.05);
+  border: 1px solid rgba(0,0,0,.08);
+  color: #444; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   transition: background .15s, color .15s;
 }
-.hwdtp-nav-btn:hover { background: var(--surface-2); color: var(--text); }
-.hwdtp-month-lbl {
-  font-size: 13px; font-weight: 700; color: var(--text); letter-spacing: -.2px;
+[data-theme="dark"] .hwdtp-nav-btn {
+  background: rgba(255,255,255,.07);
+  border-color: rgba(255,255,255,.10);
+  color: #aab;
 }
+.hwdtp-nav-btn:hover { background: rgba(0,0,0,.10); color: #000; }
+[data-theme="dark"] .hwdtp-nav-btn:hover { background: rgba(255,255,255,.14); color: #fff; }
+.hwdtp-month-lbl {
+  font-size: 13px; font-weight: 700; letter-spacing: -.2px;
+  color: #0d0f1e;
+}
+[data-theme="dark"] .hwdtp-month-lbl { color: #eef0ff; }
 
 /* Day-of-week header */
 .hwdtp-dow-row {
@@ -2428,9 +2442,10 @@ body::before{
   margin-bottom: 6px;
 }
 .hwdtp-dow-row span {
-  font-size: 10px; font-weight: 600; color: var(--text-3);
-  text-align: center; padding: 2px 0;
+  font-size: 10px; font-weight: 700; color: rgba(13,15,30,.38);
+  text-align: center; padding: 2px 0; text-transform: uppercase;
 }
+[data-theme="dark"] .hwdtp-dow-row span { color: rgba(238,240,255,.30); }
 
 /* Day grid */
 .hwdtp-days {
@@ -2440,35 +2455,60 @@ body::before{
   aspect-ratio: 1; border-radius: 8px;
   font-size: 12px; font-weight: 500;
   display: flex; align-items: center; justify-content: center;
-  cursor: pointer; border: 1px solid transparent;
-  color: var(--text-2);
+  cursor: pointer; border: 1.5px solid transparent;
+  color: #1a1c2e;
+  background: transparent;
   transition: background .12s, color .12s, border-color .12s;
 }
-.hwdtp-day:hover { background: var(--surface-2); color: var(--text); }
+[data-theme="dark"] .hwdtp-day { color: rgba(238,240,255,.80); }
+.hwdtp-day:hover { background: rgba(0,0,0,.07); color: #000; }
+[data-theme="dark"] .hwdtp-day:hover { background: rgba(255,255,255,.10); color: #fff; }
 .hwdtp-day.today {
-  border-color: rgba(0,255,217,.35); color: var(--teal);
+  border-color: rgba(0,180,150,.5); color: #008f78; font-weight: 700;
 }
+[data-theme="dark"] .hwdtp-day.today { border-color: rgba(0,255,217,.4); color: var(--teal); }
 .hwdtp-day.selected {
-  background: var(--teal); color: #0B0C14; font-weight: 700;
-  border-color: transparent;
+  background: #3b82f6; color: #fff; font-weight: 700; border-color: transparent;
 }
-.hwdtp-day.selected.today { border-color: transparent; }
-.hwdtp-day.other-month { color: var(--text-3); opacity: .5; }
-.hwdtp-day.past { opacity: .35; cursor: default; }
+[data-theme="dark"] .hwdtp-day.selected { background: var(--teal); color: #0B0C14; }
+.hwdtp-day.selected:hover { background: #2563eb; }
+[data-theme="dark"] .hwdtp-day.selected:hover { background: #00e8c4; }
+.hwdtp-day.other-month { color: rgba(13,15,30,.28); }
+[data-theme="dark"] .hwdtp-day.other-month { color: rgba(238,240,255,.22); }
+.hwdtp-day.past { opacity: .4; cursor: default; pointer-events: none; }
+
+/* Date-saved flash */
+.hwdtp-day.day-flash {
+  animation: dayFlash .5s var(--ease) both;
+}
+@keyframes dayFlash {
+  0%  { box-shadow: 0 0 0 0 rgba(59,130,246,.6); }
+  50% { box-shadow: 0 0 0 6px rgba(59,130,246,0); }
+  100%{ box-shadow: none; }
+}
+[data-theme="dark"] .hwdtp-day.day-flash {
+  animation: dayFlashDark .5s var(--ease) both;
+}
+@keyframes dayFlashDark {
+  0%  { box-shadow: 0 0 0 0 rgba(0,255,217,.5); }
+  50% { box-shadow: 0 0 0 6px rgba(0,255,217,0); }
+  100%{ box-shadow: none; }
+}
 
 /* Divider */
 .hwdtp-divider {
-  height: 1px; background: var(--rim-2); margin: 14px 0;
+  height: 1px; background: rgba(0,0,0,.08); margin: 14px 0;
 }
+[data-theme="dark"] .hwdtp-divider { background: rgba(255,255,255,.07); }
 
-/* Time */
-.hwdtp-time-section {}
+/* Time section */
 .hwdtp-time-lbl {
   display: flex; align-items: center; gap: 6px;
-  font-size: 11px; font-weight: 600; color: var(--text-3);
+  font-size: 11px; font-weight: 700; color: rgba(13,15,30,.45);
   text-transform: uppercase; letter-spacing: .5px;
   margin-bottom: 10px;
 }
+[data-theme="dark"] .hwdtp-time-lbl { color: rgba(238,240,255,.35); }
 .hwdtp-time-row {
   display: flex; align-items: center; justify-content: center; gap: 6px;
 }
@@ -2477,46 +2517,46 @@ body::before{
 }
 .hwdtp-time-val {
   font-size: 22px; font-weight: 700; font-family: var(--ff-head);
-  color: var(--text); min-width: 44px; text-align: center;
-  background: var(--surface); border: 1px solid var(--rim);
+  color: #0d0f1e; min-width: 52px; text-align: center;
+  background: rgba(0,0,0,.05);
+  border: 1.5px solid rgba(0,0,0,.10);
   border-radius: 10px; padding: 6px 4px; letter-spacing: 1px;
 }
+[data-theme="dark"] .hwdtp-time-val {
+  color: #eef0ff;
+  background: rgba(255,255,255,.07);
+  border-color: rgba(255,255,255,.10);
+}
 .hwdtp-colon {
-  font-size: 22px; font-weight: 700; color: var(--text-3);
+  font-size: 22px; font-weight: 700; color: rgba(13,15,30,.35);
   margin-bottom: 2px;
 }
+[data-theme="dark"] .hwdtp-colon { color: rgba(238,240,255,.28); }
 .hwdtp-arr {
   background: none; border: none; cursor: pointer;
-  color: var(--text-3); font-size: 9px; line-height: 1;
-  padding: 2px 8px; border-radius: 6px;
+  color: rgba(13,15,30,.35); font-size: 9px; line-height: 1;
+  padding: 2px 10px; border-radius: 6px;
   transition: color .12s, background .12s;
 }
-.hwdtp-arr:hover { color: var(--teal); background: rgba(0,255,217,.08); }
-
-/* AM/PM */
-.hwdtp-ampm-col {
-  display: flex; flex-direction: column; gap: 4px; margin-left: 4px;
+[data-theme="dark"] .hwdtp-arr { color: rgba(238,240,255,.28); }
+.hwdtp-arr:hover {
+  color: #3b82f6; background: rgba(59,130,246,.10);
 }
-.hwdtp-ampm-btn {
-  font-size: 11px; font-weight: 700; padding: 5px 9px;
-  border-radius: 8px; cursor: pointer;
-  background: var(--surface); border: 1px solid var(--rim);
-  color: var(--text-3); transition: all .12s;
-}
-.hwdtp-ampm-btn.active {
-  background: rgba(0,255,217,.15); border-color: rgba(0,255,217,.4);
-  color: var(--teal);
-}
+[data-theme="dark"] .hwdtp-arr:hover { color: var(--teal); background: rgba(0,255,217,.08); }
 
 /* Footer */
 .hwdtp-footer { margin-top: 14px; }
 .hwdtp-done-btn {
   width: 100%; padding: 10px;
-  background: var(--teal); color: #0B0C14;
+  background: #3b82f6; color: #fff;
   border: none; border-radius: 12px;
   font-size: 13px; font-weight: 700; cursor: pointer;
   font-family: var(--ff-body);
   transition: filter .15s, transform .1s;
+  letter-spacing: .1px;
+}
+[data-theme="dark"] .hwdtp-done-btn {
+  background: var(--teal); color: #0B0C14;
 }
 .hwdtp-done-btn:hover { filter: brightness(1.08); }
 .hwdtp-done-btn:active { transform: scale(.98); }
@@ -3917,18 +3957,14 @@ body::before{
                   <div class="hwdtp-time-row">
                     <div class="hwdtp-time-col">
                       <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(1)">▲</button>
-                      <span class="hwdtp-time-val" id="hwDtpHourVal">12</span>
+                      <span class="hwdtp-time-val" id="hwDtpHourVal">23</span>
                       <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(-1)">▼</button>
                     </div>
                     <span class="hwdtp-colon">:</span>
                     <div class="hwdtp-time-col">
                       <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(5)">▲</button>
-                      <span class="hwdtp-time-val" id="hwDtpMinVal">00</span>
+                      <span class="hwdtp-time-val" id="hwDtpMinVal">59</span>
                       <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(-5)">▼</button>
-                    </div>
-                    <div class="hwdtp-ampm-col">
-                      <button type="button" class="hwdtp-ampm-btn" id="hwDtpAmBtn" onclick="hwDtpSetAm()">AM</button>
-                      <button type="button" class="hwdtp-ampm-btn" id="hwDtpPmBtn" onclick="hwDtpSetPm()">PM</button>
                     </div>
                   </div>
                 </div>
@@ -4822,18 +4858,18 @@ function hwSave() {
 }
 
 /* ══════════════════════════════════════════
-   CUSTOM DATE+TIME PICKER (hwDtp)
+   CUSTOM DATE+TIME PICKER (hwDtp) — 24h
 ══════════════════════════════════════════ */
 const hwDtp = {
   year: null, month: null, day: null,
-  hour: 11, min: 59, ampm: 'PM', // default 11:59 PM
+  hour: 23, min: 59,           // 24h default: 23:59
   viewYear: null, viewMonth: null,
 };
 
 function hwDtpInit() {
   const now = new Date();
   hwDtp.viewYear  = now.getFullYear();
-  hwDtp.viewMonth = now.getMonth(); // 0-based
+  hwDtp.viewMonth = now.getMonth();
   hwDtpBuildCalendar();
   hwDtpSyncTime();
 }
@@ -4842,6 +4878,7 @@ function hwDtpToggle() {
   const panel = document.getElementById('hwDtpPanel');
   if (!panel) return;
   if (panel.classList.contains('open')) {
+    hwDtpAutoSave();
     hwDtpClose();
   } else {
     if (hwDtp.viewYear === null) hwDtpInit();
@@ -4854,11 +4891,25 @@ function hwDtpClose() {
   if (panel) panel.classList.remove('open');
 }
 
-// Close when clicking outside
+// Auto-save + close when clicking outside
 document.addEventListener('click', function(e) {
   const wrap = document.getElementById('hwDtpWrap');
-  if (wrap && !wrap.contains(e.target)) hwDtpClose();
+  if (!wrap) return;
+  if (!wrap.contains(e.target)) {
+    const panel = document.getElementById('hwDtpPanel');
+    if (panel && panel.classList.contains('open')) {
+      hwDtpAutoSave();
+      hwDtpClose();
+    }
+  }
 });
+
+// Auto-save: commit whatever is selected without explicit button press
+function hwDtpAutoSave() {
+  if (hwDtp.year !== null) {
+    hwDtpCommit();
+  }
+}
 
 function hwDtpShiftMonth(delta) {
   hwDtp.viewMonth += delta;
@@ -4876,41 +4927,42 @@ function hwDtpBuildCalendar() {
                   'July','August','September','October','November','December'];
   lbl.textContent = months[hwDtp.viewMonth] + ' ' + hwDtp.viewYear;
 
-  const firstDay = new Date(hwDtp.viewYear, hwDtp.viewMonth, 1).getDay();
+  const firstDay    = new Date(hwDtp.viewYear, hwDtp.viewMonth, 1).getDay();
   const daysInMonth = new Date(hwDtp.viewYear, hwDtp.viewMonth + 1, 0).getDate();
   const daysInPrev  = new Date(hwDtp.viewYear, hwDtp.viewMonth, 0).getDate();
 
-  const today = new Date();
-  today.setHours(0,0,0,0);
+  const today = new Date(); today.setHours(0,0,0,0);
 
   grid.innerHTML = '';
-  // Leading blanks from previous month
+
+  // Leading grey days (prev month)
   for (let i = 0; i < firstDay; i++) {
-    const d = daysInPrev - firstDay + 1 + i;
     const el = document.createElement('button');
     el.type = 'button';
     el.className = 'hwdtp-day other-month past';
-    el.textContent = d;
+    el.textContent = daysInPrev - firstDay + 1 + i;
     grid.appendChild(el);
   }
-  // Current month days
+
+  // Current month
   for (let d = 1; d <= daysInMonth; d++) {
     const el = document.createElement('button');
     el.type = 'button';
     el.className = 'hwdtp-day';
     el.textContent = d;
     const thisDate = new Date(hwDtp.viewYear, hwDtp.viewMonth, d);
-    if (thisDate < today) el.classList.add('past');
+    if (thisDate < today)  el.classList.add('past');
     if (thisDate.getTime() === today.getTime()) el.classList.add('today');
     if (hwDtp.year === hwDtp.viewYear && hwDtp.month === hwDtp.viewMonth && hwDtp.day === d) {
       el.classList.add('selected');
     }
     if (!el.classList.contains('past')) {
-      el.onclick = () => hwDtpSelectDay(hwDtp.viewYear, hwDtp.viewMonth, d);
+      el.onclick = () => hwDtpSelectDay(hwDtp.viewYear, hwDtp.viewMonth, d, el);
     }
     grid.appendChild(el);
   }
-  // Trailing days
+
+  // Trailing grey days
   const total = firstDay + daysInMonth;
   const trailing = total % 7 === 0 ? 0 : 7 - (total % 7);
   for (let d = 1; d <= trailing; d++) {
@@ -4922,31 +4974,34 @@ function hwDtpBuildCalendar() {
   }
 }
 
-function hwDtpSelectDay(y, m, d) {
+function hwDtpSelectDay(y, m, d, el) {
   hwDtp.year = y; hwDtp.month = m; hwDtp.day = d;
+  // Rebuild to move .selected highlight — don't close
   hwDtpBuildCalendar();
+  // Ripple flash on the newly selected element (re-query after rebuild)
+  const grid = document.getElementById('hwDtpDays');
+  if (grid) {
+    const all = grid.querySelectorAll('.hwdtp-day.selected');
+    all.forEach(btn => {
+      btn.classList.remove('day-flash');
+      void btn.offsetWidth; // reflow to restart animation
+      btn.classList.add('day-flash');
+    });
+  }
+  // Live-update the trigger label so user sees the date immediately
+  hwDtpUpdateTriggerLabel(/*persist=*/false);
 }
 
 function hwDtpShiftHour(delta) {
-  hwDtp.hour = ((hwDtp.hour - 1 + delta + 12) % 12) + 1;
+  hwDtp.hour = ((hwDtp.hour + delta) % 24 + 24) % 24;
   hwDtpSyncTime();
+  hwDtpUpdateTriggerLabel(false);
 }
 
 function hwDtpShiftMin(delta) {
   hwDtp.min = ((hwDtp.min + delta) % 60 + 60) % 60;
   hwDtpSyncTime();
-}
-
-function hwDtpSetAm() {
-  hwDtp.ampm = 'AM';
-  document.getElementById('hwDtpAmBtn').classList.add('active');
-  document.getElementById('hwDtpPmBtn').classList.remove('active');
-}
-
-function hwDtpSetPm() {
-  hwDtp.ampm = 'PM';
-  document.getElementById('hwDtpPmBtn').classList.add('active');
-  document.getElementById('hwDtpAmBtn').classList.remove('active');
+  hwDtpUpdateTriggerLabel(false);
 }
 
 function hwDtpSyncTime() {
@@ -4954,36 +5009,43 @@ function hwDtpSyncTime() {
   const mv = document.getElementById('hwDtpMinVal');
   if (hv) hv.textContent = String(hwDtp.hour).padStart(2,'0');
   if (mv) mv.textContent = String(hwDtp.min).padStart(2,'0');
-  // sync AM/PM button active states
-  const amBtn = document.getElementById('hwDtpAmBtn');
-  const pmBtn = document.getElementById('hwDtpPmBtn');
-  if (amBtn && pmBtn) {
-    amBtn.classList.toggle('active', hwDtp.ampm === 'AM');
-    pmBtn.classList.toggle('active', hwDtp.ampm === 'PM');
+}
+
+// Build the ISO value string
+function hwDtpIsoValue() {
+  if (hwDtp.year === null) return '';
+  const pad = n => String(n).padStart(2,'0');
+  return `${hwDtp.year}-${pad(hwDtp.month+1)}-${pad(hwDtp.day)}T${pad(hwDtp.hour)}:${pad(hwDtp.min)}`;
+}
+
+// Update the trigger button label (and optionally persist to hidden input)
+function hwDtpUpdateTriggerLabel(persist) {
+  if (hwDtp.year === null) return;
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const pad = n => String(n).padStart(2,'0');
+  const label = `${months[hwDtp.month]} ${hwDtp.day} · ${pad(hwDtp.hour)}:${pad(hwDtp.min)}`;
+  const lbl      = document.getElementById('hwDtpLabel');
+  const trigger  = document.getElementById('hwDtpTrigger');
+  const clearBtn = document.getElementById('hwDtpClear');
+  if (lbl) lbl.textContent = label;
+  if (trigger)  trigger.classList.add('has-val');
+  if (clearBtn) clearBtn.style.display = 'block';
+  if (persist) {
+    document.getElementById('hwDate').value = hwDtpIsoValue();
   }
 }
 
+// Full commit — write to hidden input and close
+function hwDtpCommit() {
+  if (hwDtp.year === null) return;
+  document.getElementById('hwDate').value = hwDtpIsoValue();
+  hwDtpUpdateTriggerLabel(false);
+}
+
+// Called by "Set Deadline" button — commit and close
 function hwDtpConfirm() {
   if (hwDtp.year === null) { hwDtpClose(); return; }
-  // Convert to 24h
-  let h24 = hwDtp.hour % 12;
-  if (hwDtp.ampm === 'PM') h24 += 12;
-  const pad = n => String(n).padStart(2,'0');
-  const val = `${hwDtp.viewYear}-${pad(hwDtp.viewMonth+1)}-${pad(hwDtp.day)}T${pad(h24)}:${pad(hwDtp.min)}`;
-  // Use the actual selected year/month
-  const dateVal = `${hwDtp.year}-${pad(hwDtp.month+1)}-${pad(hwDtp.day)}T${pad(h24)}:${pad(hwDtp.min)}`;
-  document.getElementById('hwDate').value = dateVal;
-  // Update label
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const ampmStr = hwDtp.ampm;
-  const dispH = hwDtp.hour;
-  const label = `${months[hwDtp.month]} ${hwDtp.day} · ${pad(dispH)}:${pad(hwDtp.min)} ${ampmStr}`;
-  const lbl = document.getElementById('hwDtpLabel');
-  const trigger = document.getElementById('hwDtpTrigger');
-  const clearBtn = document.getElementById('hwDtpClear');
-  if (lbl) lbl.textContent = label;
-  if (trigger) trigger.classList.add('has-val');
-  if (clearBtn) clearBtn.style.display = 'block';
+  hwDtpCommit();
   hwDtpClose();
 }
 
@@ -4991,26 +5053,25 @@ function hwDtpClear(e) {
   e.stopPropagation();
   document.getElementById('hwDate').value = '';
   hwDtp.year = hwDtp.month = hwDtp.day = null;
-  const lbl = document.getElementById('hwDtpLabel');
-  const trigger = document.getElementById('hwDtpTrigger');
+  const lbl      = document.getElementById('hwDtpLabel');
+  const trigger  = document.getElementById('hwDtpTrigger');
   const clearBtn = document.getElementById('hwDtpClear');
-  if (lbl) lbl.textContent = 'Pick deadline…';
-  if (trigger) trigger.classList.remove('has-val');
+  if (lbl)      lbl.textContent = 'Pick deadline…';
+  if (trigger)  trigger.classList.remove('has-val');
   if (clearBtn) clearBtn.style.display = 'none';
   if (hwDtp.viewYear !== null) hwDtpBuildCalendar();
 }
 
 function hwDtpReset() {
   hwDtp.year = hwDtp.month = hwDtp.day = null;
-  hwDtp.hour = 11; hwDtp.min = 59; hwDtp.ampm = 'PM';
-  const lbl = document.getElementById('hwDtpLabel');
-  const trigger = document.getElementById('hwDtpTrigger');
+  hwDtp.hour = 23; hwDtp.min = 59;
+  const lbl      = document.getElementById('hwDtpLabel');
+  const trigger  = document.getElementById('hwDtpTrigger');
   const clearBtn = document.getElementById('hwDtpClear');
-  if (lbl) lbl.textContent = 'Pick deadline…';
-  if (trigger) trigger.classList.remove('has-val');
+  if (lbl)      lbl.textContent = 'Pick deadline…';
+  if (trigger)  trigger.classList.remove('has-val');
   if (clearBtn) clearBtn.style.display = 'none';
   document.getElementById('hwDate').value = '';
-  // reset view to current month
   const now = new Date();
   hwDtp.viewYear = now.getFullYear();
   hwDtp.viewMonth = now.getMonth();
@@ -5066,16 +5127,12 @@ function hwToggleDone(id) {
 
 function hwFormatDate(date) {
   if (!date) return '';
-  // Support both 'YYYY-MM-DDTHH:MM' (datetime-local) and 'YYYY-MM-DD' (legacy)
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   if (date.includes('T')) {
     const [datePart, timePart] = date.split('T');
     const [y, m, day] = datePart.split('-');
     const [hh, mm] = timePart.split(':');
-    const hour = +hh;
-    const ampm = hour >= 12 ? 'PM' : 'AM';
-    const h12 = hour % 12 || 12;
-    return `${months[+m-1]} ${+day} at ${h12}:${mm} ${ampm}`;
+    return `${months[+m-1]} ${+day} · ${hh}:${mm}`;
   } else {
     const [y, m, day] = date.split('-');
     return `${months[+m-1]} ${+day}`;

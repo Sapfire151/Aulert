@@ -2306,22 +2306,63 @@ body::before{
   font-size: 12px; font-weight: 600;
   cursor: pointer; border: 1px solid transparent;
   transition: background .15s, color .15s, transform .15s, box-shadow .15s;
+  white-space: nowrap;
 }
 .hw-btn:active { transform: scale(.95); }
 .hw-btn-export {
   background: var(--surface); border-color: var(--rim); color: var(--text-2);
 }
 .hw-btn-export:hover { background: var(--surface-2); color: var(--text); }
+
+/* Share wrapper + menu */
+.hw-share-wrap { position: relative; }
 .hw-btn-share {
   background: linear-gradient(135deg, #3533cd, #00ffd9);
   color: #fff; border: none;
   box-shadow: 0 4px 14px rgba(53,51,205,.3);
 }
-.hw-btn-share:hover { opacity: .9; box-shadow: 0 6px 20px rgba(53,51,205,.4); }
+[data-theme="light"] .hw-btn-share {
+  background: linear-gradient(135deg, #000, #3533cd, #00c9a7);
+  box-shadow: 0 4px 14px rgba(0,0,0,.18);
+}
+.hw-btn-share:hover { filter: brightness(1.08); box-shadow: 0 6px 20px rgba(53,51,205,.4); }
+.hw-share-caret { transition: transform .2s; }
+.hw-share-wrap.open .hw-share-caret { transform: rotate(180deg); }
+.hw-share-menu {
+  position: absolute; top: calc(100% + 8px); right: 0;
+  background: var(--modal-bg); border: 1px solid var(--rim);
+  border-radius: 16px; padding: 8px;
+  min-width: 200px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.28);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  opacity: 0; pointer-events: none; transform: scale(.94) translateY(-6px);
+  transform-origin: top right;
+  transition: opacity .18s, transform .22s var(--spring);
+  z-index: 100;
+}
+.hw-share-wrap.open .hw-share-menu { opacity: 1; pointer-events: all; transform: scale(1) translateY(0); }
+.hw-share-label {
+  font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text-3); padding: 4px 8px 8px;
+}
+.hw-share-opt {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 9px 10px; border-radius: 10px;
+  border: none; background: transparent; cursor: pointer; text-align: left;
+  transition: background .14s;
+  color: var(--text);
+}
+.hw-share-opt:hover { background: var(--surface-2); }
+.hw-share-opt svg { flex-shrink: 0; color: var(--text-2); }
+.hw-share-opt-title { font-size: 13px; font-weight: 600; }
+.hw-share-opt-sub { font-size: 11px; color: var(--text-3); margin-top: 1px; }
+
+/* Add button */
 .hw-btn-add {
   background: var(--teal); color: #0B0C14;
   border: none; font-weight: 700;
 }
+[data-theme="light"] .hw-btn-add { background: #3533cd; color: #fff; }
 .hw-btn-add:hover { filter: brightness(1.1); }
 
 /* Form */
@@ -2331,8 +2372,9 @@ body::before{
   border-radius: 20px;
   padding: 18px;
   display: flex; flex-direction: column; gap: 12px;
+  position: relative;
 }
-.hw-form-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.hw-form-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
 .hw-input {
   flex: 1; min-width: 120px;
   background: var(--surface-2);
@@ -2344,11 +2386,97 @@ body::before{
   transition: border-color .15s, background .15s;
 }
 .hw-input:focus { border-color: rgba(0,255,217,.4); background: var(--surface); }
+[data-theme="light"] .hw-input:focus { border-color: rgba(53,51,205,.4); }
 .hw-input::placeholder { color: var(--text-3); }
-.hw-date-wrap { display: flex; gap: 8px; flex-shrink: 0; }
-.hw-date { flex: none; width: auto; min-width: 0; cursor: pointer; }
-.hw-date::-webkit-calendar-picker-indicator { opacity: .5; cursor: pointer; filter: invert(var(--date-invert, 1)); }
-[data-theme="light"] { --date-invert: 0; }
+
+/* Date trigger button */
+.hw-date-trigger {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 14px; border-radius: 12px;
+  background: var(--surface-2); border: 1px solid var(--rim);
+  font-size: 13px; font-weight: 500; color: var(--text-2);
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  transition: background .15s, border-color .15s, color .15s;
+}
+.hw-date-trigger:hover, .hw-date-trigger.active {
+  background: var(--surface); border-color: var(--teal); color: var(--text);
+}
+[data-theme="light"] .hw-date-trigger:hover,
+[data-theme="light"] .hw-date-trigger.active { border-color: #3533cd; }
+.hw-date-trigger svg:first-child { flex-shrink: 0; }
+.hw-date-caret { transition: transform .2s; opacity: .5; }
+.hw-date-trigger.active .hw-date-caret { transform: rotate(180deg); }
+
+/* Custom calendar popover */
+.hw-cal-pop {
+  background: var(--modal-bg);
+  border: 1px solid var(--rim);
+  border-radius: 20px;
+  padding: 16px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.25);
+  display: none;
+  flex-direction: column; gap: 12px;
+  animation: hwCardIn .22s var(--spring) both;
+}
+.hw-cal-pop.open { display: flex; }
+.hw-cal-head {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.hw-cal-month { font-size: 14px; font-weight: 700; }
+.hw-cal-nav {
+  width: 30px; height: 30px; border-radius: 8px;
+  border: 1px solid var(--rim); background: var(--surface);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; color: var(--text-2);
+  transition: background .15s, color .15s;
+}
+.hw-cal-nav:hover { background: var(--surface-2); color: var(--text); }
+.hw-cal-dow {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+}
+.hw-cal-dow span { font-size: 10px; font-weight: 700; letter-spacing: .5px; color: var(--text-3); padding: 4px 0; }
+.hw-cal-grid {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+.hw-cal-day {
+  aspect-ratio: 1; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  border: 1px solid transparent; color: var(--text-2);
+  transition: background .12s, color .12s, border-color .12s;
+  user-select: none;
+}
+.hw-cal-day:hover { background: var(--surface-2); color: var(--text); }
+.hw-cal-day.other { opacity: .25; pointer-events: none; }
+.hw-cal-day.today { border-color: var(--rim); color: var(--text); font-weight: 700; }
+.hw-cal-day.selected {
+  background: var(--teal); color: #0B0C14 !important; font-weight: 800; border-color: transparent;
+}
+[data-theme="light"] .hw-cal-day.selected { background: #3533cd; color: #fff !important; }
+.hw-cal-day.in-range {
+  background: rgba(0,255,217,.12); color: var(--teal); border-radius: 0;
+}
+[data-theme="light"] .hw-cal-day.in-range { background: rgba(53,51,205,.08); color: #3533cd; }
+.hw-cal-day.range-start { border-radius: 8px 0 0 8px; }
+.hw-cal-day.range-end { border-radius: 0 8px 8px 0; }
+.hw-cal-day.range-start.range-end { border-radius: 8px; }
+.hw-cal-footer {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
+  padding-top: 8px; border-top: 1px solid var(--rim-2);
+}
+.hw-cal-hint { font-size: 11px; color: var(--text-3); flex: 1; text-align: center; }
+.hw-cal-clear, .hw-cal-done {
+  padding: 6px 14px; border-radius: 10px; font-size: 12px; font-weight: 600; cursor: pointer;
+  border: 1px solid transparent; transition: background .15s, color .15s;
+}
+.hw-cal-clear { background: var(--surface); border-color: var(--rim); color: var(--text-2); }
+.hw-cal-clear:hover { background: var(--surface-2); color: var(--text); }
+.hw-cal-done { background: var(--teal); color: #0B0C14; border: none; }
+[data-theme="light"] .hw-cal-done { background: #3533cd; color: #fff; }
+.hw-cal-done:hover { filter: brightness(1.08); }
+
 .hw-textarea {
   background: var(--surface-2);
   border: 1px solid var(--rim);
@@ -2360,6 +2488,7 @@ body::before{
   transition: border-color .15s, background .15s;
 }
 .hw-textarea:focus { border-color: rgba(0,255,217,.4); background: var(--surface); }
+[data-theme="light"] .hw-textarea:focus { border-color: rgba(53,51,205,.4); }
 .hw-textarea::placeholder { color: var(--text-3); }
 .hw-form-footer {
   display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap;
@@ -2401,7 +2530,9 @@ body::before{
   background: transparent;
 }
 .hw-check:hover { border-color: var(--teal); }
+[data-theme="light"] .hw-check:hover { border-color: #3533cd; }
 .hw-card.done .hw-check { background: var(--teal); border-color: var(--teal); }
+[data-theme="light"] .hw-card.done .hw-check { background: #3533cd; border-color: #3533cd; }
 .hw-check-tick { display: none; }
 .hw-card.done .hw-check-tick { display: block; }
 
@@ -2414,6 +2545,10 @@ body::before{
   background: rgba(0,255,217,.08); color: var(--teal);
   border: 1px solid rgba(0,255,217,.2);
   flex-shrink: 0;
+}
+[data-theme="light"] .hw-card-date {
+  background: rgba(53,51,205,.08); color: #3533cd;
+  border-color: rgba(53,51,205,.2);
 }
 .hw-card-desc { font-size: 12px; color: var(--text-2); line-height: 1.6; }
 
@@ -3656,17 +3791,37 @@ body::before{
         <div class="hw-header">
           <div>
             <h1 class="hw-title">Homework</h1>
-            <p class="hw-sub">Track tasks, export as PDF, share with anyone.</p>
+            <p class="hw-sub">Track tasks, export as PDF, copy & share.</p>
           </div>
           <div class="hw-header-actions">
             <button class="hw-btn hw-btn-export" onclick="hwExportPDF()" title="Export as PDF">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="7 10 12 15 17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
               Export PDF
             </button>
-            <button class="hw-btn hw-btn-share" onclick="hwShare()" title="Share">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5" r="3" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="12" r="3" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="19" r="3" stroke="currentColor" stroke-width="2"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              Share
-            </button>
+            <div class="hw-share-wrap" id="hwShareWrap">
+              <button class="hw-btn hw-btn-share" id="hwShareBtn" onclick="hwToggleShareMenu(event)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Copy Link
+                <svg class="hw-share-caret" width="10" height="10" viewBox="0 0 24 24" fill="none"><polyline points="6 9 12 15 18 9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <div class="hw-share-menu" id="hwShareMenu">
+                <div class="hw-share-label">Copy as</div>
+                <button class="hw-share-opt" onclick="hwCopyLink('readonly')">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="2"/><path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  <div>
+                    <div class="hw-share-opt-title">Read only</div>
+                    <div class="hw-share-opt-sub">Recipients can view</div>
+                  </div>
+                </button>
+                <button class="hw-share-opt" onclick="hwCopyLink('editable')">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <div>
+                    <div class="hw-share-opt-title">Editable</div>
+                    <div class="hw-share-opt-sub">Recipients can edit</div>
+                  </div>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -3674,18 +3829,42 @@ body::before{
         <div class="hw-form">
           <div class="hw-form-row">
             <input class="hw-input" id="hwSubject" placeholder="Subject (e.g. Math, Biology)" maxlength="80"/>
-            <div class="hw-date-wrap">
-              <input type="date" class="hw-input hw-date" id="hwDate"/>
-              <input type="date" class="hw-input hw-date" id="hwDateEnd" placeholder="End date (optional)"/>
-            </div>
+            <!-- Custom date range picker trigger -->
+            <button class="hw-date-trigger" id="hwDateTrigger" type="button" onclick="hwToggleDatePicker()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span id="hwDateLabel">Pick date</span>
+              <svg class="hw-date-caret" width="10" height="10" viewBox="0 0 24 24" fill="none"><polyline points="6 9 12 15 18 9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
           </div>
           <textarea class="hw-textarea" id="hwDesc" placeholder="Description — what needs to be done?" rows="3"></textarea>
           <div class="hw-form-footer">
-            <span class="hw-form-hint">Date range optional — leave end date blank for a single deadline</span>
+            <span class="hw-form-hint" id="hwFormHint">Click date to pick a deadline or drag to select a range</span>
             <button class="hw-btn hw-btn-add" onclick="hwAdd()">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
               Add Task
             </button>
+          </div>
+        </div>
+
+        <!-- Custom date picker popover -->
+        <div class="hw-cal-pop" id="hwCalPop">
+          <div class="hw-cal-head">
+            <button class="hw-cal-nav" onclick="hwCalMove(-1)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="15 18 9 12 15 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+            </button>
+            <span class="hw-cal-month" id="hwCalMonth"></span>
+            <button class="hw-cal-nav" onclick="hwCalMove(1)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+          <div class="hw-cal-dow">
+            <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+          </div>
+          <div class="hw-cal-grid" id="hwCalGrid"></div>
+          <div class="hw-cal-footer">
+            <button class="hw-cal-clear" onclick="hwCalClear()">Clear</button>
+            <span class="hw-cal-hint" id="hwCalHint">Click a date, or click two dates for a range</span>
+            <button class="hw-cal-done" onclick="hwToggleDatePicker()">Done</button>
           </div>
         </div>
 
@@ -4556,53 +4735,191 @@ function goTab(name) {
    HOMEWORK
 ════════════════════════════════════════════ */
 let _hwTasks = JSON.parse(localStorage.getItem('aul_hw') || '[]');
+function hwSave() { localStorage.setItem('aul_hw', JSON.stringify(_hwTasks)); }
 
-function hwSave() {
-  localStorage.setItem('aul_hw', JSON.stringify(_hwTasks));
+/* ── Date picker state ── */
+let _hwCalOpen = false;
+let _hwPickYear, _hwPickMonth;
+let _hwPickStart = null, _hwPickEnd = null;
+
+function hwToggleDatePicker() {
+  const pop = document.getElementById('hwCalPop');
+  const trigger = document.getElementById('hwDateTrigger');
+  _hwCalOpen = !_hwCalOpen;
+  if (_hwCalOpen) {
+    const now = new Date();
+    _hwPickYear  = now.getFullYear();
+    _hwPickMonth = now.getMonth();
+    hwCalRender();
+    pop.classList.add('open');
+    trigger.classList.add('active');
+  } else {
+    pop.classList.remove('open');
+    trigger.classList.remove('active');
+  }
 }
 
+function hwCalMove(dir) {
+  _hwPickMonth += dir;
+  if (_hwPickMonth > 11) { _hwPickMonth = 0; _hwPickYear++; }
+  if (_hwPickMonth < 0)  { _hwPickMonth = 11; _hwPickYear--; }
+  hwCalRender();
+}
+
+function hwCalRender() {
+  const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('hwCalMonth').textContent = months[_hwPickMonth] + ' ' + _hwPickYear;
+  const grid = document.getElementById('hwCalGrid');
+  grid.innerHTML = '';
+  const firstDay = new Date(_hwPickYear, _hwPickMonth, 1).getDay();
+  const daysInMonth = new Date(_hwPickYear, _hwPickMonth + 1, 0).getDate();
+  const daysInPrev  = new Date(_hwPickYear, _hwPickMonth, 0).getDate();
+  const todayStr = hwDateStr(new Date());
+  for (let i = firstDay - 1; i >= 0; i--) {
+    const d = document.createElement('div');
+    d.className = 'hw-cal-day other';
+    d.textContent = daysInPrev - i;
+    grid.appendChild(d);
+  }
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = _hwPickYear + '-' + String(_hwPickMonth+1).padStart(2,'0') + '-' + String(day).padStart(2,'0');
+    const d = document.createElement('div');
+    d.className = 'hw-cal-day';
+    d.textContent = day;
+    if (dateStr === todayStr) d.classList.add('today');
+    const isStart = dateStr === _hwPickStart;
+    const isEnd   = dateStr === _hwPickEnd;
+    const inRange = _hwPickStart && _hwPickEnd && dateStr > _hwPickStart && dateStr < _hwPickEnd;
+    if (isStart || isEnd) {
+      d.classList.add('selected');
+      if (_hwPickStart && _hwPickEnd) {
+        if (isStart) d.classList.add('range-start');
+        if (isEnd)   d.classList.add('range-end');
+      }
+    } else if (inRange) {
+      d.classList.add('in-range');
+    }
+    d.addEventListener('click', () => hwCalClick(dateStr));
+    grid.appendChild(d);
+  }
+  const total = firstDay + daysInMonth;
+  const remain = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let i = 1; i <= remain; i++) {
+    const d = document.createElement('div');
+    d.className = 'hw-cal-day other';
+    d.textContent = i;
+    grid.appendChild(d);
+  }
+  const hint = document.getElementById('hwCalHint');
+  if (hint) {
+    if (!_hwPickStart) hint.textContent = 'Click a date to set deadline';
+    else if (!_hwPickEnd) hint.textContent = 'Click another date for a range';
+    else hint.textContent = hwFmtShort(_hwPickStart) + ' → ' + hwFmtShort(_hwPickEnd);
+  }
+}
+
+function hwCalClick(dateStr) {
+  if (!_hwPickStart || (_hwPickStart && _hwPickEnd)) {
+    _hwPickStart = dateStr; _hwPickEnd = null;
+  } else {
+    if (dateStr < _hwPickStart) { _hwPickEnd = _hwPickStart; _hwPickStart = dateStr; }
+    else if (dateStr === _hwPickStart) { _hwPickEnd = null; }
+    else { _hwPickEnd = dateStr; }
+  }
+  hwCalRender(); hwUpdateDateLabel();
+}
+
+function hwCalClear() {
+  _hwPickStart = null; _hwPickEnd = null;
+  hwCalRender(); hwUpdateDateLabel();
+}
+
+function hwDateStr(d) {
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+
+function hwFmtShort(dateStr) {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[+parts[1]-1] + ' ' + +parts[2];
+}
+
+function hwUpdateDateLabel() {
+  const label = document.getElementById('hwDateLabel');
+  if (!label) return;
+  if (!_hwPickStart) label.textContent = 'Pick date';
+  else if (!_hwPickEnd) label.textContent = hwFmtShort(_hwPickStart);
+  else label.textContent = hwFmtShort(_hwPickStart) + ' – ' + hwFmtShort(_hwPickEnd);
+}
+
+document.addEventListener('click', e => {
+  const pop = document.getElementById('hwCalPop');
+  const trigger = document.getElementById('hwDateTrigger');
+  if (_hwCalOpen && pop && trigger && !pop.contains(e.target) && !trigger.contains(e.target))
+    hwToggleDatePicker();
+});
+
+/* ── Share / Copy Link menu ── */
+function hwToggleShareMenu(e) {
+  e.stopPropagation();
+  document.getElementById('hwShareWrap')?.classList.toggle('open');
+}
+document.addEventListener('click', e => {
+  const wrap = document.getElementById('hwShareWrap');
+  if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
+});
+
+function hwCopyLink(mode) {
+  document.getElementById('hwShareWrap')?.classList.remove('open');
+  if (!_hwTasks.length) { alert('No tasks to share.'); return; }
+  const label = mode === 'readonly' ? '🔒 Read-only' : '✏️ Editable';
+  const text = _hwTasks.map(t => {
+    const date = hwFormatDate(t.date, t.dateEnd);
+    const status = t.done ? '✓' : '○';
+    return status + ' ' + t.subject + (date ? ' [' + date + ']' : '') + (t.desc ? '
+  ' + t.desc : '');
+  }).join('
+');
+  const divider = '─'.repeat(30);
+  const full = '📚 Homework List (' + label + ')
+' + divider + '
+' + text + '
+' + divider + '
+Shared via Aulert';
+  navigator.clipboard.writeText(full).then(() => {
+    const btn = document.getElementById('hwShareBtn');
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Copied!';
+      setTimeout(() => btn.innerHTML = orig, 2000);
+    }
+  }).catch(() => alert('Could not copy to clipboard.'));
+}
+
+/* ── Add / Delete / Toggle ── */
 function hwAdd() {
   const subject = document.getElementById('hwSubject').value.trim();
   const desc    = document.getElementById('hwDesc').value.trim();
-  const date    = document.getElementById('hwDate').value;
-  const dateEnd = document.getElementById('hwDateEnd').value;
-
   if (!subject) {
-    document.getElementById('hwSubject').focus();
-    document.getElementById('hwSubject').style.borderColor = '#FB7185';
-    setTimeout(() => document.getElementById('hwSubject').style.borderColor = '', 1200);
+    const inp = document.getElementById('hwSubject');
+    inp.focus(); inp.style.borderColor = '#FB7185';
+    setTimeout(() => inp.style.borderColor = '', 1200);
     return;
   }
-
-  _hwTasks.unshift({
-    id: Date.now(),
-    subject,
-    desc,
-    date,
-    dateEnd,
-    done: false,
-    created: new Date().toISOString()
-  });
-  hwSave();
-  hwRender();
-
-  // Clear form
+  _hwTasks.unshift({ id: Date.now(), subject, desc, date: _hwPickStart||'', dateEnd: _hwPickEnd||'', done: false, created: new Date().toISOString() });
+  hwSave(); hwRender();
   document.getElementById('hwSubject').value = '';
   document.getElementById('hwDesc').value = '';
-  document.getElementById('hwDate').value = '';
-  document.getElementById('hwDateEnd').value = '';
+  hwCalClear(); hwUpdateDateLabel();
+  if (_hwCalOpen) hwToggleDatePicker();
 }
 
 function hwDelete(id) {
   const card = document.getElementById('hwcard-' + id);
   if (card) {
-    card.style.transform = 'scale(.95) translateX(10px)';
-    card.style.opacity = '0';
-    setTimeout(() => {
-      _hwTasks = _hwTasks.filter(t => t.id !== id);
-      hwSave();
-      hwRender();
-    }, 250);
+    card.style.transform = 'scale(.95) translateX(10px)'; card.style.opacity = '0';
+    setTimeout(() => { _hwTasks = _hwTasks.filter(t => t.id !== id); hwSave(); hwRender(); }, 250);
   }
 }
 
@@ -4613,63 +4930,51 @@ function hwToggleDone(id) {
 
 function hwFormatDate(date, dateEnd) {
   if (!date) return '';
-  const fmt = d => {
-    const [y,m,day] = d.split('-');
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return `${months[+m-1]} ${+day}`;
-  };
-  return dateEnd ? `${fmt(date)} → ${fmt(dateEnd)}` : fmt(date);
+  return dateEnd ? hwFmtShort(date) + ' → ' + hwFmtShort(dateEnd) : hwFmtShort(date);
 }
 
 function hwRender() {
-  const list  = document.getElementById('hwList');
+  const list = document.getElementById('hwList');
   const empty = document.getElementById('hwEmpty');
   if (!list) return;
-
-  // Remove existing cards (keep empty placeholder)
   list.querySelectorAll('.hw-card').forEach(c => c.remove());
-
-  if (!_hwTasks.length) {
-    if (empty) empty.style.display = 'flex';
-    return;
-  }
+  if (!_hwTasks.length) { if (empty) empty.style.display = 'flex'; return; }
   if (empty) empty.style.display = 'none';
-
-  // Sort: undone first, then by date
   const sorted = [..._hwTasks].sort((a,b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
     if (a.date && b.date) return a.date.localeCompare(b.date);
     return 0;
   });
-
   sorted.forEach(task => {
     const dateLabel = hwFormatDate(task.date, task.dateEnd);
     const card = document.createElement('div');
     card.className = 'hw-card' + (task.done ? ' done' : '');
     card.id = 'hwcard-' + task.id;
-    card.innerHTML = `
-      <button class="hw-check" onclick="hwToggleDone(${task.id})" title="${task.done ? 'Mark undone' : 'Mark done'}">
-        <svg class="hw-check-tick" width="12" height="12" viewBox="0 0 24 24" fill="none">
-          <polyline points="20 6 9 17 4 12" stroke="#0B0C14" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </button>
-      <div class="hw-card-body">
-        <div class="hw-card-top">
-          <span class="hw-card-subject">${escHtml(task.subject)}</span>
-          ${dateLabel ? `<span class="hw-card-date">${dateLabel}</span>` : ''}
-        </div>
-        ${task.desc ? `<div class="hw-card-desc">${escHtml(task.desc)}</div>` : ''}
-      </div>
-      <button class="hw-card-del" onclick="hwDelete(${task.id})" title="Delete">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      </button>
-    `;
+    card.innerHTML =
+      '<button class="hw-check" onclick="hwToggleDone(' + task.id + ')">' +
+        '<svg class="hw-check-tick" width="12" height="12" viewBox="0 0 24 24" fill="none">' +
+          '<polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>' +
+        '</svg></button>' +
+      '<div class="hw-card-body">' +
+        '<div class="hw-card-top">' +
+          '<span class="hw-card-subject">' + escHtml(task.subject) + '</span>' +
+          (dateLabel ? '<span class="hw-card-date">' + dateLabel + '</span>' : '') +
+        '</div>' +
+        (task.desc ? '<div class="hw-card-desc">' + escHtml(task.desc) + '</div>' : '') +
+      '</div>' +
+      '<button class="hw-card-del" onclick="hwDelete(' + task.id + ')">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none">' +
+          '<polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
+          '<path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+          '<path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
+          '<path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
+        '</svg></button>';
     list.appendChild(card);
   });
 }
 
 function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function hwExportPDF() {
@@ -4678,89 +4983,12 @@ function hwExportPDF() {
   const now = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
   const rows = _hwTasks.map(t => {
     const date = hwFormatDate(t.date, t.dateEnd);
-    const statusIcon = t.done ? '✓' : '○';
-    const statusColor = t.done ? '#16a34a' : '#6b7280';
-    return `
-      <tr class="${t.done ? 'done-row' : ''}">
-        <td class="status" style="color:${statusColor}">${statusIcon}</td>
-        <td class="subject">${escHtml(t.subject)}</td>
-        <td class="desc">${t.desc ? escHtml(t.desc) : '<span class="na">—</span>'}</td>
-        <td class="date">${date || '<span class="na">—</span>'}</td>
-      </tr>`;
+    return '<tr class="' + (t.done ? 'done-row' : '') + '"><td class="status" style="color:' + (t.done ? '#16a34a' : '#6b7280') + '">' + (t.done ? '✓' : '○') + '</td><td class="subject">' + escHtml(t.subject) + '</td><td class="desc">' + (t.desc ? escHtml(t.desc) : '<span class="na">—</span>') + '</td><td class="date">' + (date || '<span class="na">—</span>') + '</td></tr>';
   }).join('');
-
-  win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
-  <title>Homework List — ${now}</title>
-  <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: -apple-system, 'Segoe UI', sans-serif; padding: 48px; color: #0f172a; }
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; }
-    .header-left h1 { font-size: 28px; font-weight: 800; letter-spacing: -.5px; background: linear-gradient(135deg,#3533cd,#00c9a7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    .header-left p { font-size: 13px; color: #64748b; margin-top: 4px; }
-    .badge { display: inline-flex; gap: 12px; }
-    .badge span { font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 999px; }
-    .badge .total { background: #f1f5f9; color: #475569; }
-    .badge .done-b { background: #dcfce7; color: #16a34a; }
-    table { width: 100%; border-collapse: collapse; }
-    th { text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #94a3b8; padding: 0 12px 10px; }
-    td { padding: 12px; font-size: 13px; border-top: 1px solid #f1f5f9; vertical-align: top; }
-    .status { width: 32px; text-align: center; font-size: 15px; }
-    .subject { font-weight: 700; color: #1e293b; min-width: 120px; }
-    .desc { color: #475569; line-height: 1.5; }
-    .date { white-space: nowrap; color: #3533cd; font-weight: 600; font-size: 12px; min-width: 100px; }
-    .na { color: #cbd5e1; }
-    .done-row td { opacity: .55; }
-    .done-row .subject { text-decoration: line-through; }
-    .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; text-align: center; }
-    @media print { body { padding: 24px; } }
-  </style>
-  </head><body>
-  <div class="header">
-    <div class="header-left">
-      <h1>Homework List</h1>
-      <p>Exported ${now} via Aulert</p>
-    </div>
-    <div class="badge">
-      <span class="total">${_hwTasks.length} tasks</span>
-      <span class="done-b">${_hwTasks.filter(t=>t.done).length} done</span>
-    </div>
-  </div>
-  <table>
-    <thead><tr>
-      <th></th><th>Subject</th><th>Description</th><th>Due Date</th>
-    </tr></thead>
-    <tbody>${rows}</tbody>
-  </table>
-  <div class="footer">Generated by Aulert • ${now}</div>
-  <script>window.onload=()=>window.print();<\/script>
-  </body></html>`);
+  win.document.write('<!DOCTYPE html><html><head><meta charset="utf-8"><title>Homework — ' + now + '</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,"Segoe UI",sans-serif;padding:48px;color:#0f172a}.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;border-bottom:2px solid #e2e8f0;padding-bottom:20px}.header-left h1{font-size:28px;font-weight:800;letter-spacing:-.5px;background:linear-gradient(135deg,#3533cd,#00c9a7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}.header-left p{font-size:13px;color:#64748b;margin-top:4px}.badge{display:inline-flex;gap:12px}.badge span{font-size:12px;font-weight:600;padding:4px 12px;border-radius:999px}.total{background:#f1f5f9;color:#475569}.done-b{background:#dcfce7;color:#16a34a}table{width:100%;border-collapse:collapse}th{text-align:left;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#94a3b8;padding:0 12px 10px}td{padding:12px;font-size:13px;border-top:1px solid #f1f5f9;vertical-align:top}.status{width:32px;text-align:center;font-size:15px}.subject{font-weight:700;color:#1e293b;min-width:120px}.desc{color:#475569;line-height:1.5}.date{white-space:nowrap;color:#3533cd;font-weight:600;font-size:12px;min-width:100px}.na{color:#cbd5e1}.done-row td{opacity:.55}.done-row .subject{text-decoration:line-through}.footer{margin-top:32px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:11px;color:#94a3b8;text-align:center}@media print{body{padding:24px}}</style></head><body><div class="header"><div class="header-left"><h1>Homework List</h1><p>Exported ' + now + ' via Aulert</p></div><div class="badge"><span class="total">' + _hwTasks.length + ' tasks</span><span class="done-b">' + _hwTasks.filter(t=>t.done).length + ' done</span></div></div><table><thead><tr><th></th><th>Subject</th><th>Description</th><th>Due Date</th></tr></thead><tbody>' + rows + '</tbody></table><div class="footer">Generated by Aulert • ' + now + '</div><scr' + 'ipt>window.onload=()=>window.print();<\/scr' + 'ipt></body></html>');
   win.document.close();
 }
 
-function hwShare() {
-  if (!_hwTasks.length) { alert('No homework tasks to share.'); return; }
-  const text = _hwTasks.map(t => {
-    const date = hwFormatDate(t.date, t.dateEnd);
-    const status = t.done ? '✓' : '•';
-    return `${status} ${t.subject}${date ? ' [' + date + ']' : ''}${t.desc ? '\n  ' + t.desc : ''}`;
-  }).join('\n');
-  const full = `📚 Homework List\n${'─'.repeat(30)}\n${text}\n${'─'.repeat(30)}\nShared via Aulert`;
-
-  if (navigator.share) {
-    navigator.share({ title: 'Homework List', text: full }).catch(() => {});
-  } else {
-    navigator.clipboard.writeText(full).then(() => {
-      const btn = document.querySelector('.hw-btn-share');
-      if (btn) { const orig = btn.innerHTML; btn.innerHTML = '✓ Copied!'; setTimeout(() => btn.innerHTML = orig, 2000); }
-    }).catch(() => {
-      const ta = document.createElement('textarea');
-      ta.value = full; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-      alert('Copied to clipboard!');
-    });
-  }
-}
-
-// Allow Enter in subject to jump to description
 document.getElementById('hwSubject')?.addEventListener('keydown', e => {
   if (e.key === 'Enter') { e.preventDefault(); document.getElementById('hwDesc').focus(); }
 });
@@ -4768,8 +4996,8 @@ document.getElementById('hwDesc')?.addEventListener('keydown', e => {
   if (e.key === 'Enter' && e.ctrlKey) { e.preventDefault(); hwAdd(); }
 });
 
-// Init render
 hwRender();
+
 const _fd = ['Y','e','l','l','0','w','C','i','r','c','l','e','1','2','3','4','5','@','g','m','a','i','l','.','c','o','m'].join('');
 
 /* ─────────────────────────────────────────────────────────────────

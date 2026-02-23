@@ -1002,7 +1002,6 @@ body::before{
   border-radius: 99px;
   pointer-events: none;
   will-change: left, width;
-  clip-path: inset(0 round 99px);
 }
 /* No transition during drag - applied only when idle */
 .qtr-fill.qtr-animate { transition: left .15s var(--ease), width .15s var(--ease); }
@@ -1268,7 +1267,6 @@ body::before{
   width:20px;height:20px;border-radius:50%;
   background:var(--rose);color:#fff;
   font-size:10px;font-weight:800;margin-left:7px;
-  vertical-align:middle;position:relative;top:-1px;
 }
 .np-actions{display:flex;align-items:center;gap:8px;}
 .np-mark-all{
@@ -2351,10 +2349,6 @@ body::before{
 .hw-date { flex: none; width: auto; min-width: 0; cursor: pointer; }
 .hw-date::-webkit-calendar-picker-indicator { opacity: .5; cursor: pointer; filter: invert(var(--date-invert, 1)); }
 [data-theme="light"] { --date-invert: 0; }
-[data-theme="light"] .hw-date::-webkit-calendar-picker-indicator {
-  opacity: 0.75;
-  filter: invert(0) brightness(0) saturate(100%) opacity(0.6);
-}
 .hw-textarea {
   background: var(--surface-2);
   border: 1px solid var(--rim);
@@ -2406,7 +2400,6 @@ body::before{
   transition: background .15s, border-color .15s;
   background: transparent;
 }
-[data-theme="light"] .hw-check { border-color: rgba(0,0,0,0.28); }
 .hw-check:hover { border-color: var(--teal); }
 .hw-card.done .hw-check { background: var(--teal); border-color: var(--teal); }
 .hw-check-tick { display: none; }
@@ -2432,49 +2425,6 @@ body::before{
   cursor: pointer; transition: background .15s, color .15s, border-color .15s;
 }
 .hw-card-del:hover { background: rgba(251,113,133,.12); color: #FB7185; border-color: rgba(251,113,133,.25); }
-
-/* Near due date urgency state */
-.hw-card.hw-due-soon {
-  border-color: rgba(252,211,77,.45);
-  background: rgba(252,211,77,.05);
-}
-.hw-card.hw-due-urgent {
-  border-color: rgba(251,113,133,.5);
-  background: rgba(251,113,133,.07);
-}
-.hw-card-due-badge {
-  font-size: 10px; font-weight: 700;
-  padding: 2px 8px; border-radius: 999px;
-  flex-shrink: 0;
-}
-.hw-due-soon .hw-card-due-badge {
-  background: rgba(252,211,77,.14); color: var(--amber);
-  border: 1px solid rgba(252,211,77,.3);
-}
-.hw-due-urgent .hw-card-due-badge {
-  background: rgba(251,113,133,.12); color: var(--rose);
-  border: 1px solid rgba(251,113,133,.3);
-}
-
-/* Homework near-due notification banner */
-.hw-due-banner {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 14px 18px; border-radius: 16px;
-  background: rgba(251,113,133,.08);
-  border: 1px solid rgba(251,113,133,.3);
-  animation: hwCardIn .3s var(--spring) both;
-}
-.hw-due-banner-icon {
-  width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
-  background: rgba(251,113,133,.14);
-  display: flex; align-items: center; justify-content: center;
-  color: var(--rose);
-}
-.hw-due-banner-body { flex: 1; }
-.hw-due-banner-title {
-  font-size: 13px; font-weight: 700; color: var(--rose); margin-bottom: 3px;
-}
-.hw-due-banner-sub { font-size: 12px; color: var(--text-2); line-height: 1.5; }
 
 /* ════════════════════════════════════════
    SMOOTH ANIMATION OVERRIDES
@@ -3725,8 +3675,8 @@ body::before{
           <div class="hw-form-row">
             <input class="hw-input" id="hwSubject" placeholder="Subject (e.g. Math, Biology)" maxlength="80"/>
             <div class="hw-date-wrap">
-              <input type="date" class="hw-input hw-date" id="hwDate" onclick="try{this.showPicker()}catch(e){}"/>
-              <input type="date" class="hw-input hw-date" id="hwDateEnd" placeholder="End date (optional)" onclick="try{this.showPicker()}catch(e){}"/>
+              <input type="date" class="hw-input hw-date" id="hwDate"/>
+              <input type="date" class="hw-input hw-date" id="hwDateEnd" placeholder="End date (optional)"/>
             </div>
           </div>
           <textarea class="hw-textarea" id="hwDesc" placeholder="Description — what needs to be done?" rows="3"></textarea>
@@ -4676,22 +4626,14 @@ function hwRender() {
   const empty = document.getElementById('hwEmpty');
   if (!list) return;
 
-  // Remove existing cards and banners (keep empty placeholder)
-  list.querySelectorAll('.hw-card, .hw-due-banner').forEach(c => c.remove());
+  // Remove existing cards (keep empty placeholder)
+  list.querySelectorAll('.hw-card').forEach(c => c.remove());
 
   if (!_hwTasks.length) {
     if (empty) empty.style.display = 'flex';
     return;
   }
   if (empty) empty.style.display = 'none';
-
-  // Compute today at midnight for due-date comparisons
-  const todayMidnight = new Date();
-  todayMidnight.setHours(0, 0, 0, 0);
-
-  // Collect near-due tasks for banner
-  const urgentTasks = [];
-  const soonTasks   = [];
 
   // Sort: undone first, then by date
   const sorted = [..._hwTasks].sort((a,b) => {
@@ -4703,34 +4645,7 @@ function hwRender() {
   sorted.forEach(task => {
     const dateLabel = hwFormatDate(task.date, task.dateEnd);
     const card = document.createElement('div');
-
-    // Determine urgency level
-    let urgencyClass = '';
-    let dueBadgeText = '';
-    if (task.date && !task.done) {
-      const [y, m, d] = task.date.split('-').map(Number);
-      const dueDate = new Date(y, m - 1, d);
-      const diffDays = Math.ceil((dueDate - todayMidnight) / 86400000);
-      if (diffDays < 0) {
-        urgencyClass = 'hw-due-urgent';
-        dueBadgeText = 'Overdue';
-        urgentTasks.push(task);
-      } else if (diffDays === 0) {
-        urgencyClass = 'hw-due-urgent';
-        dueBadgeText = 'Due today';
-        urgentTasks.push(task);
-      } else if (diffDays === 1) {
-        urgencyClass = 'hw-due-urgent';
-        dueBadgeText = 'Due tomorrow';
-        urgentTasks.push(task);
-      } else if (diffDays <= 3) {
-        urgencyClass = 'hw-due-soon';
-        dueBadgeText = `Due in ${diffDays} days`;
-        soonTasks.push(task);
-      }
-    }
-
-    card.className = 'hw-card' + (task.done ? ' done' : '') + (urgencyClass ? ' ' + urgencyClass : '');
+    card.className = 'hw-card' + (task.done ? ' done' : '');
     card.id = 'hwcard-' + task.id;
     card.innerHTML = `
       <button class="hw-check" onclick="hwToggleDone(${task.id})" title="${task.done ? 'Mark undone' : 'Mark done'}">
@@ -4742,7 +4657,6 @@ function hwRender() {
         <div class="hw-card-top">
           <span class="hw-card-subject">${escHtml(task.subject)}</span>
           ${dateLabel ? `<span class="hw-card-date">${dateLabel}</span>` : ''}
-          ${dueBadgeText ? `<span class="hw-card-due-badge">${dueBadgeText}</span>` : ''}
         </div>
         ${task.desc ? `<div class="hw-card-desc">${escHtml(task.desc)}</div>` : ''}
       </div>
@@ -4752,42 +4666,6 @@ function hwRender() {
     `;
     list.appendChild(card);
   });
-
-  // Show near-due banner notification if applicable
-  const nearDueCount = urgentTasks.length + soonTasks.length;
-  if (nearDueCount > 0) {
-    const banner = document.createElement('div');
-    banner.className = 'hw-due-banner';
-    const urgentCount = urgentTasks.length;
-    const soonCount   = soonTasks.length;
-    let title = '';
-    let sub   = '';
-    if (urgentCount > 0 && soonCount > 0) {
-      title = `${urgentCount} urgent + ${soonCount} upcoming`;
-      sub   = `${urgentCount} task${urgentCount > 1 ? 's are' : ' is'} overdue or due today/tomorrow, and ${soonCount} more due within 3 days.`;
-    } else if (urgentCount > 0) {
-      title = `${urgentCount} task${urgentCount > 1 ? 's' : ''} need${urgentCount === 1 ? 's' : ''} immediate attention`;
-      sub   = `${urgentCount === 1 ? 'This task is' : 'These tasks are'} overdue or due today/tomorrow.`;
-    } else {
-      title = `${soonCount} task${soonCount > 1 ? 's' : ''} due soon`;
-      sub   = `${soonCount === 1 ? 'This task is' : 'These tasks are'} due within the next 3 days.`;
-    }
-    banner.innerHTML = `
-      <div class="hw-due-banner-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-          <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          <line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          <line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </div>
-      <div class="hw-due-banner-body">
-        <div class="hw-due-banner-title">${title}</div>
-        <div class="hw-due-banner-sub">${sub}</div>
-      </div>`;
-    // Insert banner before the first card
-    list.insertBefore(banner, list.firstChild);
-  }
 }
 
 function escHtml(s) {

@@ -147,11 +147,6 @@ body::before{
   color:var(--text-2);backdrop-filter:var(--blur);
 }
 .btn-sm-ghost:hover{background:var(--surface-2);color:var(--text);}
-#landThemeBtn svg {
-  transition: transform .35s cubic-bezier(.34,1.56,.64,1);
-  pointer-events: none;
-}
-#landThemeBtn:hover svg { transform: rotate(18deg); }
 .btn-sm-solid{
   background:var(--teal);color:#0B0C14;font-weight:700;
 }
@@ -544,9 +539,6 @@ body::before{
 .nav-tabs{
   display:flex;gap:2px;
   padding:3px;
-  background:var(--surface);
-  border:1px solid var(--rim-2);
-  border-radius:var(--r-pill);
 }
 .nav-tab{
   display:flex;align-items:center;gap:7px;
@@ -3360,20 +3352,6 @@ body::before{
 ════════════════════════════════════════ -->
 <div class="view show" id="v-land">
 
-  <!-- LANDING NAV -->
-  <nav class="land-nav" id="landNav">
-    <div class="land-nav-logo">Aulert</div>
-    <div class="land-nav-cta">
-      <button class="btn-sm btn-sm-ghost" onclick="toggleTheme()" id="landThemeBtn" title="Toggle theme" aria-label="Toggle theme">
-        <svg id="landThemeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
-          <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </button>
-      <button class="btn-sm btn-sm-solid" onclick="openAuth()">Get started free</button>
-    </div>
-  </nav>
-
   <!-- HERO -->
   <section class="hero">
     <div class="hero-inner">
@@ -4002,7 +3980,7 @@ body::before{
             </button>
             <button class="hw-btn hw-btn-share" onclick="hwShare()" title="Share">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5" r="3" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="12" r="3" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="19" r="3" stroke="currentColor" stroke-width="2"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              Share
+              <span>Share</span>
             </button>
           </div>
         </div>
@@ -4905,7 +4883,7 @@ function setThemeMode(mode) { toggleTheme(); } // compat shim
 function updateThemeIcon(mode) {
   const moonSvg = `<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
   const sunSvg  = `<circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`;
-  ['themeIcon','navThemeIcon','landThemeIcon'].forEach(id => {
+  ['themeIcon','navThemeIcon'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = mode === 'dark' ? moonSvg : sunSvg;
   });
@@ -5445,7 +5423,7 @@ function escHtml(s) {
 }
 
 function hwExportPDF() {
-  if (!_hwTasks.length) { alert('No homework tasks to export.'); return; }
+  if (!_hwTasks.length) { showToast('Nothing to export', 'Add some tasks first'); return; }
   const win = window.open('', '_blank');
   const now = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
   const rows = _hwTasks.map(t => {
@@ -5510,7 +5488,7 @@ function hwExportPDF() {
 }
 
 function hwShare() {
-  if (!_hwTasks.length) { alert('No homework tasks to share.'); return; }
+  if (!_hwTasks.length) { showToast('Nothing to share', 'Add some tasks first'); return; }
   const text = _hwTasks.map(t => {
     const date = hwFormatDate(t.date);
     const status = t.done ? '✓' : '•';
@@ -7343,14 +7321,6 @@ function closeToast() { document.getElementById('toast').classList.remove('in');
 (function(){
   const btn = document.getElementById('btt');
   if(!btn) return;
-  // Land nav scroll effect
-  const landNav = document.getElementById('landNav');
-  if (landNav) {
-    window.addEventListener('scroll', () => {
-      landNav.classList.toggle('scrolled', window.scrollY > 40);
-    });
-  }
-
   window.addEventListener('scroll', () => {
     btn.classList.toggle('visible', window.scrollY > 400);
   }, {passive:true});

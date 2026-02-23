@@ -2372,6 +2372,155 @@ body::before{
 }
 .hw-form-hint { font-size: 11px; color: var(--text-3); }
 
+/* ── Custom Date+Time Picker ── */
+.hwdtp-wrap { position: relative; flex-shrink: 0; }
+.hwdtp-trigger {
+  display: flex; align-items: center; gap: 8px;
+  cursor: pointer; white-space: nowrap;
+  min-width: 170px; flex: none;
+  font-size: 13px; color: var(--text-2);
+  transition: border-color .15s, background .15s, color .15s;
+}
+.hwdtp-trigger:hover { border-color: rgba(0,255,217,.35); color: var(--text); }
+.hwdtp-trigger.has-val { color: var(--text); }
+.hwdtp-x:hover { opacity: 1 !important; }
+
+.hwdtp-panel {
+  position: absolute; top: calc(100% + 8px); right: 0;
+  z-index: 200;
+  background: var(--modal-bg);
+  border: 1px solid var(--rim);
+  border-radius: 20px;
+  padding: 18px;
+  width: 280px;
+  box-shadow: 0 24px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(0,255,217,.06);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  display: none;
+  animation: dtpIn .18s var(--spring) both;
+}
+.hwdtp-panel.open { display: block; }
+@keyframes dtpIn {
+  from { opacity:0; transform: translateY(-8px) scale(.97); }
+  to   { opacity:1; transform: none; }
+}
+
+/* Nav */
+.hwdtp-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 12px;
+}
+.hwdtp-nav-btn {
+  width: 28px; height: 28px; border-radius: 8px;
+  background: var(--surface); border: 1px solid var(--rim);
+  color: var(--text-2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background .15s, color .15s;
+}
+.hwdtp-nav-btn:hover { background: var(--surface-2); color: var(--text); }
+.hwdtp-month-lbl {
+  font-size: 13px; font-weight: 700; color: var(--text); letter-spacing: -.2px;
+}
+
+/* Day-of-week header */
+.hwdtp-dow-row {
+  display: grid; grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 6px;
+}
+.hwdtp-dow-row span {
+  font-size: 10px; font-weight: 600; color: var(--text-3);
+  text-align: center; padding: 2px 0;
+}
+
+/* Day grid */
+.hwdtp-days {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px;
+}
+.hwdtp-day {
+  aspect-ratio: 1; border-radius: 8px;
+  font-size: 12px; font-weight: 500;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; border: 1px solid transparent;
+  color: var(--text-2);
+  transition: background .12s, color .12s, border-color .12s;
+}
+.hwdtp-day:hover { background: var(--surface-2); color: var(--text); }
+.hwdtp-day.today {
+  border-color: rgba(0,255,217,.35); color: var(--teal);
+}
+.hwdtp-day.selected {
+  background: var(--teal); color: #0B0C14; font-weight: 700;
+  border-color: transparent;
+}
+.hwdtp-day.selected.today { border-color: transparent; }
+.hwdtp-day.other-month { color: var(--text-3); opacity: .5; }
+.hwdtp-day.past { opacity: .35; cursor: default; }
+
+/* Divider */
+.hwdtp-divider {
+  height: 1px; background: var(--rim-2); margin: 14px 0;
+}
+
+/* Time */
+.hwdtp-time-section {}
+.hwdtp-time-lbl {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 11px; font-weight: 600; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: .5px;
+  margin-bottom: 10px;
+}
+.hwdtp-time-row {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.hwdtp-time-col {
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.hwdtp-time-val {
+  font-size: 22px; font-weight: 700; font-family: var(--ff-head);
+  color: var(--text); min-width: 44px; text-align: center;
+  background: var(--surface); border: 1px solid var(--rim);
+  border-radius: 10px; padding: 6px 4px; letter-spacing: 1px;
+}
+.hwdtp-colon {
+  font-size: 22px; font-weight: 700; color: var(--text-3);
+  margin-bottom: 2px;
+}
+.hwdtp-arr {
+  background: none; border: none; cursor: pointer;
+  color: var(--text-3); font-size: 9px; line-height: 1;
+  padding: 2px 8px; border-radius: 6px;
+  transition: color .12s, background .12s;
+}
+.hwdtp-arr:hover { color: var(--teal); background: rgba(0,255,217,.08); }
+
+/* AM/PM */
+.hwdtp-ampm-col {
+  display: flex; flex-direction: column; gap: 4px; margin-left: 4px;
+}
+.hwdtp-ampm-btn {
+  font-size: 11px; font-weight: 700; padding: 5px 9px;
+  border-radius: 8px; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--rim);
+  color: var(--text-3); transition: all .12s;
+}
+.hwdtp-ampm-btn.active {
+  background: rgba(0,255,217,.15); border-color: rgba(0,255,217,.4);
+  color: var(--teal);
+}
+
+/* Footer */
+.hwdtp-footer { margin-top: 14px; }
+.hwdtp-done-btn {
+  width: 100%; padding: 10px;
+  background: var(--teal); color: #0B0C14;
+  border: none; border-radius: 12px;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  font-family: var(--ff-body);
+  transition: filter .15s, transform .1s;
+}
+.hwdtp-done-btn:hover { filter: brightness(1.08); }
+.hwdtp-done-btn:active { transform: scale(.98); }
+
 /* Task list */
 .hw-list { display: flex; flex-direction: column; gap: 10px; }
 .hw-empty {
@@ -3724,7 +3873,71 @@ body::before{
         <div class="hw-form">
           <div class="hw-form-row">
             <input class="hw-input" id="hwSubject" placeholder="Subject (e.g. Math, Biology)" maxlength="80"/>
-            <input type="datetime-local" class="hw-input hw-date" id="hwDate" onclick="try{this.showPicker()}catch(e){}"/>
+            <!-- Custom Date+Time Picker Trigger -->
+            <div class="hwdtp-wrap" id="hwDtpWrap">
+              <button type="button" class="hwdtp-trigger hw-input" id="hwDtpTrigger" onclick="hwDtpToggle()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;opacity:.6">
+                  <rect x="3" y="4" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+                <span id="hwDtpLabel">Pick deadline…</span>
+                <svg id="hwDtpClear" width="13" height="13" viewBox="0 0 24 24" fill="none" onclick="hwDtpClear(event)" style="display:none;margin-left:auto;flex-shrink:0;opacity:.5;cursor:pointer" class="hwdtp-x">
+                  <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                  <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                </svg>
+              </button>
+              <!-- Hidden value holder -->
+              <input type="hidden" id="hwDate"/>
+              <!-- Dropdown panel -->
+              <div class="hwdtp-panel" id="hwDtpPanel">
+                <!-- Calendar section -->
+                <div class="hwdtp-cal">
+                  <div class="hwdtp-nav">
+                    <button type="button" class="hwdtp-nav-btn" onclick="hwDtpShiftMonth(-1)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="15 18 9 12 15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <span class="hwdtp-month-lbl" id="hwDtpMonthLbl"></span>
+                    <button type="button" class="hwdtp-nav-btn" onclick="hwDtpShiftMonth(1)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                  <div class="hwdtp-dow-row">
+                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                  </div>
+                  <div class="hwdtp-days" id="hwDtpDays"></div>
+                </div>
+                <!-- Divider -->
+                <div class="hwdtp-divider"></div>
+                <!-- Time section -->
+                <div class="hwdtp-time-section">
+                  <div class="hwdtp-time-lbl">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    Time
+                  </div>
+                  <div class="hwdtp-time-row">
+                    <div class="hwdtp-time-col">
+                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(1)">▲</button>
+                      <span class="hwdtp-time-val" id="hwDtpHourVal">12</span>
+                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(-1)">▼</button>
+                    </div>
+                    <span class="hwdtp-colon">:</span>
+                    <div class="hwdtp-time-col">
+                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(5)">▲</button>
+                      <span class="hwdtp-time-val" id="hwDtpMinVal">00</span>
+                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(-5)">▼</button>
+                    </div>
+                    <div class="hwdtp-ampm-col">
+                      <button type="button" class="hwdtp-ampm-btn" id="hwDtpAmBtn" onclick="hwDtpSetAm()">AM</button>
+                      <button type="button" class="hwdtp-ampm-btn" id="hwDtpPmBtn" onclick="hwDtpSetPm()">PM</button>
+                    </div>
+                  </div>
+                </div>
+                <!-- Footer -->
+                <div class="hwdtp-footer">
+                  <button type="button" class="hwdtp-done-btn" onclick="hwDtpConfirm()">Set Deadline</button>
+                </div>
+              </div>
+            </div>
           </div>
           <textarea class="hw-textarea" id="hwDesc" placeholder="Description — what needs to be done?" rows="3"></textarea>
           <div class="hw-form-footer">
@@ -4608,10 +4821,206 @@ function hwSave() {
   localStorage.setItem('aul_hw', JSON.stringify(_hwTasks));
 }
 
+/* ══════════════════════════════════════════
+   CUSTOM DATE+TIME PICKER (hwDtp)
+══════════════════════════════════════════ */
+const hwDtp = {
+  year: null, month: null, day: null,
+  hour: 11, min: 59, ampm: 'PM', // default 11:59 PM
+  viewYear: null, viewMonth: null,
+};
+
+function hwDtpInit() {
+  const now = new Date();
+  hwDtp.viewYear  = now.getFullYear();
+  hwDtp.viewMonth = now.getMonth(); // 0-based
+  hwDtpBuildCalendar();
+  hwDtpSyncTime();
+}
+
+function hwDtpToggle() {
+  const panel = document.getElementById('hwDtpPanel');
+  if (!panel) return;
+  if (panel.classList.contains('open')) {
+    hwDtpClose();
+  } else {
+    if (hwDtp.viewYear === null) hwDtpInit();
+    panel.classList.add('open');
+  }
+}
+
+function hwDtpClose() {
+  const panel = document.getElementById('hwDtpPanel');
+  if (panel) panel.classList.remove('open');
+}
+
+// Close when clicking outside
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('hwDtpWrap');
+  if (wrap && !wrap.contains(e.target)) hwDtpClose();
+});
+
+function hwDtpShiftMonth(delta) {
+  hwDtp.viewMonth += delta;
+  if (hwDtp.viewMonth < 0)  { hwDtp.viewMonth = 11; hwDtp.viewYear--; }
+  if (hwDtp.viewMonth > 11) { hwDtp.viewMonth = 0;  hwDtp.viewYear++; }
+  hwDtpBuildCalendar();
+}
+
+function hwDtpBuildCalendar() {
+  const lbl  = document.getElementById('hwDtpMonthLbl');
+  const grid = document.getElementById('hwDtpDays');
+  if (!lbl || !grid) return;
+
+  const months = ['January','February','March','April','May','June',
+                  'July','August','September','October','November','December'];
+  lbl.textContent = months[hwDtp.viewMonth] + ' ' + hwDtp.viewYear;
+
+  const firstDay = new Date(hwDtp.viewYear, hwDtp.viewMonth, 1).getDay();
+  const daysInMonth = new Date(hwDtp.viewYear, hwDtp.viewMonth + 1, 0).getDate();
+  const daysInPrev  = new Date(hwDtp.viewYear, hwDtp.viewMonth, 0).getDate();
+
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  grid.innerHTML = '';
+  // Leading blanks from previous month
+  for (let i = 0; i < firstDay; i++) {
+    const d = daysInPrev - firstDay + 1 + i;
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'hwdtp-day other-month past';
+    el.textContent = d;
+    grid.appendChild(el);
+  }
+  // Current month days
+  for (let d = 1; d <= daysInMonth; d++) {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'hwdtp-day';
+    el.textContent = d;
+    const thisDate = new Date(hwDtp.viewYear, hwDtp.viewMonth, d);
+    if (thisDate < today) el.classList.add('past');
+    if (thisDate.getTime() === today.getTime()) el.classList.add('today');
+    if (hwDtp.year === hwDtp.viewYear && hwDtp.month === hwDtp.viewMonth && hwDtp.day === d) {
+      el.classList.add('selected');
+    }
+    if (!el.classList.contains('past')) {
+      el.onclick = () => hwDtpSelectDay(hwDtp.viewYear, hwDtp.viewMonth, d);
+    }
+    grid.appendChild(el);
+  }
+  // Trailing days
+  const total = firstDay + daysInMonth;
+  const trailing = total % 7 === 0 ? 0 : 7 - (total % 7);
+  for (let d = 1; d <= trailing; d++) {
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'hwdtp-day other-month';
+    el.textContent = d;
+    grid.appendChild(el);
+  }
+}
+
+function hwDtpSelectDay(y, m, d) {
+  hwDtp.year = y; hwDtp.month = m; hwDtp.day = d;
+  hwDtpBuildCalendar();
+}
+
+function hwDtpShiftHour(delta) {
+  hwDtp.hour = ((hwDtp.hour - 1 + delta + 12) % 12) + 1;
+  hwDtpSyncTime();
+}
+
+function hwDtpShiftMin(delta) {
+  hwDtp.min = ((hwDtp.min + delta) % 60 + 60) % 60;
+  hwDtpSyncTime();
+}
+
+function hwDtpSetAm() {
+  hwDtp.ampm = 'AM';
+  document.getElementById('hwDtpAmBtn').classList.add('active');
+  document.getElementById('hwDtpPmBtn').classList.remove('active');
+}
+
+function hwDtpSetPm() {
+  hwDtp.ampm = 'PM';
+  document.getElementById('hwDtpPmBtn').classList.add('active');
+  document.getElementById('hwDtpAmBtn').classList.remove('active');
+}
+
+function hwDtpSyncTime() {
+  const hv = document.getElementById('hwDtpHourVal');
+  const mv = document.getElementById('hwDtpMinVal');
+  if (hv) hv.textContent = String(hwDtp.hour).padStart(2,'0');
+  if (mv) mv.textContent = String(hwDtp.min).padStart(2,'0');
+  // sync AM/PM button active states
+  const amBtn = document.getElementById('hwDtpAmBtn');
+  const pmBtn = document.getElementById('hwDtpPmBtn');
+  if (amBtn && pmBtn) {
+    amBtn.classList.toggle('active', hwDtp.ampm === 'AM');
+    pmBtn.classList.toggle('active', hwDtp.ampm === 'PM');
+  }
+}
+
+function hwDtpConfirm() {
+  if (hwDtp.year === null) { hwDtpClose(); return; }
+  // Convert to 24h
+  let h24 = hwDtp.hour % 12;
+  if (hwDtp.ampm === 'PM') h24 += 12;
+  const pad = n => String(n).padStart(2,'0');
+  const val = `${hwDtp.viewYear}-${pad(hwDtp.viewMonth+1)}-${pad(hwDtp.day)}T${pad(h24)}:${pad(hwDtp.min)}`;
+  // Use the actual selected year/month
+  const dateVal = `${hwDtp.year}-${pad(hwDtp.month+1)}-${pad(hwDtp.day)}T${pad(h24)}:${pad(hwDtp.min)}`;
+  document.getElementById('hwDate').value = dateVal;
+  // Update label
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const ampmStr = hwDtp.ampm;
+  const dispH = hwDtp.hour;
+  const label = `${months[hwDtp.month]} ${hwDtp.day} · ${pad(dispH)}:${pad(hwDtp.min)} ${ampmStr}`;
+  const lbl = document.getElementById('hwDtpLabel');
+  const trigger = document.getElementById('hwDtpTrigger');
+  const clearBtn = document.getElementById('hwDtpClear');
+  if (lbl) lbl.textContent = label;
+  if (trigger) trigger.classList.add('has-val');
+  if (clearBtn) clearBtn.style.display = 'block';
+  hwDtpClose();
+}
+
+function hwDtpClear(e) {
+  e.stopPropagation();
+  document.getElementById('hwDate').value = '';
+  hwDtp.year = hwDtp.month = hwDtp.day = null;
+  const lbl = document.getElementById('hwDtpLabel');
+  const trigger = document.getElementById('hwDtpTrigger');
+  const clearBtn = document.getElementById('hwDtpClear');
+  if (lbl) lbl.textContent = 'Pick deadline…';
+  if (trigger) trigger.classList.remove('has-val');
+  if (clearBtn) clearBtn.style.display = 'none';
+  if (hwDtp.viewYear !== null) hwDtpBuildCalendar();
+}
+
+function hwDtpReset() {
+  hwDtp.year = hwDtp.month = hwDtp.day = null;
+  hwDtp.hour = 11; hwDtp.min = 59; hwDtp.ampm = 'PM';
+  const lbl = document.getElementById('hwDtpLabel');
+  const trigger = document.getElementById('hwDtpTrigger');
+  const clearBtn = document.getElementById('hwDtpClear');
+  if (lbl) lbl.textContent = 'Pick deadline…';
+  if (trigger) trigger.classList.remove('has-val');
+  if (clearBtn) clearBtn.style.display = 'none';
+  document.getElementById('hwDate').value = '';
+  // reset view to current month
+  const now = new Date();
+  hwDtp.viewYear = now.getFullYear();
+  hwDtp.viewMonth = now.getMonth();
+  hwDtpSyncTime();
+}
+
 function hwAdd() {
   const subject = document.getElementById('hwSubject').value.trim();
   const desc    = document.getElementById('hwDesc').value.trim();
-  const date    = document.getElementById('hwDate').value; // format: YYYY-MM-DDTHH:MM or YYYY-MM-DD
+  const date    = document.getElementById('hwDate').value;
 
   if (!subject) {
     document.getElementById('hwSubject').focus();
@@ -4634,7 +5043,7 @@ function hwAdd() {
   // Clear form
   document.getElementById('hwSubject').value = '';
   document.getElementById('hwDesc').value = '';
-  document.getElementById('hwDate').value = '';
+  hwDtpReset();
 }
 
 function hwDelete(id) {
@@ -6960,8 +7369,4 @@ function toggleFaq(btn){
   </svg>
 </button>
 
-<button class="btt" id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-    <path d="M12 4L12 20M12 4L5 11M12 4L19 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-</button>
+<button class="btt" id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})" tit

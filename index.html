@@ -2271,22 +2271,24 @@ body::before{
   cursor: pointer;
   color: var(--text-2);
   box-shadow: 0 4px 20px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.07);
-  transition: background .25s, color .25s, box-shadow .25s, opacity .3s, transform .3s cubic-bezier(.34,1.56,.64,1);
+  transition: background .25s, color .25s, box-shadow .25s, opacity .3s;
   opacity: 1;
 }
 .theme-switcher-btn:hover {
   background: var(--surface-2);
   color: var(--text);
-  transform: rotate(20deg);
   box-shadow: 0 6px 28px rgba(0,0,0,.22), inset 0 1px 0 rgba(255,255,255,.1);
 }
-.theme-switcher-btn:active {
-  transform: rotate(20deg) scale(.92);
-}
+.theme-switcher-btn:active { transform: scale(.92); }
 .theme-switcher-btn svg {
-  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+  transition: transform .45s cubic-bezier(.34,1.56,.64,1);
   pointer-events: none;
 }
+/* Hover tilt only when not in tilted state */
+.theme-switcher-btn:not([data-tilted]):hover svg { transform: rotate(20deg); }
+/* Persistent click tilt — alternates each toggle */
+.theme-switcher-btn[data-tilted="1"] svg { transform: rotate(180deg); }
+.theme-switcher-btn[data-tilted="2"] svg { transform: rotate(360deg); }
 
 
 
@@ -2412,6 +2414,25 @@ body::before{
   from { opacity:0; transform: translateY(-8px) scale(.97); }
   to   { opacity:1; transform: none; }
 }
+@keyframes dtpOut {
+  from { opacity:1; transform: none; }
+  to   { opacity:0; transform: translateY(-6px) scale(.97); }
+}
+.hwdtp-panel.closing {
+  animation: dtpOut .16s var(--ease) both;
+}
+
+/* Month slide animations */
+@keyframes monthSlideLeft {
+  from { opacity:0; transform: translateX(18px); }
+  to   { opacity:1; transform: none; }
+}
+@keyframes monthSlideRight {
+  from { opacity:0; transform: translateX(-18px); }
+  to   { opacity:1; transform: none; }
+}
+.hwdtp-cal.slide-left  { animation: monthSlideLeft  .2s var(--ease) both; }
+.hwdtp-cal.slide-right { animation: monthSlideRight .2s var(--ease) both; }
 
 /* Nav */
 .hwdtp-nav {
@@ -2837,9 +2858,8 @@ body::before{
 
 /* Theme button spin */
 .theme-switcher-btn svg {
-  transition: transform .5s cubic-bezier(.34,1.4,.64,1);
+  transition: transform .45s cubic-bezier(.34,1.56,.64,1);
 }
-.theme-switcher:hover .theme-switcher-btn svg { transform: rotate(20deg); }
 #navThemeBtn svg {
   transition: transform .5s cubic-bezier(.34,1.4,.64,1);
 }
@@ -4816,6 +4836,12 @@ function toggleTheme() {
   root.setAttribute('data-theme', next);
   localStorage.setItem('aul_theme', next);
   updateThemeIcon(next);
+  // Advance persistent tilt — cycles 1→2→1→2 so transform always moves
+  const btn = document.getElementById('globalThemeBtn');
+  if (btn) {
+    const cur = btn.getAttribute('data-tilted');
+    btn.setAttribute('data-tilted', cur === '1' ? '2' : '1');
+  }
 }
 
 function setThemeMode(mode) { toggleTheme(); } // compat shim
@@ -4912,7 +4938,12 @@ function hwDtpToggle() {
 
 function hwDtpClose() {
   const panel = document.getElementById('hwDtpPanel');
-  if (panel) panel.classList.remove('open');
+  if (!panel || !panel.classList.contains('open')) return;
+  panel.classList.add('closing');
+  panel.addEventListener('animationend', function onEnd() {
+    panel.classList.remove('open', 'closing');
+    panel.removeEventListener('animationend', onEnd);
+  }, { once: true });
 }
 
 // Close when clicking outside — guard against detached nodes (e.g. after calendar rebuild)
@@ -4923,7 +4954,7 @@ document.addEventListener('click', function(e) {
   if (!document.body.contains(e.target)) return;
   if (!wrap.contains(e.target)) {
     const panel = document.getElementById('hwDtpPanel');
-    if (panel && panel.classList.contains('open')) {
+    if (panel && panel.classList.contains('open') && !panel.classList.contains('closing')) {
       hwDtpAutoSave();
       hwDtpClose();
     }
@@ -4942,6 +4973,15 @@ function hwDtpShiftMonth(delta) {
   if (hwDtp.viewMonth < 0)  { hwDtp.viewMonth = 11; hwDtp.viewYear--; }
   if (hwDtp.viewMonth > 11) { hwDtp.viewMonth = 0;  hwDtp.viewYear++; }
   hwDtpBuildCalendar();
+  // Slide animation — left arrow = slide right, right arrow = slide left
+  const cal = document.querySelector('.hwdtp-cal');
+  if (cal) {
+    const cls = delta > 0 ? 'slide-left' : 'slide-right';
+    cal.classList.remove('slide-left', 'slide-right');
+    void cal.offsetWidth; // reflow to restart
+    cal.classList.add(cls);
+    cal.addEventListener('animationend', () => cal.classList.remove(cls), { once: true });
+  }
 }
 
 function hwDtpBuildCalendar() {

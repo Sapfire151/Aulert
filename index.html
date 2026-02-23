@@ -2334,7 +2334,7 @@ body::before{
   opacity: 0; transform: translateY(-6px) scale(.96); pointer-events: none;
   transition: opacity .2s var(--ease), transform .2s var(--spring); z-index: 50;
 }
-.hw-share-wrap:hover .hw-share-menu { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
+.hw-share-menu.open { opacity: 1; transform: translateY(0) scale(1); pointer-events: all; }
 .hw-share-label { font-size: 9px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase; color: var(--text-3); padding: 4px 10px 2px; }
 .hw-share-opt {
   display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 10px;
@@ -2397,9 +2397,8 @@ body::before{
   pointer-events: none; transition: opacity .22s var(--ease), transform .22s var(--spring);
 }
 .hw-drp-wrap.open .hw-drp-popup { opacity: 1; transform: none; pointer-events: all; }
-.hw-drp-mode-row { display: flex; gap: 4px; margin-bottom: 14px; background: var(--surface); border-radius: 10px; padding: 3px; }
-.hw-drp-mode-btn { flex: 1; padding: 6px; border-radius: 8px; font-size: 11px; font-weight: 700; border: none; background: transparent; color: var(--text-3); cursor: pointer; transition: all .18s var(--ease); font-family: var(--ff-body); }
-.hw-drp-mode-btn.active { background: var(--surface-2); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.hw-drp-mode-row { display: none; }
+.hw-drp-mode-btn { display: none; }
 .hw-drp-cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
 .hw-drp-nav-btn { width: 28px; height: 28px; border-radius: 8px; background: var(--surface); border: 1px solid var(--rim-2); display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text-2); transition: all .15s; }
 .hw-drp-nav-btn:hover { background: var(--surface-2); color: var(--text); }
@@ -3740,11 +3739,11 @@ body::before{
               Export PDF
             </button>
             <div class="hw-share-wrap">
-              <button class="hw-btn hw-btn-share" title="Copy Link">
+              <button class="hw-btn hw-btn-share" onclick="hwShareToggle(event)" title="Copy Link">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Copy Link
               </button>
-              <div class="hw-share-menu">
+              <div class="hw-share-menu" id="hwShareMenu">
                 <div class="hw-share-label">Copy as</div>
                 <button class="hw-share-opt" onclick="hwCopyLink('readonly')">
                   <div class="hw-share-opt-icon" style="background:rgba(139,92,246,.12);color:#8B5CF6">
@@ -3781,10 +3780,7 @@ body::before{
                 <svg class="hw-drp-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </div>
               <div class="hw-drp-popup">
-                <div class="hw-drp-mode-row">
-                  <button class="hw-drp-mode-btn active" id="hwDrpModeSingle" onclick="hwDrpSetMode('single')">Single Date</button>
-                  <button class="hw-drp-mode-btn" id="hwDrpModeRange" onclick="hwDrpSetMode('range')">Date Range</button>
-                </div>
+
                 <div class="hw-drp-cal-nav">
                   <button class="hw-drp-nav-btn" onclick="hwDrpNavMonth(-1)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
                   <span class="hw-drp-cal-month" id="hwDrpMonthLabel"></span>
@@ -3802,7 +3798,7 @@ body::before{
           </div>
           <textarea class="hw-textarea" id="hwDesc" placeholder="Description — what needs to be done?" rows="3"></textarea>
           <div class="hw-form-footer">
-            <span class="hw-form-hint" id="hwDrpHint">Date optional — pick single date or range</span>
+            <span class="hw-form-hint" id="hwDrpHint">Click a date, or click two to set a range</span>
             <button class="hw-btn hw-btn-add" onclick="hwAdd()">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
               Add Task
@@ -4794,7 +4790,7 @@ function escHtml(s) {
 }
 
 function hwExportPDF() {
-  if (!_hwTasks.length) { alert('No homework tasks to export.'); return; }
+  if (!_hwTasks.length) { showToast('Nothing to export', 'Add some homework tasks first'); return; }
   const win = window.open('', '_blank');
   const now = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
   const rows = _hwTasks.map(t => {
@@ -4860,7 +4856,7 @@ function hwExportPDF() {
 
 /* ── Custom Date Range Picker ── */
 (function(){
-  var drpOpen=false,drpMode='single',drpYear,drpMonth,drpSelStart=null,drpSelEnd=null,drpHoverDay=null;
+  var drpOpen=false,drpMode='range',drpYear,drpMonth,drpSelStart=null,drpSelEnd=null,drpHoverDay=null;
   function today(){var d=new Date();return{y:d.getFullYear(),m:d.getMonth(),d:d.getDate()};}
   function dateKey(y,m,d){return y*10000+m*100+d;}
   function parseKey(k){return{y:Math.floor(k/10000),m:Math.floor((k%10000)/100),d:k%100};}
@@ -4901,20 +4897,15 @@ function hwExportPDF() {
     disp.textContent=text;if(lbl)lbl.textContent=text;if(tr)tr.classList.add('active');
   }
   window.hwDrpToggle=function(){var w=document.getElementById('hwDrpWrap');drpOpen=!drpOpen;w.classList.toggle('open',drpOpen);if(drpOpen)renderCal();};
-  window.hwDrpSetMode=function(mode){
-    drpMode=mode;drpSelEnd=null;
-    document.getElementById('hwDrpModeSingle').classList.toggle('active',mode==='single');
-    document.getElementById('hwDrpModeRange').classList.toggle('active',mode==='range');
-    var h=document.getElementById('hwDrpHint');
-    if(h)h.textContent=mode==='range'?'Click start then end date for a range':'Date optional \u2014 pick a single date';
-    renderCal();
-  };
   window.hwDrpNavMonth=function(dir){drpMonth+=dir;if(drpMonth<0){drpMonth=11;drpYear--;}if(drpMonth>11){drpMonth=0;drpYear++;}renderCal();};
   window.hwDrpDayClick=function(key){
-    if(drpMode==='single'){drpSelStart=key;drpSelEnd=null;renderCal();hwDrpApply();}
+    // First click = start. Second click = end. If end == start, treat as single date.
+    if(!drpSelStart||drpSelEnd){drpSelStart=key;drpSelEnd=null;drpHoverDay=null;renderCal();}
     else{
-      if(!drpSelStart||drpSelEnd){drpSelStart=key;drpSelEnd=null;renderCal();}
-      else{drpSelEnd=key;if(drpSelEnd<drpSelStart){var t=drpSelStart;drpSelStart=drpSelEnd;drpSelEnd=t;}renderCal();hwDrpApply();}
+      drpSelEnd=key;
+      if(drpSelEnd<drpSelStart){var t=drpSelStart;drpSelStart=drpSelEnd;drpSelEnd=t;}
+      if(drpSelEnd===drpSelStart)drpSelEnd=null;
+      renderCal();hwDrpApply();
     }
   };
   window.hwDrpDayHover=function(key){if(drpMode==='range'&&drpSelStart&&!drpSelEnd){drpHoverDay=key;renderCal();}};
@@ -4925,7 +4916,7 @@ function hwExportPDF() {
     if(drpSelStart&&d1)d1.value=toISO(drpSelStart);
     if(drpMode==='range'&&drpSelEnd&&d2)d2.value=toISO(drpSelEnd);else if(d2)d2.value='';
     updateDisplay();
-    if(drpMode==='single'||(drpMode==='range'&&drpSelEnd)){var w=document.getElementById('hwDrpWrap');drpOpen=false;w.classList.remove('open');}
+    var w=document.getElementById('hwDrpWrap');drpOpen=false;w.classList.remove('open');
   };
   window._hwDrpReset=function(){
     drpSelStart=null;drpSelEnd=null;drpHoverDay=null;
@@ -4939,6 +4930,23 @@ function hwExportPDF() {
 
 setTimeout(function(){var orig=window.hwAdd;if(orig)window.hwAdd=function(){orig();if(window._hwDrpReset)window._hwDrpReset();};},200);
 
+function hwShareToggle(e){
+  e.stopPropagation();
+  var menu=document.getElementById('hwShareMenu');
+  if(!menu)return;
+  var isOpen=menu.classList.contains('open');
+  // close any other open menus
+  document.querySelectorAll('.hw-share-menu.open').forEach(function(m){m.classList.remove('open');});
+  if(!isOpen)menu.classList.add('open');
+}
+document.addEventListener('click',function(e){
+  var wrap=document.querySelector('.hw-share-wrap');
+  if(wrap&&!wrap.contains(e.target)){
+    var menu=document.getElementById('hwShareMenu');
+    if(menu)menu.classList.remove('open');
+  }
+});
+
 function hwCopyLink(mode){
   if(!window._hwTasks||!_hwTasks.length)return;
   var modeLabel=mode==='readonly'?'[Read Only]':'[Editable]';
@@ -4948,6 +4956,8 @@ function hwCopyLink(mode){
     return status+' '+t.subject+(date?' ['+date+']':'')+(t.desc?'\n  '+t.desc:'');
   }).join('\n');
   var full='\uD83D\uDCDA Homework List '+modeLabel+'\n'+'\u2500'.repeat(30)+'\n'+text+'\n'+'\u2500'.repeat(30)+'\nShared via Aulert';
+  var menu=document.getElementById('hwShareMenu');
+  if(menu)menu.classList.remove('open');
   navigator.clipboard.writeText(full).then(function(){
     var btn=document.querySelector('.hw-btn-share');
     if(btn){var orig=btn.innerHTML;btn.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Copied!';setTimeout(function(){btn.innerHTML=orig;},2000);}
@@ -4955,7 +4965,7 @@ function hwCopyLink(mode){
 }
 
 function hwShare() {
-  if (!_hwTasks.length) { alert('No homework tasks to share.'); return; }
+  if (!_hwTasks.length) { showToast('Nothing to share', 'Add some homework tasks first'); return; }
   const text = _hwTasks.map(t => {
     const date = hwFormatDate(t.date, t.dateEnd);
     const status = t.done ? '✓' : '•';

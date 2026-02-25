@@ -2336,11 +2336,8 @@ body::before{
 [data-theme="dark"] .hw-btn-share { box-shadow: 0 4px 14px rgba(37,99,235,.35); }
 [data-theme="dark"] .hw-btn-share:hover { box-shadow: 0 6px 20px rgba(37,99,235,.45); }
 .hw-btn-share > * { position: relative; z-index: 1; }
-.hw-btn-share--copied { opacity: .88 !important; }
-.hw-btn-share--copied .hw-share-icon { display: none; }
-.hw-btn-share--copied .hw-share-label::before { content: '✓ Copied!'; }
-.hw-btn-share--copied .hw-share-label { font-size: 0; }
-.hw-btn-share--copied .hw-share-label::before { font-size: 12px; }
+/* Lock the button width so content swaps never resize it */
+.hw-btn-share { min-width: 90px; justify-content: center; }
 
 /* ── Mobile responsiveness for Homework ── */
 @media(max-width:600px){
@@ -5536,7 +5533,7 @@ function hwShare() {
     return;
   }
   const btn = document.querySelector('.hw-btn-share');
-  if (btn && btn.dataset.sharing) return; // prevent rapid re-clicks
+  if (btn && btn.dataset.sharing) return; // block rapid re-clicks
   const text = _hwTasks.map(t => {
     const date = hwFormatDate(t.date);
     const status = t.done ? '✓' : '•';
@@ -5545,11 +5542,15 @@ function hwShare() {
   const full = `📚 Homework List\n${'─'.repeat(30)}\n${text}\n${'─'.repeat(30)}\nShared via Aulert`;
 
   function markCopied() {
+    showHwSnack('✓ Copied to clipboard!');
     if (!btn) return;
     btn.dataset.sharing = '1';
-    btn.classList.add('hw-btn-share--copied');
-    setTimeout(() => { btn.classList.remove('hw-btn-share--copied'); delete btn.dataset.sharing; }, 2000);
-    showHwSnack('✓ Copied to clipboard!');
+    const label = btn.querySelector('.hw-share-label');
+    if (label) { label.textContent = '✓ Copied!'; }
+    setTimeout(() => {
+      if (label) label.textContent = 'Share';
+      delete btn.dataset.sharing;
+    }, 2000);
   }
 
   if (navigator.share) {

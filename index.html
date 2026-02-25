@@ -1195,6 +1195,8 @@ body::before{
   color:var(--teal);font-size:13px;font-weight:700;
   backdrop-filter:blur(20px);pointer-events:none;
   transition:transform .3s var(--spring),opacity .3s;
+  white-space:nowrap;max-width:calc(100vw - 40px);
+  text-align:center;
 }
 .snack.show{transform:translateX(-50%) translateY(0);opacity:1;}
 
@@ -2334,6 +2336,39 @@ body::before{
 [data-theme="dark"] .hw-btn-share { box-shadow: 0 4px 14px rgba(37,99,235,.35); }
 [data-theme="dark"] .hw-btn-share:hover { box-shadow: 0 6px 20px rgba(37,99,235,.45); }
 .hw-btn-share > * { position: relative; z-index: 1; }
+.hw-btn-share--copied { opacity: .88 !important; }
+.hw-btn-share--copied .hw-share-icon { display: none; }
+.hw-btn-share--copied .hw-share-label::before { content: '✓ Copied!'; }
+.hw-btn-share--copied .hw-share-label { font-size: 0; }
+.hw-btn-share--copied .hw-share-label::before { font-size: 12px; }
+
+/* ── Mobile responsiveness for Homework ── */
+@media(max-width:600px){
+  #p-hw { padding: 12px 10px 80px; }
+  .hw-header { gap: 10px; }
+  .hw-header-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+  .hw-header-actions .hw-btn {
+    flex: 1;
+    justify-content: center;
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+  .hw-form { padding: 14px; gap: 10px; }
+  .hw-form-row { flex-direction: column; gap: 8px; }
+  .hw-input { min-width: 0; width: 100%; }
+  .hw-form-footer { flex-direction: column; align-items: stretch; gap: 8px; }
+  .hw-form-footer .hw-btn-add { width: 100%; justify-content: center; padding: 12px; font-size: 14px; }
+  .hw-card { padding: 12px; }
+  .hw-card-top { gap: 6px; }
+  .hw-card-subject { font-size: 13px; }
+  .hwdtp-wrap { width: 100%; }
+  .hwdtp-trigger { width: 100%; }
+  .hw-textarea { font-size: 14px; }
+  .hw-due-banner { padding: 10px 12px; gap: 10px; }
+}
 .hw-btn-add {
   background: #3b82f6; color: #fff;
   border: none; font-weight: 700;
@@ -3979,8 +4014,8 @@ body::before{
               Export PDF
             </button>
             <button class="hw-btn hw-btn-share" onclick="hwShare()" title="Share">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5" r="3" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="12" r="3" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="19" r="3" stroke="currentColor" stroke-width="2"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-              <span>Share</span>
+              <svg class="hw-share-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="18" cy="5" r="3" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="12" r="3" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="19" r="3" stroke="currentColor" stroke-width="2"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <span class="hw-share-label">Share</span>
             </button>
           </div>
         </div>
@@ -5487,8 +5522,21 @@ function hwExportPDF() {
   win.document.close();
 }
 
+function showHwSnack(msg) {
+  clearTimeout(S.snackTimer);
+  const s = document.getElementById('snack');
+  s.textContent = msg;
+  s.classList.add('show');
+  S.snackTimer = setTimeout(() => { s.classList.remove('show'); }, 2400);
+}
+
 function hwShare() {
-  if (!_hwTasks.length) { showToast('Nothing to share', 'Add some tasks first'); return; }
+  if (!_hwTasks.length) {
+    showHwSnack('📋 Nothing to share — add some tasks first!');
+    return;
+  }
+  const btn = document.querySelector('.hw-btn-share');
+  if (btn && btn.dataset.sharing) return; // prevent rapid re-clicks
   const text = _hwTasks.map(t => {
     const date = hwFormatDate(t.date);
     const status = t.done ? '✓' : '•';
@@ -5496,16 +5544,23 @@ function hwShare() {
   }).join('\n');
   const full = `📚 Homework List\n${'─'.repeat(30)}\n${text}\n${'─'.repeat(30)}\nShared via Aulert`;
 
+  function markCopied() {
+    if (!btn) return;
+    btn.dataset.sharing = '1';
+    btn.classList.add('hw-btn-share--copied');
+    setTimeout(() => { btn.classList.remove('hw-btn-share--copied'); delete btn.dataset.sharing; }, 2000);
+    showHwSnack('✓ Copied to clipboard!');
+  }
+
   if (navigator.share) {
     navigator.share({ title: 'Homework List', text: full }).catch(() => {});
   } else {
-    navigator.clipboard.writeText(full).then(() => {
-      const btn = document.querySelector('.hw-btn-share');
-      if (btn) { const orig = btn.innerHTML; btn.innerHTML = '✓ Copied!'; setTimeout(() => btn.innerHTML = orig, 2000); }
-    }).catch(() => {
-      const ta = document.createElement('textarea');
-      ta.value = full; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
-      alert('Copied to clipboard!');
+    navigator.clipboard.writeText(full).then(markCopied).catch(() => {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = full; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+        markCopied();
+      } catch(e) { showHwSnack('Could not copy — please copy manually.'); }
     });
   }
 }
@@ -6828,6 +6883,7 @@ function renderClasses() {
 function saved() {
   clearTimeout(S.snackTimer);
   const s = document.getElementById('snack');
+  s.textContent = 'Setting saved ✓';
   s.classList.add('show');
   S.snackTimer = setTimeout(() => s.classList.remove('show'), 2200);
   saveSettings();

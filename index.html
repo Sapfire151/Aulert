@@ -548,20 +548,20 @@ body::before{
   padding:8px 18px;border-radius:var(--r-pill);
   font-size:13px;font-weight:600;color:var(--text-2);
   cursor:pointer;border:none;background:transparent;
-  transition:all .22s var(--ease);white-space:nowrap;
+  transition:all .32s var(--spring);white-space:nowrap;
 }
 .nav-tab.on{
   background:var(--surface-2);
   color:var(--text);
   box-shadow:inset 0 0 0 1px var(--rim);
 }
-.nav-tab svg{flex-shrink:0;transition:transform .25s var(--spring);}
-.nav-tab:active svg,.nav-tab.icon-pop svg{transform:scale(0.85);animation:iconBounce .4s var(--spring) forwards;}
-@keyframes iconBounce{0%{transform:scale(0.85);}50%{transform:scale(1.15);}100%{transform:scale(1);}}
-.icon-btn svg{transition:transform .2s var(--spring);}
-.icon-btn:active svg,.icon-btn.icon-pop svg{transform:scale(0.9);animation:iconBounce .35s var(--spring) forwards;}
-.user-pill{transition:transform .2s var(--spring);}
-.user-pill.icon-pop{animation:iconBounce .35s var(--spring) forwards;}
+.nav-tab svg{flex-shrink:0;transition:transform .3s var(--spring);}
+.nav-tab:active svg,.nav-tab.icon-pop svg{transform:scale(0.82);animation:iconBounce .65s var(--spring) forwards;}
+@keyframes iconBounce{0%{transform:scale(0.82);}30%{transform:scale(1.18);}65%{transform:scale(0.95);}100%{transform:scale(1);}}
+.icon-btn svg{transition:transform .3s var(--spring);}
+.icon-btn:active svg,.icon-btn.icon-pop svg{transform:scale(0.85);animation:iconBounce .65s var(--spring) forwards;}
+.user-pill{transition:transform .3s var(--spring);}
+.user-pill.icon-pop{animation:iconBounce .65s var(--spring) forwards;}
 .nav-r{display:flex;align-items:center;gap:8px;}
 
 .icon-btn{
@@ -610,9 +610,9 @@ body::before{
   padding-top:64px;min-height:100svh;
   position:relative;z-index:1;
 }
-.panel{display:none;animation:panelIn .3s var(--ease) both;}
+.panel{display:none;animation:panelIn .42s var(--spring) both;}
 .panel.show{display:block;}
-@keyframes panelIn{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes panelIn{from{opacity:0;transform:translateY(16px);}60%{opacity:1;}to{opacity:1;transform:translateY(0);}}
 
 /* ═══════════════════════════════════════════════
    FEED TAB
@@ -1903,9 +1903,9 @@ body::before{
   position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
   width: 20px; height: 2px; border-radius: 2px;
   background: linear-gradient(90deg, #3533cd, #00ffd9);
-  animation: tabLine .3s var(--spring) both;
+  animation: tabLine .55s var(--spring) both;
 }
-@keyframes tabLine { from{width:0;opacity:0;} to{width:20px;opacity:1;} }
+@keyframes tabLine { from{width:0;opacity:0;transform:translateX(-50%) scaleX(0.3);} 60%{width:26px;opacity:1;} to{width:20px;opacity:1;transform:translateX(-50%) scaleX(1);} }
 
 /* Ripple on buttons */
 .ripple-host { position: relative; overflow: hidden; }
@@ -5806,8 +5806,14 @@ function updateThemeIcon(mode) {
 ════════════════════════════════════════════ */
 function iconPop(el) {
   if (!el) return;
+  // Remove first to allow re-trigger even on rapid clicks, but let it breathe
+  el.classList.remove('icon-pop');
+  // Force reflow so the browser registers the removal
+  void el.offsetWidth;
   el.classList.add('icon-pop');
-  setTimeout(() => el.classList.remove('icon-pop'), 400);
+  // Remove after animation completes (matches iconBounce duration 650ms)
+  clearTimeout(el._iconPopTimer);
+  el._iconPopTimer = setTimeout(() => el.classList.remove('icon-pop'), 700);
 }
 
 function bellRingAnim(el) {

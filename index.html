@@ -3527,6 +3527,7 @@ body::before{
   display: flex; flex-direction: column;
   height: 100%; overflow: hidden;
   background: var(--bg);
+  position: relative;
 }
 .com-loading {
   flex: 1; display: flex; align-items: center; justify-content: center;
@@ -3754,11 +3755,246 @@ body::before{
   box-shadow: 0 1px 4px rgba(220,38,38,.35);
 }
 
+/* ════════════════════════════════════════════
+   GROUPS — CSS
+════════════════════════════════════════════ */
+/* Sidebar group section header */
+.com-sec-row { display:flex; align-items:center; justify-content:space-between; width:100%; }
+.com-new-group-btn {
+  width:22px; height:22px; border-radius:7px;
+  background:rgba(56,189,248,.15); border:1px solid rgba(56,189,248,.35);
+  color:var(--sky); font-size:16px; font-weight:700;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:all .2s var(--spring); line-height:1;
+  flex-shrink:0;
+}
+.com-new-group-btn:hover { background:rgba(56,189,248,.28); transform:scale(1.12); }
+
+/* Group rows in sidebar */
+.com-group-row {
+  margin:0 10px 3px; padding:10px 12px; border-radius:var(--r-md);
+  display:flex; align-items:center; gap:10px;
+  cursor:pointer; border:1px solid transparent; transition:all .18s;
+}
+.com-group-row:hover { background:var(--surface-2); border-color:var(--rim-2); }
+.com-group-row.active { background:rgba(56,189,248,.10); border-color:rgba(56,189,248,.3); }
+.com-group-icon {
+  width:34px; height:34px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--ff-head); font-size:15px; font-weight:800; color:#fff;
+  flex-shrink:0;
+}
+.com-group-info { flex:1; min-width:0; }
+.com-group-name { font-size:13px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.com-group-sub  { font-size:10px; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+/* Create group modal */
+.com-modal-veil {
+  position:fixed; inset:0; z-index:300;
+  background:rgba(0,0,0,.58); backdrop-filter:blur(16px);
+  display:flex; align-items:center; justify-content:center; padding:20px;
+  opacity:0; pointer-events:none; transition:opacity .25s var(--ease);
+}
+.com-modal-veil.open { opacity:1; pointer-events:all; }
+.com-modal {
+  width:100%; max-width:430px; border-radius:var(--r-xl);
+  background:var(--modal-bg); border:1px solid var(--rim);
+  padding:32px 28px; box-shadow:var(--shadow);
+  transform:scale(.93) translateY(18px);
+  transition:transform .35s var(--spring);
+  max-height:92svh; overflow-y:auto;
+}
+.com-modal-veil.open .com-modal { transform:scale(1) translateY(0); }
+.com-modal-icon {
+  width:48px; height:48px; border-radius:14px;
+  background:linear-gradient(135deg,rgba(56,189,248,.2),rgba(99,102,241,.2));
+  border:1px solid rgba(56,189,248,.28);
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:16px; font-size:22px;
+}
+.com-modal-title { font-family:var(--ff-head); font-size:20px; font-weight:800; letter-spacing:-.4px; margin-bottom:6px; }
+.com-modal-sub { font-size:13px; color:var(--text-2); line-height:1.6; margin-bottom:22px; }
+.com-modal-label { font-size:11px; font-weight:700; color:var(--text-3); letter-spacing:.5px; text-transform:uppercase; margin-bottom:7px; display:block; }
+.com-modal-inp {
+  width:100%; padding:11px 14px; border-radius:var(--r-md);
+  border:1px solid var(--rim-2); background:var(--surface);
+  color:var(--text); font-family:var(--ff-body); font-size:14px;
+  outline:none; transition:border-color .2s; margin-bottom:16px;
+}
+.com-modal-inp:focus { border-color:var(--sky); box-shadow:0 0 0 2px rgba(56,189,248,.18); }
+.com-modal-inp::placeholder { color:var(--text-3); }
+.com-modal-textarea {
+  width:100%; padding:11px 14px; border-radius:var(--r-md);
+  border:1px solid var(--rim-2); background:var(--surface);
+  color:var(--text); font-family:var(--ff-body); font-size:13px;
+  outline:none; transition:border-color .2s; resize:none;
+  min-height:76px; line-height:1.6; margin-bottom:16px;
+}
+.com-modal-textarea:focus { border-color:var(--sky); box-shadow:0 0 0 2px rgba(56,189,248,.18); }
+.com-modal-textarea::placeholder { color:var(--text-3); }
+.com-modal-actions { display:flex; gap:9px; justify-content:flex-end; margin-top:4px; }
+.com-modal-cancel {
+  padding:9px 18px; border-radius:var(--r-pill);
+  background:var(--surface); border:1px solid var(--rim);
+  color:var(--text-2); font-size:13px; font-weight:600;
+  cursor:pointer; transition:all .2s;
+}
+.com-modal-cancel:hover { background:var(--surface-2); }
+.com-modal-create {
+  padding:9px 22px; border-radius:var(--r-pill);
+  background:linear-gradient(135deg,var(--sky),var(--violet)); border:none;
+  color:#fff; font-size:13px; font-weight:700;
+  cursor:pointer; transition:all .2s var(--spring);
+  display:flex; align-items:center; gap:7px;
+}
+.com-modal-create:hover { filter:brightness(1.1); transform:translateY(-1px); }
+
+/* Invite link result box inside modal */
+.com-invite-link-box {
+  margin-top:16px; padding:14px 16px;
+  border-radius:var(--r-md);
+  background:rgba(0,255,217,.06); border:1px solid rgba(0,255,217,.22);
+  display:none;
+}
+.com-invite-link-box.show { display:block; animation:cardIn .3s var(--ease) both; }
+.com-invite-link-label {
+  font-size:10px; font-weight:800; letter-spacing:.6px; text-transform:uppercase;
+  color:var(--teal); margin-bottom:8px; display:flex; align-items:center; gap:6px;
+}
+.com-invite-link-label::before { content:'🔗'; font-size:12px; }
+.com-invite-link-url {
+  font-size:11px; color:var(--text-2); word-break:break-all;
+  font-family:monospace; line-height:1.55; margin-bottom:10px;
+  padding:8px 10px; background:var(--surface); border-radius:8px;
+  border:1px solid var(--rim-2);
+}
+.com-invite-copy-btn {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 16px; border-radius:var(--r-pill);
+  background:rgba(0,255,217,.12); border:1px solid rgba(0,255,217,.3);
+  color:var(--teal); font-size:11px; font-weight:700;
+  cursor:pointer; transition:all .2s;
+}
+.com-invite-copy-btn:hover { background:rgba(0,255,217,.22); }
+
+/* Group chat header */
+.com-chat-header-group {
+  display:none; align-items:center; gap:12px;
+  padding:13px 20px; border-bottom:1px solid var(--rim-2);
+  background:var(--card-bg); backdrop-filter:var(--blur); flex-shrink:0;
+}
+.com-chat-header-group.active { display:flex; }
+.com-group-header-icon {
+  width:38px; height:38px; border-radius:11px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--ff-head); font-size:18px; font-weight:800; color:#fff;
+  flex-shrink:0;
+}
+.com-group-header-name { font-size:15px; font-weight:700; letter-spacing:-.2px; }
+.com-group-header-sub  { font-size:11px; color:var(--text-3); }
+.com-group-header-actions { display:flex; align-items:center; gap:6px; margin-left:auto; }
+.com-group-hbtn {
+  display:inline-flex; align-items:center; gap:5px;
+  padding:6px 12px; border-radius:var(--r-pill);
+  font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; border:1px solid;
+  white-space:nowrap;
+}
+.com-group-hbtn.invite  { background:rgba(0,255,217,.08); border-color:rgba(0,255,217,.28); color:var(--teal); }
+.com-group-hbtn.invite:hover  { background:rgba(0,255,217,.18); }
+.com-group-hbtn.members { background:rgba(56,189,248,.08); border-color:rgba(56,189,248,.28); color:var(--sky); }
+.com-group-hbtn.members:hover { background:rgba(56,189,248,.18); }
+.com-group-hbtn.leave   { background:rgba(251,113,133,.07); border-color:rgba(251,113,133,.22); color:var(--rose); }
+.com-group-hbtn.leave:hover   { background:rgba(251,113,133,.18); }
+
+/* Members slide panel */
+.com-members-panel {
+  position:absolute; right:0; top:0; bottom:0; width:256px; z-index:20;
+  background:var(--sheet-bg); border-left:1px solid var(--rim-2);
+  backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
+  transform:translateX(100%); transition:transform .32s var(--spring);
+  display:flex; flex-direction:column; overflow:hidden;
+}
+.com-members-panel.open { transform:translateX(0); box-shadow:-8px 0 32px rgba(0,0,0,.18); }
+.com-members-head {
+  padding:16px 18px 12px; border-bottom:1px solid var(--rim-2);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.com-members-title { font-family:var(--ff-head); font-size:16px; font-weight:800; }
+.com-members-close {
+  width:28px; height:28px; border-radius:50%;
+  background:var(--surface); border:1px solid var(--rim-2);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:all .2s; color:var(--text-2);
+}
+.com-members-close:hover { background:var(--surface-2); }
+.com-members-scroll { flex:1; overflow-y:auto; padding:10px 8px; scrollbar-width:thin; scrollbar-color:var(--rim) transparent; }
+.com-members-scroll::-webkit-scrollbar { width:3px; }
+.com-members-scroll::-webkit-scrollbar-thumb { background:var(--rim); border-radius:3px; }
+.com-member-item {
+  display:flex; align-items:center; gap:9px;
+  padding:8px 10px; border-radius:var(--r-md); transition:background .15s;
+}
+.com-member-item:hover { background:var(--surface); }
+.com-member-ava {
+  width:30px; height:30px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--ff-head); font-size:11px; font-weight:800; color:#fff;
+  flex-shrink:0; overflow:hidden;
+}
+.com-member-ava img { width:100%; height:100%; object-fit:cover; border-radius:50%; display:block; }
+.com-member-info { flex:1; min-width:0; }
+.com-member-name  { font-size:12px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.com-member-email { font-size:10px; color:var(--text-3); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.com-member-tag {
+  font-size:9px; font-weight:800; padding:2px 7px; border-radius:var(--r-pill);
+  white-space:nowrap; flex-shrink:0;
+}
+.com-member-tag.you   { background:rgba(139,92,246,.15); color:var(--violet); border:1px solid rgba(139,92,246,.3); }
+.com-member-tag.host  { background:rgba(252,211,77,.12);  color:var(--amber);  border:1px solid rgba(252,211,77,.3);  }
+
+/* Join group banner (created dynamically) */
+.com-join-banner {
+  position:fixed; top:72px; left:50%; transform:translateX(-50%);
+  z-index:250; background:var(--modal-bg); border:1px solid var(--rim);
+  border-radius:var(--r-xl); padding:26px 28px; box-shadow:var(--shadow);
+  backdrop-filter:var(--blur); -webkit-backdrop-filter:var(--blur);
+  max-width:360px; width:calc(100% - 40px); text-align:center;
+  animation:riseUp .4s var(--spring) both;
+}
+.com-join-banner h3 { font-family:var(--ff-head); font-size:19px; font-weight:800; margin-bottom:7px; }
+.com-join-banner .join-group-nm {
+  display:inline-block; font-weight:800;
+  background:linear-gradient(135deg,var(--sky),var(--violet));
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+}
+.com-join-banner p { font-size:13px; color:var(--text-2); line-height:1.6; margin-bottom:18px; }
+.com-join-banner-btns { display:flex; gap:9px; justify-content:center; }
+.com-join-accept {
+  padding:10px 22px; border-radius:var(--r-pill);
+  background:linear-gradient(135deg,var(--sky),var(--violet)); border:none;
+  color:#fff; font-size:13px; font-weight:700;
+  cursor:pointer; transition:all .2s var(--spring);
+}
+.com-join-accept:hover { filter:brightness(1.1); transform:translateY(-1px); }
+.com-join-decline {
+  padding:10px 18px; border-radius:var(--r-pill);
+  background:var(--surface); border:1px solid var(--rim);
+  color:var(--text-2); font-size:13px; font-weight:600;
+  cursor:pointer; transition:all .2s;
+}
+.com-join-decline:hover { background:var(--surface-2); }
+
+/* Group messages — sender name label */
+.com-msg-sender { font-size:10px; font-weight:700; color:var(--text-3); margin-bottom:3px; padding:0 4px; }
+
 @media(max-width:700px) {
   .com-wrap { grid-template-columns: 1fr; }
   .com-chat-panel { display: none; }
   .com-wrap.chat-open .com-sidebar { display: none; }
   .com-wrap.chat-open .com-chat-panel { display: flex; }
+  .com-group-hbtn span { display:none; }
+  .com-group-hbtn { padding:6px 9px; }
+  .com-members-panel { width:100%; }
 }
 @keyframes bellRing {
   0%   { transform: rotate(0deg); }
@@ -4863,6 +5099,27 @@ body::before{
                 </div>
               </div>
             </div>
+
+            <!-- Groups -->
+            <div id="comGroupsSection">
+              <div class="com-sec">
+                <div class="com-sec-lbl com-sec-row">
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="8" height="10" rx="2" stroke="currentColor" stroke-width="2.4"/><path d="M9 7h6a2 2 0 012 2v12H9V7z" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M17 7V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+                    Groups
+                  </div>
+                  <button class="com-new-group-btn" id="comNewGroupBtn" onclick="comShowCreateGroup()" title="New group" style="display:none">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div id="comGroupList">
+                <div class="com-empty" id="comGroupEmpty">
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" opacity=".15"><rect x="3" y="11" width="8" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M9 7h6a2 2 0 012 2v12H9V7z" stroke="currentColor" stroke-width="1.5"/></svg>
+                  <p>No groups yet.<br>Create one to get started!</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -4897,9 +5154,10 @@ body::before{
             <h3>Select a friend to chat</h3>
             <p>Add a friend by their Gmail, then select them from the list to start chatting in real time.</p>
           </div>
-          <!-- Active chat -->
+          <!-- Active chat (DM & Group) -->
           <div id="comChatArea" style="display:none;flex-direction:column;height:100%;flex:1;">
-            <div class="com-chat-header">
+            <!-- DM Header -->
+            <div class="com-chat-header" id="comDmHeader">
               <div class="com-chat-hava" id="comChatAva">?</div>
               <div>
                 <div class="com-chat-hname" id="comChatName">—</div>
@@ -4910,23 +5168,85 @@ body::before{
                 Unfriend
               </button>
             </div>
+            <!-- Group Header -->
+            <div class="com-chat-header-group" id="comGroupHeader">
+              <div class="com-group-header-icon" id="comGroupHeaderIcon">#</div>
+              <div>
+                <div class="com-group-header-name" id="comGroupHeaderName">Group</div>
+                <div class="com-group-header-sub" id="comGroupHeaderSub">0 members</div>
+              </div>
+              <div class="com-group-header-actions">
+                <button class="com-group-hbtn invite" onclick="comCopyInviteLink()">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span>Invite Link</span>
+                </button>
+                <button class="com-group-hbtn members" onclick="comToggleMembers()">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  <span>Members</span>
+                </button>
+                <button class="com-group-hbtn leave" onclick="comLeaveGroup()">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span>Leave</span>
+                </button>
+              </div>
+            </div>
             <div class="com-msgs" id="comMsgs"></div>
             <div class="com-input-row">
               <input type="file" id="comFileInput" accept="image/*,.pdf,.doc,.docx,.txt,.zip" style="display:none" onchange="comAttachFile(this)"/>
               <button class="com-attach-btn" onclick="document.getElementById('comFileInput').click()" title="Attach file">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
-              <input id="comMsgInput" class="com-msg-inp" type="text" placeholder="Message…" onkeydown="if(event.key==='Enter')comSendMsg()"/>
-              <button class="com-send-btn" onclick="comSendMsg()">
+              <input id="comMsgInput" class="com-msg-inp" type="text" placeholder="Message…" onkeydown="if(event.key==='Enter') _activeGroup ? comSendGroupMsg() : comSendMsg()"/>
+              <button class="com-send-btn" onclick="_activeGroup ? comSendGroupMsg() : comSendMsg()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><line x1="22" y1="2" x2="11" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polygon points="22,2 15,22 11,13 2,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
             </div>
+          </div>
+
+          <!-- Members slide panel -->
+          <div class="com-members-panel" id="comMembersPanel">
+            <div class="com-members-head">
+              <div class="com-members-title">Members</div>
+              <button class="com-members-close" onclick="comToggleMembers()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+            <div class="com-members-scroll" id="comMembersListEl"></div>
           </div>
         </div>
 
       </div>
     </div>
 
+</div>
+
+<!-- ══ CREATE GROUP MODAL ══ -->
+<div class="com-modal-veil" id="comGroupModal" onclick="if(event.target===this)comHideCreateGroup()">
+  <div class="com-modal">
+    <div class="com-modal-icon">👥</div>
+    <div class="com-modal-title">Create a Group</div>
+    <div class="com-modal-sub">Give your group a name and optionally invite people right away. Anyone with the invite link can join — no friend request needed.</div>
+    <label class="com-modal-label" for="comGroupNameInp">Group name <span style="color:var(--rose)">*</span></label>
+    <input class="com-modal-inp" id="comGroupNameInp" type="text" placeholder="e.g. Chemistry Study Squad" maxlength="48" onkeydown="if(event.key==='Enter')comCreateGroup()"/>
+    <label class="com-modal-label" for="comGroupEmailsInp">Invite by email <span style="color:var(--text-3);font-weight:400;text-transform:none;letter-spacing:0">(optional, comma-separated)</span></label>
+    <textarea class="com-modal-textarea" id="comGroupEmailsInp" placeholder="friend1@school.edu, friend2@school.edu&#10;They'll be added directly — no friend request needed."></textarea>
+    <!-- Invite link result (shown after group is created) -->
+    <div class="com-invite-link-box" id="comGroupInviteBox">
+      <div class="com-invite-link-label">Your Invite Link</div>
+      <div class="com-invite-link-url" id="comGroupInviteUrl"></div>
+      <button class="com-invite-copy-btn" onclick="comCopyInviteFromModal()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Copy Link
+      </button>
+    </div>
+    <div class="com-modal-actions">
+      <button class="com-modal-cancel" onclick="comHideCreateGroup()">Cancel</button>
+      <button class="com-modal-create" onclick="comCreateGroup()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        Create Group
+      </button>
+    </div>
+  </div>
 </div>
 
 <!-- Sheet (detail) -->
@@ -8263,6 +8583,20 @@ const FIREBASE_CONFIG = {
   let _friends = {};
   let _incoming = {};
   let _sent = {};
+  // ── Group state ──
+  let _groups = {};
+  let _activeGroup = null;
+  let _groupMsgUnsubscribe = null;
+  let _groupMemberUnsubscribe = null;
+  let _groupsListener = null;
+
+  function groupGrad(gid) {
+    const gs = ['linear-gradient(135deg,#38BDF8,#6366f1)','linear-gradient(135deg,#10B981,#3B82F6)',
+                'linear-gradient(135deg,#F59E0B,#8B5CF6)','linear-gradient(135deg,#EC4899,#F97316)',
+                'linear-gradient(135deg,#06B6D4,#10B981)','linear-gradient(135deg,#8B5CF6,#EC4899)'];
+    let h=0; for(const c of gid) h=(h*31+c.charCodeAt(0))&0x7fffffff;
+    return gs[h%gs.length];
+  }
 
   // ── State display ──
   function showRight(state) {
@@ -8272,6 +8606,17 @@ const FIREBASE_CONFIG = {
     if (!el) return;
     el.style.display = state === 'chat' ? 'flex' : '';
     if (state === 'chat') el.style.flexDirection = 'column';
+    // When entering chat, set header visibility based on mode
+    if (state === 'chat') {
+      const dmH = $id('comDmHeader'), grpH = $id('comGroupHeader');
+      if (_activeGroup) {
+        if (dmH) dmH.style.display = 'none';
+        if (grpH) grpH.classList.add('active');
+      } else {
+        if (dmH) dmH.style.display = '';
+        if (grpH) grpH.classList.remove('active');
+      }
+    }
   }
 
   function comToast(msg) {
@@ -8366,6 +8711,32 @@ const FIREBASE_CONFIG = {
         }).join('');
       }
     }
+
+    // Groups list
+    const gl = $id('comGroupList');
+    const gEmpty = $id('comGroupEmpty');
+    const groupIds = Object.keys(_groups);
+    if (gl) {
+      if (!groupIds.length) {
+        if (gEmpty) gEmpty.style.display = '';
+      } else {
+        if (gEmpty) gEmpty.style.display = 'none';
+        gl.innerHTML = groupIds.map(gid => {
+          const g = _groups[gid] || {};
+          const isActive = _activeGroup === gid;
+          const memberCount = Object.keys(g.members || {}).length;
+          const unread = g.userUnread || 0;
+          return `<div class="com-group-row ${isActive?'active':''}" onclick="comOpenGroup('${esc(gid)}')">
+            <div class="com-group-icon" style="background:${groupGrad(gid)}">${esc((g.name||'G')[0].toUpperCase())}</div>
+            <div class="com-group-info">
+              <div class="com-group-name">${esc(g.name||'Group')}</div>
+              <div class="com-group-sub">${memberCount} member${memberCount!==1?'s':''}</div>
+            </div>
+            ${unread ? `<div class="com-unread-badge">${unread}</div>` : ''}
+          </div>`;
+        }).join('');
+      }
+    }
   }
 
   // ── Main init (called each time tab opens) ──
@@ -8397,6 +8768,38 @@ const FIREBASE_CONFIG = {
     const myKey = encKey(myEmail);
     const form = $id('comAddForm');
     if (form) form.style.display = '';
+    // Show new group button
+    const ngb = $id('comNewGroupBtn');
+    if (ngb) ngb.style.display = 'flex';
+
+    // Listen to groups the user belongs to
+    if (!_groupsListener) {
+      _groupsListener = _db.ref(`aulert/userGroups/${myKey}`);
+      _groupsListener.on('value', async snap => {
+        const raw = snap.val() || {};
+        const groupIds = Object.keys(raw);
+        const prev = { ..._groups };
+        _groups = {};
+        await Promise.all(groupIds.map(async gid => {
+          const gSnap = await _db.ref(`aulert/groups/${gid}`).once('value');
+          const gData = gSnap.val();
+          if (gData) _groups[gid] = { ...gData, userUnread: raw[gid]?.unread || 0 };
+        }));
+        renderSidebar();
+        // Update tab badge with group unreads
+        const comTabActive = document.getElementById('tb-com')?.classList.contains('on');
+        if (!comTabActive) {
+          const friendUnread = Object.values(_friends).reduce((s,f) => s+(f.unread||0), 0);
+          const groupUnread = Object.values(_groups).reduce((s,g) => s+(g.userUnread||0), 0);
+          updateTabBadge('com', friendUnread + groupUnread);
+        }
+        // If active group got deleted or user left, go to empty
+        if (_activeGroup && !_groups[_activeGroup]) {
+          _activeGroup = null;
+          showRight('empty');
+        }
+      });
+    }
 
     // Listen to friends
     _db.ref(`aulert/friends/${myKey}`).on('value', snap => {
@@ -8530,6 +8933,10 @@ const FIREBASE_CONFIG = {
   window.comOpenChat = function(friendEmail) {
     const myEmail = S.user?.email;
     if (!myEmail || !_db) return;
+    _activeGroup = null; // clear group
+    if (_groupMsgUnsubscribe) { _groupMsgUnsubscribe(); _groupMsgUnsubscribe=null; }
+    if (_groupMemberUnsubscribe) { _groupMemberUnsubscribe(); _groupMemberUnsubscribe=null; }
+    $id('comMembersPanel')?.classList.remove('open');
     _activeChat = friendEmail;
     // Clear unread
     _db.ref(`aulert/friends/${encKey(myEmail)}/${encKey(friendEmail)}/unread`).set(0);
@@ -8591,6 +8998,279 @@ const FIREBASE_CONFIG = {
     renderSidebar();
   };
 
+  // ════════════════════════════════════════════
+  //  GROUP FUNCTIONS
+  // ════════════════════════════════════════════
+
+  // Show/hide create group modal
+  window.comShowCreateGroup = function() {
+    const modal = $id('comGroupModal');
+    if (modal) { modal.classList.add('open'); setTimeout(() => $id('comGroupNameInp')?.focus(), 80); }
+    const box = $id('comGroupInviteBox');
+    if (box) box.classList.remove('show');
+  };
+  window.comHideCreateGroup = function() {
+    const modal = $id('comGroupModal');
+    if (modal) modal.classList.remove('open');
+  };
+
+  // Create a new group
+  window.comCreateGroup = async function() {
+    const myEmail = S.user?.email;
+    if (!myEmail || !_db) return;
+    const nameInp = $id('comGroupNameInp');
+    const emailsInp = $id('comGroupEmailsInp');
+    const name = (nameInp?.value||'').trim();
+    if (!name) { comToast('Enter a group name first'); nameInp?.focus(); return; }
+
+    const inviteCode = Math.random().toString(36).slice(2,10) + Math.random().toString(36).slice(2,4);
+    const groupId = _db.ref('aulert/groups').push().key;
+    const ts = Date.now();
+
+    const members = {};
+    members[encKey(myEmail)] = { email:myEmail, name:S.user?.name||'', picture:S.user?.picture||'', joinedAt:ts, role:'owner' };
+    const rawEmails = (emailsInp?.value||'').split(/[\s,;]+/).filter(e => e.includes('@'));
+    rawEmails.forEach(e => {
+      const em = e.toLowerCase().trim();
+      if (em && em !== myEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) {
+        members[encKey(em)] = { email:em, name:'', picture:'', joinedAt:ts, role:'member' };
+      }
+    });
+
+    try {
+      await _db.ref(`aulert/groups/${groupId}`).set({ name, createdBy:myEmail, createdAt:ts, inviteCode, members });
+      await _db.ref(`aulert/invites/${inviteCode}`).set(groupId);
+      await _db.ref(`aulert/userGroups/${encKey(myEmail)}/${groupId}`).set({ name, joinedAt:ts, unread:0 });
+      // Add userGroups entries for invited members
+      for (const [mKey, mData] of Object.entries(members)) {
+        if (mKey !== encKey(myEmail)) {
+          await _db.ref(`aulert/userGroups/${mKey}/${groupId}`).set({ name, joinedAt:ts, unread:0 });
+        }
+      }
+      const url = window.location.origin + window.location.pathname + '?join=' + inviteCode;
+      const box = $id('comGroupInviteBox');
+      const urlEl = $id('comGroupInviteUrl');
+      if (box) box.classList.add('show');
+      if (urlEl) urlEl.textContent = url;
+      if (nameInp) nameInp.value = '';
+      if (emailsInp) emailsInp.value = '';
+      comToast(`Group "${name}" created! 🎉`);
+    } catch(e) { comToast('Error: ' + e.message); }
+  };
+
+  // Copy invite link from modal
+  window.comCopyInviteFromModal = function() {
+    const url = $id('comGroupInviteUrl')?.textContent;
+    if (url) { navigator.clipboard.writeText(url).then(() => comToast('Invite link copied! 🔗')); }
+  };
+
+  // Copy invite link from header button
+  window.comCopyInviteLink = function() {
+    const g = _groups[_activeGroup];
+    if (!g) return;
+    const url = window.location.origin + window.location.pathname + '?join=' + g.inviteCode;
+    navigator.clipboard.writeText(url).then(() => comToast('Invite link copied! 🔗'));
+  };
+
+  // Toggle members panel
+  window.comToggleMembers = function() {
+    $id('comMembersPanel')?.classList.toggle('open');
+  };
+
+  // Render members list
+  function renderMembersPanel(members, myEmail, createdBy) {
+    const list = $id('comMembersListEl');
+    if (!list) return;
+    list.innerHTML = Object.values(members).map(m => {
+      const isYou = m.email === myEmail;
+      const isOwner = m.role === 'owner' || m.email === createdBy;
+      const pic = m.picture || '';
+      const uname = m.name ? m.name.split(' ')[0] : m.email.split('@')[0];
+      return `<div class="com-member-item">
+        <div class="com-member-ava" style="background:${avatarBg(pic,m.email)}">${avatarInner(m.email, pic)}</div>
+        <div class="com-member-info">
+          <div class="com-member-name">${esc(uname)}</div>
+          <div class="com-member-email">${esc(m.email)}</div>
+        </div>
+        ${isYou ? '<span class="com-member-tag you">You</span>' : ''}
+        ${isOwner && !isYou ? '<span class="com-member-tag host">Host</span>' : ''}
+      </div>`;
+    }).join('');
+  }
+
+  // Open group chat
+  window.comOpenGroup = function(groupId) {
+    const myEmail = S.user?.email;
+    if (!myEmail || !_db) return;
+    // Clear DM state
+    _activeChat = null;
+    if (_chatUnsubscribe) { _chatUnsubscribe(); _chatUnsubscribe=null; }
+    // Clear old group listeners
+    if (_groupMsgUnsubscribe) { _groupMsgUnsubscribe(); _groupMsgUnsubscribe=null; }
+    if (_groupMemberUnsubscribe) { _groupMemberUnsubscribe(); _groupMemberUnsubscribe=null; }
+
+    _activeGroup = groupId;
+    $id('comMembersPanel')?.classList.remove('open');
+
+    // Clear unread
+    _db.ref(`aulert/userGroups/${encKey(myEmail)}/${groupId}/unread`).set(0);
+    if (_groups[groupId]) _groups[groupId].userUnread = 0;
+
+    renderSidebar();
+    showRight('chat');
+
+    const g = _groups[groupId] || {};
+    // Update group header
+    const iconEl = $id('comGroupHeaderIcon');
+    const nameEl = $id('comGroupHeaderName');
+    const subEl  = $id('comGroupHeaderSub');
+    const inp    = $id('comMsgInput');
+    if (iconEl) { iconEl.style.background = groupGrad(groupId); iconEl.textContent = (g.name||'G')[0].toUpperCase(); }
+    if (nameEl) nameEl.textContent = g.name || 'Group';
+    const memberCount = Object.keys(g.members || {}).length;
+    if (subEl)  subEl.textContent = `${memberCount} member${memberCount!==1?'s':''}`;
+    if (inp)    inp.placeholder = `Message ${g.name||'group'}…`;
+
+    // Listen for messages
+    const msgRef = _db.ref(`aulert/groups/${groupId}/messages`).limitToLast(200);
+    let _lastGMsgTs = Date.now();
+    msgRef.on('value', snap => {
+      const raw = snap.val() || {};
+      const msgs = Object.values(raw).sort((a,b) => a.ts-b.ts);
+      msgs.forEach(m => {
+        if (m.from !== myEmail && m.ts > _lastGMsgTs) {
+          if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+            const sn = m.senderName || m.from.split('@')[0];
+            new Notification(`Aulert · ${g.name||'Group'}`, { body: `${sn}: ${m.text?m.text.slice(0,80):'sent a file'}` });
+          }
+        }
+      });
+      if (msgs.length) _lastGMsgTs = msgs[msgs.length-1].ts;
+      renderGroupMessages(msgs, myEmail);
+    });
+    _groupMsgUnsubscribe = () => msgRef.off('value');
+
+    // Listen for member changes
+    const memRef = _db.ref(`aulert/groups/${groupId}/members`);
+    memRef.on('value', snap => {
+      const members = snap.val() || {};
+      if (_groups[groupId]) _groups[groupId].members = members;
+      const count = Object.keys(members).length;
+      const subEl2 = $id('comGroupHeaderSub');
+      if (subEl2) subEl2.textContent = `${count} member${count!==1?'s':''}`;
+      renderMembersPanel(members, myEmail, g.createdBy);
+    });
+    _groupMemberUnsubscribe = () => memRef.off('value');
+
+    _groupMsgUnsubscribe = () => { msgRef.off('value'); memRef.off('value'); };
+  };
+
+  // Send group message
+  window.comSendGroupMsg = async function() {
+    const myEmail = S.user?.email;
+    if (!myEmail || !_activeGroup || !_db) return;
+    const inp = $id('comMsgInput');
+    const text = (inp?.value||'').trim();
+    if (!text) return;
+    inp.value = '';
+    const g = _groups[_activeGroup] || {};
+    const ts = Date.now();
+    try {
+      await _db.ref(`aulert/groups/${_activeGroup}/messages`).push({
+        from: myEmail, senderName: S.user?.name||'', senderPic: S.user?.picture||'', text, ts
+      });
+      // Increment unread for all other members
+      Object.keys(g.members || {}).forEach(mKey => {
+        if (mKey !== encKey(myEmail)) {
+          _db.ref(`aulert/userGroups/${mKey}/${_activeGroup}/unread`).transaction(n => (n||0)+1);
+        }
+      });
+    } catch(e) { comToast('Failed: ' + e.message); }
+  };
+
+  // Leave group
+  window.comLeaveGroup = async function() {
+    const myEmail = S.user?.email;
+    if (!myEmail || !_activeGroup || !_db) return;
+    if (!confirm('Leave this group?')) return;
+    const gid = _activeGroup;
+    try {
+      await _db.ref(`aulert/groups/${gid}/members/${encKey(myEmail)}`).remove();
+      await _db.ref(`aulert/userGroups/${encKey(myEmail)}/${gid}`).remove();
+      delete _groups[gid];
+      if (_groupMsgUnsubscribe) { _groupMsgUnsubscribe(); _groupMsgUnsubscribe=null; }
+      _activeGroup = null;
+      $id('comMembersPanel')?.classList.remove('open');
+      showRight('empty');
+      renderSidebar();
+      comToast('Left group');
+    } catch(e) { comToast('Error: ' + e.message); }
+  };
+
+  // Join group via invite code (called from URL check or manually)
+  window.comJoinGroup = async function(code) {
+    const myEmail = S.user?.email;
+    if (!myEmail || !_db) { comToast('Sign in first to join'); return; }
+    try {
+      const cSnap = await _db.ref(`aulert/invites/${code}`).once('value');
+      const gid = cSnap.val();
+      if (!gid) { comToast('Invalid or expired invite link'); return; }
+      const gSnap = await _db.ref(`aulert/groups/${gid}`).once('value');
+      const gData = gSnap.val();
+      if (!gData) { comToast('Group no longer exists'); return; }
+      const myKey = encKey(myEmail);
+      // Already a member?
+      if (gData.members && gData.members[myKey]) {
+        comToast(`Already in "${gData.name}"!`);
+        goTab('com', document.getElementById('tb-com'));
+        setTimeout(() => comOpenGroup(gid), 500);
+        return;
+      }
+      const ts = Date.now();
+      await _db.ref(`aulert/groups/${gid}/members/${myKey}`).set({
+        email:myEmail, name:S.user?.name||'', picture:S.user?.picture||'', joinedAt:ts, role:'member'
+      });
+      await _db.ref(`aulert/userGroups/${myKey}/${gid}`).set({ name:gData.name, joinedAt:ts, unread:0 });
+      comToast(`Joined "${gData.name}"! 🎉`);
+      window.history.replaceState({}, '', window.location.pathname);
+      goTab('com', document.getElementById('tb-com'));
+      setTimeout(() => comOpenGroup(gid), 600);
+    } catch(e) { comToast('Error joining: ' + e.message); }
+  };
+
+  // Render group messages (with sender names for others)
+  function renderGroupMessages(msgs, myEmail) {
+    const area = $id('comMsgs');
+    if (!area) return;
+    if (!msgs.length) {
+      area.innerHTML='<div class="com-no-msgs"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" opacity=".2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><p>No messages yet. Say hi! 👋</p></div>';
+      return;
+    }
+    let html='', lastDay='', lastFrom='';
+    msgs.forEach(m => {
+      const day = fmtDay(m.ts);
+      if (day !== lastDay) { html+=`<div class="com-day-div">${day}</div>`; lastDay=day; lastFrom=''; }
+      const me = m.from === myEmail;
+      const showName = !me && m.from !== lastFrom;
+      lastFrom = m.from;
+      const senderLabel = showName ? `<div class="com-msg-sender">${esc(m.senderName||m.from.split('@')[0])}</div>` : '';
+      if (m.fileData) {
+        const isImg = m.fileType && m.fileType.startsWith('image/');
+        const sz = m.fileSize < 1024 ? m.fileSize+' B' : m.fileSize < 1048576 ? (m.fileSize/1024).toFixed(1)+' KB' : (m.fileSize/1048576).toFixed(1)+' MB';
+        if (isImg) {
+          html+=`<div class="com-msg ${me?'mine':'theirs'}">${senderLabel}<img class="com-file-img-preview" src="${m.fileData}" alt="${esc(m.fileName)}" onclick="window.open('${m.fileData}','_blank')"/><div class="com-msg-ts">${esc(m.fileName)} · ${sz} · ${fmtTime(m.ts)}</div></div>`;
+        } else {
+          html+=`<div class="com-msg ${me?'mine':'theirs'}">${senderLabel}<div class="com-file-msg"><div class="com-file-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polyline points="13,2 13,9 20,9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div class="com-file-info"><div class="com-file-name">${esc(m.fileName)}</div><div class="com-file-size">${sz}</div><a class="com-file-dl" href="${m.fileData}" download="${esc(m.fileName)}">Download</a></div></div><div class="com-msg-ts">${fmtTime(m.ts)}</div></div>`;
+        }
+      } else {
+        html+=`<div class="com-msg ${me?'mine':'theirs'}">${senderLabel}<div class="com-msg-bubble">${esc(m.text)}</div><div class="com-msg-ts">${fmtTime(m.ts)}</div></div>`;
+      }
+    });
+    const wasAtBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 60;
+    area.innerHTML = html;
+    if (wasAtBottom) area.scrollTop = area.scrollHeight;
+  }
+
   // ── Send message ──
   window.comSendMsg = async function() {
     const myEmail = S.user?.email;
@@ -8611,33 +9291,33 @@ const FIREBASE_CONFIG = {
   // ── Attach & send file ──
   window.comAttachFile = async function(input) {
     const myEmail = S.user?.email;
-    if (!myEmail || !_activeChat || !_db) return;
+    if (!myEmail || (!_activeChat && !_activeGroup) || !_db) return;
     const file = input?.files?.[0];
     if (!file) return;
-    input.value = ''; // reset so same file can be re-selected
+    input.value = '';
 
-    const MAX = 512 * 1024; // 512 KB limit
-    if (file.size > MAX) {
-      comToast('File too large (max 512 KB)');
-      return;
-    }
+    const MAX = 512 * 1024;
+    if (file.size > MAX) { comToast('File too large (max 512 KB)'); return; }
     comToast('Uploading…');
 
     const reader = new FileReader();
     reader.onload = async function(e) {
       const dataUrl = e.target.result;
-      const cKey = chatKey(myEmail, _activeChat);
       const ts = Date.now();
+      const payload = { from:myEmail, fileData:dataUrl, fileName:file.name, fileSize:file.size, fileType:file.type, ts };
       try {
-        await _db.ref(`aulert/messages/${cKey}`).push({
-          from: myEmail,
-          fileData: dataUrl,
-          fileName: file.name,
-          fileSize: file.size,
-          fileType: file.type,
-          ts
-        });
-        _db.ref(`aulert/friends/${encKey(_activeChat)}/${encKey(myEmail)}/unread`).transaction(n=>(n||0)+1);
+        if (_activeGroup) {
+          const g = _groups[_activeGroup] || {};
+          payload.senderName = S.user?.name||'';
+          await _db.ref(`aulert/groups/${_activeGroup}/messages`).push(payload);
+          Object.keys(g.members||{}).forEach(mKey => {
+            if (mKey !== encKey(myEmail)) _db.ref(`aulert/userGroups/${mKey}/${_activeGroup}/unread`).transaction(n=>(n||0)+1);
+          });
+        } else {
+          const cKey = chatKey(myEmail, _activeChat);
+          await _db.ref(`aulert/messages/${cKey}`).push(payload);
+          _db.ref(`aulert/friends/${encKey(_activeChat)}/${encKey(myEmail)}/unread`).transaction(n=>(n||0)+1);
+        }
         comToast('File sent ✓');
       } catch(err) { comToast('Failed to send file: ' + err.message); }
     };
@@ -8694,6 +9374,44 @@ const FIREBASE_CONFIG = {
 
   // Register comRender alias (called by goTab)
   window.comRender = window.comInit;
+
+  // ── Check for ?join= invite code in URL ──
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('join');
+    if (!code) return;
+    // Show join banner after a short delay (so the app has time to init)
+    function tryShowBanner() {
+      if (!document.getElementById('v-app')?.classList.contains('show')) {
+        setTimeout(tryShowBanner, 300); return;
+      }
+      // Need to be signed in
+      const myEmail = S?.user?.email;
+      if (!myEmail) {
+        // Prompt sign in first, then re-show after
+        const banner = document.createElement('div');
+        banner.className = 'com-join-banner';
+        banner.innerHTML = `<h3>Join a Group</h3><p>Sign in with Google first to join this group chat.</p><div class="com-join-banner-btns"><button class="com-join-accept" onclick="openLoginModal();this.closest('.com-join-banner').remove()">Sign In</button><button class="com-join-decline" onclick="window.history.replaceState({},'',location.pathname);this.closest('.com-join-banner').remove()">Dismiss</button></div>`;
+        document.body.appendChild(banner);
+        return;
+      }
+      // Show banner asking user to join
+      if (!_db) { setTimeout(tryShowBanner, 400); return; }
+      _db.ref(`aulert/invites/${code}`).once('value').then(snap => {
+        const gid = snap.val();
+        if (!gid) return;
+        return _db.ref(`aulert/groups/${gid}`).once('value');
+      }).then(gSnap => {
+        if (!gSnap || !gSnap.val()) return;
+        const g = gSnap.val();
+        const banner = document.createElement('div');
+        banner.className = 'com-join-banner';
+        banner.innerHTML = `<h3>You're invited!</h3><p>Join <span class="join-group-nm">${g.name||'a group'}</span> — chat with anyone who has the link, no friend request needed.</p><div class="com-join-banner-btns"><button class="com-join-accept" onclick="comJoinGroup('${code}');this.closest('.com-join-banner').remove()">Join Group</button><button class="com-join-decline" onclick="window.history.replaceState({},'',location.pathname);this.closest('.com-join-banner').remove()">Not now</button></div>`;
+        document.body.appendChild(banner);
+      }).catch(()=>{});
+    }
+    setTimeout(tryShowBanner, 800);
+  })();
 
 })();
 

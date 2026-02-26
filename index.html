@@ -4089,18 +4089,18 @@ body::before{
   80%  { opacity: 0.15; }
   100% { opacity: 1; }
 }
-@keyframes hwPenSwoop {
-  0%   { transform: translate(6px,-2px) rotate(45deg); opacity: 0; }
-  18%  { transform: translate(3px, 2px) rotate(35deg); opacity: 1; }
-  55%  { transform: translate(0px, 5px) rotate(20deg); opacity: 1; }
-  80%  { transform: translate(-2px,3px) rotate(10deg); opacity: 0.5; }
-  100% { transform: translate(-5px,2px) rotate(0deg);  opacity: 0; }
+@keyframes hwCheckStroke {
+  0%   { stroke-dashoffset: 20; opacity: 0; }
+  15%  { opacity: 1; }
+  65%  { stroke-dashoffset: 0; opacity: 1; }
+  85%  { stroke-dashoffset: 0; opacity: 1; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
 }
 .hw-checking .hw-board,
-.hw-checking .hw-clip  { animation: hwBoardTilt 0.85s cubic-bezier(.34,1.56,.64,1) both; transform-origin: 50% 50%; }
-.hw-checking .hw-line1 { animation: hwLineFade 0.85s ease both; }
-.hw-checking .hw-line2 { animation: hwLineFade 0.85s ease 0.05s both; }
-.hw-checking .hw-pen   { animation: hwPenSwoop 0.75s cubic-bezier(.4,0,.2,1) 0.08s both; }
+.hw-checking .hw-clip       { animation: hwBoardTilt 0.85s cubic-bezier(.34,1.56,.64,1) both; transform-origin: 50% 50%; }
+.hw-checking .hw-line1      { animation: hwLineFade 0.85s ease both; }
+.hw-checking .hw-line2      { animation: hwLineFade 0.85s ease 0.05s both; }
+.hw-checking .hw-check-draw { animation: hwCheckStroke 0.8s cubic-bezier(.4,0,.2,1) 0.12s both; }
 
 /* ── Community person pop ── */
 @keyframes comPersonPop {
@@ -4605,15 +4605,12 @@ body::before{
           <path class="hw-board" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
           <!-- clip tab -->
           <rect class="hw-clip" x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="2"/>
-          <!-- line 1 (fades out) -->
+          <!-- line 1 (fades out on click) -->
           <path class="hw-line1" d="M9 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          <!-- line 2 (fades out) -->
+          <!-- line 2 (fades out on click) -->
           <path class="hw-line2" d="M9 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          <!-- pen that slides in and writes -->
-          <g class="hw-pen" transform="translate(20, 4) rotate(45)" opacity="0">
-            <rect x="-1.5" y="-4" width="3" height="6" rx="1" fill="currentColor" opacity="0.9"/>
-            <path d="M-1.5 2 L0 5 L1.5 2Z" fill="currentColor" opacity="0.9"/>
-          </g>
+          <!-- checkmark drawn directly on the note, no circle -->
+          <path class="hw-check-draw" d="M8 13.5l2.5 2.5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="20" stroke-dashoffset="20" opacity="0"/>
         </svg>
         <span>Homework</span>
         <span class="tab-badge" id="badge-hw"></span>

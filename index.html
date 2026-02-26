@@ -3640,6 +3640,15 @@ body::before{
   color: var(--text); border-bottom-left-radius: 5px;
 }
 .com-msg-ts { font-size: 10px; color: var(--text-3); margin-top: 3px; padding: 0 3px; }
+.com-msg-seen {
+  font-size: 10px; color: var(--text-3); padding: 0 3px;
+  display: flex; align-items: center; gap: 4px;
+  margin-top: 1px; margin-bottom: 2px;
+}
+.com-msg-seen svg { opacity: .55; flex-shrink: 0; }
+/* teal double-tick when seen */
+.com-msg-seen.seen svg { opacity: 1; color: var(--teal); }
+[data-theme="light"] .com-msg-seen.seen svg { color: #2563EB; }
 .com-day-div {
   display: flex; align-items: center; gap: 10px;
   color: var(--text-3); font-size: 10px; font-weight: 700;
@@ -8574,6 +8583,19 @@ const FIREBASE_CONFIG = {
     if(d.toDateString()===y.toDateString()) return 'Yesterday';
     return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
   }
+  function fmtSeenAgo(ts) {
+    if (!ts) return '';
+    const diff = Date.now() - ts;
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1)  return 'Seen just now';
+    if (mins < 60) return `Seen ${mins} min${mins!==1?'s':''} ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24)  return `Seen ${hrs} hr${hrs!==1?'s':''} ago`;
+    const days = Math.floor(hrs / 24);
+    if (days === 1) return 'Seen yesterday';
+    if (days < 7)  return `Seen ${days} days ago`;
+    return 'Seen ' + new Date(ts).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+  }
   function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function $id(id){ return document.getElementById(id); }
 
@@ -8589,6 +8611,9 @@ const FIREBASE_CONFIG = {
   let _groupMsgUnsubscribe = null;
   let _groupMemberUnsubscribe = null;
   let _groupsListener = null;
+  let _seenByFriend = 0;       // timestamp: when friend last saw this DM thread
+  let _seenUnsubscribe = null; // unsub for seen listener
+  let _seenByGroup = {};       // groupId → { email: ts } for group seen receipts
 
   function groupGrad(gid) {
     const gs = ['linear-gradient(135deg,#38BDF8,#6366f1)','linear-gradient(135deg,#10B981,#3B82F6)',
@@ -8933,51 +8958,74 @@ const FIREBASE_CONFIG = {
   window.comOpenChat = function(friendEmail) {
     const myEmail = S.user?.email;
     if (!myEmail || !_db) return;
-    _activeGroup = null; // clear group
+    _activeGroup = null;
     if (_groupMsgUnsubscribe) { _groupMsgUnsubscribe(); _groupMsgUnsubscribe=null; }
     if (_groupMemberUnsubscribe) { _groupMemberUnsubscribe(); _groupMemberUnsubscribe=null; }
+    if (_seenUnsubscribe) { _seenUnsubscribe(); _seenUnsubscribe=null; }
     $id('comMembersPanel')?.classList.remove('open');
     _activeChat = friendEmail;
+    _seenByFriend = 0;
+
     // Clear unread
     _db.ref(`aulert/friends/${encKey(myEmail)}/${encKey(friendEmail)}/unread`).set(0);
     renderSidebar();
     showRight('chat');
-    // Update header with profile picture
+
+    // Update header
     const fData = _friends[friendEmail] || {};
     const pic = fData.picture || '';
     const displayName = fData.name ? fData.name.split(' ')[0] : friendEmail.split('@')[0];
     const ava=$id('comChatAva'), nameEl=$id('comChatName'), gEl=$id('comChatGmail');
-    if (ava) {
-      ava.style.background = avatarBg(pic, friendEmail);
-      ava.innerHTML = avatarInner(friendEmail, pic);
-    }
+    if (ava) { ava.style.background = avatarBg(pic, friendEmail); ava.innerHTML = avatarInner(friendEmail, pic); }
     if (nameEl) nameEl.textContent = displayName;
     if (gEl)    gEl.textContent = friendEmail;
-    // Detach old listener
-    if (_chatUnsubscribe) { _chatUnsubscribe(); _chatUnsubscribe=null; }
-    // Listen for messages
+
+    // Mark that I've seen this thread (write my seen timestamp)
     const cKey = chatKey(myEmail, friendEmail);
+    const writeMySeenTs = () => _db.ref(`aulert/seen/${cKey}/${encKey(myEmail)}`).set(Date.now());
+    writeMySeenTs();
+
+    // Listen to friend's seen timestamp so receipt updates in real time
+    const friendSeenRef = _db.ref(`aulert/seen/${cKey}/${encKey(friendEmail)}`);
+    friendSeenRef.on('value', snap => {
+      _seenByFriend = snap.val() || 0;
+      // Re-render with updated seen info (only if still on this chat)
+      if (_activeChat === friendEmail) {
+        const area = $id('comMsgs');
+        const existing = area ? Object.values(area.querySelectorAll('.com-msg-seen')) : [];
+        // lightweight: just update the seen row if it exists, else full re-render is fine
+        // We trigger a lightweight re-render by updating the last seen element directly
+        const seenEls = area ? area.querySelectorAll('.com-msg-seen') : [];
+        seenEls.forEach(el => {
+          const label = el.querySelector('.seen-label');
+          if (label) label.textContent = fmtSeenAgo(_seenByFriend);
+          if (_seenByFriend) el.classList.add('seen'); else el.classList.remove('seen');
+        });
+      }
+    });
+    _seenUnsubscribe = () => friendSeenRef.off('value');
+
+    // Detach old message listener
+    if (_chatUnsubscribe) { _chatUnsubscribe(); _chatUnsubscribe=null; }
+
+    // Listen for messages
     const ref = _db.ref(`aulert/messages/${cKey}`).limitToLast(120);
-    let _lastMsgTs = Date.now(); // track latest ts to detect truly new messages
+    let _lastMsgTs = Date.now();
     ref.on('value', snap => {
       const raw = snap.val() || {};
       const msgs = Object.values(raw).sort((a,b)=>a.ts-b.ts);
-      // Check for new incoming messages → browser notification
       msgs.forEach(m => {
         if (m.from !== myEmail && m.ts > _lastMsgTs) {
+          // Friend sent me a new message while chat is open → refresh my seen ts
+          writeMySeenTs();
           if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
             const senderName = (_friends[m.from]?.name || m.from.split('@')[0]);
-            const notifBody = m.fileData
-              ? `${senderName} sent a file`
-              : (m.text ? `${senderName}: ${m.text.slice(0, 80)}` : `${senderName} sent a message`);
-            new Notification('Aulert · New message', {
-              body: notifBody,
-              icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💬</text></svg>'
-            });
+            const notifBody = m.fileData ? `${senderName} sent a file` : (m.text ? `${senderName}: ${m.text.slice(0,80)}` : `${senderName} sent a message`);
+            new Notification('Aulert · New message', { body: notifBody, icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💬</text></svg>' });
           }
         }
       });
-      if (msgs.length) _lastMsgTs = msgs[msgs.length - 1].ts;
+      if (msgs.length) _lastMsgTs = msgs[msgs.length-1].ts;
       renderMessages(msgs, myEmail);
     });
     _chatUnsubscribe = () => ref.off('value');
@@ -9105,22 +9153,25 @@ const FIREBASE_CONFIG = {
     // Clear DM state
     _activeChat = null;
     if (_chatUnsubscribe) { _chatUnsubscribe(); _chatUnsubscribe=null; }
+    if (_seenUnsubscribe) { _seenUnsubscribe(); _seenUnsubscribe=null; }
     // Clear old group listeners
     if (_groupMsgUnsubscribe) { _groupMsgUnsubscribe(); _groupMsgUnsubscribe=null; }
     if (_groupMemberUnsubscribe) { _groupMemberUnsubscribe(); _groupMemberUnsubscribe=null; }
 
     _activeGroup = groupId;
+    _seenByGroup[groupId] = _seenByGroup[groupId] || {};
     $id('comMembersPanel')?.classList.remove('open');
 
-    // Clear unread
+    // Clear unread + write my seen timestamp
     _db.ref(`aulert/userGroups/${encKey(myEmail)}/${groupId}/unread`).set(0);
     if (_groups[groupId]) _groups[groupId].userUnread = 0;
+    const writeGroupSeenTs = () => _db.ref(`aulert/groupSeen/${groupId}/${encKey(myEmail)}`).set(Date.now());
+    writeGroupSeenTs();
 
     renderSidebar();
     showRight('chat');
 
     const g = _groups[groupId] || {};
-    // Update group header
     const iconEl = $id('comGroupHeaderIcon');
     const nameEl = $id('comGroupHeaderName');
     const subEl  = $id('comGroupHeaderSub');
@@ -9131,6 +9182,12 @@ const FIREBASE_CONFIG = {
     if (subEl)  subEl.textContent = `${memberCount} member${memberCount!==1?'s':''}`;
     if (inp)    inp.placeholder = `Message ${g.name||'group'}…`;
 
+    // Listen to group seen timestamps (everyone's)
+    const groupSeenRef = _db.ref(`aulert/groupSeen/${groupId}`);
+    groupSeenRef.on('value', snap => {
+      _seenByGroup[groupId] = snap.val() || {};
+    });
+
     // Listen for messages
     const msgRef = _db.ref(`aulert/groups/${groupId}/messages`).limitToLast(200);
     let _lastGMsgTs = Date.now();
@@ -9139,6 +9196,7 @@ const FIREBASE_CONFIG = {
       const msgs = Object.values(raw).sort((a,b) => a.ts-b.ts);
       msgs.forEach(m => {
         if (m.from !== myEmail && m.ts > _lastGMsgTs) {
+          writeGroupSeenTs();
           if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
             const sn = m.senderName || m.from.split('@')[0];
             new Notification(`Aulert · ${g.name||'Group'}`, { body: `${sn}: ${m.text?m.text.slice(0,80):'sent a file'}` });
@@ -9146,9 +9204,8 @@ const FIREBASE_CONFIG = {
         }
       });
       if (msgs.length) _lastGMsgTs = msgs[msgs.length-1].ts;
-      renderGroupMessages(msgs, myEmail);
+      renderGroupMessages(msgs, myEmail, groupId);
     });
-    _groupMsgUnsubscribe = () => msgRef.off('value');
 
     // Listen for member changes
     const memRef = _db.ref(`aulert/groups/${groupId}/members`);
@@ -9160,9 +9217,8 @@ const FIREBASE_CONFIG = {
       if (subEl2) subEl2.textContent = `${count} member${count!==1?'s':''}`;
       renderMembersPanel(members, myEmail, g.createdBy);
     });
-    _groupMemberUnsubscribe = () => memRef.off('value');
 
-    _groupMsgUnsubscribe = () => { msgRef.off('value'); memRef.off('value'); };
+    _groupMsgUnsubscribe = () => { msgRef.off('value'); memRef.off('value'); groupSeenRef.off('value'); };
   };
 
   // Send group message
@@ -9239,33 +9295,61 @@ const FIREBASE_CONFIG = {
   };
 
   // Render group messages (with sender names for others)
-  function renderGroupMessages(msgs, myEmail) {
+  function renderGroupMessages(msgs, myEmail, groupId) {
     const area = $id('comMsgs');
     if (!area) return;
     if (!msgs.length) {
       area.innerHTML='<div class="com-no-msgs"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" opacity=".2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><p>No messages yet. Say hi! 👋</p></div>';
       return;
     }
+    let lastMyIdx = -1;
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      if (msgs[i].from === myEmail) { lastMyIdx = i; break; }
+    }
+    const seenMap = (groupId && _seenByGroup[groupId]) ? _seenByGroup[groupId] : {};
+    const g = _groups[groupId] || {};
+    const allMembers = g.members || {};
+    const doubleTick = `<svg width="13" height="9" viewBox="0 0 18 12" fill="none"><path d="M1 6l4 4L14 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
     let html='', lastDay='', lastFrom='';
-    msgs.forEach(m => {
+    msgs.forEach((m, i) => {
       const day = fmtDay(m.ts);
-      if (day !== lastDay) { html+=`<div class="com-day-div">${day}</div>`; lastDay=day; lastFrom=''; }
+      if (day !== lastDay) { html += `<div class="com-day-div">${day}</div>`; lastDay=day; lastFrom=''; }
       const me = m.from === myEmail;
       const showName = !me && m.from !== lastFrom;
       lastFrom = m.from;
       const senderLabel = showName ? `<div class="com-msg-sender">${esc(m.senderName||m.from.split('@')[0])}</div>` : '';
+
+      let bubble = '';
       if (m.fileData) {
         const isImg = m.fileType && m.fileType.startsWith('image/');
-        const sz = m.fileSize < 1024 ? m.fileSize+' B' : m.fileSize < 1048576 ? (m.fileSize/1024).toFixed(1)+' KB' : (m.fileSize/1048576).toFixed(1)+' MB';
+        const sz = m.fileSize < 1024 ? m.fileSize+' B' : m.fileSize < 1048576 ? (m.fileSize/1024).toFixed(1)+' KB' : m.fileSize < 1073741824 ? (m.fileSize/1048576).toFixed(1)+' MB' : (m.fileSize/1073741824).toFixed(2)+' GB';
         if (isImg) {
-          html+=`<div class="com-msg ${me?'mine':'theirs'}">${senderLabel}<img class="com-file-img-preview" src="${m.fileData}" alt="${esc(m.fileName)}" onclick="window.open('${m.fileData}','_blank')"/><div class="com-msg-ts">${esc(m.fileName)} · ${sz} · ${fmtTime(m.ts)}</div></div>`;
+          bubble = `${senderLabel}<img class="com-file-img-preview" src="${m.fileData}" alt="${esc(m.fileName)}" onclick="window.open('${m.fileData}','_blank')"/><div class="com-msg-ts">${esc(m.fileName)} · ${sz} · ${fmtTime(m.ts)}</div>`;
         } else {
-          html+=`<div class="com-msg ${me?'mine':'theirs'}">${senderLabel}<div class="com-file-msg"><div class="com-file-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polyline points="13,2 13,9 20,9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div class="com-file-info"><div class="com-file-name">${esc(m.fileName)}</div><div class="com-file-size">${sz}</div><a class="com-file-dl" href="${m.fileData}" download="${esc(m.fileName)}">Download</a></div></div><div class="com-msg-ts">${fmtTime(m.ts)}</div></div>`;
+          bubble = `${senderLabel}<div class="com-file-msg"><div class="com-file-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polyline points="13,2 13,9 20,9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div class="com-file-info"><div class="com-file-name">${esc(m.fileName)}</div><div class="com-file-size">${sz}</div><a class="com-file-dl" href="${m.fileData}" download="${esc(m.fileName)}">Download</a></div></div><div class="com-msg-ts">${fmtTime(m.ts)}</div>`;
         }
       } else {
-        html+=`<div class="com-msg ${me?'mine':'theirs'}">${senderLabel}<div class="com-msg-bubble">${esc(m.text)}</div><div class="com-msg-ts">${fmtTime(m.ts)}</div></div>`;
+        bubble = `${senderLabel}<div class="com-msg-bubble">${esc(m.text)}</div><div class="com-msg-ts">${fmtTime(m.ts)}</div>`;
       }
+
+      let seenHtml = '';
+      if (me && i === lastMyIdx) {
+        const seenNames = Object.entries(allMembers)
+          .filter(([mKey, mData]) => mData.email !== myEmail && (seenMap[mKey]||0) >= m.ts)
+          .map(([, mData]) => mData.name ? mData.name.split(' ')[0] : mData.email.split('@')[0]);
+        const otherCount = Object.values(allMembers).filter(md => md.email !== myEmail).length;
+        const wasSeen = seenNames.length > 0;
+        const label = wasSeen
+          ? (seenNames.length === otherCount ? 'Seen by everyone'
+            : seenNames.length === 1 ? `Seen by ${seenNames[0]}`
+            : `Seen by ${seenNames.length}`)
+          : 'Delivered';
+        seenHtml = `<div class="com-msg-seen${wasSeen?' seen':''}">${doubleTick}<span class="seen-label">${label}</span></div>`;
+      }
+      html += `<div class="com-msg ${me?'mine':'theirs'}">${bubble}${seenHtml}</div>`;
     });
+
     const wasAtBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 60;
     area.innerHTML = html;
     if (wasAtBottom) area.scrollTop = area.scrollHeight;
@@ -9300,8 +9384,8 @@ const FIREBASE_CONFIG = {
     if (!file) return;
     input.value = '';
 
-    const MAX = 512 * 1024;
-    if (file.size > MAX) { comToast('File too large (max 512 KB)'); return; }
+    const MAX = 1024 * 1024 * 1024;
+    if (file.size > MAX) { comToast('File too large (max 1 GB)'); return; }
     comToast('Uploading…');
 
     const reader = new FileReader();
@@ -9337,40 +9421,48 @@ const FIREBASE_CONFIG = {
       area.innerHTML='<div class="com-no-msgs"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" opacity=".2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><p>No messages yet. Say hi! 👋</p></div>';
       return;
     }
+
+    // Find index of the last message I sent
+    let lastMyIdx = -1;
+    for (let i = msgs.length - 1; i >= 0; i--) {
+      if (msgs[i].from === myEmail) { lastMyIdx = i; break; }
+    }
+
+    const doubleTick = `<svg width="13" height="9" viewBox="0 0 18 12" fill="none"><path d="M1 6l4 4L14 1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10l4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
     let html='', lastDay='';
-    msgs.forEach(m => {
-      const day=fmtDay(m.ts);
-      if (day!==lastDay){ html+=`<div class="com-day-div">${day}</div>`; lastDay=day; }
-      const me = m.from===myEmail;
+    msgs.forEach((m, i) => {
+      const day = fmtDay(m.ts);
+      if (day !== lastDay) { html += `<div class="com-day-div">${day}</div>`; lastDay = day; }
+      const me = m.from === myEmail;
+
+      let bubble = '';
       if (m.fileData) {
         const isImg = m.fileType && m.fileType.startsWith('image/');
-        const sizeLabel = m.fileSize < 1024 ? m.fileSize + ' B'
-          : m.fileSize < 1048576 ? (m.fileSize/1024).toFixed(1) + ' KB'
-          : (m.fileSize/1048576).toFixed(1) + ' MB';
+        const sz = m.fileSize < 1024 ? m.fileSize+' B' : m.fileSize < 1048576 ? (m.fileSize/1024).toFixed(1)+' KB' : m.fileSize < 1073741824 ? (m.fileSize/1048576).toFixed(1)+' MB' : (m.fileSize/1073741824).toFixed(2)+' GB';
         if (isImg) {
-          html+=`<div class="com-msg ${me?'mine':'theirs'}">
-            <img class="com-file-img-preview" src="${m.fileData}" alt="${esc(m.fileName)}" onclick="window.open('${m.fileData}','_blank')"/>
-            <div class="com-msg-ts">${esc(m.fileName)} · ${sizeLabel} · ${fmtTime(m.ts)}</div>
-          </div>`;
+          bubble = `<img class="com-file-img-preview" src="${m.fileData}" alt="${esc(m.fileName)}" onclick="window.open('${m.fileData}','_blank')"/><div class="com-msg-ts">${esc(m.fileName)} · ${sz} · ${fmtTime(m.ts)}</div>`;
         } else {
-          html+=`<div class="com-msg ${me?'mine':'theirs'}">
-            <div class="com-file-msg">
-              <div class="com-file-icon">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="13,2 13,9 20,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <div class="com-file-info">
-                <div class="com-file-name">${esc(m.fileName)}</div>
-                <div class="com-file-size">${sizeLabel}</div>
-                <a class="com-file-dl" href="${m.fileData}" download="${esc(m.fileName)}">Download</a>
-              </div>
-            </div>
-            <div class="com-msg-ts">${fmtTime(m.ts)}</div>
-          </div>`;
+          bubble = `<div class="com-file-msg"><div class="com-file-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="13,2 13,9 20,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="com-file-info"><div class="com-file-name">${esc(m.fileName)}</div><div class="com-file-size">${sz}</div><a class="com-file-dl" href="${m.fileData}" download="${esc(m.fileName)}">Download</a></div></div><div class="com-msg-ts">${fmtTime(m.ts)}</div>`;
         }
       } else {
-        html+=`<div class="com-msg ${me?'mine':'theirs'}"><div class="com-msg-bubble">${esc(m.text)}</div><div class="com-msg-ts">${fmtTime(m.ts)}</div></div>`;
+        bubble = `<div class="com-msg-bubble">${esc(m.text)}</div><div class="com-msg-ts">${fmtTime(m.ts)}</div>`;
       }
+
+      // Seen receipt — only on the last message I sent
+      let seenHtml = '';
+      if (me && i === lastMyIdx) {
+        const wasSeen = _seenByFriend && _seenByFriend >= m.ts;
+        const seenLabel = wasSeen ? fmtSeenAgo(_seenByFriend) : '';
+        seenHtml = `<div class="com-msg-seen${wasSeen?' seen':''}">
+          ${doubleTick}
+          <span class="seen-label">${wasSeen ? seenLabel : 'Delivered'}</span>
+        </div>`;
+      }
+
+      html += `<div class="com-msg ${me?'mine':'theirs'}">${bubble}${seenHtml}</div>`;
     });
+
     const wasAtBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 60;
     area.innerHTML = html;
     if (wasAtBottom) area.scrollTop = area.scrollHeight;

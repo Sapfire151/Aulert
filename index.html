@@ -3341,20 +3341,32 @@ body::before{
 /* ══════════════════════════════════════════
    COMMUNITY TAB
 ══════════════════════════════════════════ */
-#p-com { padding: 0; max-width: 100%; }
-#p-com.show { display: block; }
+#p-com {
+  padding: 0;
+  position: fixed;
+  inset: 64px 0 0 0;
+  z-index: 2;
+  overflow: hidden;
+  display: none;
+}
+#p-com.show {
+  display: block;
+  animation: panelIn .3s var(--ease) both;
+}
 
 .com-layout {
   display: grid;
   grid-template-columns: 290px 1fr;
-  height: calc(100svh - 64px);
+  width: 100%;
+  height: 100%;
   overflow: hidden;
 }
 @media(max-width: 700px) {
   .com-layout { grid-template-columns: 1fr; }
+  .com-sidebar { display: flex; }
   .com-chat { display: none; }
   .com-layout.chat-open .com-sidebar { display: none; }
-  .com-layout.chat-open .com-chat { display: flex; flex-direction: column; }
+  .com-layout.chat-open .com-chat { display: flex !important; flex-direction: column; }
 }
 
 /* Sidebar */
@@ -3363,6 +3375,7 @@ body::before{
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  height: 100%;
   background: var(--card-bg);
   backdrop-filter: var(--blur);
 }
@@ -3537,11 +3550,13 @@ body::before{
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  height: 100%;
   background: var(--bg-2);
 }
 
 .com-chat-empty {
   flex: 1;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -4128,6 +4143,10 @@ body::before{
         <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="2"/><path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <span>Homework</span>
       </button>
+      <button class="nav-tab" id="tb-com" onclick="iconPop(this);goTab('com',this)">
+        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Community</span>
+      </button>
       <button class="nav-tab" id="tb-set" onclick="iconPop(this);gearSpinAnim(this);goTab('set',this)">
         <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span>Settings</span>
@@ -4135,10 +4154,6 @@ body::before{
       <button class="nav-tab" id="tb-fbk" onclick="iconPop(this);goTab('fbk',this)">
         <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span>Feedbacks</span>
-      </button>
-      <button class="nav-tab" id="tb-com" onclick="iconPop(this);goTab('com',this)">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span>Community</span>
       </button>
     </div>
     <div class="nav-r">
@@ -4761,7 +4776,7 @@ body::before{
             <p>Pick someone from your friends list to start a conversation.</p>
           </div>
 
-          <div id="comChatArea" style="display:none;height:100%;display:none;flex-direction:column;">
+          <div id="comChatArea" style="display:none;flex-direction:column;height:100%;flex:1;">
             <!-- Chat header -->
             <div class="com-chat-header">
               <div class="com-chat-ava" id="comChatAva">?</div>

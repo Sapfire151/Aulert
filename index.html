@@ -4031,36 +4031,84 @@ body::before{
   animation: gearSpin 1.0s cubic-bezier(.25,.1,.25,1) both !important;
 }
 
-/* ── Calendar flip animation ── */
-@keyframes calFlip {
-  0%   { transform: rotateX(0deg) scaleY(1); }
-  25%  { transform: rotateX(-22deg) scaleY(0.92); }
-  55%  { transform: rotateX(12deg) scaleY(1.04); }
-  75%  { transform: rotateX(-6deg) scaleY(0.98); }
-  100% { transform: rotateX(0deg) scaleY(1); }
+/* ── Calendar: rings lift, body shakes, date flips up, sparks fly ── */
+@keyframes calBodyShake {
+  0%   { transform: rotate(0deg); }
+  18%  { transform: rotate(-6deg); }
+  36%  { transform: rotate(5deg); }
+  54%  { transform: rotate(-3deg); }
+  72%  { transform: rotate(2deg); }
+  100% { transform: rotate(0deg); }
 }
-.cal-flipping svg {
-  animation: calFlip 0.75s cubic-bezier(.34,1.56,.64,1) both !important;
-  transform-origin: 50% 20% !important;
+@keyframes calRingBounce {
+  0%   { transform: translateY(0); }
+  30%  { transform: translateY(-3px); }
+  55%  { transform: translateY(1px); }
+  75%  { transform: translateY(-1px); }
+  100% { transform: translateY(0); }
 }
+@keyframes calNumFlip {
+  0%   { transform: translateY(0px) scale(1); opacity: 1; }
+  30%  { transform: translateY(-5px) scale(1.4); opacity: 0; }
+  31%  { transform: translateY(5px) scale(0.8); opacity: 0; }
+  65%  { transform: translateY(0px) scale(1.1); opacity: 1; }
+  100% { transform: translateY(0px) scale(1); opacity: 1; }
+}
+@keyframes calSparkFly1 {
+  0%   { transform: translate(0,0); opacity: 1; r: 1; }
+  100% { transform: translate(-5px,-5px); opacity: 0; r: 0.3; }
+}
+@keyframes calSparkFly2 {
+  0%   { transform: translate(0,0); opacity: 1; r: 1; }
+  100% { transform: translate(5px,-5px); opacity: 0; r: 0.3; }
+}
+@keyframes calSparkFly3 {
+  0%   { transform: translate(0,0); opacity: 1; r: 1; }
+  100% { transform: translate(0px,-7px); opacity: 0; r: 0.3; }
+}
+.cal-flipping .cal-body,
+.cal-flipping .cal-header,
+.cal-flipping .cal-line { animation: calBodyShake 0.7s cubic-bezier(.36,.07,.19,.97) both; }
+.cal-flipping .cal-rings { animation: calRingBounce 0.7s cubic-bezier(.34,1.56,.64,1) both; transform-origin: 50% 100%; }
+.cal-flipping .cal-num   { animation: calNumFlip 0.72s cubic-bezier(.34,1.56,.64,1) 0.05s both; transform-origin: 50% 50%; }
+.cal-flipping .cal-spark-1 { animation: calSparkFly1 0.55s ease-out 0.1s both; }
+.cal-flipping .cal-spark-2 { animation: calSparkFly2 0.55s ease-out 0.15s both; }
+.cal-flipping .cal-spark-3 { animation: calSparkFly3 0.5s ease-out 0.08s both; }
 
-/* ── Homework clipboard bounce + check draw ── */
-@keyframes hwClipboardBounce {
-  0%   { transform: translateY(0px) rotate(0deg); }
-  20%  { transform: translateY(-3px) rotate(-5deg); }
-  45%  { transform: translateY(1.5px) rotate(3.5deg); }
-  65%  { transform: translateY(-1px) rotate(-1.5deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
+/* ── Homework: board tilts, lines fade, pen sweeps in and draws checkmark ── */
+@keyframes hwBoardTilt {
+  0%   { transform: rotate(0deg) translateY(0); }
+  20%  { transform: rotate(-4deg) translateY(-1px); }
+  50%  { transform: rotate(2deg) translateY(0.5px); }
+  75%  { transform: rotate(-1deg) translateY(0); }
+  100% { transform: rotate(0deg) translateY(0); }
 }
-@keyframes hwCheckDraw {
-  0%   { stroke-dashoffset: 28; opacity: 0; }
-  35%  { stroke-dashoffset: 0;  opacity: 1; }
-  80%  { stroke-dashoffset: 0;  opacity: 1; }
-  100% { stroke-dashoffset: 28; opacity: 0.2; }
+@keyframes hwLineFade {
+  0%   { opacity: 1; }
+  30%  { opacity: 0.15; }
+  80%  { opacity: 0.15; }
+  100% { opacity: 1; }
 }
-.hw-checking svg {
-  animation: hwClipboardBounce 0.85s cubic-bezier(.34,1.56,.64,1) both !important;
+@keyframes hwPenSwoop {
+  0%   { transform: translate(6px,-2px) rotate(45deg); opacity: 0; }
+  18%  { transform: translate(3px, 2px) rotate(35deg); opacity: 1; }
+  55%  { transform: translate(0px, 5px) rotate(20deg); opacity: 1; }
+  80%  { transform: translate(-2px,3px) rotate(10deg); opacity: 0.5; }
+  100% { transform: translate(-5px,2px) rotate(0deg);  opacity: 0; }
 }
+@keyframes hwCheckStroke {
+  0%   { stroke-dashoffset: 18; opacity: 0; }
+  20%  { opacity: 1; }
+  70%  { stroke-dashoffset: 0; opacity: 1; }
+  90%  { opacity: 0.8; }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+.hw-checking .hw-board,
+.hw-checking .hw-clip  { animation: hwBoardTilt 0.85s cubic-bezier(.34,1.56,.64,1) both; transform-origin: 50% 50%; }
+.hw-checking .hw-line1 { animation: hwLineFade 0.85s ease both; }
+.hw-checking .hw-line2 { animation: hwLineFade 0.85s ease 0.05s both; }
+.hw-checking .hw-pen   { animation: hwPenSwoop 0.75s cubic-bezier(.4,0,.2,1) 0.08s both; }
+.hw-checking .hw-check-draw { animation: hwCheckStroke 0.7s cubic-bezier(.4,0,.2,1) 0.18s both; }
 
 /* ── Community person pop ── */
 @keyframes comPersonPop {
@@ -4518,12 +4566,43 @@ body::before{
         <span class="tab-badge" id="badge-feed"></span>
       </button>
       <button class="nav-tab" id="tb-cal" onclick="calFlipAnim(this);goTab('cal',this)">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <svg class="nav-icon" id="cal-svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <!-- body -->
+          <rect class="cal-body" x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+          <!-- header bar fill -->
+          <rect class="cal-header" x="3" y="4" width="18" height="6" rx="2" fill="currentColor" opacity="0.15"/>
+          <!-- ring pins -->
+          <path class="cal-rings" d="M8 2v4M16 2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <!-- divider line -->
+          <path class="cal-line" d="M3 10h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- date number "7" -->
+          <text class="cal-num" x="12" y="20" text-anchor="middle" font-size="8" font-weight="700" fill="currentColor" font-family="inherit">7</text>
+          <!-- sparkle dots that fly out on click -->
+          <circle class="cal-spark cal-spark-1" cx="12" cy="12" r="1" fill="currentColor" opacity="0"/>
+          <circle class="cal-spark cal-spark-2" cx="12" cy="12" r="1" fill="currentColor" opacity="0"/>
+          <circle class="cal-spark cal-spark-3" cx="12" cy="12" r="1" fill="currentColor" opacity="0"/>
+        </svg>
         <span>Calendar</span>
         <span class="tab-badge" id="badge-cal"></span>
       </button>
       <button class="nav-tab" id="tb-hw" onclick="hwCheckAnim(this);goTab('hw',this)">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="2"/><path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <svg class="nav-icon" id="hw-svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <!-- clipboard body -->
+          <path class="hw-board" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- clip tab -->
+          <rect class="hw-clip" x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="2"/>
+          <!-- line 1 (fades out) -->
+          <path class="hw-line1" d="M9 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <!-- line 2 (fades out) -->
+          <path class="hw-line2" d="M9 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <!-- checkmark drawn on click -->
+          <path class="hw-check-draw" d="M8 13.5l2.5 2.5 5-5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="18" stroke-dashoffset="18" opacity="0"/>
+          <!-- pen that slides in and writes -->
+          <g class="hw-pen" transform="translate(20, 4) rotate(45)" opacity="0">
+            <rect x="-1.5" y="-4" width="3" height="6" rx="1" fill="currentColor" opacity="0.9"/>
+            <path d="M-1.5 2 L0 5 L1.5 2Z" fill="currentColor" opacity="0.9"/>
+          </g>
+        </svg>
         <span>Homework</span>
         <span class="tab-badge" id="badge-hw"></span>
       </button>
@@ -5894,7 +5973,9 @@ function calFlipAnim(el) {
   el.classList.remove('cal-flipping');
   void el.offsetWidth;
   el.classList.add('cal-flipping');
-  el.addEventListener('animationend', () => el.classList.remove('cal-flipping'), { once: true });
+  // longest animation is ~0.75s, clean up after
+  clearTimeout(el._calTimer);
+  el._calTimer = setTimeout(() => el.classList.remove('cal-flipping'), 900);
 }
 
 function hwCheckAnim(el) {
@@ -5902,20 +5983,8 @@ function hwCheckAnim(el) {
   el.classList.remove('hw-checking');
   void el.offsetWidth;
   el.classList.add('hw-checking');
-  const paths = el.querySelectorAll('svg path');
-  paths.forEach((p, i) => {
-    if (i >= paths.length - 2) {
-      p.style.strokeDasharray = '28';
-      p.style.strokeDashoffset = '28';
-      p.style.animation = 'none';
-      void p.offsetWidth;
-      p.style.animation = `hwCheckDraw 0.85s cubic-bezier(.34,1.56,.64,1) ${0.08 + i * 0.06}s both`;
-    }
-  });
-  el.addEventListener('animationend', () => {
-    el.classList.remove('hw-checking');
-    paths.forEach(p => { p.style.animation = ''; p.style.strokeDasharray = ''; p.style.strokeDashoffset = ''; });
-  }, { once: true });
+  clearTimeout(el._hwTimer);
+  el._hwTimer = setTimeout(() => el.classList.remove('hw-checking'), 1050);
 }
 
 function comWaveAnim(el) {

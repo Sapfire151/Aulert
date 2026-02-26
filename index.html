@@ -3676,6 +3676,84 @@ body::before{
 .com-send-btn:hover { background: #7c3aed; transform: scale(1.08); }
 .com-send-btn:active { transform: scale(.95); }
 
+/* ── File attach button ── */
+.com-attach-btn {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--surface); border: 1px solid var(--rim-2);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  color: var(--text-3); flex-shrink: 0;
+  transition: all .2s var(--spring);
+}
+.com-attach-btn:hover { background: var(--surface-2); color: var(--text-2); border-color: var(--rim); transform: scale(1.08); }
+.com-attach-btn:active { transform: scale(.95); }
+
+/* File message bubble */
+.com-file-msg {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 14px; border-radius: 14px;
+  max-width: 260px;
+}
+.com-msg.mine .com-file-msg {
+  background: linear-gradient(135deg,var(--violet),#6366f1);
+  color: #fff; border-bottom-right-radius: 5px;
+}
+.com-msg.theirs .com-file-msg {
+  background: var(--card-bg); border: 1px solid var(--rim-2);
+  color: var(--text); border-bottom-left-radius: 5px;
+}
+.com-file-icon {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: rgba(255,255,255,.18);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.com-msg.theirs .com-file-icon { background: var(--surface-2); }
+.com-file-info { flex: 1; min-width: 0; }
+.com-file-name { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.com-file-size { font-size: 10px; opacity: .65; margin-top: 2px; }
+.com-file-dl {
+  display: inline-block; margin-top: 4px;
+  font-size: 10px; font-weight: 700; text-decoration: underline; cursor: pointer; opacity: .8;
+}
+.com-file-img-preview {
+  max-width: 220px; max-height: 160px; border-radius: 10px;
+  object-fit: cover; display: block;
+  cursor: pointer;
+}
+
+/* ════════════════════════════════════════════
+   TAB BADGE (notification pill on nav tabs)
+════════════════════════════════════════════ */
+.nav-tab { position: relative; }
+.tab-badge {
+  position: absolute;
+  top: 2px; right: 4px;
+  min-width: 16px; height: 16px;
+  padding: 0 4px;
+  border-radius: 5px;           /* rounded square */
+  background: #EF4444;
+  color: #fff;
+  font-size: 9.5px; font-weight: 800; line-height: 16px;
+  text-align: center;
+  display: none;                /* hidden when zero */
+  pointer-events: none;
+  z-index: 10;
+  box-shadow: 0 1px 4px rgba(239,68,68,.45);
+  letter-spacing: .2px;
+  border: 1.5px solid var(--bg);
+  transition: transform .2s var(--spring), opacity .2s;
+  animation: badgePop .3s var(--spring);
+}
+@keyframes badgePop {
+  from { transform: scale(0) rotate(-12deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg);   opacity: 1; }
+}
+[data-theme="light"] .tab-badge {
+  background: #DC2626;
+  border-color: var(--bg);
+  box-shadow: 0 1px 4px rgba(220,38,38,.35);
+}
+
 @media(max-width:700px) {
   .com-wrap { grid-template-columns: 1fr; }
   .com-chat-panel { display: none; }
@@ -4135,18 +4213,22 @@ body::before{
       <button class="nav-tab on" id="tb-feed" onclick="iconPop(this);bellRingAnim(this);goTab('feed',this)">
         <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <span>Notifications</span>
+        <span class="tab-badge" id="badge-feed"></span>
       </button>
       <button class="nav-tab" id="tb-cal" onclick="iconPop(this);goTab('cal',this)">
         <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <span>Calendar</span>
+        <span class="tab-badge" id="badge-cal"></span>
       </button>
       <button class="nav-tab" id="tb-hw" onclick="iconPop(this);goTab('hw',this)">
         <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="2"/><path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         <span>Homework</span>
+        <span class="tab-badge" id="badge-hw"></span>
       </button>
       <button class="nav-tab" id="tb-com" onclick="iconPop(this);goTab('com',this)">
         <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span>Community</span>
+        <span class="tab-badge" id="badge-com"></span>
       </button>
       <button class="nav-tab" id="tb-set" onclick="iconPop(this);gearSpinAnim(this);goTab('set',this)">
         <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -4830,6 +4912,10 @@ body::before{
             </div>
             <div class="com-msgs" id="comMsgs"></div>
             <div class="com-input-row">
+              <input type="file" id="comFileInput" accept="image/*,.pdf,.doc,.docx,.txt,.zip" style="display:none" onchange="comAttachFile(this)"/>
+              <button class="com-attach-btn" onclick="document.getElementById('comFileInput').click()" title="Attach file">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
               <input id="comMsgInput" class="com-msg-inp" type="text" placeholder="Message…" onkeydown="if(event.key==='Enter')comSendMsg()"/>
               <button class="com-send-btn" onclick="comSendMsg()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><line x1="22" y1="2" x2="11" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polygon points="22,2 15,22 11,13 2,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -5412,6 +5498,25 @@ function gearSpinAnim(el) {
 }
 
 /* ════════════════════════════════════════════
+   TAB BADGE SYSTEM
+════════════════════════════════════════════ */
+const _tabBadgeCounts = { feed: 0, cal: 0, hw: 0, com: 0, set: 0, fbk: 0 };
+
+function updateTabBadge(tabId, count) {
+  _tabBadgeCounts[tabId] = count || 0;
+  const el = document.getElementById('badge-' + tabId);
+  if (!el) return;
+  const n = Math.max(0, count || 0);
+  if (n === 0) {
+    el.style.display = 'none';
+    el.textContent = '';
+  } else {
+    el.textContent = n > 99 ? '99+' : n;
+    el.style.display = 'inline-block';
+  }
+}
+
+/* ════════════════════════════════════════════
    TABS
 ════════════════════════════════════════════ */
 function goTab(name) {
@@ -5432,6 +5537,8 @@ function goTab(name) {
     if (panel) panel.classList.toggle('show', t === name);
     if (tab) tab.classList.toggle('on', t === name);
   });
+  // Clear badge for the tab you're switching to
+  updateTabBadge(name, 0);
   if (name === 'cal') renderCal();
   if (name === 'set') renderSettings();
   if (name === 'hw') hwRender();
@@ -5798,9 +5905,18 @@ function hwRender() {
 
   if (!_hwTasks.length) {
     if (empty) empty.style.display = 'flex';
+    // Clear hw badge when no tasks
+    const hwTabActive = document.getElementById('tb-hw')?.classList.contains('on');
+    if (!hwTabActive) updateTabBadge('hw', 0);
     return;
   }
   if (empty) empty.style.display = 'none';
+
+  // Badge = number of undone tasks
+  const undoneTasks = _hwTasks.filter(t => !t.done).length;
+  const hwTabActive2 = document.getElementById('tb-hw')?.classList.contains('on');
+  if (!hwTabActive2) updateTabBadge('hw', undoneTasks);
+  else updateTabBadge('hw', 0);
 
   // Compute today at midnight for due-date comparisons
   const todayMidnight = new Date();
@@ -7077,6 +7193,10 @@ function renderFeed() {
   const unread = S.notifs.filter(n => !n.read).length;
   const du = document.getElementById('dashUnreadNum');
   if (du) du.textContent = unread;
+  // Update Notifications tab badge (only when not currently on that tab)
+  const feedTabActive = document.getElementById('tb-feed')?.classList.contains('on');
+  if (!feedTabActive) updateTabBadge('feed', unread);
+  else updateTabBadge('feed', 0);
 
   const fm = document.getElementById('feedMeta');
   if (fm) fm.textContent = unread
@@ -8287,6 +8407,26 @@ const FIREBASE_CONFIG = {
         _friends[email] = v || {};
       });
       renderSidebar();
+      // Update Community tab badge with total unread messages across all friends
+      const comTabActive = document.getElementById('tb-com')?.classList.contains('on');
+      if (!comTabActive) {
+        const totalUnread = Object.values(_friends).reduce((s, f) => s + (f.unread || 0), 0);
+        updateTabBadge('com', totalUnread);
+        // Fire browser notification if we just got new messages
+        if (totalUnread > 0 && 'Notification' in window && Notification.permission === 'granted') {
+          const senders = Object.entries(_friends)
+            .filter(([,f]) => (f.unread || 0) > 0)
+            .map(([email, f]) => f.name ? f.name.split(' ')[0] : email.split('@')[0]);
+          if (senders.length > 0 && !comTabActive) {
+            new Notification('Aulert · New message', {
+              body: `${senders.join(', ')} sent you a message`,
+              icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💬</text></svg>'
+            });
+          }
+        }
+      } else {
+        updateTabBadge('com', 0);
+      }
       if (_activeChat && !_friends[_activeChat]) {
         _activeChat = null;
         showRight('empty');
@@ -8411,9 +8551,26 @@ const FIREBASE_CONFIG = {
     // Listen for messages
     const cKey = chatKey(myEmail, friendEmail);
     const ref = _db.ref(`aulert/messages/${cKey}`).limitToLast(120);
+    let _lastMsgTs = Date.now(); // track latest ts to detect truly new messages
     ref.on('value', snap => {
       const raw = snap.val() || {};
       const msgs = Object.values(raw).sort((a,b)=>a.ts-b.ts);
+      // Check for new incoming messages → browser notification
+      msgs.forEach(m => {
+        if (m.from !== myEmail && m.ts > _lastMsgTs) {
+          if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+            const senderName = (_friends[m.from]?.name || m.from.split('@')[0]);
+            const notifBody = m.fileData
+              ? `${senderName} sent a file`
+              : (m.text ? `${senderName}: ${m.text.slice(0, 80)}` : `${senderName} sent a message`);
+            new Notification('Aulert · New message', {
+              body: notifBody,
+              icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💬</text></svg>'
+            });
+          }
+        }
+      });
+      if (msgs.length) _lastMsgTs = msgs[msgs.length - 1].ts;
       renderMessages(msgs, myEmail);
     });
     _chatUnsubscribe = () => ref.off('value');
@@ -8451,6 +8608,43 @@ const FIREBASE_CONFIG = {
     } catch(e) { comToast('Failed to send: ' + e.message); }
   };
 
+  // ── Attach & send file ──
+  window.comAttachFile = async function(input) {
+    const myEmail = S.user?.email;
+    if (!myEmail || !_activeChat || !_db) return;
+    const file = input?.files?.[0];
+    if (!file) return;
+    input.value = ''; // reset so same file can be re-selected
+
+    const MAX = 512 * 1024; // 512 KB limit
+    if (file.size > MAX) {
+      comToast('File too large (max 512 KB)');
+      return;
+    }
+    comToast('Uploading…');
+
+    const reader = new FileReader();
+    reader.onload = async function(e) {
+      const dataUrl = e.target.result;
+      const cKey = chatKey(myEmail, _activeChat);
+      const ts = Date.now();
+      try {
+        await _db.ref(`aulert/messages/${cKey}`).push({
+          from: myEmail,
+          fileData: dataUrl,
+          fileName: file.name,
+          fileSize: file.size,
+          fileType: file.type,
+          ts
+        });
+        _db.ref(`aulert/friends/${encKey(_activeChat)}/${encKey(myEmail)}/unread`).transaction(n=>(n||0)+1);
+        comToast('File sent ✓');
+      } catch(err) { comToast('Failed to send file: ' + err.message); }
+    };
+    reader.onerror = () => comToast('Failed to read file');
+    reader.readAsDataURL(file);
+  };
+
   // ── Render messages ──
   function renderMessages(msgs, myEmail) {
     const area = $id('comMsgs');
@@ -8464,7 +8658,34 @@ const FIREBASE_CONFIG = {
       const day=fmtDay(m.ts);
       if (day!==lastDay){ html+=`<div class="com-day-div">${day}</div>`; lastDay=day; }
       const me = m.from===myEmail;
-      html+=`<div class="com-msg ${me?'mine':'theirs'}"><div class="com-msg-bubble">${esc(m.text)}</div><div class="com-msg-ts">${fmtTime(m.ts)}</div></div>`;
+      if (m.fileData) {
+        const isImg = m.fileType && m.fileType.startsWith('image/');
+        const sizeLabel = m.fileSize < 1024 ? m.fileSize + ' B'
+          : m.fileSize < 1048576 ? (m.fileSize/1024).toFixed(1) + ' KB'
+          : (m.fileSize/1048576).toFixed(1) + ' MB';
+        if (isImg) {
+          html+=`<div class="com-msg ${me?'mine':'theirs'}">
+            <img class="com-file-img-preview" src="${m.fileData}" alt="${esc(m.fileName)}" onclick="window.open('${m.fileData}','_blank')"/>
+            <div class="com-msg-ts">${esc(m.fileName)} · ${sizeLabel} · ${fmtTime(m.ts)}</div>
+          </div>`;
+        } else {
+          html+=`<div class="com-msg ${me?'mine':'theirs'}">
+            <div class="com-file-msg">
+              <div class="com-file-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="13,2 13,9 20,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="com-file-info">
+                <div class="com-file-name">${esc(m.fileName)}</div>
+                <div class="com-file-size">${sizeLabel}</div>
+                <a class="com-file-dl" href="${m.fileData}" download="${esc(m.fileName)}">Download</a>
+              </div>
+            </div>
+            <div class="com-msg-ts">${fmtTime(m.ts)}</div>
+          </div>`;
+        }
+      } else {
+        html+=`<div class="com-msg ${me?'mine':'theirs'}"><div class="com-msg-bubble">${esc(m.text)}</div><div class="com-msg-ts">${fmtTime(m.ts)}</div></div>`;
+      }
     });
     const wasAtBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 60;
     area.innerHTML = html;

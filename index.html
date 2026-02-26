@@ -3338,8 +3338,334 @@ body::before{
 #p-fbk { display: none !important; flex-direction: column; align-items: center; }
 #p-fbk.show { display: flex !important; }
 
+/* ══════════════════════════════════════════
+   COMMUNITY TAB
+══════════════════════════════════════════ */
+#p-com { padding: 0; max-width: 100%; }
+#p-com.show { display: block; }
 
-/* ── Bell ring animation ── */
+.com-layout {
+  display: grid;
+  grid-template-columns: 290px 1fr;
+  height: calc(100svh - 64px);
+  overflow: hidden;
+}
+@media(max-width: 700px) {
+  .com-layout { grid-template-columns: 1fr; }
+  .com-chat { display: none; }
+  .com-layout.chat-open .com-sidebar { display: none; }
+  .com-layout.chat-open .com-chat { display: flex; flex-direction: column; }
+}
+
+/* Sidebar */
+.com-sidebar {
+  border-right: 1px solid var(--rim-2);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--card-bg);
+  backdrop-filter: var(--blur);
+}
+.com-sidebar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 18px 12px;
+  border-bottom: 1px solid var(--rim-2);
+}
+.com-sidebar-title {
+  font-family: var(--ff-head);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -.5px;
+}
+.com-online-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--r-pill);
+  background: rgba(0,255,217,.12);
+  color: var(--teal);
+  border: 1px solid rgba(0,255,217,.25);
+}
+
+/* Add friend box */
+.com-add-friend-box {
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid var(--rim-2);
+}
+.com-add-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: .5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.com-add-row {
+  display: flex;
+  gap: 7px;
+}
+.com-input {
+  background: var(--surface);
+  border: 1px solid var(--rim-2);
+  border-radius: var(--r-md);
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--text);
+  font-family: var(--ff-body);
+  transition: border-color .2s;
+  outline: none;
+}
+.com-input:focus { border-color: var(--violet); box-shadow: 0 0 0 2px rgba(139,92,246,.18); }
+.com-add-row .com-input { flex: 1; min-width: 0; }
+.com-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--r-md);
+  background: rgba(139,92,246,.18);
+  border: 1px solid rgba(139,92,246,.4);
+  color: var(--violet);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all .2s;
+  white-space: nowrap;
+}
+.com-add-btn:hover { background: rgba(139,92,246,.28); transform: translateY(-1px); }
+
+/* Section labels */
+.com-section-label {
+  padding: 10px 16px 5px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-3);
+  letter-spacing: .7px;
+  text-transform: uppercase;
+}
+
+/* Pending list */
+.com-pending-list { padding: 0 10px 6px; display: flex; flex-direction: column; gap: 6px; }
+.com-pending-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  background: rgba(252,211,77,.07);
+  border: 1px solid rgba(252,211,77,.2);
+}
+.com-pending-name { flex: 1; font-size: 13px; font-weight: 600; }
+.com-pending-actions { display: flex; gap: 5px; }
+.com-pending-btn {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  border: none;
+  transition: all .15s;
+}
+.com-pending-btn.accept { background: rgba(0,255,217,.15); color: var(--teal); border: 1px solid rgba(0,255,217,.35); }
+.com-pending-btn.accept:hover { background: rgba(0,255,217,.28); }
+.com-pending-btn.decline { background: rgba(251,113,133,.1); color: var(--rose); border: 1px solid rgba(251,113,133,.3); }
+.com-pending-btn.decline:hover { background: rgba(251,113,133,.2); }
+.com-pending-wait {
+  font-size: 10px;
+  color: var(--amber);
+  font-weight: 600;
+  padding: 3px 8px;
+  background: rgba(252,211,77,.1);
+  border-radius: var(--r-pill);
+  border: 1px solid rgba(252,211,77,.25);
+  white-space: nowrap;
+}
+
+/* Friends list */
+.com-friend-list { flex: 1; overflow-y: auto; padding: 6px 10px 10px; display: flex; flex-direction: column; gap: 4px; }
+.com-friend-list::-webkit-scrollbar { width: 4px; }
+.com-friend-list::-webkit-scrollbar-thumb { background: var(--rim); border-radius: 4px; }
+
+.com-friend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all .18s;
+}
+.com-friend-item:hover { background: var(--surface-2); border-color: var(--rim-2); }
+.com-friend-item.active { background: rgba(139,92,246,.12); border-color: rgba(139,92,246,.35); }
+.com-friend-ava {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--violet), var(--teal));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ff-head); font-size: 14px; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+  position: relative;
+}
+.com-friend-ava .com-status-dot {
+  position: absolute; bottom: 1px; right: 1px;
+  width: 9px; height: 9px; border-radius: 50%;
+  border: 2px solid var(--card-bg);
+}
+.com-friend-info { flex: 1; min-width: 0; }
+.com-friend-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.com-friend-lastseen { font-size: 11px; color: var(--text-3); }
+.com-friend-unread {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--violet);
+  color: #fff;
+  font-size: 10px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+
+.com-empty-friends {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 32px 16px; text-align: center; color: var(--text-3);
+  gap: 10px;
+}
+.com-empty-friends p { font-size: 13px; line-height: 1.6; }
+
+/* Chat area */
+.com-chat {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--bg-2);
+}
+
+.com-chat-empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  color: var(--text-3);
+  gap: 14px;
+}
+.com-chat-empty-icon { opacity: .2; }
+.com-chat-empty h3 { font-family: var(--ff-head); font-size: 20px; font-weight: 700; color: var(--text-2); }
+.com-chat-empty p { font-size: 13px; }
+
+.com-chat-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--rim-2);
+  background: var(--card-bg);
+  backdrop-filter: var(--blur);
+  flex-shrink: 0;
+}
+.com-chat-ava {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--violet), var(--teal));
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--ff-head); font-size: 15px; font-weight: 800; color: #fff;
+  flex-shrink: 0;
+}
+.com-chat-name { font-size: 15px; font-weight: 700; letter-spacing: -.2px; }
+.com-chat-status { font-size: 11px; color: var(--teal); font-weight: 600; }
+.com-chat-remove {
+  margin-left: auto;
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--r-pill);
+  background: rgba(251,113,133,.08);
+  border: 1px solid rgba(251,113,133,.25);
+  color: var(--rose);
+  font-size: 12px; font-weight: 600;
+  cursor: pointer;
+  transition: all .2s;
+}
+.com-chat-remove:hover { background: rgba(251,113,133,.18); }
+
+/* Messages */
+.com-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.com-messages::-webkit-scrollbar { width: 4px; }
+.com-messages::-webkit-scrollbar-thumb { background: var(--rim); border-radius: 4px; }
+
+.com-msg {
+  display: flex;
+  flex-direction: column;
+  max-width: 72%;
+  animation: cardIn .25s var(--ease) both;
+}
+.com-msg.mine { align-self: flex-end; align-items: flex-end; }
+.com-msg.theirs { align-self: flex-start; align-items: flex-start; }
+
+.com-msg-bubble {
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.55;
+  word-break: break-word;
+}
+.com-msg.mine .com-msg-bubble {
+  background: linear-gradient(135deg, var(--violet), #6366f1);
+  color: #fff;
+  border-bottom-right-radius: 5px;
+}
+.com-msg.theirs .com-msg-bubble {
+  background: var(--surface-2);
+  border: 1px solid var(--rim-2);
+  color: var(--text);
+  border-bottom-left-radius: 5px;
+}
+.com-msg-time { font-size: 10px; color: var(--text-3); margin-top: 3px; padding: 0 4px; }
+
+.com-msg-day-divider {
+  display: flex; align-items: center; gap: 10px;
+  color: var(--text-3); font-size: 11px; font-weight: 600;
+  letter-spacing: .5px; text-transform: uppercase;
+  margin: 8px 0;
+}
+.com-msg-day-divider::before, .com-msg-day-divider::after {
+  content: ''; flex: 1; height: 1px; background: var(--rim-2);
+}
+
+.com-msg-input-row {
+  display: flex;
+  gap: 8px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--rim-2);
+  background: var(--card-bg);
+  flex-shrink: 0;
+}
+.com-msg-inp { flex: 1; border-radius: 24px; padding: 10px 16px; font-size: 14px; }
+.com-send-btn {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--violet);
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff;
+  flex-shrink: 0;
+  transition: all .2s var(--spring);
+}
+.com-send-btn:hover { background: #7c3aed; transform: scale(1.08); }
+.com-send-btn:active { transform: scale(.95); }
+
+.com-no-msgs {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center; flex: 1;
+  color: var(--text-3); text-align: center; gap: 8px;
+}
+.com-no-msgs p { font-size: 13px; }
 @keyframes bellRing {
   0%   { transform: rotate(0deg); }
   8%   { transform: rotate(22deg); }
@@ -3809,6 +4135,10 @@ body::before{
       <button class="nav-tab" id="tb-fbk" onclick="iconPop(this);goTab('fbk',this)">
         <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span>Feedbacks</span>
+      </button>
+      <button class="nav-tab" id="tb-com" onclick="iconPop(this);goTab('com',this)">
+        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Community</span>
       </button>
     </div>
     <div class="nav-r">
@@ -4381,6 +4711,86 @@ body::before{
       </div>
     </div>
   </div>
+
+    <!-- ══ COMMUNITY PANEL ══ -->
+    <div class="panel" id="p-com">
+      <div class="com-layout">
+
+        <!-- LEFT: Friends sidebar -->
+        <div class="com-sidebar">
+          <div class="com-sidebar-head">
+            <h2 class="com-sidebar-title">Friends</h2>
+            <span class="com-online-badge" id="comOnlineCount">0 online</span>
+          </div>
+
+          <!-- Add Friend -->
+          <div class="com-add-friend-box">
+            <div class="com-add-label">Add a friend</div>
+            <div class="com-add-row">
+              <input id="comFriendInput" class="com-input" type="text" placeholder="Enter friend's name…" onkeydown="if(event.key==='Enter')comSendRequest()"/>
+              <button class="com-add-btn" onclick="comSendRequest()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="8.5" cy="7" r="4" stroke="currentColor" stroke-width="2"/><line x1="20" y1="8" x2="20" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="17" y1="11" x2="23" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Send
+              </button>
+            </div>
+          </div>
+
+          <!-- Pending requests -->
+          <div id="comPendingSection" style="display:none">
+            <div class="com-section-label">Pending</div>
+            <div id="comPendingList" class="com-pending-list"></div>
+          </div>
+
+          <!-- Friends list -->
+          <div class="com-section-label">Your Friends</div>
+          <div id="comFriendList" class="com-friend-list">
+            <div class="com-empty-friends">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" opacity=".2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              <p>No friends yet.<br>Send a request to get started!</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Chat area -->
+        <div class="com-chat" id="comChat">
+          <div class="com-chat-empty" id="comChatEmpty">
+            <div class="com-chat-empty-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <h3>Select a friend to chat</h3>
+            <p>Pick someone from your friends list to start a conversation.</p>
+          </div>
+
+          <div id="comChatArea" style="display:none;height:100%;display:none;flex-direction:column;">
+            <!-- Chat header -->
+            <div class="com-chat-header">
+              <div class="com-chat-ava" id="comChatAva">?</div>
+              <div>
+                <div class="com-chat-name" id="comChatName">—</div>
+                <div class="com-chat-status" id="comChatStatus">Online</div>
+              </div>
+              <button class="com-chat-remove" title="Remove friend" onclick="comRemoveFriend()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="8.5" cy="7" r="4" stroke="currentColor" stroke-width="2"/><line x1="17" y1="11" x2="23" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Remove
+              </button>
+            </div>
+
+            <!-- Messages -->
+            <div class="com-messages" id="comMessages"></div>
+
+            <!-- Input -->
+            <div class="com-msg-input-row">
+              <input id="comMsgInput" class="com-input com-msg-inp" type="text" placeholder="Type a message…" onkeydown="if(event.key==='Enter')comSendMsg()"/>
+              <button class="com-send-btn" onclick="comSendMsg()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><line x1="22" y1="2" x2="11" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polygon points="22,2 15,22 11,13 2,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
 </div>
 
 <!-- Sheet (detail) -->
@@ -4966,7 +5376,7 @@ function goTab(name) {
 }
 
 function goTab(name) {
-  ['feed','cal','hw','set','fbk'].forEach(t => {
+  ['feed','cal','hw','set','fbk','com'].forEach(t => {
     const panel = document.getElementById('p-'+t);
     const tab = document.getElementById('tb-'+t);
     if (panel) panel.classList.toggle('show', t === name);
@@ -4975,6 +5385,7 @@ function goTab(name) {
   if (name === 'cal') renderCal();
   if (name === 'set') renderSettings();
   if (name === 'hw') hwRender();
+  if (name === 'com') comRender();
 }
 
 /* ════════════════════════════════════════════
@@ -7626,6 +8037,345 @@ function toggleFaq(btn){
     });
   }
   // If Battery API not available, the hardcoded SVG fill stays as-is
+})();
+
+/* ════════════════════════════════════════════
+   COMMUNITY — Friends & Chat
+════════════════════════════════════════════ */
+(function(){
+  const STORE_KEY = 'aul_community';
+
+  // State
+  let state = JSON.parse(localStorage.getItem(STORE_KEY) || 'null') || {
+    friends: [],        // [{id, name, status:'online'|'offline', lastSeen, unread:0}]
+    pending: [],        // [{id, name, direction:'sent'|'received'}]
+    chats: {},          // {friendId: [{id, text, from:'me'|'them', ts}]}
+    activeFriend: null
+  };
+  let _activeId = state.activeFriend || null;
+
+  function save() {
+    state.activeFriend = _activeId;
+    localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  }
+
+  function uid() { return Math.random().toString(36).slice(2,10); }
+  function initials(name) { return name.trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+
+  function avatarGradient(id) {
+    const palettes = [
+      'linear-gradient(135deg,#8B5CF6,#00ffd9)',
+      'linear-gradient(135deg,#FB7185,#FCD34D)',
+      'linear-gradient(135deg,#38BDF8,#8B5CF6)',
+      'linear-gradient(135deg,#00ffd9,#38BDF8)',
+      'linear-gradient(135deg,#FCD34D,#FB7185)',
+    ];
+    const idx = id.charCodeAt(0) % palettes.length;
+    return palettes[idx];
+  }
+
+  // ── Simulate friend status changes ──
+  function simulateOnline() {
+    state.friends.forEach(f => {
+      if (Math.random() > 0.6) {
+        f.status = Math.random() > 0.4 ? 'online' : 'offline';
+        if (f.status === 'offline') f.lastSeen = Date.now();
+      }
+    });
+    save();
+    comRender();
+  }
+
+  // ── Simulate receiving a message occasionally ──
+  function simulateIncoming() {
+    const online = state.friends.filter(f => f.status === 'online');
+    if (!online.length) return;
+    const f = online[Math.floor(Math.random() * online.length)];
+    const samples = [
+      "Hey! How's it going?",
+      'Did you finish the homework? 😅',
+      'What did you get for question 3?',
+      'Study session tonight?',
+      'Did the teacher post anything new?',
+      'Thanks for the help earlier!',
+      'Are you going to class tomorrow?',
+    ];
+    const text = samples[Math.floor(Math.random() * samples.length)];
+    if (!state.chats[f.id]) state.chats[f.id] = [];
+    state.chats[f.id].push({ id: uid(), text, from: 'them', ts: Date.now() });
+    if (_activeId !== f.id) {
+      f.unread = (f.unread || 0) + 1;
+    }
+    save();
+    comRender();
+    if (_activeId === f.id) scrollMsgs();
+  }
+
+  // ── Send friend request ──
+  window.comSendRequest = function() {
+    const inp = document.getElementById('comFriendInput');
+    const name = inp.value.trim();
+    if (!name) return;
+
+    // Check duplicates
+    const alreadyFriend = state.friends.some(f => f.name.toLowerCase() === name.toLowerCase());
+    const alreadyPending = state.pending.some(p => p.name.toLowerCase() === name.toLowerCase());
+    if (alreadyFriend) { inp.value = ''; comToast('Already friends with ' + name); return; }
+    if (alreadyPending) { inp.value = ''; comToast('Request already sent to ' + name); return; }
+
+    const id = uid();
+    state.pending.push({ id, name, direction: 'sent' });
+    save();
+    inp.value = '';
+    comRender();
+
+    // Simulate acceptance after 4–10 seconds
+    const delay = 4000 + Math.random() * 6000;
+    setTimeout(() => {
+      const idx = state.pending.findIndex(p => p.id === id);
+      if (idx === -1) return; // was declined manually
+      state.pending.splice(idx, 1);
+      state.friends.push({ id, name, status: 'online', lastSeen: Date.now(), unread: 0 });
+      if (!state.chats[id]) state.chats[id] = [];
+      save();
+      comRender();
+      comToast(name + ' accepted your friend request! 🎉');
+    }, delay);
+  };
+
+  // ── Accept / decline pending request ──
+  window.comAccept = function(id) {
+    const idx = state.pending.findIndex(p => p.id === id);
+    if (idx === -1) return;
+    const p = state.pending.splice(idx, 1)[0];
+    state.friends.push({ id: p.id, name: p.name, status: 'online', lastSeen: Date.now(), unread: 0 });
+    if (!state.chats[p.id]) state.chats[p.id] = [];
+    save();
+    comRender();
+  };
+  window.comDecline = function(id) {
+    state.pending = state.pending.filter(p => p.id !== id);
+    save();
+    comRender();
+  };
+
+  // ── Open chat ──
+  window.comOpenChat = function(id) {
+    _activeId = id;
+    const f = state.friends.find(f => f.id === id);
+    if (f) f.unread = 0;
+    save();
+    comRender();
+    setTimeout(scrollMsgs, 50);
+  };
+
+  // ── Remove friend ──
+  window.comRemoveFriend = function() {
+    if (!_activeId) return;
+    state.friends = state.friends.filter(f => f.id !== _activeId);
+    delete state.chats[_activeId];
+    _activeId = null;
+    save();
+    comRender();
+  };
+
+  // ── Send message ──
+  window.comSendMsg = function() {
+    const inp = document.getElementById('comMsgInput');
+    const text = inp.value.trim();
+    if (!text || !_activeId) return;
+    if (!state.chats[_activeId]) state.chats[_activeId] = [];
+    state.chats[_activeId].push({ id: uid(), text, from: 'me', ts: Date.now() });
+    inp.value = '';
+    save();
+    renderMessages();
+    scrollMsgs();
+
+    // Simulate a reply after 2–5 seconds
+    const f = state.friends.find(f => f.id === _activeId);
+    if (f && f.status === 'online') {
+      const delay = 2000 + Math.random() * 3000;
+      const replies = [
+        'Got it!', 'Sure!', 'Sounds good 👍', 'Thanks!',
+        'Okay, makes sense.', 'Haha yeah!', 'I agree!',
+        'Let me check and get back to you.', 'Noted!', '😊'
+      ];
+      const reply = replies[Math.floor(Math.random() * replies.length)];
+      setTimeout(() => {
+        if (!state.chats[_activeId]) return;
+        state.chats[_activeId].push({ id: uid(), text: reply, from: 'them', ts: Date.now() });
+        save();
+        renderMessages();
+        scrollMsgs();
+      }, delay);
+    }
+  };
+
+  // ── Toast ──
+  function comToast(msg) {
+    let t = document.getElementById('comToastEl');
+    if (!t) {
+      t = document.createElement('div');
+      t.id = 'comToastEl';
+      t.style.cssText = `
+        position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);
+        background:var(--surface-2);border:1px solid var(--rim);border-radius:var(--r-pill);
+        padding:10px 20px;font-size:13px;font-weight:600;color:var(--text);
+        z-index:9999;opacity:0;transition:all .3s var(--ease);pointer-events:none;
+        white-space:nowrap;backdrop-filter:var(--blur);box-shadow:var(--shadow);
+      `;
+      document.body.appendChild(t);
+    }
+    t.textContent = msg;
+    setTimeout(() => { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; }, 10);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(20px)'; }, 3000);
+  }
+
+  function scrollMsgs() {
+    const el = document.getElementById('comMessages');
+    if (el) el.scrollTop = el.scrollHeight;
+  }
+
+  function fmtTime(ts) {
+    const d = new Date(ts);
+    const h = d.getHours(), m = d.getMinutes();
+    return `${h}:${String(m).padStart(2,'0')}`;
+  }
+
+  function fmtDate(ts) {
+    const d = new Date(ts);
+    const now = new Date();
+    if (d.toDateString() === now.toDateString()) return 'Today';
+    const y = new Date(now); y.setDate(y.getDate() - 1);
+    if (d.toDateString() === y.toDateString()) return 'Yesterday';
+    return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  }
+
+  function renderMessages() {
+    const area = document.getElementById('comMessages');
+    if (!area || !_activeId) return;
+    const msgs = state.chats[_activeId] || [];
+    if (!msgs.length) {
+      area.innerHTML = `<div class="com-no-msgs"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" opacity=".2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><p>No messages yet.<br>Say hi! 👋</p></div>`;
+      return;
+    }
+    let html = '';
+    let lastDay = '';
+    msgs.forEach(m => {
+      const day = fmtDate(m.ts);
+      if (day !== lastDay) {
+        html += `<div class="com-msg-day-divider">${day}</div>`;
+        lastDay = day;
+      }
+      html += `<div class="com-msg ${m.from === 'me' ? 'mine' : 'theirs'}">
+        <div class="com-msg-bubble">${escHtml(m.text)}</div>
+        <div class="com-msg-time">${fmtTime(m.ts)}</div>
+      </div>`;
+    });
+    area.innerHTML = html;
+  }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  // ── Main render ──
+  window.comRender = function() {
+    // Online count
+    const onlineCount = state.friends.filter(f => f.status === 'online').length;
+    const oc = document.getElementById('comOnlineCount');
+    if (oc) oc.textContent = onlineCount + ' online';
+
+    // Pending section
+    const pendingSection = document.getElementById('comPendingSection');
+    const pendingList = document.getElementById('comPendingList');
+    if (pendingSection && pendingList) {
+      if (state.pending.length) {
+        pendingSection.style.display = '';
+        pendingList.innerHTML = state.pending.map(p => `
+          <div class="com-pending-item">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color:var(--amber);flex-shrink:0"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <div class="com-pending-name">${escHtml(p.name)}</div>
+            <div class="com-pending-actions">
+              ${p.direction === 'received'
+                ? `<button class="com-pending-btn accept" onclick="comAccept('${p.id}')">Accept</button>
+                   <button class="com-pending-btn decline" onclick="comDecline('${p.id}')">Decline</button>`
+                : `<span class="com-pending-wait">Pending…</span>`
+              }
+            </div>
+          </div>
+        `).join('');
+      } else {
+        pendingSection.style.display = 'none';
+      }
+    }
+
+    // Friends list
+    const fl = document.getElementById('comFriendList');
+    if (fl) {
+      if (!state.friends.length) {
+        fl.innerHTML = `<div class="com-empty-friends">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" opacity=".2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <p>No friends yet.<br>Send a request to get started!</p>
+        </div>`;
+      } else {
+        fl.innerHTML = state.friends.map(f => {
+          const isActive = _activeId === f.id;
+          const dotColor = f.status === 'online' ? '#00ffd9' : 'var(--text-3)';
+          const lastSeenStr = f.status === 'online' ? 'Online' : 'Offline';
+          return `<div class="com-friend-item ${isActive ? 'active' : ''}" onclick="comOpenChat('${f.id}')">
+            <div class="com-friend-ava" style="background:${avatarGradient(f.id)}">
+              ${escHtml(initials(f.name))}
+              <div class="com-status-dot" style="background:${dotColor}"></div>
+            </div>
+            <div class="com-friend-info">
+              <div class="com-friend-name">${escHtml(f.name)}</div>
+              <div class="com-friend-lastseen">${lastSeenStr}</div>
+            </div>
+            ${f.unread ? `<div class="com-friend-unread">${f.unread}</div>` : ''}
+          </div>`;
+        }).join('');
+      }
+    }
+
+    // Chat area
+    const emptyChat = document.getElementById('comChatEmpty');
+    const chatArea = document.getElementById('comChatArea');
+    if (!_activeId || !state.friends.find(f => f.id === _activeId)) {
+      _activeId = null;
+      if (emptyChat) emptyChat.style.display = '';
+      if (chatArea) chatArea.style.display = 'none';
+    } else {
+      const f = state.friends.find(f => f.id === _activeId);
+      if (emptyChat) emptyChat.style.display = 'none';
+      if (chatArea) { chatArea.style.display = 'flex'; chatArea.style.flexDirection = 'column'; }
+
+      const ava = document.getElementById('comChatAva');
+      const nameEl = document.getElementById('comChatName');
+      const statusEl = document.getElementById('comChatStatus');
+      if (ava) { ava.textContent = initials(f.name); ava.style.background = avatarGradient(f.id); }
+      if (nameEl) nameEl.textContent = f.name;
+      if (statusEl) { statusEl.textContent = f.status === 'online' ? 'Online' : 'Offline'; statusEl.style.color = f.status === 'online' ? 'var(--teal)' : 'var(--text-3)'; }
+
+      renderMessages();
+    }
+  };
+
+  // Periodic simulations (only when community tab open)
+  setInterval(() => {
+    const panel = document.getElementById('p-com');
+    if (panel && panel.classList.contains('show')) {
+      simulateOnline();
+    }
+  }, 15000);
+
+  setInterval(() => {
+    const panel = document.getElementById('p-com');
+    if (panel && panel.classList.contains('show') && state.friends.length) {
+      if (Math.random() > 0.6) simulateIncoming();
+    }
+  }, 20000);
+
 })();
 
 

@@ -3468,8 +3468,9 @@ body::before{
   width: 32px; height: 32px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-family: var(--ff-head); font-size: 12px; font-weight: 800; color: #fff;
-  flex-shrink: 0;
+  flex-shrink: 0; overflow: hidden;
 }
+.com-req-ava img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
 .com-req-info { flex: 1; min-width: 0; }
 .com-req-name { font-size: 12px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .com-req-gmail { font-size: 10px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -3503,8 +3504,9 @@ body::before{
   width: 34px; height: 34px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-family: var(--ff-head); font-size: 13px; font-weight: 800; color: #fff;
-  flex-shrink: 0;
+  flex-shrink: 0; overflow: hidden;
 }
+.com-friend-ava img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
 .com-friend-info { flex: 1; min-width: 0; }
 .com-friend-name { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .com-friend-sub { font-size: 10px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -3594,8 +3596,9 @@ body::before{
   width: 38px; height: 38px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-family: var(--ff-head); font-size: 15px; font-weight: 800; color: #fff;
-  flex-shrink: 0;
+  flex-shrink: 0; overflow: hidden;
 }
+.com-chat-hava img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
 .com-chat-hname { font-size: 15px; font-weight: 700; letter-spacing: -.2px; }
 .com-chat-hgmail { font-size: 11px; color: var(--text-3); }
 .com-unfriend-btn {
@@ -4737,7 +4740,7 @@ body::before{
               <span class="com-friends-badge" id="comFriendsCount">0 friends</span>
             </div>
             <div class="com-add-form" id="comAddForm" style="display:none">
-              <input id="comFriendInput" class="com-add-inp" type="email" placeholder="friend@gmail.com" onkeydown="if(event.key==='Enter')comSendRequest()"/>
+              <input id="comFriendInput" class="com-add-inp" type="email" placeholder="friend@school.edu" onkeydown="if(event.key==='Enter')comSendRequest()"/>
               <button class="com-add-btn" onclick="comSendRequest()">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="8.5" cy="7" r="4" stroke="currentColor" stroke-width="2"/><line x1="20" y1="8" x2="20" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="17" y1="11" x2="23" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 Add
@@ -8116,6 +8119,13 @@ const FIREBASE_CONFIG = {
             'linear-gradient(135deg,#38BDF8,#8B5CF6)','linear-gradient(135deg,#00ffd9,#38BDF8)',
             'linear-gradient(135deg,#FCD34D,#FB7185)'][email.charCodeAt(0)%5];
   }
+  // Returns inner HTML for an avatar element — photo if available, else gradient+initials
+  function avatarInner(email, picture) {
+    const uname = email.split('@')[0];
+    if (picture) return `<img src="${esc(picture)}" alt="${esc(uname)}" onerror="this.parentNode.innerHTML='${esc(initials(uname))}';this.parentNode.style.background='${avatarGrad(email)}';">`;
+    return esc(initials(uname));
+  }
+  function avatarBg(picture, email) { return picture ? 'transparent' : avatarGrad(email); }
   function fmtTime(ts){ const d=new Date(ts); return d.getHours()+':'+String(d.getMinutes()).padStart(2,'0'); }
   function fmtDay(ts){
     const d=new Date(ts),n=new Date();
@@ -8124,7 +8134,7 @@ const FIREBASE_CONFIG = {
     if(d.toDateString()===y.toDateString()) return 'Yesterday';
     return d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
   }
-  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function $id(id){ return document.getElementById(id); }
 
   let _db = null;
@@ -8176,11 +8186,12 @@ const FIREBASE_CONFIG = {
     if (inList) inList.innerHTML = inKeys.map(fromKey => {
       const d = _incoming[fromKey]||{};
       const email = d.email || decKey(fromKey);
+      const pic = d.picture || '';
       const uname = email.split('@')[0];
       return `<div class="com-req-card incoming-card">
-        <div class="com-req-ava" style="background:${avatarGrad(email)}">${esc(initials(uname))}</div>
+        <div class="com-req-ava" style="background:${avatarBg(pic,email)}">${avatarInner(email,pic)}</div>
         <div class="com-req-info">
-          <div class="com-req-name">${esc(uname)}</div>
+          <div class="com-req-name">${esc(d.name || uname)}</div>
           <div class="com-req-gmail">${esc(email)}</div>
         </div>
         <div class="com-req-actions">
@@ -8216,14 +8227,16 @@ const FIREBASE_CONFIG = {
     const fl = $id('comFriendList');
     if (fl) {
       if (!friendEmails.length) {
-        fl.innerHTML = `<div class="com-empty"><svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><p>No friends yet.<br>Add someone by Gmail!</p></div>`;
+        fl.innerHTML = `<div class="com-empty"><svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><p>No friends yet.<br>Add someone by their email!</p></div>`;
       } else {
         fl.innerHTML = friendEmails.map(fEmail => {
-          const uname = fEmail.split('@')[0];
+          const fData = _friends[fEmail] || {};
+          const pic = fData.picture || '';
+          const uname = fData.name ? fData.name.split(' ')[0] : fEmail.split('@')[0];
           const isActive = _activeChat === fEmail;
-          const unread = _friends[fEmail]?.unread || 0;
+          const unread = fData.unread || 0;
           return `<div class="com-friend-row ${isActive?'active':''}" onclick="comOpenChat('${esc(fEmail)}')">
-            <div class="com-friend-ava" style="background:${avatarGrad(fEmail)}">${esc(initials(uname))}</div>
+            <div class="com-friend-ava" style="background:${avatarBg(pic,fEmail)}">${avatarInner(fEmail,pic)}</div>
             <div class="com-friend-info">
               <div class="com-friend-name">${esc(uname)}</div>
               <div class="com-friend-sub">${esc(fEmail)}</div>
@@ -8312,8 +8325,8 @@ const FIREBASE_CONFIG = {
     const inp = $id('comFriendInput');
     const gmail = (inp?.value||'').trim().toLowerCase();
     if (!gmail) return;
-    if (!/^[a-zA-Z0-9._%+\-]+@gmail\.com$/.test(gmail)) {
-      comToast('Please enter a valid @gmail.com address'); inp.focus(); return;
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(gmail)) {
+      comToast('Please enter a valid email address'); inp.focus(); return;
     }
     if (gmail === myEmail) { comToast("You can't add yourself!"); return; }
     if (_friends[gmail]) { inp.value=''; comToast('Already friends!'); return; }
@@ -8321,7 +8334,12 @@ const FIREBASE_CONFIG = {
 
     const ts = Date.now();
     try {
-      await _db.ref(`aulert/requests/${encKey(gmail)}/${encKey(myEmail)}`).set({ email: myEmail, name: S.user?.name||'', ts });
+      await _db.ref(`aulert/requests/${encKey(gmail)}/${encKey(myEmail)}`).set({
+        email: myEmail,
+        name: S.user?.name || '',
+        picture: S.user?.picture || '',
+        ts
+      });
       await _db.ref(`aulert/sent/${encKey(myEmail)}/${encKey(gmail)}`).set({ email: gmail, ts });
       inp.value = '';
       comToast('Request sent to ' + gmail + ' ✉️');
@@ -8333,12 +8351,22 @@ const FIREBASE_CONFIG = {
     const myEmail = S.user?.email;
     if (!myEmail || !_db) return;
     const ts = Date.now();
+    // Get the sender's stored picture from their request
+    const reqSnap = await _db.ref(`aulert/requests/${encKey(myEmail)}/${encKey(fromEmail)}`).once('value');
+    const reqData = reqSnap.val() || {};
+    const fromPic = reqData.picture || '';
+    const fromName = reqData.name || '';
     try {
-      await _db.ref(`aulert/friends/${encKey(myEmail)}/${encKey(fromEmail)}`).set({ email: fromEmail, since: ts, unread: 0 });
-      await _db.ref(`aulert/friends/${encKey(fromEmail)}/${encKey(myEmail)}`).set({ email: myEmail, since: ts, unread: 0 });
+      // Store friend entry with picture for both sides
+      await _db.ref(`aulert/friends/${encKey(myEmail)}/${encKey(fromEmail)}`).set({
+        email: fromEmail, name: fromName, picture: fromPic, since: ts, unread: 0
+      });
+      await _db.ref(`aulert/friends/${encKey(fromEmail)}/${encKey(myEmail)}`).set({
+        email: myEmail, name: S.user?.name || '', picture: S.user?.picture || '', since: ts, unread: 0
+      });
       await _db.ref(`aulert/requests/${encKey(myEmail)}/${encKey(fromEmail)}`).remove();
       await _db.ref(`aulert/sent/${encKey(fromEmail)}/${encKey(myEmail)}`).remove();
-      comToast('You and ' + fromEmail.split('@')[0] + ' are now friends! 🎉');
+      comToast('You and ' + (fromName || fromEmail.split('@')[0]) + ' are now friends! 🎉');
     } catch(e) { comToast('Error: ' + e.message); }
   };
 
@@ -8367,11 +8395,16 @@ const FIREBASE_CONFIG = {
     _db.ref(`aulert/friends/${encKey(myEmail)}/${encKey(friendEmail)}/unread`).set(0);
     renderSidebar();
     showRight('chat');
-    // Update header
-    const uname = friendEmail.split('@')[0];
+    // Update header with profile picture
+    const fData = _friends[friendEmail] || {};
+    const pic = fData.picture || '';
+    const displayName = fData.name ? fData.name.split(' ')[0] : friendEmail.split('@')[0];
     const ava=$id('comChatAva'), nameEl=$id('comChatName'), gEl=$id('comChatGmail');
-    if (ava)    { ava.textContent=initials(uname); ava.style.background=avatarGrad(friendEmail); }
-    if (nameEl) nameEl.textContent = uname;
+    if (ava) {
+      ava.style.background = avatarBg(pic, friendEmail);
+      ava.innerHTML = avatarInner(friendEmail, pic);
+    }
+    if (nameEl) nameEl.textContent = displayName;
     if (gEl)    gEl.textContent = friendEmail;
     // Detach old listener
     if (_chatUnsubscribe) { _chatUnsubscribe(); _chatUnsubscribe=null; }

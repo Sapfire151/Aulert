@@ -4096,19 +4096,11 @@ body::before{
   80%  { transform: translate(-2px,3px) rotate(10deg); opacity: 0.5; }
   100% { transform: translate(-5px,2px) rotate(0deg);  opacity: 0; }
 }
-@keyframes hwCheckStroke {
-  0%   { stroke-dashoffset: 18; opacity: 0; }
-  20%  { opacity: 1; }
-  70%  { stroke-dashoffset: 0; opacity: 1; }
-  90%  { opacity: 0.8; }
-  100% { stroke-dashoffset: 0; opacity: 0; }
-}
 .hw-checking .hw-board,
 .hw-checking .hw-clip  { animation: hwBoardTilt 0.85s cubic-bezier(.34,1.56,.64,1) both; transform-origin: 50% 50%; }
 .hw-checking .hw-line1 { animation: hwLineFade 0.85s ease both; }
 .hw-checking .hw-line2 { animation: hwLineFade 0.85s ease 0.05s both; }
 .hw-checking .hw-pen   { animation: hwPenSwoop 0.75s cubic-bezier(.4,0,.2,1) 0.08s both; }
-.hw-checking .hw-check-draw { animation: hwCheckStroke 0.7s cubic-bezier(.4,0,.2,1) 0.18s both; }
 
 /* ── Community person pop ── */
 @keyframes comPersonPop {
@@ -4123,19 +4115,41 @@ body::before{
   transform-origin: 50% 90% !important;
 }
 
-/* ── Feedback bubble pop ── */
-@keyframes fbkBubblePop {
-  0%   { transform: scale(1) rotate(0deg); }
-  15%  { transform: scale(0.86) rotate(-7deg); }
-  40%  { transform: scale(1.16) rotate(4deg); }
-  60%  { transform: scale(0.96) rotate(-2deg); }
-  80%  { transform: scale(1.05) rotate(1deg); }
-  100% { transform: scale(1) rotate(0deg); }
+/* ── Feedback: bubble squash+stretch, dots bounce in sequence, sparks fly ── */
+@keyframes fbkBodyPop {
+  0%   { transform: scale(1,1); }
+  15%  { transform: scale(1.12, 0.9); }
+  35%  { transform: scale(0.93, 1.1); }
+  55%  { transform: scale(1.05, 0.97); }
+  75%  { transform: scale(0.98, 1.02); }
+  100% { transform: scale(1,1); }
 }
-.fbk-popping svg {
-  animation: fbkBubblePop 0.75s cubic-bezier(.34,1.56,.64,1) both !important;
-  transform-origin: 28% 58% !important;
+@keyframes fbkDotBounce {
+  0%   { transform: translateY(0);    opacity: 0.9; }
+  25%  { transform: translateY(-4px); opacity: 1; }
+  55%  { transform: translateY(1.5px);opacity: 0.9; }
+  75%  { transform: translateY(-1px); opacity: 1; }
+  100% { transform: translateY(0);    opacity: 0.9; }
 }
+@keyframes fbkSparkFly1 {
+  0%   { transform: translate(0,0) scale(1);   opacity: 1; }
+  100% { transform: translate(-5px,-6px) scale(0); opacity: 0; }
+}
+@keyframes fbkSparkFly2 {
+  0%   { transform: translate(0,0) scale(1);   opacity: 1; }
+  100% { transform: translate(5px,-6px) scale(0);  opacity: 0; }
+}
+@keyframes fbkSparkFly3 {
+  0%   { transform: translate(0,0) scale(1);   opacity: 1; }
+  100% { transform: translate(-6px,-5px) scale(0); opacity: 0; }
+}
+.fbk-popping .fbk-body    { animation: fbkBodyPop    0.7s cubic-bezier(.34,1.56,.64,1) both; transform-origin: 50% 60%; }
+.fbk-popping .fbk-dot-1   { animation: fbkDotBounce  0.65s cubic-bezier(.34,1.56,.64,1) 0.05s both; }
+.fbk-popping .fbk-dot-2   { animation: fbkDotBounce  0.65s cubic-bezier(.34,1.56,.64,1) 0.13s both; }
+.fbk-popping .fbk-dot-3   { animation: fbkDotBounce  0.65s cubic-bezier(.34,1.56,.64,1) 0.21s both; }
+.fbk-popping .fbk-spark-1 { animation: fbkSparkFly1  0.5s ease-out 0.08s both; }
+.fbk-popping .fbk-spark-2 { animation: fbkSparkFly2  0.5s ease-out 0.14s both; }
+.fbk-popping .fbk-spark-3 { animation: fbkSparkFly3  0.5s ease-out 0.11s both; }
 </style>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
@@ -4595,8 +4609,6 @@ body::before{
           <path class="hw-line1" d="M9 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
           <!-- line 2 (fades out) -->
           <path class="hw-line2" d="M9 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-          <!-- checkmark drawn on click -->
-          <path class="hw-check-draw" d="M8 13.5l2.5 2.5 5-5.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="18" stroke-dashoffset="18" opacity="0"/>
           <!-- pen that slides in and writes -->
           <g class="hw-pen" transform="translate(20, 4) rotate(45)" opacity="0">
             <rect x="-1.5" y="-4" width="3" height="6" rx="1" fill="currentColor" opacity="0.9"/>
@@ -4616,7 +4628,18 @@ body::before{
         <span>Settings</span>
       </button>
       <button class="nav-tab" id="tb-fbk" onclick="fbkPopAnim(this);goTab('fbk',this)">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <!-- bubble body -->
+          <path class="fbk-body" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- three typing dots -->
+          <circle class="fbk-dot fbk-dot-1" cx="8"  cy="12" r="1.3" fill="currentColor" opacity="0.9"/>
+          <circle class="fbk-dot fbk-dot-2" cx="12" cy="12" r="1.3" fill="currentColor" opacity="0.9"/>
+          <circle class="fbk-dot fbk-dot-3" cx="16" cy="12" r="1.3" fill="currentColor" opacity="0.9"/>
+          <!-- sparkle dots that shoot out -->
+          <circle class="fbk-spark fbk-spark-1" cx="12" cy="8" r="1" fill="currentColor" opacity="0"/>
+          <circle class="fbk-spark fbk-spark-2" cx="18" cy="6" r="0.8" fill="currentColor" opacity="0"/>
+          <circle class="fbk-spark fbk-spark-3" cx="6"  cy="6" r="0.8" fill="currentColor" opacity="0"/>
+        </svg>
         <span>Feedbacks</span>
       </button>
     </div>
@@ -5970,10 +5993,12 @@ function gearSpinAnim(el) {
 
 function calFlipAnim(el) {
   if (!el) return;
+  // Update the date number to today's real date
+  const dateEl = el.querySelector('.cal-num');
+  if (dateEl) dateEl.textContent = new Date().getDate();
   el.classList.remove('cal-flipping');
   void el.offsetWidth;
   el.classList.add('cal-flipping');
-  // longest animation is ~0.75s, clean up after
   clearTimeout(el._calTimer);
   el._calTimer = setTimeout(() => el.classList.remove('cal-flipping'), 900);
 }
@@ -6000,7 +6025,8 @@ function fbkPopAnim(el) {
   el.classList.remove('fbk-popping');
   void el.offsetWidth;
   el.classList.add('fbk-popping');
-  el.addEventListener('animationend', () => el.classList.remove('fbk-popping'), { once: true });
+  clearTimeout(el._fbkTimer);
+  el._fbkTimer = setTimeout(() => el.classList.remove('fbk-popping'), 900);
 }
 
 /* ════════════════════════════════════════════
@@ -8244,6 +8270,16 @@ function qtpRenderTimeline() {
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
+})();
+
+// Set real date on calendar SVG on load
+(function() {
+  function setCalDate() {
+    const el = document.querySelector('#tb-cal .cal-num');
+    if (el) el.textContent = new Date().getDate();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setCalDate);
+  else setCalDate();
 })();
 
 /* Mouse wheel support on time values */

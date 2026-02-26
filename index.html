@@ -3032,7 +3032,6 @@ body::before{
   position: absolute;
   top: calc(100% + 6px);
   left: 0; right: 0;
-  background: var(--modal-bg);
   border: 1px solid var(--rim);
   border-radius: var(--r-md);
   box-shadow: var(--shadow), 0 0 0 1px rgba(0,255,217,.06);
@@ -3042,8 +3041,16 @@ body::before{
   transform: translateY(-6px) scale(.98);
   pointer-events: none;
   transition: opacity .2s var(--ease), transform .2s var(--spring);
+}
+.fbk-dd-menu::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--modal-bg);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
+  z-index: -1;
+  border-radius: var(--r-md);
 }
 .fbk-dd-menu.open {
   opacity: 1;

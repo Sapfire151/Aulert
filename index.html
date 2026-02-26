@@ -3042,6 +3042,8 @@ body::before{
   transform: translateY(-6px) scale(.98);
   pointer-events: none;
   transition: opacity .2s var(--ease), transform .2s var(--spring);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
 }
 .fbk-dd-menu.open {
   opacity: 1;
@@ -5381,7 +5383,7 @@ body::before{
               </button>
               <input id="comMsgInput" class="com-msg-inp" type="text" placeholder="Message…" onkeydown="if(event.key==='Enter') comSendCurrent()"/>
               <button class="com-send-btn" onclick="comSendCurrent()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><line x1="22" y1="2" x2="11" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polygon points="22,2 15,22 11,13 2,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
             </div>
           </div>

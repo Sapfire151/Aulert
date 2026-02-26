@@ -4740,9 +4740,9 @@ body::before{
 
           <!-- Add Friend -->
           <div class="com-add-friend-box">
-            <div class="com-add-label">Add a friend</div>
+            <div class="com-add-label">Add friend by Gmail</div>
             <div class="com-add-row">
-              <input id="comFriendInput" class="com-input" type="text" placeholder="Enter friend's name…" onkeydown="if(event.key==='Enter')comSendRequest()"/>
+              <input id="comFriendInput" class="com-input" type="email" placeholder="friend@gmail.com" onkeydown="if(event.key==='Enter')comSendRequest()"/>
               <button class="com-add-btn" onclick="comSendRequest()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="8.5" cy="7" r="4" stroke="currentColor" stroke-width="2"/><line x1="20" y1="8" x2="20" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="17" y1="11" x2="23" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 Send
@@ -8075,7 +8075,11 @@ function toggleFaq(btn){
   }
 
   function uid() { return Math.random().toString(36).slice(2,10); }
-  function initials(name) { return name.trim().split(/\s+/).map(w=>w[0]).join('').slice(0,2).toUpperCase(); }
+  function initials(name) {
+    const parts = name.trim().split(/[\s._\-]+/);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return name.slice(0, 2).toUpperCase();
+  }
 
   function avatarGradient(id) {
     const palettes = [
@@ -8090,72 +8094,35 @@ function toggleFaq(btn){
   }
 
   // ── Simulate friend status changes ──
-  function simulateOnline() {
-    state.friends.forEach(f => {
-      if (Math.random() > 0.6) {
-        f.status = Math.random() > 0.4 ? 'online' : 'offline';
-        if (f.status === 'offline') f.lastSeen = Date.now();
-      }
-    });
-    save();
-    comRender();
-  }
+  function simulateOnline() { /* removed — no simulation */ }
+  function simulateIncoming() { /* removed — no simulation */ }
 
-  // ── Simulate receiving a message occasionally ──
-  function simulateIncoming() {
-    const online = state.friends.filter(f => f.status === 'online');
-    if (!online.length) return;
-    const f = online[Math.floor(Math.random() * online.length)];
-    const samples = [
-      "Hey! How's it going?",
-      'Did you finish the homework? 😅',
-      'What did you get for question 3?',
-      'Study session tonight?',
-      'Did the teacher post anything new?',
-      'Thanks for the help earlier!',
-      'Are you going to class tomorrow?',
-    ];
-    const text = samples[Math.floor(Math.random() * samples.length)];
-    if (!state.chats[f.id]) state.chats[f.id] = [];
-    state.chats[f.id].push({ id: uid(), text, from: 'them', ts: Date.now() });
-    if (_activeId !== f.id) {
-      f.unread = (f.unread || 0) + 1;
-    }
-    save();
-    comRender();
-    if (_activeId === f.id) scrollMsgs();
-  }
-
-  // ── Send friend request ──
+  // ── Send friend request (Gmail only, no auto-accept) ──
   window.comSendRequest = function() {
     const inp = document.getElementById('comFriendInput');
-    const name = inp.value.trim();
-    if (!name) return;
+    const gmail = inp.value.trim().toLowerCase();
+    if (!gmail) return;
+
+    // Validate Gmail format
+    if (!/^[a-zA-Z0-9._%+\-]+@gmail\.com$/.test(gmail)) {
+      comToast('Please enter a valid @gmail.com address');
+      inp.focus();
+      return;
+    }
 
     // Check duplicates
-    const alreadyFriend = state.friends.some(f => f.name.toLowerCase() === name.toLowerCase());
-    const alreadyPending = state.pending.some(p => p.name.toLowerCase() === name.toLowerCase());
-    if (alreadyFriend) { inp.value = ''; comToast('Already friends with ' + name); return; }
-    if (alreadyPending) { inp.value = ''; comToast('Request already sent to ' + name); return; }
+    const alreadyFriend = state.friends.some(f => f.gmail === gmail);
+    const alreadyPending = state.pending.some(p => p.gmail === gmail);
+    if (alreadyFriend) { inp.value = ''; comToast('Already friends with ' + gmail); return; }
+    if (alreadyPending) { inp.value = ''; comToast('Request already sent to ' + gmail); return; }
 
     const id = uid();
-    state.pending.push({ id, name, direction: 'sent' });
+    state.pending.push({ id, gmail, direction: 'sent' });
     save();
     inp.value = '';
     comRender();
-
-    // Simulate acceptance after 4–10 seconds
-    const delay = 4000 + Math.random() * 6000;
-    setTimeout(() => {
-      const idx = state.pending.findIndex(p => p.id === id);
-      if (idx === -1) return; // was declined manually
-      state.pending.splice(idx, 1);
-      state.friends.push({ id, name, status: 'online', lastSeen: Date.now(), unread: 0 });
-      if (!state.chats[id]) state.chats[id] = [];
-      save();
-      comRender();
-      comToast(name + ' accepted your friend request! 🎉');
-    }, delay);
+    comToast('Friend request sent to ' + gmail + ' ✉️');
+    // No auto-accept — the request stays pending until manually accepted
   };
 
   // ── Accept / decline pending request ──
@@ -8163,7 +8130,7 @@ function toggleFaq(btn){
     const idx = state.pending.findIndex(p => p.id === id);
     if (idx === -1) return;
     const p = state.pending.splice(idx, 1)[0];
-    state.friends.push({ id: p.id, name: p.name, status: 'online', lastSeen: Date.now(), unread: 0 });
+    state.friends.push({ id: p.id, gmail: p.gmail, status: 'accepted', unread: 0 });
     if (!state.chats[p.id]) state.chats[p.id] = [];
     save();
     comRender();
@@ -8205,25 +8172,7 @@ function toggleFaq(btn){
     save();
     renderMessages();
     scrollMsgs();
-
-    // Simulate a reply after 2–5 seconds
-    const f = state.friends.find(f => f.id === _activeId);
-    if (f && f.status === 'online') {
-      const delay = 2000 + Math.random() * 3000;
-      const replies = [
-        'Got it!', 'Sure!', 'Sounds good 👍', 'Thanks!',
-        'Okay, makes sense.', 'Haha yeah!', 'I agree!',
-        'Let me check and get back to you.', 'Noted!', '😊'
-      ];
-      const reply = replies[Math.floor(Math.random() * replies.length)];
-      setTimeout(() => {
-        if (!state.chats[_activeId]) return;
-        state.chats[_activeId].push({ id: uid(), text: reply, from: 'them', ts: Date.now() });
-        save();
-        renderMessages();
-        scrollMsgs();
-      }, delay);
-    }
+    // No simulated reply — messages are stored locally and await real responses
   };
 
   // ── Toast ──
@@ -8296,10 +8245,9 @@ function toggleFaq(btn){
 
   // ── Main render ──
   window.comRender = function() {
-    // Online count
-    const onlineCount = state.friends.filter(f => f.status === 'online').length;
+    // Friend count (no simulated online status)
     const oc = document.getElementById('comOnlineCount');
-    if (oc) oc.textContent = onlineCount + ' online';
+    if (oc) oc.textContent = state.friends.length + ' friend' + (state.friends.length !== 1 ? 's' : '');
 
     // Pending section
     const pendingSection = document.getElementById('comPendingSection');
@@ -8310,12 +8258,12 @@ function toggleFaq(btn){
         pendingList.innerHTML = state.pending.map(p => `
           <div class="com-pending-item">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="color:var(--amber);flex-shrink:0"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            <div class="com-pending-name">${escHtml(p.name)}</div>
+            <div class="com-pending-name" title="${escHtml(p.gmail)}">${escHtml(p.gmail)}</div>
             <div class="com-pending-actions">
               ${p.direction === 'received'
                 ? `<button class="com-pending-btn accept" onclick="comAccept('${p.id}')">Accept</button>
                    <button class="com-pending-btn decline" onclick="comDecline('${p.id}')">Decline</button>`
-                : `<span class="com-pending-wait">Pending…</span>`
+                : `<button class="com-pending-btn decline" onclick="comDecline('${p.id}')" title="Cancel request">Cancel</button><span class="com-pending-wait">Awaiting…</span>`
               }
             </div>
           </div>
@@ -8336,16 +8284,14 @@ function toggleFaq(btn){
       } else {
         fl.innerHTML = state.friends.map(f => {
           const isActive = _activeId === f.id;
-          const dotColor = f.status === 'online' ? '#00ffd9' : 'var(--text-3)';
-          const lastSeenStr = f.status === 'online' ? 'Online' : 'Offline';
+          const username = f.gmail.split('@')[0];
           return `<div class="com-friend-item ${isActive ? 'active' : ''}" onclick="comOpenChat('${f.id}')">
             <div class="com-friend-ava" style="background:${avatarGradient(f.id)}">
-              ${escHtml(initials(f.name))}
-              <div class="com-status-dot" style="background:${dotColor}"></div>
+              ${escHtml(initials(username))}
             </div>
             <div class="com-friend-info">
-              <div class="com-friend-name">${escHtml(f.name)}</div>
-              <div class="com-friend-lastseen">${lastSeenStr}</div>
+              <div class="com-friend-name">${escHtml(username)}</div>
+              <div class="com-friend-lastseen" title="${escHtml(f.gmail)}">${escHtml(f.gmail)}</div>
             </div>
             ${f.unread ? `<div class="com-friend-unread">${f.unread}</div>` : ''}
           </div>`;
@@ -8362,34 +8308,22 @@ function toggleFaq(btn){
       if (chatArea) chatArea.style.display = 'none';
     } else {
       const f = state.friends.find(f => f.id === _activeId);
+      const username = f.gmail.split('@')[0];
       if (emptyChat) emptyChat.style.display = 'none';
       if (chatArea) { chatArea.style.display = 'flex'; chatArea.style.flexDirection = 'column'; }
 
       const ava = document.getElementById('comChatAva');
       const nameEl = document.getElementById('comChatName');
       const statusEl = document.getElementById('comChatStatus');
-      if (ava) { ava.textContent = initials(f.name); ava.style.background = avatarGradient(f.id); }
-      if (nameEl) nameEl.textContent = f.name;
-      if (statusEl) { statusEl.textContent = f.status === 'online' ? 'Online' : 'Offline'; statusEl.style.color = f.status === 'online' ? 'var(--teal)' : 'var(--text-3)'; }
+      if (ava) { ava.textContent = initials(username); ava.style.background = avatarGradient(f.id); }
+      if (nameEl) nameEl.textContent = username;
+      if (statusEl) { statusEl.textContent = f.gmail; statusEl.style.color = 'var(--text-3)'; }
 
       renderMessages();
     }
   };
 
-  // Periodic simulations (only when community tab open)
-  setInterval(() => {
-    const panel = document.getElementById('p-com');
-    if (panel && panel.classList.contains('show')) {
-      simulateOnline();
-    }
-  }, 15000);
-
-  setInterval(() => {
-    const panel = document.getElementById('p-com');
-    if (panel && panel.classList.contains('show') && state.friends.length) {
-      if (Math.random() > 0.6) simulateIncoming();
-    }
-  }, 20000);
+  // No periodic simulations — all interactions are real and user-driven
 
 })();
 

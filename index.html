@@ -37,6 +37,13 @@
   --shadow:       0 20px 60px rgba(0,0,0,.5);
   --blur:         blur(40px);
   --theme-icon:   '☀️';
+  --dd-frost-bg:      rgba(18,20,34,0.50);
+  --dd-frost-rim:     rgba(255,255,255,0.12);
+  --dd-frost-divider: rgba(255,255,255,0.07);
+  --dd-frost-hover:   rgba(255,255,255,0.08);
+  --dd-frost-sheen:   linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent);
+  --dd-opt-name:      #EEF0FF;
+  --dd-opt-sub:       rgba(238,240,255,0.58);
 }
 [data-theme="light"] {
   --bg:           #F0F2FA;
@@ -59,6 +66,13 @@
   --shadow:       0 20px 60px rgba(0,0,0,.12);
   --blur:         blur(40px);
   --theme-icon:   '🌙';
+  --dd-frost-bg:      rgba(240,242,252,0.55);
+  --dd-frost-rim:     rgba(0,0,0,0.10);
+  --dd-frost-divider: rgba(0,0,0,0.07);
+  --dd-frost-hover:   rgba(0,0,0,0.05);
+  --dd-frost-sheen:   linear-gradient(90deg, transparent, rgba(255,255,255,0.50), transparent);
+  --dd-opt-name:      #0D0F1E;
+  --dd-opt-sub:       rgba(13,15,30,0.60);
 }
 
 /* ─── PALETTE (theme-independent) ─── */
@@ -3032,42 +3046,28 @@ body::before{
   position: absolute;
   top: calc(100% + 6px);
   left: 0; right: 0;
-  border: 1px solid rgba(255,255,255,0.14);
   border-radius: var(--r-md);
-  box-shadow: var(--shadow), 0 0 0 1px rgba(0,255,217,.08), 0 8px 32px rgba(0,0,0,.6);
+  box-shadow: var(--shadow), 0 0 0 1px rgba(0,255,217,.08), 0 8px 32px rgba(0,0,0,.25);
   z-index: 100;
   overflow: hidden;
   opacity: 0;
   transform: translateY(-6px) scale(.98);
   pointer-events: none;
   transition: opacity .2s var(--ease), transform .2s var(--spring);
-  /* Frosted glass base — visible even before ::before renders */
-  background: rgba(14,16,28,0.82);
-  backdrop-filter: blur(28px) saturate(1.6);
-  -webkit-backdrop-filter: blur(28px) saturate(1.6);
+  /* True backdrop blur — samples whatever is visually behind */
+  backdrop-filter: blur(32px) saturate(1.8) brightness(1.04);
+  -webkit-backdrop-filter: blur(32px) saturate(1.8) brightness(1.04);
+  /* Thin tint that adapts to theme via CSS var */
+  background: var(--dd-frost-bg);
+  border: 1px solid var(--dd-frost-rim);
 }
-.fbk-dd-menu::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  /* Solid frost layer — removes see-through look */
-  background: linear-gradient(
-    160deg,
-    rgba(30,34,56,0.92) 0%,
-    rgba(16,18,30,0.96) 100%
-  );
-  backdrop-filter: blur(28px) saturate(1.8);
-  -webkit-backdrop-filter: blur(28px) saturate(1.8);
-  z-index: -1;
-  border-radius: var(--r-md);
-}
-/* Subtle top-edge highlight for glass depth */
+/* Subtle top-edge shimmer for glass depth */
 .fbk-dd-menu::after {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  background: var(--dd-frost-sheen);
   z-index: 1;
   pointer-events: none;
 }
@@ -3082,15 +3082,13 @@ body::before{
   gap: 12px;
   padding: 13px 16px;
   cursor: pointer;
-  border-bottom: 1px solid rgba(255,255,255,0.07);
+  border-bottom: 1px solid var(--dd-frost-divider);
   transition: background .15s;
-  /* Each option also has its own subtle frost */
   position: relative;
-  z-index: 0;
 }
 .fbk-dd-option:last-child { border-bottom: none; }
-.fbk-dd-option:hover { background: rgba(255,255,255,0.07); }
-.fbk-dd-option.chosen { background: rgba(0,255,217,.09); }
+.fbk-dd-option:hover { background: var(--dd-frost-hover); }
+.fbk-dd-option.chosen { background: rgba(0,255,217,.10); }
 .fbk-dd-opt-icon {
   width: 32px; height: 32px; border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
@@ -3098,11 +3096,11 @@ body::before{
 }
 .fbk-dd-opt-info { flex: 1; }
 .fbk-dd-opt-name {
-  font-size: 14px; font-weight: 600; color: var(--text);
+  font-size: 14px; font-weight: 600; color: var(--dd-opt-name);
   line-height: 1.2;
 }
 .fbk-dd-opt-desc {
-  font-size: 11px; color: var(--text-3);
+  font-size: 11px; color: var(--dd-opt-sub);
   margin-top: 2px;
 }
 .fbk-dd-opt-check {

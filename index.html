@@ -3705,6 +3705,175 @@ body::before{
 }
 .com-msg:hover .ts-rpt-btn { opacity: 1; pointer-events: all; }
 .ts-rpt-btn:hover { background: rgba(251,113,133,.14); border-color: rgba(251,113,133,.3); color: var(--rose); }
+/* ════ Trust & Safety CSS ════ */
+
+/* Context menu */
+.ts-ctx-menu {
+  position: fixed; z-index: 3000;
+  background: var(--bg-2); border: 1px solid var(--rim);
+  border-radius: var(--r-md);
+  box-shadow: 0 8px 32px rgba(0,0,0,.35), 0 2px 8px rgba(0,0,0,.2);
+  padding: 5px;
+  min-width: 150px;
+  opacity: 0; pointer-events: none;
+  transform: scale(.93) translateY(-4px);
+  transform-origin: top left;
+  transition: opacity .15s var(--ease), transform .15s var(--spring);
+}
+.ts-ctx-menu.open {
+  opacity: 1; pointer-events: all;
+  transform: scale(1) translateY(0);
+}
+.ts-ctx-item {
+  width: 100%; display: flex; align-items: center; gap: 9px;
+  padding: 9px 12px; border-radius: var(--r-sm);
+  background: none; border: none;
+  color: var(--text-2); font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: background .12s, color .12s;
+  font-family: var(--ff-body); text-align: left;
+}
+.ts-ctx-item:hover { background: var(--surface-2); color: var(--text); }
+.ts-ctx-item.danger { color: var(--rose); }
+.ts-ctx-item.danger:hover { background: rgba(251,113,133,.10); }
+.ts-ctx-divider { height: 1px; background: var(--rim-2); margin: 4px 0; }
+
+/* Reply bar */
+.com-reply-bar {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 16px 8px 14px;
+  background: var(--surface);
+  border-top: 1px solid var(--rim-2);
+  animation: slideUp .15s var(--ease) both;
+}
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(6px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.com-reply-bar-line {
+  width: 3px; align-self: stretch; border-radius: 3px;
+  background: var(--teal); flex-shrink: 0;
+}
+.com-reply-bar-content { flex: 1; min-width: 0; }
+.com-reply-bar-label {
+  font-size: 11px; font-weight: 700; color: var(--teal);
+  margin-bottom: 2px; text-transform: uppercase; letter-spacing: .04em;
+}
+.com-reply-bar-text {
+  font-size: 12px; color: var(--text-2); line-height: 1.4;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.com-reply-bar-close {
+  flex-shrink: 0; background: none; border: none;
+  color: var(--text-3); cursor: pointer; padding: 4px;
+  border-radius: 50%; transition: background .15s, color .15s;
+}
+.com-reply-bar-close:hover { background: var(--surface-2); color: var(--text); }
+
+/* Reply quote inside bubble */
+.com-msg-reply-quote {
+  font-size: 11.5px; color: var(--text-3);
+  border-left: 2px solid var(--teal);
+  padding: 4px 8px; margin-bottom: 5px;
+  border-radius: 0 4px 4px 0;
+  background: rgba(0,255,217,.05);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Report modal */
+.ts-modal-overlay {
+  position: fixed; inset: 0; z-index: 2000;
+  background: rgba(0,0,0,.5); backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s var(--ease);
+}
+.ts-modal-overlay.open { opacity: 1; pointer-events: all; }
+.ts-modal {
+  width: 100%; max-width: 400px; margin: 20px;
+  background: var(--bg-2); border: 1px solid var(--rim);
+  border-radius: var(--r-xl); padding: 28px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.5);
+  transform: translateY(14px) scale(.97);
+  transition: transform .25s var(--spring);
+}
+.ts-modal-overlay.open .ts-modal { transform: translateY(0) scale(1); }
+.ts-modal-title {
+  font-family: var(--ff-head); font-size: 17px; font-weight: 700;
+  color: var(--text); margin-bottom: 6px;
+  display: flex; align-items: center; gap: 8px;
+}
+.ts-modal-sub { font-size: 12px; color: var(--text-3); margin-bottom: 18px; line-height: 1.5; }
+.ts-modal-preview {
+  background: var(--surface); border: 1px solid var(--rim-2);
+  border-radius: var(--r-md); padding: 10px 14px;
+  font-size: 13px; color: var(--text-2); line-height: 1.5;
+  margin-bottom: 18px; font-style: italic;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.ts-modal-label {
+  font-size: 11px; font-weight: 700; color: var(--text-3);
+  text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px;
+}
+.ts-reason-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+.ts-reason-opt {
+  padding: 10px 12px; border-radius: var(--r-md);
+  border: 1px solid var(--rim); background: var(--surface);
+  color: var(--text-2); font-size: 12px; font-weight: 500;
+  cursor: pointer; transition: all .15s; text-align: left;
+  display: flex; align-items: center; gap: 7px;
+  font-family: var(--ff-body);
+}
+.ts-reason-opt:hover { background: var(--surface-2); color: var(--text); }
+.ts-reason-opt.selected {
+  border-color: var(--rose); background: rgba(251,113,133,.10);
+  color: var(--rose); font-weight: 600;
+}
+.ts-reason-icon { font-size: 15px; }
+.ts-modal-btns { display: flex; gap: 10px; justify-content: flex-end; }
+.ts-btn-cancel {
+  padding: 9px 18px; border-radius: var(--r-pill);
+  background: var(--surface); border: 1px solid var(--rim);
+  color: var(--text-2); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all .2s; font-family: var(--ff-body);
+}
+.ts-btn-cancel:hover { background: var(--surface-2); color: var(--text); }
+.ts-btn-report {
+  padding: 9px 18px; border-radius: var(--r-pill);
+  background: rgba(251,113,133,.12); border: 1px solid rgba(251,113,133,.3);
+  color: var(--rose); font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all .2s; font-family: var(--ff-body);
+}
+.ts-btn-report:hover { background: rgba(251,113,133,.22); }
+.ts-btn-report:disabled { opacity: .4; cursor: not-allowed; }
+
+/* Rate limit banner */
+.ts-rate-banner {
+  position: fixed; bottom: 80px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 4000; opacity: 0; pointer-events: none;
+  background: rgba(251,191,36,.12); border: 1px solid rgba(251,191,36,.35);
+  color: var(--amber); border-radius: var(--r-pill);
+  padding: 10px 20px; font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  transition: opacity .25s, transform .25s var(--spring);
+  white-space: nowrap;
+}
+.ts-rate-banner.show {
+  opacity: 1; pointer-events: all;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* Blocked notice */
+.ts-blocked-notice {
+  text-align: center; padding: 40px 20px;
+  color: var(--text-3); font-size: 13px; line-height: 1.7;
+}
+.ts-blocked-notice svg { opacity: .2; display: block; margin: 0 auto 12px; }
+
 
 /* ── Rate limit banner ── */
 .ts-rate-banner {
@@ -5473,6 +5642,17 @@ body::before{
               </div>
             </div>
             <div class="com-msgs" id="comMsgs"></div>
+            <!-- Reply bar (shown when replying to a message) -->
+            <div class="com-reply-bar" id="comReplyBar" style="display:none;">
+              <div class="com-reply-bar-line"></div>
+              <div class="com-reply-bar-content">
+                <div class="com-reply-bar-label">Replying to</div>
+                <div class="com-reply-bar-text" id="comReplyBarText"></div>
+              </div>
+              <button class="com-reply-bar-close" onclick="window.tsCancelReply()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
             <div class="com-input-row">
               <input type="file" id="comFileInput" accept="image/*,.pdf,.doc,.docx,.txt,.zip" style="display:none" onchange="comAttachFile(this)"/>
               <button class="com-attach-btn" onclick="document.getElementById('comFileInput').click()" title="Attach file">
@@ -6735,7 +6915,54 @@ function hwExportPDF() {
   </table>
   <div class="footer">Generated by Aulert • ${now}</div>
   <script>window.onload=()=>window.print();<\/script>
-  </body></html>`);
+  
+<!-- ════ Trust & Safety UI ════ -->
+
+<!-- Context menu -->
+<div class="ts-ctx-menu" id="tsMsgCtxMenu">
+  <button class="ts-ctx-item" onclick="window.tsCtxReply()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 17l-5-5 5-5M4 12h11a5 5 0 010 10h-1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    Reply
+  </button>
+  <div class="ts-ctx-divider"></div>
+  <button class="ts-ctx-item danger" onclick="window.tsCtxReport()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    Report
+  </button>
+</div>
+
+<!-- Report modal -->
+<div class="ts-modal-overlay" id="tsReportOverlay" onclick="if(event.target===this)window.tsCloseReport()">
+  <div class="ts-modal">
+    <div class="ts-modal-title">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Report Message
+    </div>
+    <div class="ts-modal-sub">Your report is anonymous and will be reviewed by the developer.</div>
+    <div class="ts-modal-preview" id="tsReportPreview"></div>
+    <div class="ts-modal-label">Why are you reporting this?</div>
+    <div class="ts-reason-grid">
+      <button class="ts-reason-opt" data-reason="harassment"    onclick="window.tsSelectReason(this)"><span class="ts-reason-icon">😠</span>Harassment</button>
+      <button class="ts-reason-opt" data-reason="spam"          onclick="window.tsSelectReason(this)"><span class="ts-reason-icon">🗑️</span>Spam</button>
+      <button class="ts-reason-opt" data-reason="hate_speech"   onclick="window.tsSelectReason(this)"><span class="ts-reason-icon">🚫</span>Hate Speech</button>
+      <button class="ts-reason-opt" data-reason="misinformation" onclick="window.tsSelectReason(this)"><span class="ts-reason-icon">⚠️</span>Misinformation</button>
+      <button class="ts-reason-opt" data-reason="inappropriate" onclick="window.tsSelectReason(this)"><span class="ts-reason-icon">🔞</span>Inappropriate</button>
+      <button class="ts-reason-opt" data-reason="other"         onclick="window.tsSelectReason(this)"><span class="ts-reason-icon">💬</span>Other</button>
+    </div>
+    <div class="ts-modal-btns">
+      <button class="ts-btn-cancel" onclick="window.tsCloseReport()">Cancel</button>
+      <button class="ts-btn-report" id="tsSubmitReportBtn" onclick="window.tsSubmitReport()" disabled>Submit Report</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rate limit banner -->
+<div class="ts-rate-banner" id="tsRateBanner">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  <span id="tsRateBannerText">Slow down</span>
+</div>
+
+</body></html>`);
   win.document.close();
 }
 
@@ -9637,6 +9864,7 @@ const FIREBASE_CONFIG = {
   function renderGroupMessages(msgs, myEmail, groupId) {
     const area = $id('comMsgs');
     if (!area) return;
+    window._tsMsgStore = msgs; // expose for context menu
     if (!msgs.length) {
       area.innerHTML='<div class="com-no-msgs"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" opacity=".2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><p>No messages yet. Say hi! 👋</p></div>';
       return;
@@ -9669,7 +9897,10 @@ const FIREBASE_CONFIG = {
           bubble = `${senderLabel}<div class="com-file-msg"><div class="com-file-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polyline points="13,2 13,9 20,9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div><div class="com-file-info"><div class="com-file-name">${esc(m.fileName)}</div><div class="com-file-size">${sz}</div><a class="com-file-dl" href="${m.fileData}" download="${esc(m.fileName)}">Download</a></div></div><div class="com-msg-ts">${fmtTime(m.ts)}</div>`;
         }
       } else {
-        bubble = `${senderLabel}<div class="com-msg-bubble">${esc(m.text)}</div><div class="com-msg-ts">${fmtTime(m.ts)}</div>`;
+        const replyQuoteG = m.replyTo
+          ? `<div class="com-msg-reply-quote">${esc((m.replyTo.text||'').slice(0,80)||'(file)')}</div>`
+          : '';
+        bubble = `${senderLabel}<div class="com-msg-bubble">${replyQuoteG}${esc(m.text)}</div><div class="com-msg-ts">${fmtTime(m.ts)}</div>`;
       }
 
       let seenHtml = '';
@@ -9687,7 +9918,7 @@ const FIREBASE_CONFIG = {
         seenHtml = `<div class="com-msg-seen${wasSeen?' seen':''}">${doubleTick}<span class="seen-label">${label}</span></div>`;
       }
       const reportBtn = !me
-        ? `<button class="ts-rpt-btn" title="Report" onclick="window.tsOpenReport(${JSON.stringify(m._key||'')},${JSON.stringify((m.text||'').slice(0,200))},${JSON.stringify(m.from||'')})">&#8943;</button>`
+        ? `<button class="ts-rpt-btn" title="Actions" data-midx="${i}" onclick="window.tsMsgMenu(this,${i})">&#8943;</button>`
         : '';
       html += `<div class="com-msg ${me?'mine':'theirs'}"><div class="com-msg-wrap">${reportBtn}<div class="com-msg-content">${bubble}${seenHtml}</div></div></div>`;
     });
@@ -9707,8 +9938,14 @@ const FIREBASE_CONFIG = {
     inp.value = '';
     const cKey = chatKey(myEmail, _activeChat);
     const ts = Date.now();
+    // Build payload — attach reply quote if active
+    const payload = { from: myEmail, text, ts };
+    if (window._tsReplyTo) {
+      payload.replyTo = { key: window._tsReplyTo.key || '', from: window._tsReplyTo.from || '', text: (window._tsReplyTo.text || '').slice(0, 100) };
+      window.tsCancelReply();
+    }
     try {
-      await _db.ref(`aulert/messages/${cKey}`).push({ from: myEmail, text, ts });
+      await _db.ref(`aulert/messages/${cKey}`).push(payload);
       // Increment friend's unread counter
       _db.ref(`aulert/friends/${encKey(_activeChat)}/${encKey(myEmail)}/unread`).transaction(n=>(n||0)+1);
     } catch(e) { comToast('Failed to send: ' + e.message); }
@@ -9739,6 +9976,10 @@ const FIREBASE_CONFIG = {
         if (_activeGroup) {
           const g = _groups[_activeGroup] || {};
           payload.senderName = S.user?.name||'';
+          if (window._tsReplyTo) {
+            payload.replyTo = { key: window._tsReplyTo.key||'', from: window._tsReplyTo.from||'', text: (window._tsReplyTo.text||'').slice(0,100) };
+            window.tsCancelReply();
+          }
           await _db.ref(`aulert/groups/${_activeGroup}/messages`).push(payload);
           Object.keys(g.members||{}).forEach(mKey => {
             if (mKey !== encKey(myEmail)) _db.ref(`aulert/userGroups/${mKey}/${_activeGroup}/unread`).transaction(n=>(n||0)+1);
@@ -9759,6 +10000,7 @@ const FIREBASE_CONFIG = {
   function renderMessages(msgs, myEmail) {
     const area = $id('comMsgs');
     if (!area) return;
+    window._tsMsgStore = msgs; // expose for context menu
     if (!msgs.length) {
       area.innerHTML='<div class="com-no-msgs"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" opacity=".2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><p>No messages yet. Say hi! 👋</p></div>';
       return;
@@ -9788,7 +10030,10 @@ const FIREBASE_CONFIG = {
           bubble = `<div class="com-file-msg"><div class="com-file-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="13,2 13,9 20,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div class="com-file-info"><div class="com-file-name">${esc(m.fileName)}</div><div class="com-file-size">${sz}</div><a class="com-file-dl" href="${m.fileData}" download="${esc(m.fileName)}">Download</a></div></div><div class="com-msg-ts">${fmtTime(m.ts)}</div>`;
         }
       } else {
-        bubble = `<div class="com-msg-bubble">${esc(m.text)}</div><div class="com-msg-ts">${fmtTime(m.ts)}</div>`;
+        const replyQuote = m.replyTo
+          ? `<div class="com-msg-reply-quote">${esc((m.replyTo.text||'').slice(0,80)||'(file)')}</div>`
+          : '';
+        bubble = `<div class="com-msg-bubble">${replyQuote}${esc(m.text)}</div><div class="com-msg-ts">${fmtTime(m.ts)}</div>`;
       }
 
       // Seen receipt — only on the last message I sent
@@ -9803,7 +10048,7 @@ const FIREBASE_CONFIG = {
       }
 
       const rptBtnG = !me
-        ? `<button class="ts-rpt-btn" title="Report" onclick="window.tsOpenReport(${JSON.stringify(m._key||'')},${JSON.stringify((m.text||'').slice(0,200))},${JSON.stringify(m.from||'')})">&#8943;</button>`
+        ? `<button class="ts-rpt-btn" title="Actions" data-midx="${i}" onclick="window.tsMsgMenu(this,${i})">&#8943;</button>`
         : '';
       html += `<div class="com-msg ${me?'mine':'theirs'}"><div class="com-msg-wrap">${rptBtnG}<div class="com-msg-content">${bubble}${seenHtml}</div></div></div>`;
     });
@@ -9859,37 +10104,97 @@ const FIREBASE_CONFIG = {
 
 
 // ════════════════════════════════════════════════════════════
-//  TRUST & SAFETY — Block, Report, Rate Limiting
+//  TRUST & SAFETY — Block, Report, Reply, Rate Limiting
 // ════════════════════════════════════════════════════════════
 (function() {
 
+  // ── Message data store — avoids JSON.stringify in onclick attrs ──
+  window._tsMsgStore = [];   // populated by renderMessages each render
+  window._tsActiveMsgIdx = null;
+
   // ── Helpers ──────────────────────────────────────────────
   function $id(id) { return document.getElementById(id); }
-  function tsShowBanner(msg, durationMs) {
-    const b = $id('tsRateBanner');
-    const t = $id('tsRateBannerText');
+
+  function tsShowBanner(msg, ms) {
+    const b = $id('tsRateBanner'), t = $id('tsRateBannerText');
     if (!b || !t) return;
     t.textContent = msg;
     b.classList.add('show');
-    clearTimeout(b._hideTimer);
-    b._hideTimer = setTimeout(() => b.classList.remove('show'), durationMs || 3500);
+    clearTimeout(b._t);
+    b._t = setTimeout(() => b.classList.remove('show'), ms || 3500);
   }
 
-  // ── Block / Unblock ──────────────────────────────────────
+  // Close context menu on outside click
+  document.addEventListener('click', function(e) {
+    const menu = $id('tsMsgCtxMenu');
+    if (menu && !menu.contains(e.target) && !e.target.closest('.ts-rpt-btn')) {
+      menu.classList.remove('open');
+    }
+  });
 
-  // Update the block button label/state for the active chat
+  // ── Context menu ─────────────────────────────────────────
+  window.tsMsgMenu = function(btn, idx) {
+    const menu = $id('tsMsgCtxMenu');
+    if (!menu) return;
+    window._tsActiveMsgIdx = idx;
+    // Position near the button
+    const rect = btn.getBoundingClientRect();
+    const menuW = 160, menuH = 90;
+    let top  = rect.bottom + 6;
+    let left = rect.left;
+    if (left + menuW > window.innerWidth - 10)  left = window.innerWidth - menuW - 10;
+    if (top + menuH  > window.innerHeight - 10) top  = rect.top - menuH - 6;
+    menu.style.top  = top  + 'px';
+    menu.style.left = left + 'px';
+    menu.classList.toggle('open');
+  };
+
+  window.tsCtxReply = function() {
+    const menu = $id('tsMsgCtxMenu');
+    if (menu) menu.classList.remove('open');
+    const idx = window._tsActiveMsgIdx;
+    if (idx == null || !window._tsMsgStore[idx]) return;
+    const msg = window._tsMsgStore[idx];
+    // Show reply bar
+    const bar  = $id('comReplyBar');
+    const text = $id('comReplyBarText');
+    if (!bar || !text) return;
+    const preview = msg.text
+      ? (msg.text.length > 60 ? msg.text.slice(0, 60) + '…' : msg.text)
+      : '(file)';
+    text.textContent = preview;
+    bar.style.display = 'flex';
+    window._tsReplyTo = { key: msg._key, from: msg.from, text: msg.text || '' };
+    // Focus input
+    const inp = $id('comMsgInput');
+    if (inp) inp.focus();
+  };
+
+  window.tsCancelReply = function() {
+    const bar = $id('comReplyBar');
+    if (bar) bar.style.display = 'none';
+    window._tsReplyTo = null;
+  };
+
+  window.tsCtxReport = function() {
+    const menu = $id('tsMsgCtxMenu');
+    if (menu) menu.classList.remove('open');
+    const idx = window._tsActiveMsgIdx;
+    if (idx == null || !window._tsMsgStore[idx]) return;
+    const msg = window._tsMsgStore[idx];
+    window.tsOpenReport(msg._key || '', msg.text || '', msg.from || '');
+  };
+
+  // ── Block / Unblock ──────────────────────────────────────
   window._updateBlockBtn = function(email) {
-    const btn  = $id('comBlockBtn');
-    const lbl  = $id('comBlockBtnLabel');
+    const btn = $id('comBlockBtn'), lbl = $id('comBlockBtnLabel');
     if (!btn || !lbl) return;
-    const blocked = window._isBlocked ? window._isBlocked(email) : false;
+    const blocked = window._isBlocked(email);
     lbl.textContent = blocked ? 'Unblock' : 'Block';
     btn.classList.toggle('is-blocked', blocked);
   };
 
   window._isBlocked = function(email) {
-    // _blocks is defined inside the community IIFE — access via closure won't work directly,
-    // so we store a reference on window when blocks load
     return !!(window._aulertBlocks && window._aulertBlocks[email]);
   };
 
@@ -9897,23 +10202,18 @@ const FIREBASE_CONFIG = {
     const myEmail = S.user?.email;
     if (!myEmail || !window._activeChatEmail || !window._aulertDb) return;
     const targetEmail = window._activeChatEmail;
-    const myKey = myEmail.toLowerCase().replace(/\./g,',').replace(/@/g,'__at__');
-    const theirKey = targetEmail.toLowerCase().replace(/\./g,',').replace(/@/g,'__at__');
+    const enc = e => e.toLowerCase().replace(/\./g,',').replace(/@/g,'__at__');
+    const myKey = enc(myEmail), theirKey = enc(targetEmail);
     const isBlocked = window._isBlocked(targetEmail);
     try {
       if (isBlocked) {
-        // Unblock
         await window._aulertDb.ref(`aulert/blocks/${myKey}/${theirKey}`).remove();
-        tsShowBanner(`${targetEmail.split('@')[0]} unblocked`, 2500);
+        tsShowBanner(targetEmail.split('@')[0] + ' unblocked', 2500);
       } else {
-        // Block: write to Firebase, also remove friend relationship
-        await window._aulertDb.ref(`aulert/blocks/${myKey}/${theirKey}`).set({
-          email: targetEmail, ts: Date.now()
-        });
-        // Remove friend edges (both sides) so they disappear from each other's lists
+        await window._aulertDb.ref(`aulert/blocks/${myKey}/${theirKey}`).set({ email: targetEmail, ts: Date.now() });
         await window._aulertDb.ref(`aulert/friends/${myKey}/${theirKey}`).remove();
         await window._aulertDb.ref(`aulert/friends/${theirKey}/${myKey}`).remove();
-        tsShowBanner(`${targetEmail.split('@')[0]} blocked`, 2500);
+        tsShowBanner(targetEmail.split('@')[0] + ' blocked', 2500);
       }
     } catch(e) {
       tsShowBanner('Error — please try again', 2500);
@@ -9921,98 +10221,79 @@ const FIREBASE_CONFIG = {
   };
 
   // ── Report Modal ─────────────────────────────────────────
-
   let _tsSelectedReason = null;
 
   window.tsOpenReport = function(msgKey, text, fromEmail) {
     window._tsReportData = { msgKey, text, fromEmail };
     _tsSelectedReason = null;
-    // Reset selections
     document.querySelectorAll('.ts-reason-opt').forEach(b => b.classList.remove('selected'));
-    $id('tsSubmitReport').disabled = true;
-    // Show preview
+    const sbtn = $id('tsSubmitReportBtn');
+    if (sbtn) sbtn.disabled = true;
     const prev = $id('tsReportPreview');
-    if (prev) prev.textContent = text ? `"${text}"` : '(file or media)';
-    $id('tsReportOverlay').classList.add('open');
+    if (prev) prev.textContent = text ? '\u201c' + text + '\u201d' : '(file or media)';
+    const overlay = $id('tsReportOverlay');
+    if (overlay) overlay.classList.add('open');
   };
 
   window.tsCloseReport = function() {
-    $id('tsReportOverlay').classList.remove('open');
+    const overlay = $id('tsReportOverlay');
+    if (overlay) overlay.classList.remove('open');
   };
 
   window.tsSelectReason = function(btn) {
     document.querySelectorAll('.ts-reason-opt').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
     _tsSelectedReason = btn.dataset.reason;
-    $id('tsSubmitReport').disabled = false;
+    const sbtn = $id('tsSubmitReportBtn');
+    if (sbtn) sbtn.disabled = false;
   };
 
   window.tsSubmitReport = async function() {
     const myEmail = S.user?.email;
     if (!myEmail || !_tsSelectedReason || !window._aulertDb) return;
     const { msgKey, text, fromEmail } = window._tsReportData || {};
-    const submitBtn = $id('tsSubmitReport');
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Submitting…';
+    const sbtn = $id('tsSubmitReportBtn');
+    if (sbtn) { sbtn.disabled = true; sbtn.textContent = 'Submitting\u2026'; }
     try {
       await window._aulertDb.ref('aulert/reports').push({
-        reporter:      myEmail,
-        reported:      fromEmail || '',
-        messageKey:    msgKey || '',
-        messageText:   text   || '',
-        reason:        _tsSelectedReason,
-        ts:            Date.now(),
-        status:        'pending',
-        context:       window._activeChatEmail
-          ? `dm:${window._activeChatEmail}`
-          : (window._activeGroupId ? `group:${window._activeGroupId}` : 'unknown')
+        reporter: myEmail, reported: fromEmail || '',
+        messageKey: msgKey || '', messageText: text || '',
+        reason: _tsSelectedReason, ts: Date.now(), status: 'pending',
+        context: window._activeChatEmail
+          ? 'dm:' + window._activeChatEmail
+          : (window._activeGroupId ? 'group:' + window._activeGroupId : 'unknown')
       });
-      tsCloseReport();
-      tsShowBanner('Report submitted — thank you', 3000);
+      window.tsCloseReport();
+      tsShowBanner('Report submitted \u2014 thank you', 3000);
     } catch(e) {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Submit Report';
-      tsShowBanner('Failed to submit — please try again', 3000);
+      if (sbtn) { sbtn.disabled = false; sbtn.textContent = 'Submit Report'; }
+      tsShowBanner('Failed to submit \u2014 please try again', 3000);
     }
   };
 
-  // ── Rate Limiting ─────────────────────────────────────────
-
-  // Feedback: max 3 per 24 hours per email
+  // ── Rate Limiting (feedback only) ────────────────────────
   window.tsCheckFeedbackRateLimit = async function(email) {
     if (!window._aulertDb || !email) return false;
     const key = email.toLowerCase().replace(/\./g,',').replace(/@/g,'__at__');
-    const ref = window._aulertDb.ref(`aulert/ratelimit/${key}/feedback`);
-    const LIMIT = 3;
-    const WINDOW_MS = 24 * 60 * 60 * 1000; // 24 hours
-    const now = Date.now();
+    const ref = window._aulertDb.ref('aulert/ratelimit/' + key + '/feedback');
+    const LIMIT = 3, WINDOW_MS = 24 * 60 * 60 * 1000, now = Date.now();
     try {
       let blocked = false;
       await ref.transaction(data => {
-        if (!data || (now - (data.windowStart || 0)) > WINDOW_MS) {
-          // New window
-          return { count: 1, windowStart: now };
-        }
-        if (data.count >= LIMIT) {
-          blocked = true;
-          return; // abort — don't write
-        }
+        if (!data || (now - (data.windowStart || 0)) > WINDOW_MS) return { count: 1, windowStart: now };
+        if (data.count >= LIMIT) { blocked = true; return; }
         return { ...data, count: data.count + 1 };
       });
       if (blocked) {
         const snap = await ref.once('value');
         const d = snap.val() || {};
-        const resetIn = Math.ceil((WINDOW_MS - (now - (d.windowStart||now))) / 3600000);
-        tsShowBanner(`Daily feedback limit reached — resets in ~${resetIn}h`, 5000);
-        return true; // rate limited
+        const resetIn = Math.ceil((WINDOW_MS - (now - (d.windowStart || now))) / 3600000);
+        tsShowBanner('Daily feedback limit reached \u2014 resets in ~' + resetIn + 'h', 5000);
+        return true;
       }
       return false;
-    } catch(e) {
-      return false; // fail open
-    }
+    } catch(e) { return false; }
   };
-
-
 
 })();
 

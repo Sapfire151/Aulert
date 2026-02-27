@@ -3680,6 +3680,21 @@ body::before{
   color: var(--violet);
 }
 .com-block-btn.is-blocked:hover { background: rgba(139,92,246,.18); }
+/* Light mode: deeper amber so text/border aren't washed out */
+[data-theme="light"] .com-block-btn {
+  background: rgba(180,100,0,.08); border-color: rgba(180,100,0,.35);
+  color: #a85e00;
+}
+[data-theme="light"] .com-block-btn:hover {
+  background: rgba(180,100,0,.15); border-color: rgba(180,100,0,.55);
+}
+[data-theme="light"] .com-block-btn.is-blocked {
+  background: rgba(109,40,217,.08); border-color: rgba(109,40,217,.35);
+  color: #6d28d9;
+}
+[data-theme="light"] .com-block-btn.is-blocked:hover {
+  background: rgba(109,40,217,.15); border-color: rgba(109,40,217,.55);
+}
 
 /* ── Report button on messages ── */
 .com-msg-wrap {
@@ -10247,6 +10262,7 @@ const FIREBASE_CONFIG = {
 <button class="btt" id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})" tit
 
 <!-- ════ Trust & Safety UI ════ -->
+
 <!-- Rate limit banner -->
 <div class="ts-rate-banner" id="tsRateBanner">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>

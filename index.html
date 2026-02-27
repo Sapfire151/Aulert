@@ -3666,24 +3666,44 @@ body::before{
   cursor: pointer; transition: all .2s;
 }
 .com-unfriend-btn:hover { background: rgba(251,113,133,.18); }
+/* ── Block button ── */
+.com-block-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: var(--r-pill);
+  background: rgba(251,191,36,.08); border: 1px solid rgba(251,191,36,.22);
+  color: var(--amber); font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all .2s; font-family: var(--ff-body);
+}
+.com-block-btn:hover { background: rgba(251,191,36,.20); }
+.com-block-btn.is-blocked {
+  background: rgba(139,92,246,.08); border-color: rgba(139,92,246,.3);
+  color: var(--violet);
+}
+.com-block-btn.is-blocked:hover { background: rgba(139,92,246,.18); }
+
 /* ── Report button on messages ── */
-.com-msg-wrap { position: relative; display: flex; flex-direction: column; width: 100%; }
-.com-msg.mine  .com-msg-wrap { align-items: flex-end; }
-.com-msg.theirs .com-msg-wrap { align-items: flex-start; }
+.com-msg-wrap {
+  display: flex; align-items: center; gap: 6px; width: 100%;
+}
+/* Bubble+timestamp column stays on correct side */
+.com-msg.mine   .com-msg-wrap { flex-direction: row-reverse; justify-content: flex-start; }
+.com-msg.theirs .com-msg-wrap { flex-direction: row;         justify-content: flex-start; }
+.com-msg-content { display: flex; flex-direction: column; }
+.com-msg.mine   .com-msg-content { align-items: flex-end; }
+.com-msg.theirs .com-msg-content { align-items: flex-start; }
+/* Report button — always in the layout, invisible until hover */
 .ts-rpt-btn {
-  display: none;
-  position: absolute; top: 8px;
+  flex-shrink: 0;
+  opacity: 0; pointer-events: none;
   background: var(--surface-2); border: 1px solid var(--rim);
   color: var(--text-3); border-radius: var(--r-pill);
   width: 26px; height: 26px;
-  align-items: center; justify-content: center;
-  cursor: pointer; transition: background .15s, color .15s, opacity .15s;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: opacity .15s, background .15s, color .15s;
   font-size: 16px; line-height: 1; padding: 0;
-  z-index: 2;
 }
-.com-msg.mine   .ts-rpt-btn { right: calc(100% + 6px); }
-.com-msg.theirs .ts-rpt-btn { left:  calc(100% + 6px); }
-.com-msg:hover  .ts-rpt-btn { display: flex; }
+.com-msg:hover .ts-rpt-btn { opacity: 1; pointer-events: all; }
 .ts-rpt-btn:hover { background: rgba(251,113,133,.14); border-color: rgba(251,113,133,.3); color: var(--rose); }
 
 /* ── Rate limit banner ── */
@@ -9669,7 +9689,7 @@ const FIREBASE_CONFIG = {
       const reportBtn = !me
         ? `<button class="ts-rpt-btn" title="Report" onclick="window.tsOpenReport(${JSON.stringify(m._key||'')},${JSON.stringify((m.text||'').slice(0,200))},${JSON.stringify(m.from||'')})">&#8943;</button>`
         : '';
-      html += `<div class="com-msg ${me?'mine':'theirs'}"><div class="com-msg-wrap">${reportBtn}${bubble}${seenHtml}</div></div>`;
+      html += `<div class="com-msg ${me?'mine':'theirs'}"><div class="com-msg-wrap">${reportBtn}<div class="com-msg-content">${bubble}${seenHtml}</div></div></div>`;
     });
 
     const wasAtBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 60;
@@ -9785,7 +9805,7 @@ const FIREBASE_CONFIG = {
       const rptBtnG = !me
         ? `<button class="ts-rpt-btn" title="Report" onclick="window.tsOpenReport(${JSON.stringify(m._key||'')},${JSON.stringify((m.text||'').slice(0,200))},${JSON.stringify(m.from||'')})">&#8943;</button>`
         : '';
-      html += `<div class="com-msg ${me?'mine':'theirs'}"><div class="com-msg-wrap">${rptBtnG}${bubble}${seenHtml}</div></div>`;
+      html += `<div class="com-msg ${me?'mine':'theirs'}"><div class="com-msg-wrap">${rptBtnG}<div class="com-msg-content">${bubble}${seenHtml}</div></div></div>`;
     });
 
     const wasAtBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 60;

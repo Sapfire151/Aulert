@@ -3691,20 +3691,7 @@ body::before{
 .com-msg-content { display: flex; flex-direction: column; }
 .com-msg.mine   .com-msg-content { align-items: flex-end; }
 .com-msg.theirs .com-msg-content { align-items: flex-start; }
-/* Report button — always in the layout, invisible until hover */
-.ts-rpt-btn {
-  flex-shrink: 0;
-  opacity: 0; pointer-events: none;
-  background: var(--surface-2); border: 1px solid var(--rim);
-  color: var(--text-3); border-radius: var(--r-pill);
-  width: 26px; height: 26px;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer;
-  transition: opacity .15s, background .15s, color .15s;
-  font-size: 16px; line-height: 1; padding: 0;
-}
-.com-msg:hover .ts-rpt-btn { opacity: 1; pointer-events: all; }
-.ts-rpt-btn:hover { background: rgba(251,113,133,.14); border-color: rgba(251,113,133,.3); color: var(--rose); }
+
 /* ════ Trust & Safety CSS ════ */
 
 /* Context menu */
@@ -9873,10 +9860,7 @@ const FIREBASE_CONFIG = {
           : 'Delivered';
         seenHtml = `<div class="com-msg-seen${wasSeen?' seen':''}">${doubleTick}<span class="seen-label">${label}</span></div>`;
       }
-      const reportBtn = !me
-        ? `<button class="ts-rpt-btn" title="Actions" data-midx="${i}" onclick="window.tsMsgMenu(this,${i})">&#8943;</button>`
-        : '';
-      html += `<div class="com-msg ${me?'mine':'theirs'}"><div class="com-msg-wrap">${reportBtn}<div class="com-msg-content">${bubble}${seenHtml}</div></div></div>`;
+      html += `<div class="com-msg ${me?'mine':'theirs'}"><div class="com-msg-wrap"><div class="com-msg-content">${bubble}${seenHtml}</div></div></div>`;
     });
 
     const wasAtBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 60;
@@ -10003,10 +9987,7 @@ const FIREBASE_CONFIG = {
         </div>`;
       }
 
-      const rptBtnG = !me
-        ? `<button class="ts-rpt-btn" title="Actions" data-midx="${i}" onclick="window.tsMsgMenu(this,${i})">&#8943;</button>`
-        : '';
-      html += `<div class="com-msg ${me?'mine':'theirs'}"><div class="com-msg-wrap">${rptBtnG}<div class="com-msg-content">${bubble}${seenHtml}</div></div></div>`;
+      html += `<div class="com-msg ${me?'mine':'theirs'}"><div class="com-msg-wrap"><div class="com-msg-content">${bubble}${seenHtml}</div></div></div>`;
     });
 
     const wasAtBottom = area.scrollHeight - area.scrollTop - area.clientHeight < 60;
@@ -10267,18 +10248,7 @@ const FIREBASE_CONFIG = {
 
 <!-- ════ Trust & Safety UI ════ -->
 
-<!-- Context menu -->
-<div class="ts-ctx-menu" id="tsMsgCtxMenu">
-  <button class="ts-ctx-item" onclick="window.tsCtxReply()">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M9 17l-5-5 5-5M4 12h11a5 5 0 010 10h-1" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    Reply
-  </button>
-  <div class="ts-ctx-divider"></div>
-  <button class="ts-ctx-item danger" onclick="window.tsCtxReport()">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    Report
-  </button>
-</div>
+
 
 <!-- Report modal -->
 <div class="ts-modal-overlay" id="tsReportOverlay" onclick="if(event.target===this)window.tsCloseReport()">

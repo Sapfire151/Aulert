@@ -10247,34 +10247,6 @@ const FIREBASE_CONFIG = {
 <button class="btt" id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})" tit
 
 <!-- ════ Trust & Safety UI ════ -->
-
-
-
-<!-- Report modal -->
-<div class="ts-modal-overlay" id="tsReportOverlay" onclick="if(event.target===this)window.tsCloseReport()">
-  <div class="ts-modal">
-    <div class="ts-modal-title">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-      Report Message
-    </div>
-    <div class="ts-modal-sub">Your report is anonymous and will be reviewed by the developer.</div>
-    <div class="ts-modal-preview" id="tsReportPreview"></div>
-    <div class="ts-modal-label">Why are you reporting this?</div>
-    <div class="ts-reason-grid">
-      <button class="ts-reason-opt" data-reason="harassment"     onclick="window.tsSelectReason(this)"><span class="ts-reason-icon">😠</span>Harassment</button>
-      <button class="ts-reason-opt" data-reason="spam"           onclick="window.tsSelectReason(this)"><span class="ts-reason-icon">🗑️</span>Spam</button>
-      <button class="ts-reason-opt" data-reason="hate_speech"    onclick="window.tsSelectReason(this)"><span class="ts-reason-icon">🚫</span>Hate Speech</button>
-      <button class="ts-reason-opt" data-reason="misinformation" onclick="window.tsSelectReason(this)"><span class="ts-reason-icon">⚠️</span>Misinformation</button>
-      <button class="ts-reason-opt" data-reason="inappropriate"  onclick="window.tsSelectReason(this)"><span class="ts-reason-icon">🔞</span>Inappropriate</button>
-      <button class="ts-reason-opt" data-reason="other"          onclick="window.tsSelectReason(this)"><span class="ts-reason-icon">💬</span>Other</button>
-    </div>
-    <div class="ts-modal-btns">
-      <button class="ts-btn-cancel" onclick="window.tsCloseReport()">Cancel</button>
-      <button class="ts-btn-report" id="tsSubmitReportBtn" onclick="window.tsSubmitReport()" disabled>Submit Report</button>
-    </div>
-  </div>
-</div>
-
 <!-- Rate limit banner -->
 <div class="ts-rate-banner" id="tsRateBanner">
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>

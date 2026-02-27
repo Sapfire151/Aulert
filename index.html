@@ -46,6 +46,8 @@
   --dd-frost-sheen:   linear-gradient(90deg, transparent, rgba(255,255,255,0.10), transparent);
   --dd-opt-name:      #EEF0FF;
   --dd-opt-sub:       rgba(238,240,255,0.58);
+  --teal-icon:        #00ffd9;
+  --teal-icon-bg:     rgba(0,255,217,0.12);
 }
 [data-theme="light"] {
   --bg:           #F0F2FA;
@@ -77,6 +79,8 @@
   --dd-frost-sheen:   linear-gradient(90deg, transparent, rgba(255,255,255,0.50), transparent);
   --dd-opt-name:      #0D0F1E;
   --dd-opt-sub:       rgba(13,15,30,0.60);
+  --teal-icon:        #007a68;
+  --teal-icon-bg:     rgba(0,122,104,0.12);
 }
 
 /* ─── PALETTE (theme-independent) ─── */
@@ -5136,7 +5140,7 @@ body::before{
             </button>
             <div class="fbk-dd-menu" id="fbkDdMenu" role="listbox">
               <div class="fbk-dd-option" role="option" onclick="fbkSelectType('recommendation')">
-                <div class="fbk-dd-opt-icon" style="background:rgba(0,255,217,.12);color:#00ffd9">
+                <div class="fbk-dd-opt-icon" style="background:var(--teal-icon-bg);color:var(--teal-icon)">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 </div>
                 <div class="fbk-dd-opt-info">
@@ -6897,7 +6901,7 @@ const FBK_DD_SVG = {
   rating:         `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 };
 const FBK_DD_META = {
-  recommendation: { label: 'Recommendation', svgColor: '#00ffd9',  iconBg: 'rgba(0,255,217,.12)' },
+  recommendation: { label: 'Recommendation', svgColor: 'var(--teal-icon)',  iconBg: 'var(--teal-icon-bg)' },
   error:          { label: 'Error Report',    svgColor: '#FB7185',  iconBg: 'rgba(251,113,133,.12)' },
   rating:         { label: 'Rating (1–5 ★)',  svgColor: '#FCD34D',  iconBg: 'rgba(252,211,77,.12)' }
 };

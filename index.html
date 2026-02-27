@@ -37,7 +37,7 @@
   --shadow:       0 20px 60px rgba(0,0,0,.5);
   --blur:         blur(40px);
   --theme-icon:   '☀️';
-  --dd-frost-bg:      rgba(18,20,34,0.08);
+  --dd-frost-bg:      rgba(18,22,38,0.76);
   --dd-frost-rim:     rgba(255,255,255,0.12);
   --dd-frost-divider: rgba(255,255,255,0.07);
   --dd-frost-hover:   rgba(255,255,255,0.08);
@@ -66,7 +66,7 @@
   --shadow:       0 20px 60px rgba(0,0,0,.12);
   --blur:         blur(40px);
   --theme-icon:   '🌙';
-  --dd-frost-bg:      rgba(240,242,252,0.10);
+  --dd-frost-bg:      rgba(235,238,252,0.78);
   --dd-frost-rim:     rgba(0,0,0,0.10);
   --dd-frost-divider: rgba(0,0,0,0.07);
   --dd-frost-hover:   rgba(0,0,0,0.05);
@@ -3055,8 +3055,8 @@ body::before{
   pointer-events: none;
   transition: opacity .2s var(--ease), transform .2s var(--spring);
   /* True backdrop blur — samples whatever is visually behind */
-  backdrop-filter: blur(120px) saturate(2.5) contrast(1.1) brightness(1.08);
-  -webkit-backdrop-filter: blur(120px) saturate(2.5) contrast(1.1) brightness(1.08);
+  backdrop-filter: blur(48px) saturate(1.8);
+  -webkit-backdrop-filter: blur(48px) saturate(1.8);
   /* Thin tint that adapts to theme via CSS var */
   background: var(--dd-frost-bg);
   border: 1px solid var(--dd-frost-rim);

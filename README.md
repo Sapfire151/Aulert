@@ -48,7 +48,7 @@ Have a suggestion or found a bug? Send feedback directly from inside the app.
 
 ---
 
-## Google Calendar Sync setup
+## Google Calendar Sync setup (Soon)
 
 To sync deadlines to your Google Calendar:
 
@@ -78,8 +78,8 @@ Found a bug or have a feature request? [Open an issue](https://github.com/Sapfir
 
 Aulert was designed and built by two developers:
 
-| | |
-|---|---|
+| |
+|---|
 | **[esrazti](https://github.com/esrazti)** |
 | **[Sapfire151](https://github.com/Sapfire151)** |
 

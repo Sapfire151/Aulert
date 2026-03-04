@@ -194,6 +194,13 @@
               <div class="feed-col-title">Activity Feed</div>
               <div class="feed-col-meta" id="feedCountMeta">Loading…</div>
             </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span id="pollCountdown" style="font-size:11px;color:var(--text-3);letter-spacing:.3px"></span>
+              <button onclick="manualRefresh()" title="Refresh now" style="background:none;border:1px solid var(--border);border-radius:8px;padding:5px 8px;cursor:pointer;color:var(--text-2);display:flex;align-items:center;gap:5px;font-size:11px" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
+                <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Refresh
+              </button>
+            </div>
           </div>
 
           <!-- search box -->

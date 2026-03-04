@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Aulert — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<!-- Firebase SDK (Community) -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<!-- EmailJS SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@300;400;500;600;700&family=Pridi:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="styles.css"/>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+<div id="scrollBar"></div>
+<div id="auroraFollower"></div>
+<div class="aurora">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+</div>
+
+<!-- APP -->
+
+  <!-- Top Nav -->
+  <nav class="app-nav">
+    <div class="nav-logo">Aulert</div>
+    <div class="nav-tabs">
+      <button class="nav-tab on" id="tb-feed" onclick="bellRingAnim(this);goTab('feed',this)">
+        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Notifications</span>
+        <span class="tab-badge" id="badge-feed"></span>
+      </button>
+      <button class="nav-tab" id="tb-cal" onclick="calFlipAnim(this);goTab('cal',this)">
+        <svg class="nav-icon" id="cal-svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <!-- body -->
+          <rect class="cal-body" x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+          <!-- header bar fill -->
+          <rect class="cal-header" x="3" y="4" width="18" height="6" rx="2" fill="currentColor" opacity="0.15"/>
+          <!-- ring pins -->
+          <path class="cal-rings" d="M8 2v4M16 2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <!-- divider line -->
+          <path class="cal-line" d="M3 10h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <!-- date number "7" -->
+          <text class="cal-num" x="12" y="20" text-anchor="middle" font-size="8" font-weight="700" fill="currentColor" font-family="inherit">7</text>
+
+        </svg>
+        <span>Calendar</span>
+        <span class="tab-badge" id="badge-cal"></span>
+      </button>
+      <button class="nav-tab" id="tb-hw" onclick="hwCheckAnim(this);goTab('hw',this)">
+        <svg class="nav-icon" id="hw-svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <!-- clipboard body -->
+          <path class="hw-board" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- clip tab -->
+          <rect class="hw-clip" x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="2"/>
+          <!-- line 1 (fades out on click) -->
+          <path class="hw-line1" d="M9 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <!-- line 2 (fades out on click) -->
+          <path class="hw-line2" d="M9 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <!-- checkmark drawn directly on the note, no circle -->
+          <path class="hw-check-draw" d="M8 13.5l2.5 2.5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="20" stroke-dashoffset="20" opacity="0"/>
+        </svg>
+        <span>Homework</span>
+        <span class="tab-badge" id="badge-hw"></span>
+      </button>
+      <button class="nav-tab" id="tb-com" onclick="comWaveAnim(this);goTab('com',this)">
+        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Community</span>
+        <span class="tab-badge" id="badge-com"></span>
+      </button>
+      <button class="nav-tab" id="tb-set" onclick="gearSpinAnim(this);goTab('set',this)">
+        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>Settings</span>
+      </button>
+      <button class="nav-tab" id="tb-fbk" onclick="fbkPopAnim(this);goTab('fbk',this)">
+        <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <!-- bubble body -->
+          <path class="fbk-body" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <!-- three typing dots -->
+          <circle class="fbk-dot fbk-dot-1" cx="8"  cy="12" r="1.3" fill="currentColor" opacity="0.9"/>
+          <circle class="fbk-dot fbk-dot-2" cx="12" cy="12" r="1.3" fill="currentColor" opacity="0.9"/>
+          <circle class="fbk-dot fbk-dot-3" cx="16" cy="12" r="1.3" fill="currentColor" opacity="0.9"/>
+
+        </svg>
+        <span>Feedbacks</span>
+      </button>
+    </div>
+    <div class="nav-r">
+      <!-- Theme toggle (in-nav) -->
+      <div class="icon-btn icon-btn-animate" id="navThemeBtn" onclick="iconPop(this);toggleTheme()" title="Toggle theme">
+        <svg id="navThemeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="icon-btn icon-btn-animate" id="bellBtn" onclick="iconPop(this);bellRingAnim(this);toggleNotifPanel(event)" title="Notifications">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <div class="notif-pip" id="pip" style="display:none"></div>
+      </div>
+      <!-- User -->
+      <div class="user-pill icon-btn-animate" onclick="iconPop(this);goTab('set',document.getElementById('tb-set'))">
+        <div class="ava">S</div>
+        <span class="user-pill-name">Student</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── NOTIFICATION PANEL ── -->
+  <div class="notif-panel-overlay" id="notifPanelOverlay" onclick="closeNotifPanel()"></div>
+  <div class="notif-panel" id="notifPanel">
+    <div class="np-header">
+      <div class="np-title">
+        Notifications
+        <span id="npUnreadCount">0</span>
+      </div>
+      <div class="np-actions">
+        <button class="np-mark-all" onclick="markAllRead()">Mark all read</button>
+        <div class="np-close-btn" onclick="closeNotifPanel()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+      </div>
+    </div>
+    <div class="np-list" id="npList"></div>
+    <div class="np-footer">
+      <button class="np-view-all icon-btn-animate" onclick="iconPop(this);closeNotifPanel();goTab('feed',document.getElementById('tb-feed'))">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        View all in feed
+      </button>
+    </div>
+  </div>
+
+  <div class="app-body">
+    <div class="panel show" id="p-feed">
+
+      <!-- Welcome card -->
+      <div class="dash-welcome">
+        <div class="dash-welcome-left">
+          <div class="dash-greeting" id="dashGreeting">Good morning</div>
+          <h1 id="dashWelcomeH">Ready to <span class="accent-text">stay ahead?</span></h1>
+          <p id="feedMeta">Monitoring your Google Classroom courses</p>
+        </div>
+        <div class="dash-welcome-right">
+          <div class="dash-unread-badge">
+            <div class="dub-num" id="dashUnreadNum">0</div>
+            <div class="dub-info">
+              <div class="dub-label">Unread alerts</div>
+              <div class="dub-sub">across your classes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick stats -->
+      <div class="dash-stats">
+        <div class="dstat">
+          <div class="dstat-icon" style="background:rgba(0,255,217,.12)">
+            <svg class="icon-teal" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="#00ffd9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div><div class="dstat-num" id="cnt-announcement">0</div><div class="dstat-lbl">Announcements</div></div>
+        </div>
+        <div class="dstat">
+          <div class="dstat-icon" style="background:rgba(139,92,246,.12)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14,2 14,8 20,8" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div><div class="dstat-num" id="cnt-assignment">0</div><div class="dstat-lbl">Assignments</div></div>
+        </div>
+        <div class="dstat">
+          <div class="dstat-icon" style="background:rgba(251,113,133,.12)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="#FB7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="#FB7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div><div class="dstat-num" id="cnt-material">0</div><div class="dstat-lbl">Materials</div></div>
+        </div>
+        <div class="dstat">
+          <div class="dstat-icon" style="background:rgba(96,165,250,.12)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#60A5FA" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="#60A5FA" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div><div class="dstat-num" id="cnt-deadline">0</div><div class="dstat-lbl">Deadlines</div></div>
+        </div>
+      </div>
+
+      <!-- Two-column dashboard layout -->
+      <div class="dash-main">
+
+        <!-- Feed column -->
+        <div class="dash-feed-col">
+
+          <div class="feed-col-header">
+            <div>
+              <div class="feed-col-title">Activity Feed</div>
+              <div class="feed-col-meta" id="feedCountMeta">Loading…</div>
+            </div>
+          </div>
+
+          <!-- search box -->
+          <div class="search-wrap">
+            <input style="font-family:var(--ff-body)" type="text" id="searchInp" placeholder="Search work..." oninput="onSearch(this.value)">
+          </div>
+
+          <div class="chips">
+            <div class="chip active" onclick="setChip('all',this)">All <span class="chip-badge" id="cnt-all">0</span></div>
+            <div class="chip" onclick="setChip('announcement',this)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Announcements
+            </div>
+            <div class="chip" onclick="setChip('assignment',this)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Assignments
+            </div>
+            <div class="chip" onclick="setChip('material',this)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Materials
+            </div>
+          </div>
+
+          <div class="notif-feed" id="notifFeed"></div>
+          <div id="pagination"></div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="dash-sidebar">
+          <div class="sidebar-card">
+            <div class="sc-header">
+              <div class="sc-title">Upcoming Deadlines</div>
+              <div class="sc-badge" id="sc-dl-count">0</div>
+            </div>
+            <div class="mini-dl-list" id="sidebarDlList"></div>
+          </div>
+          <div class="sidebar-card">
+            <div class="sc-header">
+              <div class="sc-title">Your Classes</div>
+              <div class="sc-badge">4</div>
+            </div>
+            <div class="sidebar-cls-list" id="sidebarClsList"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── CALENDAR ── -->
+    <div class="panel" id="p-cal">
+      <div class="cal-header-row">
+        <div>
+          <h1>Deadlines</h1>
+          <p>All due dates across every class in one view</p>
+        </div>
+        <div class="mnav-wrap">
+          <div class="mnav">
+            <div class="mnav-btn" onclick="navMo(-1)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="15,18 9,12 15,6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="mnav-label" id="moLabel">February 2026</div>
+            <div class="mnav-btn" onclick="navMo(1)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="9,18 15,12 9,6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <button class="mnav-add-cal icon-btn-animate" onclick="iconPop(this);exportToGoogleCalendar()" title="Add deadlines to Google Calendar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 14v4M10 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Add to Calendar
+          </button>
+        </div>
+      </div>
+      <div class="cal-card">
+        <div class="dow-row">
+          <div class="dow">Sun</div><div class="dow">Mon</div><div class="dow">Tue</div>
+          <div class="dow">Wed</div><div class="dow">Thu</div><div class="dow">Fri</div><div class="dow">Sat</div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+      <div class="dl-head" id="dlHead">All upcoming deadlines</div>
+      <div class="dl-list" id="dlList"></div>
+    </div>
+
+    <!-- ── SETTINGS ── -->
+    <div class="panel" id="p-hw">
+      <div class="hw-wrap">
+        <div class="hw-header">
+          <div>
+            <h1 class="hw-title">Homework</h1>
+            <p class="hw-sub">Track tasks, export as PDF, share with anyone.</p>
+          </div>
+          <div class="hw-header-actions">
+            <button class="hw-btn hw-btn-export" onclick="hwExportPDF()" title="Export as PDF">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="7 10 12 15 17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              Export PDF
+            </button>
+
+          </div>
+        </div>
+
+        <!-- Add task form -->
+        <div class="hw-form">
+          <div class="hw-form-row">
+            <input class="hw-input" id="hwSubject" placeholder="Subject (e.g. Math, Biology)" maxlength="80"/>
+            <!-- Custom Date+Time Picker Trigger -->
+            <div class="hwdtp-wrap" id="hwDtpWrap">
+              <button type="button" class="hwdtp-trigger hw-input" id="hwDtpTrigger" onclick="hwDtpToggle()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;opacity:.6">
+                  <rect x="3" y="4" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+                <span id="hwDtpLabel">Pick deadline…</span>
+                <svg id="hwDtpClear" width="13" height="13" viewBox="0 0 24 24" fill="none" onclick="hwDtpClear(event)" style="display:none;margin-left:auto;flex-shrink:0;opacity:.5;cursor:pointer" class="hwdtp-x">
+                  <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                  <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                </svg>
+              </button>
+              <!-- Hidden value holder -->
+              <input type="hidden" id="hwDate"/>
+              <!-- Dropdown panel -->
+              <div class="hwdtp-panel" id="hwDtpPanel">
+                <!-- Calendar section -->
+                <div class="hwdtp-cal">
+                  <div class="hwdtp-nav">
+                    <button type="button" class="hwdtp-nav-btn" onclick="hwDtpShiftMonth(-1)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="15 18 9 12 15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <span class="hwdtp-month-lbl" id="hwDtpMonthLbl"></span>
+                    <button type="button" class="hwdtp-nav-btn" onclick="hwDtpShiftMonth(1)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                  <div class="hwdtp-dow-row">
+                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                  </div>
+                  <div class="hwdtp-days" id="hwDtpDays"></div>
+                </div>
+                <!-- Divider -->
+                <div class="hwdtp-divider"></div>
+                <!-- Time section -->
+                <div class="hwdtp-time-section">
+                  <div class="hwdtp-time-lbl">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    Time
+                  </div>
+                  <div class="hwdtp-time-row">
+                    <div class="hwdtp-time-col">
+                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(1)">▲</button>
+                      <input class="hwdtp-time-val" id="hwDtpHourVal" type="text" inputmode="numeric" maxlength="2" value="23"
+                        onfocus="this.select()"
+                        oninput="hwDtpHourInput(this)"
+                        onblur="hwDtpHourBlur(this)"
+                        onkeydown="hwDtpTimeKey(event,'hour')"/>
+                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(-1)">▼</button>
+                    </div>
+                    <span class="hwdtp-colon">:</span>
+                    <div class="hwdtp-time-col">
+                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(5)">▲</button>
+                      <input class="hwdtp-time-val" id="hwDtpMinVal" type="text" inputmode="numeric" maxlength="2" value="59"
+                        onfocus="this.select()"
+                        oninput="hwDtpMinInput(this)"
+                        onblur="hwDtpMinBlur(this)"
+                        onkeydown="hwDtpTimeKey(event,'min')"/>
+                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(-5)">▼</button>
+                    </div>
+                  </div>
+                </div>
+                <!-- Footer -->
+                <div class="hwdtp-footer">
+                  <button type="button" class="hwdtp-done-btn" onclick="hwDtpConfirm()">Set Deadline</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <textarea class="hw-textarea" id="hwDesc" placeholder="Description — what needs to be done?" rows="3"></textarea>
+          <div class="hw-form-footer">
+            <span class="hw-form-hint">Date &amp; time optional — pick your exact deadline</span>
+            <button class="hw-btn hw-btn-add" onclick="hwAdd()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+              Add Task
+            </button>
+          </div>
+        </div>
+
+        <!-- Task list -->
+        <div class="hw-list" id="hwList">
+          <div class="hw-empty" id="hwEmpty">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" style="opacity:.2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <p>No tasks yet — add one above</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="p-set">
+      <h1>Settings</h1>
+      <p class="sub">Control your account, notifications, and connected classes</p>
+
+      <div class="sg sg-account">
+        <div class="sg-lbl">Account</div>
+        <div class="prof-row">
+          <div class="prof-ava" id="profAva">S</div>
+          <div class="prof-info">
+            <div class="prof-name" id="profName">Student User</div>
+            <div class="prof-email" id="profEmail" style="display:flex;align-items:center;gap:6px;margin-top:3px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              <span id="profEmailText"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="82f1f6f7e6e7ecf6c2f1e1eaededeeace7e6f7">[email&#160;protected]</a></span>
+            </div>
+          </div>
+          <button class="disc-btn" onclick="disconnect()">Disconnect</button>
+        </div>
+      </div>
+
+      <div class="sg sg-notify">
+        <div class="sg-lbl">Notify me about</div>
+        <div class="sg-body">
+          <div class="srow"><div class="srow-info"><h4>Stream Posts</h4><p>Class stream</p></div><label class="tog"><input type="checkbox" id="set_stream" onchange="saveSetting('stream',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Announcements</h4><p>Teacher announcements</p></div><label class="tog"><input type="checkbox" id="set_announcements" onchange="saveSetting('announcements',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Assignments</h4><p>New work posted</p></div><label class="tog"><input type="checkbox" id="set_assignments" onchange="saveSetting('assignments',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Grades</h4><p>When graded</p></div><label class="tog"><input type="checkbox" id="set_grades" onchange="saveSetting('grades',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Materials</h4><p>Study resources</p></div><label class="tog"><input type="checkbox" id="set_materials" onchange="saveSetting('materials',this.checked)"><div class="tog-track"></div></label></div>
+        </div>
+      </div>
+
+      <div class="sg sg-delivery">
+        <div class="sg-lbl">Delivery</div>
+        <div class="sg-body">
+          <div class="srow"><div class="srow-info"><h4>Push Notifications</h4><p>Alerts when tab closed</p></div><label class="tog"><input type="checkbox" id="set_push" onchange="reqPush(this)"><div class="tog-track"></div></label></div>
+          <div class="srow srow-quiet-inline" id="quietHoursRow">
+            <div class="srow-info">
+              <h4>Quiet Hours</h4>
+              <p>Pause notifications during set times</p>
+            </div>
+            <div class="srow-quiet">
+              <label class="tog"><input type="checkbox" id="set_quietHours" onchange="saveSetting('quietHours',this.checked);qtpToggleVisibility()"><div class="tog-track"></div></label>
+              <!-- hidden native inputs kept for saveQuietTime() compatibility -->
+              <input type="time" id="quietStart" style="display:none" onchange="saveQuietTime()">
+              <input type="time" id="quietEnd" style="display:none" onchange="saveQuietTime()">
+              <!-- Custom time pickers -->
+              <div class="quiet-times" id="qtpTimes">
+                <!-- Start picker -->
+                <div class="qtp-wrap" id="qtpStartWrap">
+                  <div class="qtp-col">
+                    <button class="qtp-arrow" onclick="qtpStep('start','h',1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="qtp-val" id="qtp-start-h">22</div>
+                    <button class="qtp-arrow" onclick="qtpStep('start','h',-1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                  <div class="qtp-colon">:</div>
+                  <div class="qtp-col">
+                    <button class="qtp-arrow" onclick="qtpStep('start','m',1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="qtp-val" id="qtp-start-m">00</div>
+                    <button class="qtp-arrow" onclick="qtpStep('start','m',-1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <!-- separator arrow -->
+                <div class="quiet-arrow-sep">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <!-- End picker -->
+                <div class="qtp-wrap" id="qtpEndWrap">
+                  <div class="qtp-col">
+                    <button class="qtp-arrow" onclick="qtpStep('end','h',1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="qtp-val" id="qtp-end-h">07</div>
+                    <button class="qtp-arrow" onclick="qtpStep('end','h',-1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                  <div class="qtp-colon">:</div>
+                  <div class="qtp-col">
+                    <button class="qtp-arrow" onclick="qtpStep('end','m',1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="qtp-val" id="qtp-end-m">00</div>
+                    <button class="qtp-arrow" onclick="qtpStep('end','m',-1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 24h timeline bar — shown below row when quiet hours enabled -->
+          <div class="quiet-timeline-row" id="quietTimeline">
+            <div class="qtr-labels">
+              <span class="qtr-label">0</span>
+              <span class="qtr-label">6</span>
+              <span class="qtr-label">12</span>
+              <span class="qtr-label">18</span>
+              <span class="qtr-label">24</span>
+            </div>
+            <div class="qtr-bar" id="qtrBar">
+              <div class="qtr-fill" id="qtrFill"></div>
+              <div class="qtr-fill" id="qtrFill2"></div>
+              <div class="qtr-thumb" id="qtrThumbStart" title="Start time"></div>
+              <div class="qtr-thumb qtr-end-thumb" id="qtrThumbEnd" title="End time"></div>
+            </div>
+            <div class="qtr-time-display">
+              <span class="qtr-td-pill qtr-td-start" id="qtrLabelStart">22:00</span>
+              <span class="qtr-td-pill qtr-td-end" id="qtrLabelEnd">07:00</span>
+            </div>
+          </div>
+          <div class="srow"><div class="srow-info"><h4>Sound Alerts</h4><p>Sound on new alert</p></div><label class="tog"><input type="checkbox" id="set_sound" onchange="saveSetting('sound',this.checked)"><div class="tog-track"></div></label></div>
+        </div>
+      </div>
+
+      <div class="sg sg-gcal">
+        <div class="sg-lbl">Google Calendar</div>
+        <div class="sg-body">
+          <div class="srow">
+            <div class="srow-info">
+              <h4>Sync Deadlines &amp; Homework</h4>
+              <p>Auto-add assignment due dates and homework deadlines to your Google Calendar</p>
+            </div>
+            <label class="tog"><input type="checkbox" id="set_gcalSync" onchange="gcalToggle(this)" disabled><div class="tog-track"></div></label>
+          </div>
+          <div class="srow" style="flex-direction:column;align-items:flex-start;gap:10px;border-top:1px solid var(--border);padding-top:14px">
+            <p id="gcalStatusText" style="font-size:12px;color:var(--text-3);margin:0">Sync disabled</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button id="gcalSyncBtn" class="btn-sm" onclick="gcalSyncAll()" style="display:none;align-items:center;gap:6px;font-size:12px">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Sync now
+              </button>
+              <button id="gcalUnsyncBtn" class="btn-sm" onclick="gcalUnsyncAll()" style="display:none;align-items:center;gap:6px;font-size:12px;color:#FB7185;border-color:#FB7185">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Remove all events
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sg sg-classes">
+        <div class="sg-lbl">Connected Classes</div>
+        <div class="sg-body" id="clsBody"></div>
+      </div>
+    </div>
+
+    <!-- ── FEEDBACKS ── -->
+    <div class="panel" id="p-fbk">
+      <div class="fbk-header">
+        <h1>Feedbacks</h1>
+        <p class="sub">Send your thoughts directly to the developer</p>
+      </div>
+
+      <div class="fbk-card">
+
+        <!-- Custom Dropdown -->
+        <div class="fbk-field">
+          <label class="fbk-label">Feedback Type</label>
+          <div class="fbk-dropdown" id="fbkDropdown">
+            <button type="button" class="fbk-dd-trigger" id="fbkDdTrigger" onclick="fbkToggleDropdown(event)" aria-haspopup="listbox" aria-expanded="false">
+              <div class="fbk-dd-icon">
+                <div class="fbk-dd-type-icon" id="fbkDdTypeIcon"></div>
+                <span id="fbkDdLabel" style="color:var(--text-3)">— Select a type —</span>
+              </div>
+              <svg class="fbk-dd-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <div class="fbk-dd-menu" id="fbkDdMenu" role="listbox">
+              <div class="fbk-dd-option" role="option" onclick="fbkSelectType('recommendation')">
+                <div class="fbk-dd-opt-icon" style="background:var(--teal-icon-bg);color:var(--teal-icon)">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </div>
+                <div class="fbk-dd-opt-info">
+                  <div class="fbk-dd-opt-name">Recommendation</div>
+                  <div class="fbk-dd-opt-desc">Suggest a feature or improvement</div>
+                </div>
+                <svg class="fbk-dd-opt-check" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 6l-11 11-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="fbk-dd-option" role="option" onclick="fbkSelectType('error')">
+                <div class="fbk-dd-opt-icon" style="background:rgba(251,113,133,.12);color:#FB7185">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </div>
+                <div class="fbk-dd-opt-info">
+                  <div class="fbk-dd-opt-name">Error Report</div>
+                  <div class="fbk-dd-opt-desc">Something broke or isn't working</div>
+                </div>
+                <svg class="fbk-dd-opt-check" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 6l-11 11-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div class="fbk-dd-option" role="option" onclick="fbkSelectType('rating')">
+                <div class="fbk-dd-opt-icon" style="background:rgba(252,211,77,.12);color:#FCD34D">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <div class="fbk-dd-opt-info">
+                  <div class="fbk-dd-opt-name">Rating (1–5 stars)</div>
+                  <div class="fbk-dd-opt-desc">Rate your overall experience</div>
+                </div>
+                <svg class="fbk-dd-opt-check" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 6l-11 11-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Text fields (recommendation / error) -->
+        <div id="fbkTextFields" style="display:none;">
+          <div class="fbk-field">
+            <label class="fbk-label" for="fbkUserEmail">Your Email <span style="color:var(--rose)">*</span></label>
+            <input class="fbk-input" id="fbkUserEmail" type="email" placeholder="your@email.com" oninput="fbkAnalyze()"/>
+          </div>
+          <div class="fbk-field">
+            <label class="fbk-label" for="fbkSubject">Subject</label>
+            <input class="fbk-input" id="fbkSubject" type="text" placeholder="Brief summary of your feedback…" maxlength="120" oninput="fbkAnalyze()"/>
+            <div class="fbk-char-count" id="fbkSubjectCount">0 / 120</div>
+          </div>
+          <div class="fbk-field">
+            <label class="fbk-label" for="fbkDetail">Details</label>
+            <textarea class="fbk-textarea" id="fbkDetail" placeholder="Describe in detail what you'd like to share…" rows="5" oninput="fbkAnalyze()"></textarea>
+          </div>
+        </div>
+
+        <!-- Star rating section -->
+        <div id="fbkRatingSection" style="display:none;">
+          <div class="fbk-field">
+            <label class="fbk-label" for="fbkUserEmailRating">Your Email <span style="color:var(--rose)">*</span></label>
+            <input class="fbk-input" id="fbkUserEmailRating" type="email" placeholder="your@email.com" oninput="fbkAnalyze()"/>
+          </div>
+          <div class="fbk-field">
+            <label class="fbk-label">Your Rating</label>
+            <div class="fbk-stars" id="fbkStars" role="radiogroup" aria-label="Rating">
+              <span class="fbk-star" data-val="1" onclick="fbkSetStar(1)" onmouseover="fbkHoverStar(1)" onmouseleave="fbkHoverEnd()">☆</span>
+              <span class="fbk-star" data-val="2" onclick="fbkSetStar(2)" onmouseover="fbkHoverStar(2)" onmouseleave="fbkHoverEnd()">☆</span>
+              <span class="fbk-star" data-val="3" onclick="fbkSetStar(3)" onmouseover="fbkHoverStar(3)" onmouseleave="fbkHoverEnd()">☆</span>
+              <span class="fbk-star" data-val="4" onclick="fbkSetStar(4)" onmouseover="fbkHoverStar(4)" onmouseleave="fbkHoverEnd()">☆</span>
+              <span class="fbk-star" data-val="5" onclick="fbkSetStar(5)" onmouseover="fbkHoverStar(5)" onmouseleave="fbkHoverEnd()">☆</span>
+            </div>
+          </div>
+          <div class="fbk-field">
+            <label class="fbk-label" for="fbkReason">Reasoning</label>
+            <textarea class="fbk-textarea" id="fbkReason" placeholder="Describe what drove your rating and how we can improve…" rows="4" oninput="fbkAnalyze()"></textarea>
+          </div>
+        </div>
+
+        <!-- Shared quality bar + warning (shown for all types) -->
+        <div class="fbk-quality-bar" id="fbkQualityBar">
+          <div class="fbk-quality-top">
+            <span class="fbk-quality-label">Message Quality</span>
+            <span class="fbk-quality-status" id="fbkQualityStatus">—</span>
+          </div>
+          <div class="fbk-quality-track">
+            <div class="fbk-quality-fill" id="fbkQualityFill" style="width:0%"></div>
+          </div>
+          <div class="fbk-quality-hint" id="fbkQualityHint"></div>
+        </div>
+        <div class="fbk-warn" id="fbkWarn">
+          <svg class="fbk-warn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <div class="fbk-warn-text" id="fbkWarnText"></div>
+        </div>
+
+        <!-- Submit row -->
+        <div class="fbk-submit-row" id="fbkSubmitRow" style="display:none;">
+          <button class="fbk-submit" id="fbkSubmitBtn" onclick="fbkSubmit()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Send Feedback
+          </button>
+          <div class="fbk-akismet-badge">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+                    stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Protected by Akismet
+          </div>
+        </div>
+
+        <!-- Success message -->
+        <div class="fbk-success" id="fbkSuccess">
+          <div class="fbk-success-ring">
+            <svg class="fbk-ring-svg" width="72" height="72" viewBox="0 0 72 72" fill="none">
+              <circle class="fbk-success-ring-bg" cx="36" cy="36" r="30" stroke-width="3" fill="none"/>
+              <circle class="fbk-success-ring-fill" cx="36" cy="36" r="30" stroke-width="3" fill="none"
+                stroke-linecap="round" transform="rotate(-90 36 36)"/>
+            </svg>
+            <div class="fbk-success-check">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <div class="fbk-success-title">Message Sent!</div>
+          <div class="fbk-success-sub">Thanks for taking the time. The developer will read your feedback and use it to make Aulert better.</div>
+          <button class="fbk-again-btn" id="fbkAgainBtn" onclick="fbkReset()">Send Another</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+    <!-- ══ COMMUNITY PANEL ══ -->
+    <div class="panel" id="p-com">
+      <div class="com-wrap" id="comWrap">
+
+        <!-- LEFT SIDEBAR -->
+        <div class="com-sidebar">
+          <div class="com-sb-head">
+            <div class="com-sb-head-row">
+              <h2 class="com-sb-title">Community</h2>
+              <span class="com-friends-badge" id="comFriendsCount">0 friends</span>
+            </div>
+            <div class="com-add-form" id="comAddForm" style="display:none">
+              <input id="comFriendInput" class="com-add-inp" type="email" placeholder="friend@school.edu" onkeydown="if(event.key==='Enter')comSendRequest()"/>
+              <button class="com-add-btn" onclick="comSendRequest()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="8.5" cy="7" r="4" stroke="currentColor" stroke-width="2"/><line x1="20" y1="8" x2="20" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="17" y1="11" x2="23" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Add
+              </button>
+            </div>
+          </div>
+          <div class="com-sb-scroll" id="comSbScroll">
+            <!-- Incoming requests -->
+            <div id="comIncomingSection" style="display:none">
+              <div class="com-sec">
+                <div class="com-sec-lbl incoming">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                  Incoming
+                  <span class="com-sec-count" id="comIncomingCount">0</span>
+                </div>
+              </div>
+              <div id="comIncomingList"></div>
+            </div>
+            <!-- Sent requests -->
+            <div id="comSentSection" style="display:none">
+              <div class="com-sec">
+                <div class="com-sec-lbl">Sent</div>
+              </div>
+              <div id="comSentList"></div>
+            </div>
+            <!-- Friends -->
+            <div>
+              <div class="com-sec">
+                <div class="com-sec-lbl">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2.5"/></svg>
+                  Friends
+                </div>
+              </div>
+              <div id="comFriendList">
+                <div class="com-empty">
+                  <svg width="34" height="34" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.5"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  <p>No friends yet.<br>Add someone by Gmail!</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Groups -->
+            <div id="comGroupsSection">
+              <div class="com-sec">
+                <div class="com-sec-lbl com-sec-row">
+                  <div style="display:flex;align-items:center;gap:6px;">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="8" height="10" rx="2" stroke="currentColor" stroke-width="2.4"/><path d="M9 7h6a2 2 0 012 2v12H9V7z" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M17 7V5a2 2 0 00-2-2H9a2 2 0 00-2 2v2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+                    Groups
+                  </div>
+                  <button class="com-new-group-btn" id="comNewGroupBtn" onclick="comShowCreateGroup()" title="New group" style="display:none">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                  </button>
+                </div>
+              </div>
+              <div id="comGroupList">
+                <div class="com-empty" id="comGroupEmpty">
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" opacity=".15"><rect x="3" y="11" width="8" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M9 7h6a2 2 0 012 2v12H9V7z" stroke="currentColor" stroke-width="1.5"/></svg>
+                  <p>No groups yet.<br>Create one to get started!</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Chat / States -->
+        <div class="com-chat-panel">
+          <!-- Loading -->
+          <div class="com-loading" id="comLoading">
+            <svg width="18" height="18" viewBox="0 0 24 24" style="animation:spin .9s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Connecting…
+          </div>
+          <!-- Not signed in -->
+          <div class="com-noauth" id="comNoAuth" style="display:none">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.4"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            <h3>Sign in first</h3>
+            <p>Connect your Google account to start using Community.</p>
+          </div>
+          <!-- Firebase setup needed -->
+          <div class="com-setup" id="comSetup" style="display:none">
+            <div class="com-setup-icon">🔥</div>
+            <h3>Set Up Firebase</h3>
+            <p>Community uses Firebase Realtime Database for real friend requests and live chat. It's free and takes about 2 minutes.</p>
+            <div class="com-setup-steps">
+              <div class="com-setup-step"><div class="com-setup-num">1</div><div>Go to <a href="https://console.firebase.google.com" target="_blank" style="color:var(--teal)">console.firebase.google.com</a> → create a new project</div></div>
+              <div class="com-setup-step"><div class="com-setup-num">2</div><div>Build → Realtime Database → Create database → choose <strong>test mode</strong></div></div>
+              <div class="com-setup-step"><div class="com-setup-num">3</div><div>Project Settings → Your apps → Add web app → copy the config object</div></div>
+              <div class="com-setup-step"><div class="com-setup-num">4</div><div>In this file's <code>&lt;script&gt;</code>, find <code>FIREBASE_CONFIG</code> and paste in your <code>apiKey</code>, <code>databaseURL</code>, and <code>projectId</code></div></div>
+            </div>
+          </div>
+          <!-- Pick a friend -->
+          <div class="com-chat-empty" id="comChatEmpty" style="display:none">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <h3>Select a friend to chat</h3>
+            <p>Add a friend by their Gmail, then select them from the list to start chatting in real time.</p>
+          </div>
+          <!-- Active chat (DM & Group) -->
+          <div id="comChatArea" style="display:none;flex-direction:column;height:100%;flex:1;">
+            <!-- DM Header -->
+            <div class="com-chat-header" id="comDmHeader">
+              <div class="com-chat-hava" id="comChatAva">?</div>
+              <div>
+                <div class="com-chat-hname" id="comChatName">—</div>
+                <div class="com-chat-hgmail" id="comChatGmail"></div>
+              </div>
+              <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+                <button class="com-unfriend-btn" style="margin-left:0" onclick="comRemoveFriend()">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="8.5" cy="7" r="4" stroke="currentColor" stroke-width="2"/><line x1="17" y1="11" x2="23" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  Unfriend
+                </button>
+                <button class="com-block-btn" id="comBlockBtn" onclick="comToggleBlock()">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  <span id="comBlockBtnLabel">Block</span>
+                </button>
+              </div>
+            </div>
+            <!-- Group Header -->
+            <div class="com-chat-header-group" id="comGroupHeader">
+              <div class="com-group-header-icon" id="comGroupHeaderIcon">#</div>
+              <div>
+                <div class="com-group-header-name" id="comGroupHeaderName">Group</div>
+                <div class="com-group-header-sub" id="comGroupHeaderSub">0 members</div>
+              </div>
+              <div class="com-group-header-actions">
+                <button class="com-group-hbtn invite" onclick="comCopyInviteLink()">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span>Invite Link</span>
+                </button>
+                <button class="com-group-hbtn members" onclick="comToggleMembers()">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                  <span>Members</span>
+                </button>
+                <button class="com-group-hbtn leave" onclick="comLeaveGroup()">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <span>Leave</span>
+                </button>
+              </div>
+            </div>
+            <div class="com-msgs" id="comMsgs"></div>
+            <!-- Reply bar (shown when replying to a message) -->
+            <div class="com-reply-bar" id="comReplyBar" style="display:none;">
+              <div class="com-reply-bar-line"></div>
+              <div class="com-reply-bar-content">
+                <div class="com-reply-bar-label">Replying to</div>
+                <div class="com-reply-bar-text" id="comReplyBarText"></div>
+              </div>
+              <button class="com-reply-bar-close" onclick="window.tsCancelReply()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+            <div class="com-input-row">
+              <input type="file" id="comFileInput" accept="image/*,.pdf,.doc,.docx,.txt,.zip" style="display:none" onchange="comAttachFile(this)"/>
+              <button class="com-attach-btn" onclick="document.getElementById('comFileInput').click()" title="Attach file">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <input id="comMsgInput" class="com-msg-inp" type="text" placeholder="Message…" onkeydown="if(event.key==='Enter') comSendCurrent()"/>
+              <button class="com-send-btn" onclick="comSendCurrent()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 19V5M5 12l7-7 7 7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Members slide panel -->
+          <div class="com-members-panel" id="comMembersPanel">
+            <div class="com-members-head">
+              <div class="com-members-title">Members</div>
+              <button class="com-members-close" onclick="comToggleMembers()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+            <div class="com-members-scroll" id="comMembersListEl"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+</div>
+
+<!-- ══ CREATE GROUP MODAL ══ -->
+<div class="com-modal-veil" id="comGroupModal" onclick="if(event.target===this)comHideCreateGroup()">
+  <div class="com-modal">
+    <div class="com-modal-icon">👥</div>
+    <div class="com-modal-title">Create a Group</div>
+    <div class="com-modal-sub">Give your group a name and optionally invite people right away. Anyone with the invite link can join — no friend request needed.</div>
+    <label class="com-modal-label" for="comGroupNameInp">Group name <span style="color:var(--rose)">*</span></label>
+    <input class="com-modal-inp" id="comGroupNameInp" type="text" placeholder="e.g. Chemistry Study Squad" maxlength="48" onkeydown="if(event.key==='Enter')comCreateGroup()"/>
+    <label class="com-modal-label" for="comGroupEmailsInp">Invite by email <span style="color:var(--text-3);font-weight:400;text-transform:none;letter-spacing:0">(optional, comma-separated)</span></label>
+    <textarea class="com-modal-textarea" id="comGroupEmailsInp" placeholder="friend1@school.edu, friend2@school.edu&#10;They'll be added directly — no friend request needed."></textarea>
+    <!-- Invite link result (shown after group is created) -->
+    <div class="com-invite-link-box" id="comGroupInviteBox">
+      <div class="com-invite-link-label">Your Invite Link</div>
+      <div class="com-invite-link-url" id="comGroupInviteUrl"></div>
+      <button class="com-invite-copy-btn" onclick="comCopyInviteFromModal()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Copy Link
+      </button>
+    </div>
+    <div class="com-modal-actions">
+      <button class="com-modal-cancel" onclick="comHideCreateGroup()">Cancel</button>
+      <button class="com-modal-create" onclick="comCreateGroup()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        Create Group
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Sheet (detail) -->
+<div class="sheet-veil" id="sheetVeil" onclick="closeSheet(event)">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-top">
+      <div class="sheet-eyebrow" id="shEyebrow"></div>
+      <div class="sheet-h" id="shTitle"></div>
+      <div class="sheet-sub" id="shSub"></div>
+    </div>
+    <div class="sheet-content">
+      <div class="sheet-body-text" id="shText"></div>
+      <div class="sheet-actions">
+        <a href="https://classroom.google.com" target="_blank" class="sa-primary">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Open in Classroom
+        </a>
+        <button class="sa-ghost" id="mrBtn" onclick="toggleRead()">Mark as read</button>
+        <button class="sa-ghost" onclick="closeSheet()">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Push toast -->
+<div class="push-toast" id="toast">
+  <div class="toast-icon">
+    <svg class="icon-teal" width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="#00ffd9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="#00ffd9" stroke-width="2" stroke-linecap="round"/></svg>
+  </div>
+  <div class="toast-body">
+    <div class="toast-app">Aulert · Google Classroom</div>
+    <div class="toast-t" id="toastT">New notification</div>
+    <div class="toast-m" id="toastM">You have a new classroom update</div>
+  </div>
+  <div class="toast-close" onclick="closeToast()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </div>
+</div>
+
+<div class="snack" id="snack">Setting saved ✓</div>
+
+
+<!-- Advanced Theme Switcher -->
+<button class="theme-switcher-btn hidden" id="globalThemeBtn" onclick="toggleTheme()" aria-label="Toggle theme">
+  <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
+    <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+</button>
+
+<!-- ════ Trust & Safety UI ════ -->
+<div class="ts-rate-banner" id="tsRateBanner">
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  <span id="tsRateBannerText">Slow down</span>
+</div>
+
+<script src="script-app.js"></script>
+</body>
+</html>

@@ -20,7 +20,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/calendar.events',
 ].join(' ');
 
-const POLL_MS        = 1 * 30 * 1000; // refresh every 30 sec
+const POLL_MS        = 1 * 60 * 1000; // refresh every 60 sec
 const COURSE_COLORS  = ['#00ffd9','#8B5CF6','#FCD34D','#FB7185','#60A5FA','#34D399','#F97316','#A78BFA'];
 const TYPE_META      = {
   announcement: { label:'Announcement', color:'#00ffd9' },

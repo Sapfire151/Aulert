@@ -89,10 +89,6 @@ function waitForGSI(attempts = 0) {
   }
 }
 
-function openAuth() {
-  document.getElementById('authModal').classList.add('open');
-}
-
 function doAuth() {
   if (CLIENT_ID.startsWith('YOUR_CLIENT_ID')) {
     const p = document.querySelector('#authModal .modal-p');

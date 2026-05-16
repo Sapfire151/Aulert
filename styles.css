@@ -33,7 +33,13 @@
   --dd-opt-sub:       rgba(238,240,255,0.58);
   --teal-icon:        #00ffd9;
   --teal-icon-bg:     rgba(0,255,217,0.12);
+  --teal:             #00FFD9;
+  --violet:           #A78BFA;
+  --amber:            #FBBF24;
+  --rose:             #FB7185;
+  --sky:              #38BDF8;
 }
+
 [data-theme="light"] {
   --bg:           #F0F2FA;
   --bg-2:         #E8EAF6;
@@ -66,21 +72,24 @@
   --dd-opt-sub:       rgba(13,15,30,0.60);
   --teal-icon:        #007a68;
   --teal-icon-bg:     rgba(0,122,104,0.12);
+  --teal:             #008471;
+  --violet:           #6D28D9;
+  --amber:            #B45309;
+  --rose:             #E11D48;
+  --sky:              #0369A1;
 }
 
-/* ─── PALETTE (theme-independent) ─── */
 :root {
-  --teal:     #00ffd9;
-  --violet:   #8B5CF6;
-  --amber:    #FCD34D;
-  --rose:     #FB7185;
-  --sky:      #38BDF8;
-  --r-xl: 28px; --r-lg: 20px; --r-md: 14px; --r-sm: 8px; --r-pill: 999px;
-  --ease:   cubic-bezier(.4,0,.2,1);
-  --spring: cubic-bezier(.34,1.56,.64,1);
-  --ff-head: 'Bricolage Grotesque', sans-serif;
-  --ff-body: 'Inter', sans-serif;
-  --ff-thai: 'Google Sans', sans-serif;
+  --r-xl:             28px; 
+  --r-lg:             20px; 
+  --r-md:             14px; 
+  --r-sm:             8px; 
+  --r-pill:           999px;
+  --ease:             cubic-bezier(.4,0,.2,1);
+  --spring:           cubic-bezier(.34,1.56,.64,1);
+  --ff-head:          'Bricolage Grotesque', sans-serif;
+  --ff-body:          'Inter', sans-serif;
+  --ff-thai:          'Google Sans', sans-serif;
 }
 
 /* ─── RESET ─── */

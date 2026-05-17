@@ -23,11 +23,11 @@ const SCOPES = [
 ].join(' ');
 
 const POLL_MS        = 5 * 60 * 1000;
-const COURSE_COLORS  = ['#00ffd9','#8B5CF6','#FCD34D','#FB7185','#60A5FA','#34D399','#F97316','#A78BFA'];
+const COURSE_COLORS  = ['var(--teal)', 'var(--violet)', 'var(--amber)', 'var(--rose)', 'var(--sky)'];
 const TYPE_META      = {
-  announcement: { label:'Announcement', color:'#00ffd9' },
-  assignment:   { label:'Assignment',   color:'#8B5CF6' },
-  material:     { label:'Material',     color:'#FB7185' },
+  announcement: { label:'Announcement', color:'var(--teal)' },
+  assignment:   { label:'Assignment',   color:'var(--violet)' },
+  material:     { label:'Material',     color:'var(--rose)' },
 };
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
@@ -59,7 +59,7 @@ function saveRead()     { localStorage.setItem('aul_read',     JSON.stringify([.
 function saveSeen()     { localStorage.setItem('aul_seen',     JSON.stringify([...S.seenIds])); }
 function saveSettings() { localStorage.setItem('aul_settings', JSON.stringify(S.settings)); }
 
-const courseById = id => S.courses.find(c => c.id === id) || { color:'#8B5CF6', name:'Unknown', abbr:'?', section:'' };
+const courseById = id => S.courses.find(c => c.id === id) || { color:'var(--violet)', name:'Unknown', abbr:'?', section:'' };
 
 /* ════════════════════════════════════════════
    OAUTH — Google Identity Services
@@ -92,7 +92,7 @@ function waitForGSI(attempts = 0) {
 function doAuth() {
   if (CLIENT_ID.startsWith('YOUR_CLIENT_ID')) {
     const p = document.querySelector('#authModal .modal-p');
-    if (p) { p.style.color='#FB7185'; p.textContent='Please set your Google OAuth Client ID in the CONFIG at the top of the script.'; }
+    if (p) { p.style.color='var(--rose)'; p.textContent='Please set your Google OAuth Client ID in the CONFIG at the top of the script.'; }
     return;
   }
   if (!window.google?.accounts?.oauth2) { alert('Google Sign-In is still loading. Please try again in a moment.'); return; }
@@ -527,9 +527,9 @@ function toggleFaq(btn){
 
     // Color: green if charging or >50%, amber if 20–50%, red if <20%
     let color;
-    if(charging || level > 0.5) color = '#4ade80';   // green
-    else if(level > 0.2)        color = '#FCD34D';   // amber
-    else                        color = '#FB7185';    // red
+    if(charging || level > 0.5) color = 'var(--green)';   // green
+    else if(level > 0.2)        color = 'var(--amber)';   // amber
+    else                        color = 'var(--rose)';    // red
 
     fill.setAttribute('fill', color);
 

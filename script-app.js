@@ -21,11 +21,11 @@ const SCOPES = [
 ].join(' ');
 
 const POLL_MS        = 1 * 60 * 1000; // refresh every 60 sec
-const COURSE_COLORS  = ['#00ffd9','#8B5CF6','#FCD34D','#FB7185','#60A5FA','#34D399','#F97316','#A78BFA'];
+const COURSE_COLORS  = ['var(--teal)', 'var(--violet)', 'var(--amber)', 'var(--rose)', 'var(--sky)', 'var(--green)', 'var(--orange)', 'var(--pink)', 'var(--emerald)', 'var(--gamemaster)'];
 const TYPE_META      = {
-  announcement: { label:'Announcement', color:'#00ffd9' },
-  assignment:   { label:'Assignment',   color:'#8B5CF6' },
-  material:     { label:'Material',     color:'#FB7185' },
+  announcement: { label:'Announcement', color:'var(--teal)' },
+  assignment:   { label:'Assignment',   color:'var(--violet)' },
+  material:     { label:'Material',     color:'var(--rose)' },
 };
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
@@ -58,7 +58,7 @@ function saveRead()     { localStorage.setItem('aul_read',     JSON.stringify([.
 function saveSeen()     { localStorage.setItem('aul_seen',     JSON.stringify([...S.seenIds])); }
 function saveSettings() { localStorage.setItem('aul_settings', JSON.stringify(S.settings)); }
 
-const courseById = id => S.courses.find(c => c.id === id) || { color:'#8B5CF6', name:'Unknown', abbr:'?', section:'' };
+const courseById = id => S.courses.find(c => c.id === id) || { color:'var(--violet)', name:'Unknown', abbr:'?', section:'' };
 
 
 /* ════ APP PAGE INIT ════ */
@@ -112,7 +112,7 @@ function openAuth() {
 function doAuth() {
   if (CLIENT_ID.startsWith('YOUR_CLIENT_ID')) {
     const p = document.querySelector('#authModal .modal-p');
-    if (p) { p.style.color='#FB7185'; p.textContent='Please set your Google OAuth Client ID in the CONFIG at the top of the script.'; }
+    if (p) { p.style.color='var(--rose)'; p.textContent='Please set your Google OAuth Client ID in the CONFIG at the top of the script.'; }
     return;
   }
   if (!window.google?.accounts?.oauth2) { alert('Google Sign-In is still loading. Please try again in a moment.'); return; }
@@ -883,7 +883,7 @@ function hwAdd() {
 
   if (!subject) {
     document.getElementById('hwSubject').focus();
-    document.getElementById('hwSubject').style.borderColor = '#FB7185';
+    document.getElementById('hwSubject').style.borderColor = 'var(--rose)';
     setTimeout(() => document.getElementById('hwSubject').style.borderColor = '', 1200);
     return;
   }
@@ -1001,7 +1001,7 @@ function hwRender() {
         urgencyClass = 'hw-due-urgent';
         dueBadgeText = 'Due tomorrow';
         urgentTasks.push(task);
-      } else if (diffDays <= 3) {
+      } else if (diffDays <= 5) {
         urgencyClass = 'hw-due-soon';
         dueBadgeText = `Due in ${diffDays} days`;
         soonTasks.push(task);
@@ -1079,7 +1079,7 @@ function hwExportPDF() {
   const rows = _hwTasks.map(t => {
     const date = hwFormatDate(t.date);
     const statusIcon = t.done ? '✓' : '○';
-    const statusColor = t.done ? '#16a34a' : '#6b7280';
+    const statusColor = t.done ? 'var(--emerald)' : '#6b7280';
     return `
       <tr class="${t.done ? 'done-row' : ''}">
         <td class="status" style="color:${statusColor}">${statusIcon}</td>
@@ -1100,7 +1100,7 @@ function hwExportPDF() {
     .badge { display: inline-flex; gap: 12px; }
     .badge span { font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 999px; }
     .badge .total { background: #f1f5f9; color: #475569; }
-    .badge .done-b { background: #dcfce7; color: #16a34a; }
+    .badge .done-b { background: #dcfce7; color: var(--emerald); }
     table { width: 100%; border-collapse: collapse; }
     th { text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #94a3b8; padding: 0 12px 10px; }
     td { padding: 12px; font-size: 13px; border-top: 1px solid #f1f5f9; vertical-align: top; }
@@ -1365,9 +1365,9 @@ const FBK_DD_SVG = {
   rating:         `<svg width="15" height="15" viewBox="0 0 24 24" fill="none"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`
 };
 const FBK_DD_META = {
-  recommendation: { label: 'Recommendation', svgColor: 'var(--teal-icon)',  iconBg: 'var(--teal-icon-bg)' },
-  error:          { label: 'Error Report',    svgColor: '#FB7185',  iconBg: 'rgba(251,113,133,.12)' },
-  rating:         { label: 'Rating (1–5 ★)',  svgColor: '#FCD34D',  iconBg: 'rgba(252,211,77,.12)' }
+  recommendation: { label: 'Recommendation', svgColor: 'var(--teal)',  iconBg: 'var(--teal-icon-bg)' },
+  error:          { label: 'Error Report',    svgColor: 'var(--rose)',  iconBg: 'var(--rose-icon-bg)' },
+  rating:         { label: 'Rating (1–5 ★)',  svgColor: 'var(--amber)',  iconBg: 'var(--amber-icon-bg)' }
 };
 
 function fbkSelectType(val) {
@@ -1641,7 +1641,7 @@ function fbkScoreText(subject, detail) {
   const lc       = combined.toLowerCase();
 
   // ─── HARD BLOCK LAYER ───────────────────────────────────────
-  const block = (hint) => ({ score: 3, blocked: true, status: 'Spam Detected', hint, color: '#FB7185' });
+  const block = (hint) => ({ score: 3, blocked: true, status: 'Spam Detected', hint, color: 'var(--rose)' });
 
   // 1. No letters at all
   if (letters === 0 && total > 2)
@@ -1840,18 +1840,18 @@ function fbkScoreText(subject, detail) {
 
   let status, color, hint;
   if (score < 35) {
-    status = 'Low Quality'; color = '#FB7185';
+    status = 'Low Quality'; color = 'var(--rose)';
     hint = detWords < 6
       ? 'Too short — describe your feedback with at least a couple of sentences.'
       : 'Add more specific detail so the developer can understand and act on your message.';
   } else if (score < 58) {
-    status = 'Moderate'; color = '#FCD34D';
+    status = 'Moderate'; color = 'var(--amber)';
     hint = 'Decent start — adding more context and specifics will make this much more useful.';
   } else if (score < 80) {
-    status = 'Good'; color = '#00ffd9';
+    status = 'Good'; color = 'var(--gamemaster)';
     hint = 'Clear and descriptive.';
   } else {
-    status = 'Excellent'; color = '#00ffd9';
+    status = 'Excellent'; color = 'var(--gamemaster)';
     hint = 'Detailed and well-written — very helpful to the developer.';
   }
 
@@ -2314,7 +2314,7 @@ function renderFeed() {
   }
 
   if (!filtered.length) {
-    feed.innerHTML = `<div class="empty-s"><svg class="icon-teal" width="42" height="42" viewBox="0 0 24 24" fill="none" style="opacity:.2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="#00ffd9" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><h3>Nothing here</h3><p>No notifications match this filter.<br>Try clearing filters/search to see everything.</p></div>`;
+    feed.innerHTML = `<div class="empty-s"><svg class="icon-teal" width="42" height="42" viewBox="0 0 24 24" fill="none" style="opacity:.2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="var(--gamemaster)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><h3>Nothing here</h3><p>No notifications match this filter.<br>Try clearing filters/search to see everything.</p></div>`;
     const pg = document.getElementById('pagination'); if (pg) pg.innerHTML = '';
     return;
   }
@@ -2468,7 +2468,7 @@ function renderCal() {
   for (let d = 1; d <= days; d++) {
     const isT = today.getDate()===d && today.getMonth()===S.calMonth && today.getFullYear()===S.calYear;
     const dots = (dmap[d]||[]).map(dl => {
-      const color = dl._hwTask ? '#00ffd9' : courseById(dl.courseId).color;
+      const color = dl._hwTask ? 'var(--gamemaster)' : courseById(dl.courseId).color;
       return `<div class="cdot" style="background:${color}"></div>`;
     }).join('');
     h += `<div class="cday${isT?' today':''}" onclick="pickDay(${d},this)"><div class="cday-n">${d}</div><div class="cday-dots">${dots}</div></div>`;
@@ -2558,9 +2558,9 @@ function renderDl(day) {
     const ds   = dl.date.toLocaleDateString('en-US', { month:'short', day:'numeric' });
     const when = diff < 0 ? 'Overdue' : diff===0 ? 'Today' : diff===1 ? 'Tomorrow' : `${diff} days`;
     if (dl._hwTask) {
-      const urg = diff < 0 ? 'urg' : diff <= 1 ? 'urg' : diff <= 3 ? 'soo' : 'ok';
-      const urgLabel = diff < 0 ? 'Overdue' : diff <= 1 ? 'Urgent' : diff <= 3 ? 'Soon' : 'On track';
-      return `<div class="dl-row"><div class="dl-stripe" style="background:#00ffd9"></div><div class="dl-info"><div class="dl-t">${dl.title}</div><div class="dl-c" style="color:#00ffd9;opacity:.8">Homework</div></div><div class="dl-meta"><span class="dl-date">${ds} · ${when}</span><span class="dl-badge ${urg}">${urgLabel}</span></div></div>`;
+      const urg = diff < 0 ? 'urg' : diff <= 1 ? 'urg' : diff <= 5 ? 'soo' : 'ok';
+      const urgLabel = diff < 0 ? 'Overdue' : diff <= 1 ? 'Urgent' : diff <= 5 ? 'Soon' : 'On track';
+      return `<div class="dl-row"><div class="dl-stripe" style="background:var(--gamemaster)"></div><div class="dl-info"><div class="dl-t">${dl.title}</div><div class="dl-c" style="color:var(--gamemaster);opacity:.8">Homework</div></div><div class="dl-meta"><span class="dl-date">${ds} · ${when}</span><span class="dl-badge ${urg}">${urgLabel}</span></div></div>`;
     }
     const c = courseById(dl.courseId);
     return `<div class="dl-row"><div class="dl-stripe" style="background:${c.color}"></div><div class="dl-info"><div class="dl-t">${dl.title}</div><div class="dl-c">${c.name}</div></div><div class="dl-meta"><span class="dl-date">${ds} · ${when}</span><span class="dl-badge ${dl.urg}">${ul[dl.urg]}</span></div></div>`;
@@ -2573,7 +2573,7 @@ function renderDl(day) {
 function renderClasses() {
   document.getElementById('clsBody').innerHTML = S.courses.map(c => `
 <div class="cls-row">
-  <div class="cls-swatch" style="background:${c.color}">${c.abbr}</div>
+  <div class="cls-swatch" style="background:${c.color}; color:var(--invertext)">${c.abbr}</div>
   <div class="cls-info"><b>${c.name}</b>${c.section ? `<span>${c.section}</span>` : ''}</div>
   <label class="tog"><input type="checkbox" checked onchange="saved()"><div class="tog-track"></div></label>
 </div>`).join('');
@@ -2719,7 +2719,7 @@ function qtpRenderTimeline() {
     fill1.style.left    = startPct + '%';
     fill1.style.width   = (endPct - startPct) + '%';
     // Full gradient across segment
-    fill1.style.background = `linear-gradient(90deg, var(--violet) 0%, #00ffd9 100%)`;
+    fill1.style.background = `linear-gradient(90deg, var(--violet) 0%, var(--gamemaster) 100%)`;
     fill1.style.borderRadius = '99px';
 
     // Segment B: hidden
@@ -2743,7 +2743,7 @@ function qtpRenderTimeline() {
     fill1.style.left     = startPct + '%';
     fill1.style.width    = bWidth + '%';
     fill1.style.borderRadius = '99px 0 0 99px';
-    fill1.style.background   = `linear-gradient(90deg, var(--violet) 0%, color-mix(in srgb, var(--violet) ${100 - bGradEnd}%, #00ffd9 ${bGradEnd}%) 100%)`;
+    fill1.style.background   = `linear-gradient(90deg, var(--violet) 0%, color-mix(in srgb, var(--violet) ${100 - bGradEnd}%, var(--gamemaster) ${bGradEnd}%) 100%)`;
 
     // Segment A: 0% → endPct — teal at right, partial gradient
     const aWidth = endPct;
@@ -2751,7 +2751,7 @@ function qtpRenderTimeline() {
     fill2.style.left     = '0%';
     fill2.style.width    = aWidth + '%';
     fill2.style.borderRadius = '0 99px 99px 0';
-    fill2.style.background   = `linear-gradient(90deg, color-mix(in srgb, var(--violet) ${100 - bGradEnd}%, #00ffd9 ${bGradEnd}%) 0%, #00ffd9 100%)`;
+    fill2.style.background   = `linear-gradient(90deg, color-mix(in srgb, var(--violet) ${100 - bGradEnd}%, var(--gamemaster) ${bGradEnd}%) 0%, var(--gamemaster) 100%)`;
   }
 
   // Labels
@@ -3464,9 +3464,9 @@ function toggleFaq(btn){
 
     // Color: green if charging or >50%, amber if 20–50%, red if <20%
     let color;
-    if(charging || level > 0.5) color = '#4ade80';   // green
-    else if(level > 0.2)        color = '#FCD34D';   // amber
-    else                        color = '#FB7185';    // red
+    if(charging || level > 0.5) color = 'var(--green)';   // green
+    else if(level > 0.2)        color = 'var(--amber)';   // amber
+    else                        color = 'var(--rose)';    // red
 
     fill.setAttribute('fill', color);
 
@@ -3513,9 +3513,9 @@ const FIREBASE_CONFIG = {
     return (p.length >= 2 ? p[0][0]+p[1][0] : n.slice(0,2)).toUpperCase();
   }
   function avatarGrad(email) {
-    return ['linear-gradient(135deg,#8B5CF6,#00ffd9)','linear-gradient(135deg,#FB7185,#FCD34D)',
-            'linear-gradient(135deg,#38BDF8,#8B5CF6)','linear-gradient(135deg,#00ffd9,#38BDF8)',
-            'linear-gradient(135deg,#FCD34D,#FB7185)'][email.charCodeAt(0)%5];
+        return ['linear-gradient(135deg,var(--violet),var(--teal))','linear-gradient(135deg,var(--rose),var(--amber))',
+                'linear-gradient(135deg,var(--sky),var(--violet))','linear-gradient(135deg,var(--teal),var(--sky))',
+                'linear-gradient(135deg,var(--amber),var(--rose))'][email.charCodeAt(0)%5];
   }
   // Returns inner HTML for an avatar element — photo if available, else gradient+initials
   function avatarInner(email, picture) {
@@ -3566,9 +3566,9 @@ const FIREBASE_CONFIG = {
   let _blocks = {};            // { email → {email, ts} } — users I've blocked
 
   function groupGrad(gid) {
-    const gs = ['linear-gradient(135deg,#38BDF8,#6366f1)','linear-gradient(135deg,#10B981,#3B82F6)',
-                'linear-gradient(135deg,#F59E0B,#8B5CF6)','linear-gradient(135deg,#EC4899,#F97316)',
-                'linear-gradient(135deg,#06B6D4,#10B981)','linear-gradient(135deg,#8B5CF6,#EC4899)'];
+    const gs = ['linear-gradient(135deg,var(--sky),var(--pink))','linear-gradient(135deg,var(--teal),var(--blue))',
+                'linear-gradient(135deg,var(--amber),var(--violet))','linear-gradient(135deg,var(--pink),var(--orange))',
+                'linear-gradient(135deg,var(--teal),var(--green))','linear-gradient(135deg,var(--violet),var(--pink))'];
     let h=0; for(const c of gid) h=(h*31+c.charCodeAt(0))&0x7fffffff;
     return gs[h%gs.length];
   }

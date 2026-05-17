@@ -158,26 +158,26 @@
       <!-- Quick stats -->
       <div class="dash-stats">
         <div class="dstat">
-          <div class="dstat-icon" style="background:rgba(0,255,217,.12)">
-            <svg class="icon-teal" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="#00ffd9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="dstat-icon" style="background:var(--teal-icon-bg)">
+            <svg class="icon-teal" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div><div class="dstat-num" id="cnt-announcement">0</div><div class="dstat-lbl">Announcements</div></div>
         </div>
         <div class="dstat">
-          <div class="dstat-icon" style="background:rgba(139,92,246,.12)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14,2 14,8 20,8" stroke="#8B5CF6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="dstat-icon" style="background:var(--violet-icon-bg)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="var(--violet)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14,2 14,8 20,8" stroke="var(--violet)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div><div class="dstat-num" id="cnt-assignment">0</div><div class="dstat-lbl">Assignments</div></div>
         </div>
         <div class="dstat">
-          <div class="dstat-icon" style="background:rgba(251,113,133,.12)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="#FB7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="#FB7185" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="dstat-icon" style="background:var(--rose-icon-bg)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="var(--rose)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="var(--rose)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </div>
           <div><div class="dstat-num" id="cnt-material">0</div><div class="dstat-lbl">Materials</div></div>
         </div>
         <div class="dstat">
-          <div class="dstat-icon" style="background:rgba(96,165,250,.12)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="#60A5FA" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="#60A5FA" stroke-width="2" stroke-linecap="round"/></svg>
+          <div class="dstat-icon" style="background:var(--sky-icon-bg)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="var(--sky)" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="var(--sky)" stroke-width="2" stroke-linecap="round"/></svg>
           </div>
           <div><div class="dstat-num" id="cnt-deadline">0</div><div class="dstat-lbl">Deadlines</div></div>
         </div>
@@ -405,7 +405,7 @@
           <div class="prof-info">
             <div class="prof-name" id="profName">Student User</div>
             <div class="prof-email" id="profEmail" style="display:flex;align-items:center;gap:6px;margin-top:3px;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="var(--gamemaster)"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="var(--emerald)"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="var(--amber)"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="var(--rose)"/></svg>
               <span id="profEmailText"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="82f1f6f7e6e7ecf6c2f1e1eaededeeace7e6f7">[email&#160;protected]</a></span>
             </div>
           </div>
@@ -532,7 +532,7 @@
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 Sync now
               </button>
-              <button id="gcalUnsyncBtn" class="btn-sm" onclick="gcalUnsyncAll()" style="display:none;align-items:center;gap:6px;font-size:12px;color:#FB7185;border-color:#FB7185">
+              <button id="gcalUnsyncBtn" class="btn-sm" onclick="gcalUnsyncAll()" style="display:none;align-items:center;gap:6px;font-size:12px;color:var(--rose);border-color:var(--rose)">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 Remove all events
               </button>
@@ -579,7 +579,7 @@
                 <svg class="fbk-dd-opt-check" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 6l-11 11-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </div>
               <div class="fbk-dd-option" role="option" onclick="fbkSelectType('error')">
-                <div class="fbk-dd-opt-icon" style="background:rgba(251,113,133,.12);color:#FB7185">
+                <div class="fbk-dd-opt-icon" style="background: var(--rose-icon-bg);color: var(--rose)">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 </div>
                 <div class="fbk-dd-opt-info">
@@ -589,7 +589,7 @@
                 <svg class="fbk-dd-opt-check" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 6l-11 11-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </div>
               <div class="fbk-dd-option" role="option" onclick="fbkSelectType('rating')">
-                <div class="fbk-dd-opt-icon" style="background:rgba(252,211,77,.12);color:#FCD34D">
+                <div class="fbk-dd-opt-icon" style="background: var(--amber-icon-bg);color: var(--amber)">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </div>
                 <div class="fbk-dd-opt-info">
@@ -940,7 +940,7 @@
 <!-- Push toast -->
 <div class="push-toast" id="toast">
   <div class="toast-icon">
-    <svg class="icon-teal" width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="#00ffd9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="#00ffd9" stroke-width="2" stroke-linecap="round"/></svg>
+    <svg class="icon-teal" width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="var(--gamemaster)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="var(--gamemaster)" stroke-width="2" stroke-linecap="round"/></svg>
   </div>
   <div class="toast-body">
     <div class="toast-app">Aulert · Google Classroom</div>

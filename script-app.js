@@ -20,7 +20,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/calendar.events',
 ].join(' ');
 
-const POLL_MS        = 1 * 60 * 1000;
+const POLL_MS        = 1 * 60 * 1000; // refresh every 60 sec
 const COURSE_COLORS  = ['var(--teal)', 'var(--violet)', 'var(--amber)', 'var(--rose)', 'var(--sky)', 'var(--green)', 'var(--orange)', 'var(--pink)', 'var(--emerald)', 'var(--gamemaster)'];
 const TYPE_META      = {
   announcement: { label:'Announcement', color:'var(--teal)' },
@@ -28,28 +28,6 @@ const TYPE_META      = {
   material:     { label:'Material',     color:'var(--rose)' },
 };
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-
-function setCookie(name, value, days) {
-  let expires = "";
-  if (days) {
-    let date = new Date();
-    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-    expires = "; expires=" + date.toUTCString();
-  }
-  const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-  const secureFlag = isLocalhost ? "" : "; Secure";
-  document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax" + secureFlag;
-}
-
-function getCookie(name) {
-  let nameEQ = name + "=";
-  let ca = document.cookie.split(';');
-  for(let i=0; i < ca.length; i++) {
-    let c = ca[i].trim();
-    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-  }
-  return null;
-}
 
 /* ════════════════════════════════════════════
    STATE
@@ -88,7 +66,6 @@ const courseById = id => S.courses.find(c => c.id === id) || { color:'var(--viol
 // On app page load — verify we have a token, else bounce to landing
 window.addEventListener('load', () => {
   const saved = sessionStorage.getItem('aul_token');
-  const saved = getCookie('aul_token');
   if (saved) {
     S.token = saved;
     showLoadingState();
@@ -156,7 +133,6 @@ async function onToken(resp) {
   if (btn) { btn.disabled = false; btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg> Continue with Google`; }
   if (resp.error) { console.error('OAuth error:', resp.error); return; }
   S.token = resp.access_token;
-  setCookie('aul_token', S.token, 1);
   sessionStorage.setItem('aul_token', S.token);
   document.getElementById('authModal').classList.remove('open');
   showLoadingApp();
@@ -457,7 +433,6 @@ function launchApp() {
 function disconnect() {
   clearInterval(S.pollTimer);
   clearInterval(S.countdownTimer);
-  set
   S.token = null;
   sessionStorage.removeItem('aul_token');
   if (window.google?.accounts?.oauth2 && S.user?.id) {
@@ -472,18 +447,9 @@ function toggleTheme() {
   const isDark = root.getAttribute('data-theme') === 'dark';
   const next = isDark ? 'light' : 'dark';
   root.setAttribute('data-theme', next);
-
-  setCookie('aul_theme', next, 365);
+  localStorage.setItem('aul_theme', next);
   updateThemeIcon(next);
 }
-
-/* ── Init theme on load from cookie ── */
-(function(){
-  const saved = getCookie('aul_theme') || 'dark';
-  const mode = (saved === 'custom') ? 'dark' : saved;
-  document.documentElement.setAttribute('data-theme', mode);
-  updateThemeIcon(mode);
-})();
 
 function setThemeMode(mode) { toggleTheme(); } // compat shim
 

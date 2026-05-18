@@ -1781,7 +1781,8 @@ body::before{
   max-width:800px;margin:0 auto;
 }
 @media(max-width:900px){.faq-sec{padding:70px 24px;}}
-.faq-sec .sec-h,.faq-sec .sec-sub,.faq-sec .sec-label{text-align:center;}
+.faq-sec .sec-h,.faq-sec .sec-sub{text-align:center;}
+.faq-sec .sec-label{display:block;width:fit-content;margin:0 auto 20px;}
 .faq-sec .sec-sub{display:block;}
 .faq-list{margin-top:48px;display:flex;flex-direction:column;gap:2px;}
 .faq-item{

@@ -556,144 +556,9 @@
       </div>
 
       <div class="fbk-card">
-
-        <!-- Custom Dropdown -->
-        <div class="fbk-field">
-          <label class="fbk-label">Feedback Type</label>
-          <div class="fbk-dropdown" id="fbkDropdown">
-            <button type="button" class="fbk-dd-trigger" id="fbkDdTrigger" onclick="fbkToggleDropdown(event)" aria-haspopup="listbox" aria-expanded="false">
-              <div class="fbk-dd-icon">
-                <div class="fbk-dd-type-icon" id="fbkDdTypeIcon"></div>
-                <span id="fbkDdLabel" style="color:var(--text-3)">— Select a type —</span>
-              </div>
-              <svg class="fbk-dd-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
-            <div class="fbk-dd-menu" id="fbkDdMenu" role="listbox">
-              <div class="fbk-dd-option" role="option" onclick="fbkSelectType('recommendation')">
-                <div class="fbk-dd-opt-icon" style="background:var(--teal-icon-bg);color:var(--teal-icon)">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                </div>
-                <div class="fbk-dd-opt-info">
-                  <div class="fbk-dd-opt-name">Recommendation</div>
-                  <div class="fbk-dd-opt-desc">Suggest a feature or improvement</div>
-                </div>
-                <svg class="fbk-dd-opt-check" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 6l-11 11-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <div class="fbk-dd-option" role="option" onclick="fbkSelectType('error')">
-                <div class="fbk-dd-opt-icon" style="background: var(--rose-icon-bg);color: var(--rose)">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                </div>
-                <div class="fbk-dd-opt-info">
-                  <div class="fbk-dd-opt-name">Error Report</div>
-                  <div class="fbk-dd-opt-desc">Something broke or isn't working</div>
-                </div>
-                <svg class="fbk-dd-opt-check" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 6l-11 11-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-              <div class="fbk-dd-option" role="option" onclick="fbkSelectType('rating')">
-                <div class="fbk-dd-opt-icon" style="background: var(--amber-icon-bg);color: var(--amber)">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                </div>
-                <div class="fbk-dd-opt-info">
-                  <div class="fbk-dd-opt-name">Rating (1–5 stars)</div>
-                  <div class="fbk-dd-opt-desc">Rate your overall experience</div>
-                </div>
-                <svg class="fbk-dd-opt-check" width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M20 6l-11 11-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Text fields (recommendation / error) -->
-        <div id="fbkTextFields" style="display:none;">
-          <div class="fbk-field">
-            <label class="fbk-label" for="fbkUserEmail">Your Email</label>
-            <input class="fbk-input" id="fbkUserEmail" type="email" oninput="fbkAnalyze()" readonly>
-          </div>
-          <div class="fbk-field">
-            <label class="fbk-label" for="fbkSubject">Subject</label>
-            <input class="fbk-input" id="fbkSubject" type="text" placeholder="Brief summary of your feedback…" maxlength="120" oninput="fbkAnalyze()"/>
-            <div class="fbk-char-count" id="fbkSubjectCount">0 / 120</div>
-          </div>
-          <div class="fbk-field">
-            <label class="fbk-label" for="fbkDetail">Details</label>
-            <textarea class="fbk-textarea" id="fbkDetail" placeholder="Describe in detail what you'd like to share…" rows="5" oninput="fbkAnalyze()"></textarea>
-          </div>
-        </div>
-
-        <!-- Star rating section -->
-        <div id="fbkRatingSection" style="display:none;">
-          <div class="fbk-field">
-            <label class="fbk-label" for="fbkUserEmailRating">Your Email</label>
-            <input class="fbk-input" id="fbkUserEmailRating" type="email" oninput="fbkAnalyze()" readonly>
-          </div>
-          <div class="fbk-field">
-            <label class="fbk-label">Your Rating</label>
-            <div class="fbk-stars" id="fbkStars" role="radiogroup" aria-label="Rating">
-              <span class="fbk-star" data-val="1" onclick="fbkSetStar(1)" onmouseover="fbkHoverStar(1)" onmouseleave="fbkHoverEnd()">☆</span>
-              <span class="fbk-star" data-val="2" onclick="fbkSetStar(2)" onmouseover="fbkHoverStar(2)" onmouseleave="fbkHoverEnd()">☆</span>
-              <span class="fbk-star" data-val="3" onclick="fbkSetStar(3)" onmouseover="fbkHoverStar(3)" onmouseleave="fbkHoverEnd()">☆</span>
-              <span class="fbk-star" data-val="4" onclick="fbkSetStar(4)" onmouseover="fbkHoverStar(4)" onmouseleave="fbkHoverEnd()">☆</span>
-              <span class="fbk-star" data-val="5" onclick="fbkSetStar(5)" onmouseover="fbkHoverStar(5)" onmouseleave="fbkHoverEnd()">☆</span>
-            </div>
-          </div>
-          <div class="fbk-field">
-            <label class="fbk-label" for="fbkReason">Reasoning</label>
-            <textarea class="fbk-textarea" id="fbkReason" placeholder="Describe what drove your rating and how we can improve…" rows="4" oninput="fbkAnalyze()"></textarea>
-          </div>
-        </div>
-
-        <!-- Shared quality bar + warning (shown for all types) -->
-        <div class="fbk-quality-bar" id="fbkQualityBar">
-          <div class="fbk-quality-top">
-            <span class="fbk-quality-label">Message Quality</span>
-            <span class="fbk-quality-status" id="fbkQualityStatus">—</span>
-          </div>
-          <div class="fbk-quality-track">
-            <div class="fbk-quality-fill" id="fbkQualityFill" style="width:0%"></div>
-          </div>
-          <div class="fbk-quality-hint" id="fbkQualityHint"></div>
-        </div>
-        <div class="fbk-warn" id="fbkWarn">
-          <svg class="fbk-warn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          <div class="fbk-warn-text" id="fbkWarnText"></div>
-        </div>
-
-        <!-- Submit row -->
-        <div class="fbk-submit-row" id="fbkSubmitRow" style="display:none;">
-          <button class="fbk-submit" id="fbkSubmitBtn" onclick="fbkSubmit()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            Send Feedback
-          </button>
-          <div class="fbk-akismet-badge">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
-                    stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Protected by Akismet
-          </div>
-        </div>
-
-        <!-- Success message -->
-        <div class="fbk-success" id="fbkSuccess">
-          <div class="fbk-success-ring">
-            <svg class="fbk-ring-svg" width="72" height="72" viewBox="0 0 72 72" fill="none">
-              <circle class="fbk-success-ring-bg" cx="36" cy="36" r="30" stroke-width="3" fill="none"/>
-              <circle class="fbk-success-ring-fill" cx="36" cy="36" r="30" stroke-width="3" fill="none"
-                stroke-linecap="round" transform="rotate(-90 36 36)"/>
-            </svg>
-            <div class="fbk-success-check">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 12l5 5L20 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-          </div>
-          <div class="fbk-success-title">Message Sent!</div>
-          <div class="fbk-success-sub">Thanks for taking the time. The developer will read your feedback and use it to make Aulert better.</div>
-          <button class="fbk-again-btn" id="fbkAgainBtn" onclick="fbkReset()">Send Another</button>
-        </div>
-
-      </div>
-    </div>
-  </div>
+			</div>
+      <p> comming soon <p>
+		</div>
 
     <!-- ══ COMMUNITY PANEL ══ -->
     <div class="panel" id="p-com">
@@ -758,7 +623,7 @@
                     Groups
                   </div>
                   <button class="com-new-group-btn" id="comNewGroupBtn" onclick="comShowCreateGroup()" title="New group" style="display:none">
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="1o2" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
                   </button>
                 </div>
               </div>

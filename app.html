@@ -370,7 +370,7 @@
                 </div>
                 <!-- Footer -->
                 <div class="hwdtp-footer">
-                  <button type="button" class="hwdtp-done-btn" onclick="hwDtpConfirm()">Set Deadline</button>
+                  <button type="button" class="hwdtp-done-btn" onclick="document.querySelectorAll('.hwdtp-day.selected,.hwdtp-day.day-flash').forEach(el=>el.classList.remove('selected','day-flash'));hwDtpConfirm()">Set Deadline</button>
                 </div>
               </div>
             </div>

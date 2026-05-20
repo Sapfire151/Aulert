@@ -829,7 +829,7 @@ body::before{
 }
 .dow-row{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:2px;}
 .dow{text-align:center;font-size:9px;font-weight:700;color:var(--text-3);letter-spacing:.7px;text-transform:uppercase;padding:2px 0;}
-.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap: 12px;}
 
 .cday{
   border-radius:8px;

@@ -1,0 +1,113 @@
+    <div class="panel show" id="p-feed">
+
+      <!-- Welcome card -->
+      <div class="dash-welcome">
+        <div class="dash-welcome-left">
+          <div class="dash-greeting" id="dashGreeting">Good morning</div>
+          <h1 id="dashWelcomeH">Ready to <span class="accent-text">stay ahead?</span></h1>
+          <p id="feedMeta">Monitoring your Google Classroom courses</p>
+        </div>
+        <div class="dash-welcome-right">
+          <div class="dash-unread-badge">
+            <div class="dub-num" id="dashUnreadNum">0</div>
+            <div class="dub-info">
+              <div class="dub-label">Unread alerts</div>
+              <div class="dub-sub">across your classes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick stats -->
+      <div class="dash-stats">
+        <div class="dstat">
+          <div class="dstat-icon" style="background:var(--teal-icon-bg)">
+            <svg class="icon-teal" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div><div class="dstat-num" id="cnt-announcement">0</div><div class="dstat-lbl">Announcements</div></div>
+        </div>
+        <div class="dstat">
+          <div class="dstat-icon" style="background:var(--violet-icon-bg)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="var(--violet)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14,2 14,8 20,8" stroke="var(--violet)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div><div class="dstat-num" id="cnt-assignment">0</div><div class="dstat-lbl">Assignments</div></div>
+        </div>
+        <div class="dstat">
+          <div class="dstat-icon" style="background:var(--rose-icon-bg)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="var(--rose)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="var(--rose)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div><div class="dstat-num" id="cnt-material">0</div><div class="dstat-lbl">Materials</div></div>
+        </div>
+        <div class="dstat">
+          <div class="dstat-icon" style="background:var(--sky-icon-bg)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="var(--sky)" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="var(--sky)" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div><div class="dstat-num" id="cnt-deadline">0</div><div class="dstat-lbl">Deadlines</div></div>
+        </div>
+      </div>
+
+      <!-- Two-column dashboard layout -->
+      <div class="dash-main">
+
+        <!-- Feed column -->
+        <div class="dash-feed-col">
+
+          <div class="feed-col-header">
+            <div>
+              <div class="feed-col-title">Activity Feed</div>
+              <div class="feed-col-meta" id="feedCountMeta">Loading…</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span id="pollCountdown" style="font-size:11px;color:var(--text-3);letter-spacing:.3px"></span>
+              <button onclick="manualRefresh()" title="Refresh now" style="background:none;border:1px solid var(--border);border-radius:8px;padding:5px 8px;cursor:pointer;color:var(--text-2);display:flex;align-items:center;gap:5px;font-size:11px" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
+                <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Refresh
+              </button>
+            </div>
+          </div>
+
+          <!-- search box -->
+          <div class="search-wrap">
+            <input style="font-family:var(--ff-body)" type="text" id="searchInp" placeholder="Search work..." oninput="onSearch(this.value)">
+          </div>
+
+          <div class="chips">
+            <div class="chip active" onclick="setChip('all',this)">All <span class="chip-badge" id="cnt-all">0</span></div>
+            <div class="chip" onclick="setChip('announcement',this)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Announcements
+            </div>
+            <div class="chip" onclick="setChip('assignment',this)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Assignments
+            </div>
+            <div class="chip" onclick="setChip('material',this)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Materials
+            </div>
+          </div>
+
+          <div class="notif-feed" id="notifFeed"></div>
+          <div id="pagination"></div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="dash-sidebar">
+          <div class="sidebar-card">
+            <div class="sc-header">
+              <div class="sc-title">Upcoming Deadlines</div>
+              <div class="sc-badge" id="sc-dl-count">0</div>
+            </div>
+            <div class="mini-dl-list" id="sidebarDlList"></div>
+          </div>
+          <div class="sidebar-card">
+            <div class="sc-header">
+              <div class="sc-title">Your Classes</div>
+              <div class="sc-badge">4</div>
+            </div>
+            <div class="sidebar-cls-list" id="sidebarClsList"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>

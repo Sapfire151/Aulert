@@ -1,0 +1,152 @@
+    <div class="panel" id="p-set">
+      <h1>Settings</h1>
+      <p class="sub">Control your account, notifications, and connected classes</p>
+
+      <div class="sg sg-account">
+        <div class="sg-lbl">Account</div>
+        <div class="prof-row">
+          <div class="prof-ava" id="profAva">S</div>
+          <div class="prof-info">
+            <div class="prof-name" id="profName">Student User</div>
+            <div class="prof-email" id="profEmail" style="display:flex;align-items:center;gap:6px;margin-top:3px;">
+              <img src="data:image/webp;base64,UklGRvYDAABXRUJQVlA4WAoAAAAQAAAALwAAMAAAQUxQSD0CAAABkCzJtmlb89q2bbP1jJ5t27Zt20bP17atZ9s+fGc+rbnW3l8QERMA3Ab+g3ZlP/ii0Wm+PsrfPyLECKR16H/2ngKpqkdXhjlL4DS9Uo382trZzoKM+pfpUKyuvJ+hCI9DP1D8970ufEnFKG1WFE/3uyj1Hn1a9ycodYoPkJPvodQpnkD2LEFOzYuqtGup5U9VrBRPIBsdQvrL04OCbYwNja0Deh9+8p8UT6D3/0H6cjBaH4ihuz8hpngC3akMqY099IGu16MlxRM4p+soeeHAH+QOnI6VSCwOABkOUBMexIMMDc4jWz0e5Bhwn5BqKYshCpayL8hyN7Kr7GkOIYJdcwnbgT737Suhb84/ZGkHcqxCwc1fWJ8SOVaKeqthPQ+Qh0LHeuwtj18a1vMAeeAX1udEeagfsLSD5PEph4U75HF3F6HKnhYzdgxx5FEdK3OwgqXsS+NcjezdAfdYmGopzKaEpRpucI6gniCsn4L1JAz6q1n4MF6QYwGyr5qAQwUBi/yFGG5Ftm4SAEzVETA3TIDRIgXhvh8AOJVSsLGHAY/LLgUSt8K/fb9T8MvhWAOK7eBSpD4O+4/hfhLiq3NDw+xMjUysvTutKFEheTH8372Ahqh9XZt1K6Pi0Q/kzHJgQHwbh+hHyUDs/FAGHwYAuVObZB/HAmdcnkTPhgC3295vUhS1A4GGvYp+iXq9wRXEOkwqVYl4eSQBxNv1PnX7J0n7JmdRhD5Iqu/bb2vanQ9KrfLzw6LjUxOtgBcAVlA4IJIBAACQCwCdASowADEAPoE0lUelIyIhN/cdUKAQCWwAnTL/+S+3fkB+QHyi1R+3fgnKL+hDlm97vqb8RrcPftN60vor82b/AdZn6AHScgQB9I/EgAtcbST+7cnXXVOLaOX0w5/uxm7vgAD+UivGRn2Kiy7nnRJ6Al1yTkg8vDQlaZQ8rXXwPvqqPiKnTTbNo6+3hAokP5WRy0UAvc8yepd+yrR01uaTikpMU2A/9vst3bmWubmaxLoEyNADe46yfzwuQTXgFuf+dhsCw6LNWYG+FOocmuudXp51oLAvTBSqb+XiIGv/p1P/+PQfVUL72hqk+ik6bEg7H+D4/wQBA8lRJ0iaiwM1IaqwtVqyWk2RiMFMbLeHPh4TAzNe0XJgUis5XwLHTQJuTO65q/6Ox8WIa0H05vfE6Ix21yKFNWWzaAX6NT9znrWbVdPOnS1TtbYnHxZ/2LqiQuyk2//Cb4jctfI9pCL/8k49QTOaRT6m1BU8Bq2uo7/h0f/8gt9Dsv0Oy/f+OB+v+TcAf/xwP1/ybgAAAAA=" width="12" height="12" style="flex-shrink:0" alt="Google">
+              <span id="profEmailText"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="82f1f6f7e6e7ecf6c2f1e1eaededeeace7e6f7">[email&#160;protected]</a></span>
+            </div>
+          </div>
+          <button class="disc-btn" onclick="disconnect()">Disconnect</button>
+        </div>
+      </div>
+
+      <div class="sg sg-notify">
+        <div class="sg-lbl">Notify me about</div>
+        <div class="sg-body">
+          <div class="srow"><div class="srow-info"><h4>Stream Posts</h4><p>Class stream</p></div><label class="tog"><input type="checkbox" id="set_stream" onchange="saveSetting('stream',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Announcements</h4><p>Teacher announcements</p></div><label class="tog"><input type="checkbox" id="set_announcements" onchange="saveSetting('announcements',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Assignments</h4><p>New work posted</p></div><label class="tog"><input type="checkbox" id="set_assignments" onchange="saveSetting('assignments',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Grades</h4><p>When graded</p></div><label class="tog"><input type="checkbox" id="set_grades" onchange="saveSetting('grades',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Materials</h4><p>Study resources</p></div><label class="tog"><input type="checkbox" id="set_materials" onchange="saveSetting('materials',this.checked)"><div class="tog-track"></div></label></div>
+        </div>
+      </div>
+
+      <div class="sg sg-delivery">
+        <div class="sg-lbl">Delivery</div>
+        <div class="sg-body">
+          <div class="srow"><div class="srow-info"><h4>Push Notifications</h4><p>Alerts when tab closed</p></div><label class="tog"><input type="checkbox" id="set_push" onchange="reqPush(this)"><div class="tog-track"></div></label></div>
+          <div class="srow srow-quiet-inline" id="quietHoursRow">
+            <div class="srow-info">
+              <h4>Quiet Hours</h4>
+              <p>Pause notifications during set times</p>
+            </div>
+            <div class="srow-quiet">
+              <label class="tog"><input type="checkbox" id="set_quietHours" onchange="saveSetting('quietHours',this.checked);qtpToggleVisibility()"><div class="tog-track"></div></label>
+              <!-- hidden native inputs kept for saveQuietTime() compatibility -->
+              <input type="time" id="quietStart" style="display:none" onchange="saveQuietTime()">
+              <input type="time" id="quietEnd" style="display:none" onchange="saveQuietTime()">
+              <!-- Custom time pickers -->
+              <div class="quiet-times" id="qtpTimes">
+                <!-- Start picker -->
+                <div class="qtp-wrap" id="qtpStartWrap">
+                  <div class="qtp-col">
+                    <button class="qtp-arrow" onclick="qtpStep('start','h',1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="qtp-val" id="qtp-start-h">22</div>
+                    <button class="qtp-arrow" onclick="qtpStep('start','h',-1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                  <div class="qtp-colon">:</div>
+                  <div class="qtp-col">
+                    <button class="qtp-arrow" onclick="qtpStep('start','m',1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="qtp-val" id="qtp-start-m">00</div>
+                    <button class="qtp-arrow" onclick="qtpStep('start','m',-1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <!-- separator arrow -->
+                <div class="quiet-arrow-sep">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <!-- End picker -->
+                <div class="qtp-wrap" id="qtpEndWrap">
+                  <div class="qtp-col">
+                    <button class="qtp-arrow" onclick="qtpStep('end','h',1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="qtp-val" id="qtp-end-h">07</div>
+                    <button class="qtp-arrow" onclick="qtpStep('end','h',-1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                  <div class="qtp-colon">:</div>
+                  <div class="qtp-col">
+                    <button class="qtp-arrow" onclick="qtpStep('end','m',1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="qtp-val" id="qtp-end-m">00</div>
+                    <button class="qtp-arrow" onclick="qtpStep('end','m',-1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 24h timeline bar — shown below row when quiet hours enabled -->
+          <div class="quiet-timeline-row" id="quietTimeline">
+            <div class="qtr-labels">
+              <span class="qtr-label">0</span>
+              <span class="qtr-label">6</span>
+              <span class="qtr-label">12</span>
+              <span class="qtr-label">18</span>
+              <span class="qtr-label">24</span>
+            </div>
+            <div class="qtr-bar" id="qtrBar">
+              <div class="qtr-fill" id="qtrFill"></div>
+              <div class="qtr-fill" id="qtrFill2"></div>
+              <div class="qtr-thumb" id="qtrThumbStart" title="Start time"></div>
+              <div class="qtr-thumb qtr-end-thumb" id="qtrThumbEnd" title="End time"></div>
+            </div>
+            <div class="qtr-time-display">
+              <span class="qtr-td-pill qtr-td-start" id="qtrLabelStart">22:00</span>
+              <span class="qtr-td-pill qtr-td-end" id="qtrLabelEnd">07:00</span>
+            </div>
+          </div>
+          <div class="srow"><div class="srow-info"><h4>Sound Alerts</h4><p>Sound on new alert</p></div><label class="tog"><input type="checkbox" id="set_sound" onchange="saveSetting('sound',this.checked)"><div class="tog-track"></div></label></div>
+        </div>
+      </div>
+
+      <div class="sg sg-gcal">
+        <div class="sg-lbl">Google Calendar</div>
+        <div class="sg-body">
+          <div class="srow">
+            <div class="srow-info">
+              <h4>Sync Deadlines &amp; Homework</h4>
+              <p>Auto-add assignment due dates and homework deadlines to your Google Calendar</p>
+            </div>
+            <label class="tog tog-disabled"><input type="checkbox" id="set_gcalSync" onchange="gcalToggle(this)" disabled><div class="tog-track"></div></label>
+          </div>
+          <div class="srow" style="flex-direction:column;align-items:flex-start;gap:10px;border-top:1px solid var(--border);padding-top:14px">
+            <p id="gcalStatusText" style="font-size:12px;color:var(--text-3);margin:0">Sync disabled</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button id="gcalSyncBtn" class="btn-sm" onclick="gcalSyncAll()" style="display:none;align-items:center;gap:6px;font-size:12px">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Sync now
+              </button>
+              <button id="gcalUnsyncBtn" class="btn-sm" onclick="gcalUnsyncAll()" style="display:none;align-items:center;gap:6px;font-size:12px;color:var(--rose);border-color:var(--rose)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Remove all events
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sg sg-classes">
+        <div class="sg-lbl">Connected Classes</div>
+        <div class="sg-body" id="clsBody"></div>
+      </div>
+    </div>

@@ -129,12 +129,450 @@
     </div>
   </div>
 
-  <div class="app-body" id="appBody"></div>
+  <div class="app-body" id="appBody">
+
+    <!-- ═══ TAB: FEED ═══ -->
+    <div class="panel show" id="p-feed">
+
+      <!-- Welcome card -->
+      <div class="dash-welcome">
+        <div class="dash-welcome-left">
+          <div class="dash-greeting" id="dashGreeting">Good morning</div>
+          <h1 id="dashWelcomeH">Ready to <span class="accent-text">stay ahead?</span></h1>
+          <p id="feedMeta">Monitoring your Google Classroom courses</p>
+        </div>
+        <div class="dash-welcome-right">
+          <div class="dash-unread-badge">
+            <div class="dub-num" id="dashUnreadNum">0</div>
+            <div class="dub-info">
+              <div class="dub-label">Unread alerts</div>
+              <div class="dub-sub">across your classes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick stats -->
+      <div class="dash-stats">
+        <div class="dstat">
+          <div class="dstat-icon" style="background:var(--teal-icon-bg)">
+            <svg class="icon-teal" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div><div class="dstat-num" id="cnt-announcement">0</div><div class="dstat-lbl">Announcements</div></div>
+        </div>
+        <div class="dstat">
+          <div class="dstat-icon" style="background:var(--violet-icon-bg)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="var(--violet)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14,2 14,8 20,8" stroke="var(--violet)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div><div class="dstat-num" id="cnt-assignment">0</div><div class="dstat-lbl">Assignments</div></div>
+        </div>
+        <div class="dstat">
+          <div class="dstat-icon" style="background:var(--rose-icon-bg)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="var(--rose)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="var(--rose)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div><div class="dstat-num" id="cnt-material">0</div><div class="dstat-lbl">Materials</div></div>
+        </div>
+        <div class="dstat">
+          <div class="dstat-icon" style="background:var(--sky-icon-bg)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="var(--sky)" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="var(--sky)" stroke-width="2" stroke-linecap="round"/></svg>
+          </div>
+          <div><div class="dstat-num" id="cnt-deadline">0</div><div class="dstat-lbl">Deadlines</div></div>
+        </div>
+      </div>
+
+      <!-- Two-column dashboard layout -->
+      <div class="dash-main">
+
+        <!-- Feed column -->
+        <div class="dash-feed-col">
+
+          <div class="feed-col-header">
+            <div>
+              <div class="feed-col-title">Activity Feed</div>
+              <div class="feed-col-meta" id="feedCountMeta">Loading…</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span id="pollCountdown" style="font-size:11px;color:var(--text-3);letter-spacing:.3px"></span>
+              <button onclick="manualRefresh()" title="Refresh now" style="background:none;border:1px solid var(--border);border-radius:8px;padding:5px 8px;cursor:pointer;color:var(--text-2);display:flex;align-items:center;gap:5px;font-size:11px" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
+                <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Refresh
+              </button>
+            </div>
+          </div>
+
+          <!-- search box -->
+          <div class="search-wrap">
+            <input style="font-family:var(--ff-body)" type="text" id="searchInp" placeholder="Search work..." oninput="onSearch(this.value)">
+          </div>
+
+          <div class="chips">
+            <div class="chip active" onclick="setChip('all',this)">All <span class="chip-badge" id="cnt-all">0</span></div>
+            <div class="chip" onclick="setChip('announcement',this)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Announcements
+            </div>
+            <div class="chip" onclick="setChip('assignment',this)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Assignments
+            </div>
+            <div class="chip" onclick="setChip('material',this)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Materials
+            </div>
+          </div>
+
+          <div class="notif-feed" id="notifFeed"></div>
+          <div id="pagination"></div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="dash-sidebar">
+          <div class="sidebar-card">
+            <div class="sc-header">
+              <div class="sc-title">Upcoming Deadlines</div>
+              <div class="sc-badge" id="sc-dl-count">0</div>
+            </div>
+            <div class="mini-dl-list" id="sidebarDlList"></div>
+          </div>
+          <div class="sidebar-card">
+            <div class="sc-header">
+              <div class="sc-title">Your Classes</div>
+              <div class="sc-badge">4</div>
+            </div>
+            <div class="sidebar-cls-list" id="sidebarClsList"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ TAB: CALENDAR ═══ -->
+    <div class="panel" id="p-cal">
+      <div class="cal-header-row">
+        <div>
+          <h1>Deadlines</h1>
+          <p>All due dates across every class in one view</p>
+        </div>
+        <div class="mnav-wrap">
+          <div class="mnav">
+            <div class="mnav-btn" onclick="navMo(-1)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="15,18 9,12 15,6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div class="mnav-label" id="moLabel">February 2026</div>
+            <div class="mnav-btn" onclick="navMo(1)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="9,18 15,12 9,6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          </div>
+          <button class="mnav-add-cal icon-btn-animate" onclick="iconPop(this);exportToGoogleCalendar()" title="Add deadlines to Google Calendar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 14v4M10 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Add to Calendar
+          </button>
+        </div>
+      </div>
+      <div class="cal-card">
+        <div class="dow-row">
+          <div class="dow">Sun</div><div class="dow">Mon</div><div class="dow">Tue</div>
+          <div class="dow">Wed</div><div class="dow">Thu</div><div class="dow">Fri</div><div class="dow">Sat</div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+      <div class="dl-head" id="dlHead">All upcoming deadlines</div>
+      <div class="dl-list" id="dlList"></div>
+    </div>
+
+    <!-- ═══ TAB: HOMEWORK ═══ -->
+    <div class="panel" id="p-hw">
+      <div class="hw-wrap">
+        <div class="hw-header">
+          <div>
+            <h1 class="hw-title">Homework</h1>
+            <p class="hw-sub">Track tasks, export as PDF, share with anyone.</p>
+          </div>
+          <div class="hw-header-actions">
+            <button class="hw-btn hw-btn-export" onclick="hwExportPDF()" title="Export as PDF">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="7 10 12 15 17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              Export PDF
+            </button>
+
+          </div>
+        </div>
+
+        <!-- Add task form -->
+        <div class="hw-form">
+          <div class="hw-form-row">
+            <input class="hw-input" id="hwSubject" placeholder="Subject (e.g. Math, Biology)" maxlength="80"/>
+            <!-- Custom Date+Time Picker Trigger -->
+            <div class="hwdtp-wrap" id="hwDtpWrap">
+              <button type="button" class="hwdtp-trigger hw-input" id="hwDtpTrigger" onclick="hwDtpToggle()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;opacity:.6">
+                  <rect x="3" y="4" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/>
+                  <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                </svg>
+                <span id="hwDtpLabel">Pick deadline…</span>
+                <svg id="hwDtpClear" width="13" height="13" viewBox="0 0 24 24" fill="none" onclick="hwDtpClear(event)" style="display:none;margin-left:auto;flex-shrink:0;opacity:.5;cursor:pointer" class="hwdtp-x">
+                  <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                  <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                </svg>
+              </button>
+              <!-- Hidden value holder -->
+              <input type="hidden" id="hwDate"/>
+              <!-- Dropdown panel -->
+              <div class="hwdtp-panel" id="hwDtpPanel">
+                <!-- Calendar section -->
+                <div class="hwdtp-cal">
+                  <div class="hwdtp-nav">
+                    <button type="button" class="hwdtp-nav-btn" onclick="hwDtpShiftMonth(-1)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="15 18 9 12 15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <span class="hwdtp-month-lbl" id="hwDtpMonthLbl"></span>
+                    <button type="button" class="hwdtp-nav-btn" onclick="hwDtpShiftMonth(1)">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                  <div class="hwdtp-dow-row">
+                    <span>Su</span><span>Mo</span><span>Tu</span><span>We</span><span>Th</span><span>Fr</span><span>Sa</span>
+                  </div>
+                  <div class="hwdtp-days" id="hwDtpDays"></div>
+                </div>
+                <!-- Divider -->
+                <div class="hwdtp-divider"></div>
+                <!-- Time section -->
+                <div class="hwdtp-time-section">
+                  <div class="hwdtp-time-lbl">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    Time
+                  </div>
+                  <div class="hwdtp-time-row">
+                    <div class="hwdtp-time-col">
+                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(1)">▲</button>
+                      <input class="hwdtp-time-val" id="hwDtpHourVal" type="text" inputmode="numeric" maxlength="2" value="23"
+                        onfocus="this.select()"
+                        oninput="hwDtpHourInput(this)"
+                        onblur="hwDtpHourBlur(this)"
+                        onkeydown="hwDtpTimeKey(event,'hour')"/>
+                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(-1)">▼</button>
+                    </div>
+                    <span class="hwdtp-colon">:</span>
+                    <div class="hwdtp-time-col">
+                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(5)">▲</button>
+                      <input class="hwdtp-time-val" id="hwDtpMinVal" type="text" inputmode="numeric" maxlength="2" value="59"
+                        onfocus="this.select()"
+                        oninput="hwDtpMinInput(this)"
+                        onblur="hwDtpMinBlur(this)"
+                        onkeydown="hwDtpTimeKey(event,'min')"/>
+                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(-5)">▼</button>
+                    </div>
+                  </div>
+                </div>
+                <!-- Footer -->
+                <div class="hwdtp-footer">
+                  <button type="button" class="hwdtp-done-btn" onclick="document.querySelectorAll('.hwdtp-day.selected,.hwdtp-day.day-flash').forEach(el=>el.classList.remove('selected','day-flash'));hwDtpConfirm()">Set Deadline</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <textarea class="hw-textarea" id="hwDesc" placeholder="Description — what needs to be done?" rows="3"></textarea>
+          <div class="hw-form-footer">
+            <span class="hw-form-hint">Date &amp; time optional — pick your exact deadline</span>
+            <button class="hw-btn hw-btn-add" onclick="hwAdd()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+              Add Task
+            </button>
+          </div>
+        </div>
+
+        <!-- Task list -->
+        <div class="hw-list" id="hwList">
+          <div class="hw-empty" id="hwEmpty">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" style="opacity:.2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <p>No tasks yet — add one above</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ TAB: SETTINGS ═══ -->
+    <div class="panel" id="p-set">
+      <h1>Settings</h1>
+      <p class="sub">Control your account, notifications, and connected classes</p>
+
+      <div class="sg sg-account">
+        <div class="sg-lbl">Account</div>
+        <div class="prof-row">
+          <div class="prof-ava" id="profAva">S</div>
+          <div class="prof-info">
+            <div class="prof-name" id="profName">Student User</div>
+            <div class="prof-email" id="profEmail" style="display:flex;align-items:center;gap:6px;margin-top:3px;">
+              <img src="data:image/webp;base64,UklGRvYDAABXRUJQVlA4WAoAAAAQAAAALwAAMAAAQUxQSD0CAAABkCzJtmlb89q2bbP1jJ5t27Zt20bP17atZ9s+fGc+rbnW3l8QERMA3Ab+g3ZlP/ii0Wm+PsrfPyLECKR16H/2ngKpqkdXhjlL4DS9Uo382trZzoKM+pfpUKyuvJ+hCI9DP1D8970ufEnFKG1WFE/3uyj1Hn1a9ycodYoPkJPvodQpnkD2LEFOzYuqtGup5U9VrBRPIBsdQvrL04OCbYwNja0Deh9+8p8UT6D3/0H6cjBaH4ihuz8hpngC3akMqY099IGu16MlxRM4p+soeeHAH+QOnI6VSCwOABkOUBMexIMMDc4jWz0e5Bhwn5BqKYshCpayL8hyN7Kr7GkOIYJdcwnbgT737Suhb84/ZGkHcqxCwc1fWJ8SOVaKeqthPQ+Qh0LHeuwtj18a1vMAeeAX1udEeagfsLSD5PEph4U75HF3F6HKnhYzdgxx5FEdK3OwgqXsS+NcjezdAfdYmGopzKaEpRpucI6gniCsn4L1JAz6q1n4MF6QYwGyr5qAQwUBi/yFGG5Ftm4SAEzVETA3TIDRIgXhvh8AOJVSsLGHAY/LLgUSt8K/fb9T8MvhWAOK7eBSpD4O+4/hfhLiq3NDw+xMjUysvTutKFEheTH8372Ahqh9XZt1K6Pi0Q/kzHJgQHwbh+hHyUDs/FAGHwYAuVObZB/HAmdcnkTPhgC3295vUhS1A4GGvYp+iXq9wRXEOkwqVYl4eSQBxNv1PnX7J0n7JmdRhD5Iqu/bb2vanQ9KrfLzw6LjUxOtgBcAVlA4IJIBAACQCwCdASowADEAPoE0lUelIyIhN/cdUKAQCWwAnTL/+S+3fkB+QHyi1R+3fgnKL+hDlm97vqb8RrcPftN60vor82b/AdZn6AHScgQB9I/EgAtcbST+7cnXXVOLaOX0w5/uxm7vgAD+UivGRn2Kiy7nnRJ6Al1yTkg8vDQlaZQ8rXXwPvqqPiKnTTbNo6+3hAokP5WRy0UAvc8yepd+yrR01uaTikpMU2A/9vst3bmWubmaxLoEyNADe46yfzwuQTXgFuf+dhsCw6LNWYG+FOocmuudXp51oLAvTBSqb+XiIGv/p1P/+PQfVUL72hqk+ik6bEg7H+D4/wQBA8lRJ0iaiwM1IaqwtVqyWk2RiMFMbLeHPh4TAzNe0XJgUis5XwLHTQJuTO65q/6Ox8WIa0H05vfE6Ix21yKFNWWzaAX6NT9znrWbVdPOnS1TtbYnHxZ/2LqiQuyk2//Cb4jctfI9pCL/8k49QTOaRT6m1BU8Bq2uo7/h0f/8gt9Dsv0Oy/f+OB+v+TcAf/xwP1/ybgAAAAA=" width="12" height="12" style="flex-shrink:0" alt="Google">
+              <span id="profEmailText">student@example.com</span>
+            </div>
+          </div>
+          <button class="disc-btn" onclick="disconnect()">Disconnect</button>
+        </div>
+      </div>
+
+      <div class="sg sg-notify">
+        <div class="sg-lbl">Notify me about</div>
+        <div class="sg-body">
+          <div class="srow"><div class="srow-info"><h4>Stream Posts</h4><p>Class stream</p></div><label class="tog"><input type="checkbox" id="set_stream" onchange="saveSetting('stream',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Announcements</h4><p>Teacher announcements</p></div><label class="tog"><input type="checkbox" id="set_announcements" onchange="saveSetting('announcements',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Assignments</h4><p>New work posted</p></div><label class="tog"><input type="checkbox" id="set_assignments" onchange="saveSetting('assignments',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Grades</h4><p>When graded</p></div><label class="tog"><input type="checkbox" id="set_grades" onchange="saveSetting('grades',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow"><div class="srow-info"><h4>Materials</h4><p>Study resources</p></div><label class="tog"><input type="checkbox" id="set_materials" onchange="saveSetting('materials',this.checked)"><div class="tog-track"></div></label></div>
+        </div>
+      </div>
+
+      <div class="sg sg-delivery">
+        <div class="sg-lbl">Delivery</div>
+        <div class="sg-body">
+          <div class="srow"><div class="srow-info"><h4>Push Notifications</h4><p>Alerts when tab closed</p></div><label class="tog"><input type="checkbox" id="set_push" onchange="reqPush(this)"><div class="tog-track"></div></label></div>
+          <div class="srow srow-quiet-inline" id="quietHoursRow">
+            <div class="srow-info">
+              <h4>Quiet Hours</h4>
+              <p>Pause notifications during set times</p>
+            </div>
+            <div class="srow-quiet">
+              <label class="tog"><input type="checkbox" id="set_quietHours" onchange="saveSetting('quietHours',this.checked);qtpToggleVisibility()"><div class="tog-track"></div></label>
+              <!-- hidden native inputs kept for saveQuietTime() compatibility -->
+              <input type="time" id="quietStart" style="display:none" onchange="saveQuietTime()">
+              <input type="time" id="quietEnd" style="display:none" onchange="saveQuietTime()">
+              <!-- Custom time pickers -->
+              <div class="quiet-times" id="qtpTimes">
+                <!-- Start picker -->
+                <div class="qtp-wrap" id="qtpStartWrap">
+                  <div class="qtp-col">
+                    <button class="qtp-arrow" onclick="qtpStep('start','h',1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="qtp-val" id="qtp-start-h">22</div>
+                    <button class="qtp-arrow" onclick="qtpStep('start','h',-1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                  <div class="qtp-colon">:</div>
+                  <div class="qtp-col">
+                    <button class="qtp-arrow" onclick="qtpStep('start','m',1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="qtp-val" id="qtp-start-m">00</div>
+                    <button class="qtp-arrow" onclick="qtpStep('start','m',-1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+                <!-- separator arrow -->
+                <div class="quiet-arrow-sep">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5l7 7-7 7" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </div>
+                <!-- End picker -->
+                <div class="qtp-wrap" id="qtpEndWrap">
+                  <div class="qtp-col">
+                    <button class="qtp-arrow" onclick="qtpStep('end','h',1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="qtp-val" id="qtp-end-h">07</div>
+                    <button class="qtp-arrow" onclick="qtpStep('end','h',-1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                  <div class="qtp-colon">:</div>
+                  <div class="qtp-col">
+                    <button class="qtp-arrow" onclick="qtpStep('end','m',1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M18 15l-6-6-6 6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <div class="qtp-val" id="qtp-end-m">00</div>
+                    <button class="qtp-arrow" onclick="qtpStep('end','m',-1)" tabindex="-1">
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- 24h timeline bar — shown below row when quiet hours enabled -->
+          <div class="quiet-timeline-row" id="quietTimeline">
+            <div class="qtr-labels">
+              <span class="qtr-label">0</span>
+              <span class="qtr-label">6</span>
+              <span class="qtr-label">12</span>
+              <span class="qtr-label">18</span>
+              <span class="qtr-label">24</span>
+            </div>
+            <div class="qtr-bar" id="qtrBar">
+              <div class="qtr-fill" id="qtrFill"></div>
+              <div class="qtr-fill" id="qtrFill2"></div>
+              <div class="qtr-thumb" id="qtrThumbStart" title="Start time"></div>
+              <div class="qtr-thumb qtr-end-thumb" id="qtrThumbEnd" title="End time"></div>
+            </div>
+            <div class="qtr-time-display">
+              <span class="qtr-td-pill qtr-td-start" id="qtrLabelStart">22:00</span>
+              <span class="qtr-td-pill qtr-td-end" id="qtrLabelEnd">07:00</span>
+            </div>
+          </div>
+          <div class="srow"><div class="srow-info"><h4>Sound Alerts</h4><p>Sound on new alert</p></div><label class="tog"><input type="checkbox" id="set_sound" onchange="saveSetting('sound',this.checked)"><div class="tog-track"></div></label></div>
+        </div>
+      </div>
+
+      <div class="sg sg-gcal">
+        <div class="sg-lbl">Google Calendar</div>
+        <div class="sg-body">
+          <div class="srow">
+            <div class="srow-info">
+              <h4>Sync Deadlines &amp; Homework</h4>
+              <p>Auto-add assignment due dates and homework deadlines to your Google Calendar</p>
+            </div>
+            <label class="tog tog-disabled"><input type="checkbox" id="set_gcalSync" onchange="gcalToggle(this)" disabled><div class="tog-track"></div></label>
+          </div>
+          <div class="srow" style="flex-direction:column;align-items:flex-start;gap:10px;border-top:1px solid var(--border);padding-top:14px">
+            <p id="gcalStatusText" style="font-size:12px;color:var(--text-3);margin:0">Sync disabled</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button id="gcalSyncBtn" class="btn-sm" onclick="gcalSyncAll()" style="display:none;align-items:center;gap:6px;font-size:12px">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Sync now
+              </button>
+              <button id="gcalUnsyncBtn" class="btn-sm" onclick="gcalUnsyncAll()" style="display:none;align-items:center;gap:6px;font-size:12px;color:var(--rose);border-color:var(--rose)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Remove all events
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sg sg-classes">
+        <div class="sg-lbl">Connected Classes</div>
+        <div class="sg-body" id="clsBody"></div>
+      </div>
+    </div>
+
+    <!-- ═══ TAB: FEEDBACK ═══ -->
+    <div class="panel" id="p-fbk">
+      <div class="fbk-wrapper" style="max-width: 600px; margin-top: 32px;">
+        <div class="fbk-card" style="padding: 48px 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); text-align: center;">
+          <div style="width: 64px; height: 64px; background: var(--violet-icon-bg); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="var(--violet)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h3 style="margin-bottom: 12px; font-size: 20px; color: var(--text); font-weight: 600;">Help Us Improve</h3>
+          <p style="font-size: 15px; color: var(--text-2); margin-bottom: 32px; max-width: 400px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+            Got a feature request, found a bug, or just want to share your thoughts? Let us know through our official feedback form.
+          </p>
+          <button class="btn-hero btn-hero-primary" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfAMPxrACJjnqb68kdvO_bSTBmY9otYxZiNqrri_uRNBFzIMQ/formResponse');" style="font-size: 15px; padding: 14px 28px; border-radius: 12px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="margin-right: 8px;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Open Feedback Form
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
 
       <!-- Sheet (detail) -->
 <div class="sheet-veil" id="sheetVeil" onclick="closeSheet(event)">
-  <div class="sheet">
+  <div class="sheet" style="position:relative;">
     <div class="sheet-grip"></div>
+    <button class="sheet-close" onclick="closeSheet()" aria-label="Close" style="position: absolute; top: 16px; right: 16px; z-index: 100;">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
     <div class="sheet-top">
       <div class="sheet-eyebrow" id="shEyebrow"></div>
       <div class="sheet-h" id="shTitle"></div>
@@ -142,13 +580,21 @@
     </div>
     <div class="sheet-content">
       <div class="sheet-body-text" id="shText"></div>
-      <div class="sheet-actions">
-        <a href="https://classroom.google.com" target="_blank" class="sa-primary">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          Open in Classroom
+      <div class="sheet-actions" style="flex-wrap: nowrap; gap: 6px; justify-content: flex-start;">
+        <!-- Hidden file input for submission -->
+        <input type="file" id="assignmentFileInput" style="display:none" onchange="handleSubmissionUpload(event)">
+        
+        <!-- Submit work button (hidden by default, shown by JS when appropriate) -->
+        <button class="sa-primary" id="submitWorkBtn" style="display:none; background: linear-gradient(135deg, #3B82F6, #2563EB); border: none; color: #fff; padding: 8px 12px; border-radius: var(--r-pill); font-weight: 600; font-size: 13px; letter-spacing: 0.3px; box-shadow: 0 4px 14px rgba(37,99,235,0.35); transition: all 0.2s ease; cursor: pointer; white-space: nowrap; flex-shrink: 1;" onclick="showSubmitConfirm()" onmouseover="this.style.boxShadow='0 6px 20px rgba(37,99,235,0.5)';" onmouseout="this.style.boxShadow='0 4px 14px rgba(37,99,235,0.35)';">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="margin-right: 5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline><line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></svg>
+          Submit
+        </button>
+
+        <a href="https://classroom.google.com" target="_blank" class="sa-primary" style="white-space: nowrap; flex-shrink: 1; padding: 8px 12px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="margin-right: 5px;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Classroom
         </a>
-        <button class="sa-ghost" id="mrBtn" onclick="toggleRead()">Mark as read</button>
-        <button class="sa-ghost" onclick="closeSheet()">Close</button>
+        <button class="sa-ghost" id="mrBtn" onclick="toggleRead()" style="white-space: nowrap; flex-shrink: 1; padding: 8px 12px;">Mark as read</button>
       </div>
     </div>
   </div>
@@ -186,6 +632,43 @@
   <span id="tsRateBannerText">Slow down</span>
 </div>
 
+<!-- Unified Submit Modal -->
+<div id="submitUnifiedModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.55); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); align-items:center; justify-content:center; opacity:0; transition:opacity 0.25s ease;">
+  <div class="submit-modal-content" style="position:relative; background: var(--bg-2); border: 1px solid var(--rim); border-radius: 20px; padding: 32px; max-width: 420px; width: 90%; box-shadow: 0 24px 80px rgba(0,0,0,0.5); text-align: center; transform:scale(0.9) translateY(20px); transition:transform 0.3s cubic-bezier(.16,1,.3,1), opacity 0.25s ease; opacity:0;">
+    <button class="sheet-close-btn" onclick="closeSubmitUnifiedModal()" style="position: absolute; top: 16px; right: 16px; background:none; border:none; color:var(--text-2); cursor:pointer; padding: 4px; display:flex; align-items:center; justify-content:center; transition: color 0.2s, transform 0.2s; border-radius: 50%;" onmouseover="this.style.color='var(--teal)'; this.style.transform='rotate(90deg) scale(1.1)'; this.style.boxShadow='0 0 12px rgba(0,255,217,0.4)';" onmouseout="this.style.color='var(--text-2)'; this.style.transform='none'; this.style.boxShadow='none';">
+       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <h3 style="font-size: 18px; font-weight: 650; color: var(--text); margin-bottom: 24px;">Submit Work</h3>
+    
+    <!-- Drag & Drop Zone -->
+    <div id="dropZone" onclick="document.getElementById('assignmentFileInput').click()" style="border: 2px dashed var(--rim); border-radius: 12px; padding: 32px 16px; cursor: pointer; transition: all 0.2s ease; background: rgba(0,0,0,0.02); margin-bottom: 20px;" onmouseover="if(!this.style.background.includes('rgba(0, 255, 217')) { this.style.borderColor='var(--text-3)'; }" onmouseout="if(!this.style.background.includes('rgba(0, 255, 217')) { this.style.borderColor='var(--rim)'; }">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" style="margin: 0 auto 12px auto; color: var(--text-3);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div id="dropZoneText" style="font-size: 14px; font-weight: 500; color: var(--text-2);">Click to browse or drag file here</div>
+      <div id="dropZoneFile" style="font-size: 13px; font-weight: 600; color: var(--teal); margin-top: 8px; display: none;"></div>
+    </div>
+    
+    <div style="display: flex; align-items: center; margin-bottom: 20px;">
+      <div style="flex: 1; height: 1px; background: var(--rim-2);"></div>
+      <div style="margin: 0 12px; font-size: 12px; color: var(--text-3); font-weight: 600; text-transform: uppercase;">or</div>
+      <div style="flex: 1; height: 1px; background: var(--rim-2);"></div>
+    </div>
+    
+    <!-- Link Input -->
+    <div style="text-align: left; margin-bottom: 24px;">
+      <label style="display: block; font-size: 13px; color: var(--text-2); font-weight: 600; margin-bottom: 8px;">Attach Link</label>
+      <input type="url" id="submitLinkInput" placeholder="https://..." style="width: 100%; box-sizing: border-box; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--rim); background: transparent; color: var(--text); font-size: 14px; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--rim)'" oninput="handleLinkInput()">
+    </div>
+    
+    <!-- Submit Button -->
+    <button id="unifiedSubmitBtn" onclick="processUnifiedSubmit()" style="width: 100%; padding: 12px; border-radius: 12px; border: none; background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.35); transition: all 0.15s; opacity: 0.5; pointer-events: none;" onmouseover="this.style.boxShadow='0 6px 20px rgba(37,99,235,0.5)'" onmouseout="this.style.boxShadow='0 4px 14px rgba(37,99,235,0.35)'">Submit Assignment</button>
+  </div>
+</div>
+
+<script src="script-app-feed.js"></script>
+<script src="script-app-calendar.js"></script>
+<script src="script-app-homework.js"></script>
+<script src="script-app-settings.js"></script>
+<script src="script-app-feedback.js"></script>
 <script src="script-app.js"></script>
 </body>
 </html>

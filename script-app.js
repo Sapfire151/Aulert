@@ -13,17 +13,19 @@
 /* ════════════════════════════════════════════
    CONFIGURATION
 ═════════════════════════════════════════════════════ */
-const CLIENT_ID = '370399752035-cukpu5t8o2129gfjmei17stptbqt24mh.apps.googleusercontent.com';
+const CLIENT_ID = '464032446404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com';
 
 const SCOPES = [
   'https://www.googleapis.com/auth/classroom.courses.readonly',
   'https://www.googleapis.com/auth/classroom.announcements.readonly',
   'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
   'https://www.googleapis.com/auth/classroom.student-submissions.me.readonly',
+  'https://www.googleapis.com/auth/classroom.student-submissions.students',
   'https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly',
   'https://www.googleapis.com/auth/userinfo.profile',
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/calendar.events',
+  'https://www.googleapis.com/auth/drive.file',
 ].join(' ');
 
 const POLL_MS        = 1 * 60 * 1000;
@@ -89,7 +91,7 @@ window.addEventListener('load', async () => {
   const saved = sessionStorage.getItem('aul_token');
   if (saved) {
     S.token = saved;
-    await loadTabs();
+    // await loadTabs(); // Removed to prevent duplicating hardcoded tabs
     showLoadingState();
     loadEverything()
       .then(() => launchApp())
@@ -169,6 +171,38 @@ function hideLoadingApp() { window.location.href = 'index.html'; }
 ════════════════════════════════════════════ */
 
 async function classroomApi(path) {
+  if (S.token === 'preview_bypass') {
+    if (path.startsWith('courses?')) {
+      return {
+        courses: [
+          { id: '1', name: 'Preview Course 1', section: 'Morning', alternateLink: '#' },
+          { id: '2', name: 'Preview Course 2', section: 'Afternoon', alternateLink: '#' }
+        ]
+      };
+    } else if (path.includes('/announcements?')) {
+      return {
+        announcements: [
+          { id: 'a1', text: 'Welcome to Preview Mode!', creationTime: new Date().toISOString(), alternateLink: '#' }
+        ]
+      };
+    } else if (path.includes('/courseWork?')) {
+      return {
+        courseWork: [
+          { id: 'cw1', title: 'Preview Assignment', description: 'This is a mock assignment.', creationTime: new Date().toISOString(), updateTime: new Date().toISOString(), alternateLink: '#', state: 'PUBLISHED' }
+        ]
+      };
+    } else if (path.includes('/courseWorkMaterials?')) {
+      return { courseWorkMaterial: [] };
+    } else if (path.includes('/studentSubmissions?')) {
+      return { 
+        studentSubmissions: [
+          { id: 'sub1', courseWorkId: 'cw1', state: 'CREATED' }
+        ] 
+      };
+    }
+    return {};
+  }
+
   const res = await fetch(`https://classroom.googleapis.com/v1/${path}`, {
     headers: { Authorization: `Bearer ${S.token}` },
   });
@@ -185,6 +219,9 @@ async function classroomApi(path) {
 }
 
 async function fetchUserInfo() {
+  if (S.token === 'preview_bypass') {
+    return { id: 'preview-id', name: 'Preview User', email: 'preview@example.com' };
+  }
   const res = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
     headers: { Authorization: `Bearer ${S.token}` },
   });
@@ -316,15 +353,17 @@ async function fetchCourse(course) {
   ]);
 
   const turnedInIds = new Set();
+  const submissionIds = {};
   if (subs.status === 'fulfilled' && subs.value.studentSubmissions) {
     subs.value.studentSubmissions.forEach(s => {
       if (s.state === 'TURNED_IN' || s.state === 'RETURNED') turnedInIds.add(s.courseWorkId);
+      submissionIds[s.courseWorkId] = s.id;
     });
   }
 
   if (ann.status === 'fulfilled') {
     (ann.value.announcements || []).forEach(a => {
-      const firstLine = (a.text || '').split('\n').find(l => l.trim()) || 'New Announcement';
+      const firstLine = (a.text || '').split('\r\n').find(l => l.trim()) || 'New Announcement';
       notifs.push({
         id:        `ann-${a.id}`,
         type:      'announcement',
@@ -343,17 +382,19 @@ async function fetchCourse(course) {
     (cw.value.courseWork || []).forEach(w => {
       if (turnedInIds.has(w.id)) return;
       const obj = {
-        id:        `cw-${w.id}`,
-        type:      'assignment',
-        courseId:  course.id,
-        title:     w.title || 'New Assignment',
-        body:      w.description || `Posted in ${course.name}`,
-        createdAt: w.creationTime,
-        updatedAt: w.updateTime || w.creationTime,
-        time:      relTime(w.creationTime),
-        read:      S.readIds.has(`cw-${w.id}`),
-        link:      w.alternateLink || course.link,
-        state:     w.state || '',
+        id:           `cw-${w.id}`,
+        type:         'assignment',
+        courseId:     course.id,
+        courseWorkId: w.id,
+        submissionId: submissionIds[w.id],
+        title:        w.title || 'New Assignment',
+        body:         w.description || `Posted in ${course.name}`,
+        createdAt:    w.creationTime,
+        updatedAt:    w.updateTime || w.creationTime,
+        time:         relTime(w.creationTime),
+        read:         S.readIds.has(`cw-${w.id}`),
+        link:         w.alternateLink || course.link,
+        state:        w.state || '',
       };
       if (w.dueDate) {
         const { year, month, day } = w.dueDate;
@@ -608,6 +649,19 @@ function openSheet(id) {
   const link = document.querySelector('.sa-primary');
   if (link) link.href = n.link || 'https://classroom.google.com';
 
+  const submitBtn = document.getElementById('submitWorkBtn');
+  if (submitBtn) {
+    // Only show if it's an assignment and we have the necessary IDs
+    if (n.type === 'assignment' && n.courseWorkId && n.submissionId) {
+      submitBtn.style.display = 'flex';
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+      submitBtn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="margin-right: 6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline><line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></svg> Submit Work`;
+    } else {
+      submitBtn.style.display = 'none';
+    }
+  }
+
   if (!n.read) {
     n.read = true;
     S.readIds.add(n.id);
@@ -691,3 +745,197 @@ function closeToast() { document.getElementById('toast').classList.remove('in');
     r.addEventListener('animationend', () => r.remove());
   });
 })();
+
+let _pendingFile = null;
+
+function showSubmitConfirm() {
+  const modal = document.getElementById('submitUnifiedModal');
+  // Reset state
+  _pendingFile = null;
+  const dropZoneText = document.getElementById('dropZoneText');
+  const dropZoneFile = document.getElementById('dropZoneFile');
+  const linkInput = document.getElementById('submitLinkInput');
+  const submitBtn = document.getElementById('unifiedSubmitBtn');
+  if (dropZoneText) dropZoneText.textContent = 'Click to browse or drag file here';
+  if (dropZoneFile) { dropZoneFile.style.display = 'none'; dropZoneFile.textContent = ''; }
+  if (linkInput) linkInput.value = '';
+  if (submitBtn) { submitBtn.style.opacity = '0.5'; submitBtn.style.pointerEvents = 'none'; }
+
+  // Show with animation
+  modal.style.display = 'flex';
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      modal.style.opacity = '1';
+      const content = modal.querySelector('.submit-modal-content');
+      if (content) { content.style.transform = 'scale(1) translateY(0)'; content.style.opacity = '1'; }
+    });
+  });
+}
+
+function closeSubmitUnifiedModal() {
+  const modal = document.getElementById('submitUnifiedModal');
+  const content = modal.querySelector('.submit-modal-content');
+  modal.style.opacity = '0';
+  if (content) { content.style.transform = 'scale(0.9) translateY(20px)'; content.style.opacity = '0'; }
+  setTimeout(() => { modal.style.display = 'none'; }, 300);
+}
+
+function updateSubmitBtn() {
+  const btn = document.getElementById('unifiedSubmitBtn');
+  const linkInput = document.getElementById('submitLinkInput');
+  const hasFile = !!_pendingFile;
+  const hasLink = linkInput && linkInput.value.trim().length > 0;
+  if (hasFile || hasLink) {
+    btn.style.opacity = '1';
+    btn.style.pointerEvents = 'auto';
+  } else {
+    btn.style.opacity = '0.5';
+    btn.style.pointerEvents = 'none';
+  }
+}
+
+function handleLinkInput() {
+  updateSubmitBtn();
+}
+
+// Handle file input from browse button
+function handleSubmissionUpload(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  event.target.value = '';
+  setDroppedFile(file);
+}
+
+function setDroppedFile(file) {
+  _pendingFile = file;
+  const dropZoneText = document.getElementById('dropZoneText');
+  const dropZoneFile = document.getElementById('dropZoneFile');
+  const dropZone = document.getElementById('dropZone');
+  if (dropZoneText) dropZoneText.textContent = 'File selected:';
+  if (dropZoneFile) {
+    dropZoneFile.textContent = '\ud83d\udcce ' + file.name;
+    dropZoneFile.style.display = 'block';
+  }
+  if (dropZone) {
+    dropZone.style.borderColor = 'var(--teal)';
+    dropZone.style.background = 'rgba(0,255,217,0.05)';
+  }
+  // Clear link input when file is chosen
+  const linkInput = document.getElementById('submitLinkInput');
+  if (linkInput) linkInput.value = '';
+  updateSubmitBtn();
+}
+
+// Drag & drop setup
+(function() {
+  document.addEventListener('DOMContentLoaded', () => {
+    const dropZone = document.getElementById('dropZone');
+    if (!dropZone) return;
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      dropZone.style.borderColor = 'var(--teal)';
+      dropZone.style.background = 'rgba(0,255,217,0.08)';
+    });
+
+    dropZone.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!_pendingFile) {
+        dropZone.style.borderColor = 'var(--rim)';
+        dropZone.style.background = 'rgba(0,0,0,0.02)';
+      }
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const file = e.dataTransfer.files[0];
+      if (file) setDroppedFile(file);
+    });
+  });
+})();
+
+async function processUnifiedSubmit() {
+  const n = S.notifs.find(x => x.id === S.openId);
+  if (!n || n.type !== 'assignment' || !n.courseWorkId || !n.submissionId) return;
+
+  const linkInput = document.getElementById('submitLinkInput');
+  const linkUrl = linkInput ? linkInput.value.trim() : '';
+  const file = _pendingFile;
+
+  if (!file && !linkUrl) return;
+
+  closeSubmitUnifiedModal();
+
+  const btn = document.getElementById('submitWorkBtn');
+  const origHtml = btn.innerHTML;
+  btn.innerHTML = 'Submitting\u2026';
+  btn.disabled = true;
+  btn.style.opacity = '0.7';
+
+  try {
+    if (S.token === 'preview_bypass') {
+      await new Promise(r => setTimeout(r, 1500));
+      showToast('Assignment Submitted!', file ? `Attached ${file.name} successfully.` : 'Link attached successfully.');
+    } else if (file) {
+      // Upload file to Drive then attach
+      const metadata = { name: file.name };
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+      form.append('file', file);
+
+      const driveRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${S.token}` },
+        body: form
+      });
+      const driveData = await driveRes.json();
+      if (driveData.error) throw new Error(driveData.error.message);
+
+      const attachRes = await fetch(`https://classroom.googleapis.com/v1/courses/${n.courseId}/courseWork/${n.courseWorkId}/studentSubmissions/${n.submissionId}:modifyAttachments`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${S.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ addAttachments: [{ driveFile: { id: driveData.id } }] })
+      });
+      if (!attachRes.ok) throw new Error('Failed to attach file');
+
+      const turnInRes = await fetch(`https://classroom.googleapis.com/v1/courses/${n.courseId}/courseWork/${n.courseWorkId}/studentSubmissions/${n.submissionId}:turnIn`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${S.token}` }
+      });
+      if (!turnInRes.ok) throw new Error('Failed to turn in assignment');
+
+      showToast('Assignment Submitted!', `Turned in ${file.name} successfully.`);
+    } else {
+      // Attach link
+      const attachRes = await fetch(`https://classroom.googleapis.com/v1/courses/${n.courseId}/courseWork/${n.courseWorkId}/studentSubmissions/${n.submissionId}:modifyAttachments`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${S.token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ addAttachments: [{ link: { url: linkUrl } }] })
+      });
+      if (!attachRes.ok) throw new Error('Failed to attach link');
+
+      const turnInRes = await fetch(`https://classroom.googleapis.com/v1/courses/${n.courseId}/courseWork/${n.courseWorkId}/studentSubmissions/${n.submissionId}:turnIn`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${S.token}` }
+      });
+      if (!turnInRes.ok) throw new Error('Failed to turn in assignment');
+
+      showToast('Assignment Submitted!', 'Turned in link successfully.');
+    }
+
+    loadEverything();
+    closeSheet();
+
+  } catch (err) {
+    console.error('Submission failed:', err);
+    showToast('Submission Failed', err.message);
+    btn.innerHTML = origHtml;
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  }
+
+  _pendingFile = null;
+}

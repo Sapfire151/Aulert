@@ -167,6 +167,12 @@
             width="20" height="20" style="flex-shrink:0;object-fit:contain" alt="Google" />
           Login Google Classroom
         </button>
+        <!-- Preview Mode Button (3rd button) -->
+        <button class="btn-hero"
+          onclick="sessionStorage.setItem('aul_token', 'preview_bypass'); window.location.href='app.html';"
+          style="background: var(--surface); color: var(--text); border: 1px solid var(--border);">
+          Preview Mode
+        </button>
       </div>
       <div class="cta-fine">Read-only access · Disconnect anytime</div>
     </div>
@@ -350,8 +356,10 @@
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
                       <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="var(--violet)"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                      <line x1="9" y1="10" x2="15" y2="10" stroke="var(--violet)" stroke-width="1.5" stroke-linecap="round" />
-                      <line x1="9" y1="13" x2="13" y2="13" stroke="var(--violet)" stroke-width="1.5" stroke-linecap="round" />
+                      <line x1="9" y1="10" x2="15" y2="10" stroke="var(--violet)" stroke-width="1.5"
+                        stroke-linecap="round" />
+                      <line x1="9" y1="13" x2="13" y2="13" stroke="var(--violet)" stroke-width="1.5"
+                        stroke-linecap="round" />
                     </svg>
                   </div>
                   <div class="pn-body">
@@ -364,11 +372,12 @@
                 <div class="phone-notif" id="pn-3">
                   <div class="pn-icon" style="background:var(--amber-icon-bg)">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
-                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="var(--amber)" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round" />
+                      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="var(--amber)"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                       <polyline points="14,2 14,8 20,8" stroke="var(--amber)" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round" />
-                      <line x1="9" y1="13" x2="15" y2="13" stroke="var(--amber)" stroke-width="1.5" stroke-linecap="round" />
+                      <line x1="9" y1="13" x2="15" y2="13" stroke="var(--amber)" stroke-width="1.5"
+                        stroke-linecap="round" />
                     </svg>
                   </div>
                   <div class="pn-body">
@@ -381,8 +390,8 @@
                 <div class="phone-notif" id="pn-4">
                   <div class="pn-icon" style="background:var(--rose-icon-bg)">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none">
-                      <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="var(--rose)" stroke-width="2" stroke-linecap="round"
-                        stroke-linejoin="round" />
+                      <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="var(--rose)" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round" />
                       <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="var(--rose)"
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>

@@ -1019,6 +1019,24 @@ async function processUnifiedSubmit() {
 
   } catch (err) {
     console.error('Submission failed:', err);
+    if (err.message && err.message.includes('@ProjectPermissionDenied')) {
+      const content = document.querySelector('.submit-modal-content');
+      if (content && n.alternateLink) {
+        content.innerHTML = `
+          <h3 style="font-size: 18px; font-weight: 650; color: var(--rose); margin-bottom: 16px;">API Restriction</h3>
+          <p style="font-size: 14px; color: var(--text-2); margin-bottom: 24px; line-height: 1.5;">
+            Google Classroom prohibits third-party apps from turning in assignments created by teachers. <br><br>
+            Your files were uploaded to your Google Drive! Please open the assignment in Classroom to attach them from your "Recent" files and turn it in.
+          </p>
+          <div style="display: flex; gap: 12px; justify-content: center;">
+            <button onclick="closeSubmitUnifiedModal(); setTimeout(() => loadEverything(), 300);" style="padding: 10px 16px; border-radius: 10px; border: 1px solid var(--rim); background: transparent; color: var(--text); font-weight: 600; cursor: pointer;">Cancel</button>
+            <a href="${n.alternateLink}" target="_blank" onclick="closeSubmitUnifiedModal(); setTimeout(() => loadEverything(), 300);" style="text-decoration: none; padding: 10px 16px; border-radius: 10px; border: none; background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.35);">Open in Classroom</a>
+          </div>
+        `;
+        return; // Leave modal open with the new content
+      }
+    }
+
     showToast('Submission Failed', err.message);
     if (modalBtn) {
       modalBtn.innerHTML = origModalHtml;

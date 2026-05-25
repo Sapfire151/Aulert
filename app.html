@@ -582,7 +582,7 @@
       <div class="sheet-body-text" id="shText"></div>
       <div class="sheet-actions" style="flex-wrap: nowrap; gap: 6px; justify-content: flex-start;">
         <!-- Hidden file input for submission -->
-        <input type="file" id="assignmentFileInput" style="display:none" onchange="handleSubmissionUpload(event)">
+        <input type="file" id="assignmentFileInput" style="display:none" multiple onchange="handleSubmissionUpload(event)">
         
         <!-- Submit work button (hidden by default, shown by JS when appropriate) -->
         <button class="sa-primary" id="submitWorkBtn" style="display:none; background: linear-gradient(135deg, #3B82F6, #2563EB); border: none; color: #fff; padding: 8px 12px; border-radius: var(--r-pill); font-weight: 600; font-size: 13px; letter-spacing: 0.3px; box-shadow: 0 4px 14px rgba(37,99,235,0.35); transition: all 0.2s ease; cursor: pointer; white-space: nowrap; flex-shrink: 1;" onclick="showSubmitConfirm()" onmouseover="this.style.boxShadow='0 6px 20px rgba(37,99,235,0.5)';" onmouseout="this.style.boxShadow='0 4px 14px rgba(37,99,235,0.35)';">
@@ -644,8 +644,8 @@
     <div id="dropZone" onclick="document.getElementById('assignmentFileInput').click()" style="border: 2px dashed var(--rim); border-radius: 12px; padding: 32px 16px; cursor: pointer; transition: all 0.2s ease; background: rgba(0,0,0,0.02); margin-bottom: 20px;" onmouseover="if(!this.style.background.includes('rgba(0, 255, 217')) { this.style.borderColor='var(--text-3)'; }" onmouseout="if(!this.style.background.includes('rgba(0, 255, 217')) { this.style.borderColor='var(--rim)'; }">
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none" style="margin: 0 auto 12px auto; color: var(--text-3);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <div id="dropZoneText" style="font-size: 14px; font-weight: 500; color: var(--text-2);">Click to browse or drag file here</div>
-      <div id="dropZoneFile" style="font-size: 13px; font-weight: 600; color: var(--teal); margin-top: 8px; display: none;"></div>
     </div>
+    <div id="fileListContainer" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; text-align: left;"></div>
     
     <div style="display: flex; align-items: center; margin-bottom: 20px;">
       <div style="flex: 1; height: 1px; background: var(--rim-2);"></div>

@@ -746,20 +746,22 @@ function closeToast() { document.getElementById('toast').classList.remove('in');
   });
 })();
 
-let _pendingFile = null;
+let _pendingFiles = [];
 
 function showSubmitConfirm() {
   const modal = document.getElementById('submitUnifiedModal');
   // Reset state
-  _pendingFile = null;
+  _pendingFiles = [];
   const dropZoneText = document.getElementById('dropZoneText');
-  const dropZoneFile = document.getElementById('dropZoneFile');
+  const fileList = document.getElementById('fileListContainer');
   const linkInput = document.getElementById('submitLinkInput');
   const submitBtn = document.getElementById('unifiedSubmitBtn');
-  if (dropZoneText) dropZoneText.textContent = 'Click to browse or drag file here';
-  if (dropZoneFile) { dropZoneFile.style.display = 'none'; dropZoneFile.textContent = ''; }
+  const dropZone = document.getElementById('dropZone');
+  if (dropZoneText) dropZoneText.textContent = 'Click to browse or drag files here';
+  if (fileList) fileList.innerHTML = '';
   if (linkInput) linkInput.value = '';
   if (submitBtn) { submitBtn.style.opacity = '0.5'; submitBtn.style.pointerEvents = 'none'; }
+  if (dropZone) { dropZone.style.borderColor = 'var(--rim)'; dropZone.style.background = 'rgba(0,0,0,0.02)'; }
 
   // Show with animation
   modal.style.display = 'flex';
@@ -783,9 +785,9 @@ function closeSubmitUnifiedModal() {
 function updateSubmitBtn() {
   const btn = document.getElementById('unifiedSubmitBtn');
   const linkInput = document.getElementById('submitLinkInput');
-  const hasFile = !!_pendingFile;
+  const hasFiles = _pendingFiles.length > 0;
   const hasLink = linkInput && linkInput.value.trim().length > 0;
-  if (hasFile || hasLink) {
+  if (hasFiles || hasLink) {
     btn.style.opacity = '1';
     btn.style.pointerEvents = 'auto';
   } else {
@@ -798,38 +800,103 @@ function handleLinkInput() {
   updateSubmitBtn();
 }
 
-// Handle file input from browse button
+// Handle file input from browse button (supports multiple)
 function handleSubmissionUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+  const files = Array.from(event.target.files);
+  if (!files.length) return;
   event.target.value = '';
-  setDroppedFile(file);
+  files.forEach(f => addPendingFile(f));
 }
 
-function setDroppedFile(file) {
-  _pendingFile = file;
-  const dropZoneText = document.getElementById('dropZoneText');
-  const dropZoneFile = document.getElementById('dropZoneFile');
-  const dropZone = document.getElementById('dropZone');
-  if (dropZoneText) dropZoneText.textContent = 'File selected:';
-  if (dropZoneFile) {
-    dropZoneFile.textContent = '\ud83d\udcce ' + file.name;
-    dropZoneFile.style.display = 'block';
+function addPendingFile(file) {
+  if (_pendingFiles.some(f => f.name === file.name && f.size === file.size)) return;
+  _pendingFiles.push(file);
+  renderFileList();
+  updateSubmitBtn();
+}
+
+function removePendingFile(index) {
+  _pendingFiles.splice(index, 1);
+  renderFileList();
+  updateSubmitBtn();
+  if (_pendingFiles.length === 0) {
+    const dropZone = document.getElementById('dropZone');
+    const dropZoneText = document.getElementById('dropZoneText');
+    if (dropZone) { dropZone.style.borderColor = 'var(--rim)'; dropZone.style.background = 'rgba(0,0,0,0.02)'; }
+    if (dropZoneText) dropZoneText.textContent = 'Click to browse or drag files here';
   }
+}
+
+function openPendingFile(index) {
+  const file = _pendingFiles[index];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  window.open(url, '_blank');
+}
+
+function renderFileList() {
+  const container = document.getElementById('fileListContainer');
+  const dropZoneText = document.getElementById('dropZoneText');
+  const dropZone = document.getElementById('dropZone');
+  if (!container) return;
+
+  if (_pendingFiles.length === 0) {
+    container.innerHTML = '';
+    return;
+  }
+
+  if (dropZoneText) dropZoneText.textContent = _pendingFiles.length + ' file' + (_pendingFiles.length > 1 ? 's' : '') + ' selected \u2014 click to add more';
   if (dropZone) {
     dropZone.style.borderColor = 'var(--teal)';
     dropZone.style.background = 'rgba(0,255,217,0.05)';
   }
-  // Clear link input when file is chosen
-  const linkInput = document.getElementById('submitLinkInput');
-  if (linkInput) linkInput.value = '';
-  updateSubmitBtn();
+
+  let html = '';
+  for (let i = 0; i < _pendingFiles.length; i++) {
+    const file = _pendingFiles[i];
+    const sizeKB = (file.size / 1024).toFixed(1);
+    const sizeStr = sizeKB > 1024 ? (file.size / 1048576).toFixed(1) + ' MB' : sizeKB + ' KB';
+    html += '<div style="display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--surface-2); border-radius:10px; border:1px solid var(--rim);">'
+      + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0; color:var(--teal);"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      + '<div style="flex:1; min-width:0;">'
+      + '<div style="font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="openPendingFile(' + i + ')" title="Click to preview">' + file.name + '</div>'
+      + '<div style="font-size:11px; color:var(--text-3);">' + sizeStr + '</div>'
+      + '</div>'
+      + '<button onclick="openPendingFile(' + i + ')" title="Open file" style="background:none; border:none; color:var(--text-3); cursor:pointer; padding:4px; display:flex; transition:color 0.15s;" onmouseover="this.style.color=\'var(--teal)\'" onmouseout="this.style.color=\'var(--text-3)\'">'
+      + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+      + '</button>'
+      + '<button onclick="removePendingFile(' + i + ')" title="Remove" style="background:none; border:none; color:var(--text-3); cursor:pointer; padding:4px; display:flex; transition:color 0.15s;" onmouseover="this.style.color=\'var(--rose)\'" onmouseout="this.style.color=\'var(--text-3)\'">'
+      + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
+      + '</button>'
+      + '</div>';
+  }
+  container.innerHTML = html;
 }
 
-// Drag & drop setup
+// Drag & drop and paste setup (multiple files)
 (function() {
   document.addEventListener('DOMContentLoaded', () => {
     const dropZone = document.getElementById('dropZone');
+    
+    // Paste handler for screenshots
+    document.addEventListener('paste', (e) => {
+      const modal = document.getElementById('submitUnifiedModal');
+      if (modal && modal.style.display !== 'none' && e.clipboardData) {
+        const items = e.clipboardData.items;
+        for (let i = 0; i < items.length; i++) {
+          if (items[i].type.indexOf('image') !== -1) {
+            const blob = items[i].getAsFile();
+            if (blob) {
+              const d = new Date();
+              const filename = `Pasted_Image_${d.getFullYear()}${(d.getMonth()+1).toString().padStart(2,'0')}${d.getDate().toString().padStart(2,'0')}_${d.getHours().toString().padStart(2,'0')}${d.getMinutes().toString().padStart(2,'0')}${d.getSeconds().toString().padStart(2,'0')}.png`;
+              const file = new File([blob], filename, { type: blob.type });
+              addPendingFile(file);
+            }
+          }
+        }
+      }
+    });
+
     if (!dropZone) return;
 
     dropZone.addEventListener('dragover', (e) => {
@@ -842,7 +909,7 @@ function setDroppedFile(file) {
     dropZone.addEventListener('dragleave', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (!_pendingFile) {
+      if (_pendingFiles.length === 0) {
         dropZone.style.borderColor = 'var(--rim)';
         dropZone.style.background = 'rgba(0,0,0,0.02)';
       }
@@ -851,8 +918,8 @@ function setDroppedFile(file) {
     dropZone.addEventListener('drop', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const file = e.dataTransfer.files[0];
-      if (file) setDroppedFile(file);
+      const files = Array.from(e.dataTransfer.files);
+      files.forEach(f => addPendingFile(f));
     });
   });
 })();
@@ -863,79 +930,107 @@ async function processUnifiedSubmit() {
 
   const linkInput = document.getElementById('submitLinkInput');
   const linkUrl = linkInput ? linkInput.value.trim() : '';
-  const file = _pendingFile;
+  const files = [..._pendingFiles];
 
-  if (!file && !linkUrl) return;
+  if (files.length === 0 && !linkUrl) return;
 
-  closeSubmitUnifiedModal();
+  const modalBtn = document.getElementById('unifiedSubmitBtn');
+  const origModalHtml = modalBtn ? modalBtn.innerHTML : '';
+  if (modalBtn) {
+    modalBtn.innerHTML = 'Submitting\u2026';
+    modalBtn.disabled = true;
+    modalBtn.style.opacity = '0.7';
+    modalBtn.style.pointerEvents = 'none';
+  }
 
   const btn = document.getElementById('submitWorkBtn');
-  const origHtml = btn.innerHTML;
-  btn.innerHTML = 'Submitting\u2026';
-  btn.disabled = true;
-  btn.style.opacity = '0.7';
+  const origHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.innerHTML = 'Submitting\u2026';
+    btn.disabled = true;
+    btn.style.opacity = '0.7';
+  }
 
   try {
     if (S.token === 'preview_bypass') {
       await new Promise(r => setTimeout(r, 1500));
-      showToast('Assignment Submitted!', file ? `Attached ${file.name} successfully.` : 'Link attached successfully.');
-    } else if (file) {
-      // Upload file to Drive then attach
-      const metadata = { name: file.name };
-      const form = new FormData();
-      form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-      form.append('file', file);
-
-      const driveRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${S.token}` },
-        body: form
-      });
-      const driveData = await driveRes.json();
-      if (driveData.error) throw new Error(driveData.error.message);
-
-      const attachRes = await fetch(`https://classroom.googleapis.com/v1/courses/${n.courseId}/courseWork/${n.courseWorkId}/studentSubmissions/${n.submissionId}:modifyAttachments`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${S.token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ addAttachments: [{ driveFile: { id: driveData.id } }] })
-      });
-      if (!attachRes.ok) throw new Error('Failed to attach file');
-
-      const turnInRes = await fetch(`https://classroom.googleapis.com/v1/courses/${n.courseId}/courseWork/${n.courseWorkId}/studentSubmissions/${n.submissionId}:turnIn`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${S.token}` }
-      });
-      if (!turnInRes.ok) throw new Error('Failed to turn in assignment');
-
-      showToast('Assignment Submitted!', `Turned in ${file.name} successfully.`);
+      const msg = files.length > 0
+        ? 'Attached ' + files.length + ' file' + (files.length > 1 ? 's' : '') + ' successfully.'
+        : 'Link attached successfully.';
+      showToast('Assignment Submitted!', msg);
     } else {
-      // Attach link
-      const attachRes = await fetch(`https://classroom.googleapis.com/v1/courses/${n.courseId}/courseWork/${n.courseWorkId}/studentSubmissions/${n.submissionId}:modifyAttachments`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${S.token}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ addAttachments: [{ link: { url: linkUrl } }] })
-      });
-      if (!attachRes.ok) throw new Error('Failed to attach link');
+      const attachments = [];
 
-      const turnInRes = await fetch(`https://classroom.googleapis.com/v1/courses/${n.courseId}/courseWork/${n.courseWorkId}/studentSubmissions/${n.submissionId}:turnIn`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${S.token}` }
-      });
-      if (!turnInRes.ok) throw new Error('Failed to turn in assignment');
+      // Upload all files to Drive
+      for (const file of files) {
+        const metadata = { name: file.name };
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+        form.append('file', file);
 
-      showToast('Assignment Submitted!', 'Turned in link successfully.');
+        const driveRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + S.token },
+          body: form
+        });
+        const driveData = await driveRes.json();
+        if (driveData.error) throw new Error(driveData.error.message);
+        attachments.push({ driveFile: { id: driveData.id } });
+      }
+
+      // Add link if provided
+      if (linkUrl) {
+        attachments.push({ link: { url: linkUrl } });
+      }
+
+      // Attach all at once
+      if (attachments.length > 0) {
+        const attachRes = await fetch('https://classroom.googleapis.com/v1/courses/' + n.courseId + '/courseWork/' + n.courseWorkId + '/studentSubmissions/' + n.submissionId + ':modifyAttachments', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + S.token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ addAttachments: attachments })
+        });
+        if (!attachRes.ok) {
+          const errData = await attachRes.json().catch(() => ({}));
+          throw new Error((errData.error && errData.error.message) || 'Failed to attach items');
+        }
+      }
+
+      // Turn in
+      const turnInRes = await fetch('https://classroom.googleapis.com/v1/courses/' + n.courseId + '/courseWork/' + n.courseWorkId + '/studentSubmissions/' + n.submissionId + ':turnIn', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + S.token }
+      });
+      if (!turnInRes.ok) {
+        const errData = await turnInRes.json().catch(() => ({}));
+        throw new Error((errData.error && errData.error.message) || 'Failed to turn in assignment');
+      }
+
+      const msg = files.length > 0
+        ? 'Turned in ' + files.length + ' file' + (files.length > 1 ? 's' : '') + (linkUrl ? ' + link' : '') + ' successfully.'
+        : 'Turned in link successfully.';
+      showToast('Assignment Submitted!', msg);
     }
 
+    _pendingFiles = [];
+    closeSubmitUnifiedModal();
     loadEverything();
     closeSheet();
 
   } catch (err) {
     console.error('Submission failed:', err);
     showToast('Submission Failed', err.message);
-    btn.innerHTML = origHtml;
-    btn.disabled = false;
-    btn.style.opacity = '1';
+    if (modalBtn) {
+      modalBtn.innerHTML = origModalHtml;
+      modalBtn.disabled = false;
+      modalBtn.style.opacity = '1';
+      modalBtn.style.pointerEvents = 'auto';
+    }
+    if (btn) {
+      btn.innerHTML = origHtml;
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
   }
-
-  _pendingFile = null;
 }
+

@@ -1021,7 +1021,7 @@ async function processUnifiedSubmit() {
     console.error('Submission failed:', err);
     if (err.message && err.message.includes('@ProjectPermissionDenied')) {
       const content = document.querySelector('.submit-modal-content');
-      if (content && n.alternateLink) {
+      if (content && n.link) {
         content.innerHTML = `
           <h3 style="font-size: 18px; font-weight: 650; color: var(--rose); margin-bottom: 16px;">API Restriction</h3>
           <p style="font-size: 14px; color: var(--text-2); margin-bottom: 24px; line-height: 1.5;">
@@ -1030,7 +1030,7 @@ async function processUnifiedSubmit() {
           </p>
           <div style="display: flex; gap: 12px; justify-content: center;">
             <button onclick="closeSubmitUnifiedModal(); setTimeout(() => loadEverything(), 300);" style="padding: 10px 16px; border-radius: 10px; border: 1px solid var(--rim); background: transparent; color: var(--text); font-weight: 600; cursor: pointer;">Cancel</button>
-            <a href="${n.alternateLink}" target="_blank" onclick="closeSubmitUnifiedModal(); setTimeout(() => loadEverything(), 300);" style="text-decoration: none; padding: 10px 16px; border-radius: 10px; border: none; background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.35);">Open in Classroom</a>
+            <a href="${n.link}" target="_blank" onclick="closeSubmitUnifiedModal(); setTimeout(() => loadEverything(), 300);" style="text-decoration: none; padding: 10px 16px; border-radius: 10px; border: none; background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.35);">Open in Classroom</a>
           </div>
         `;
         return; // Leave modal open with the new content

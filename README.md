@@ -5,7 +5,7 @@
 **Never miss a Google Classroom update again.**
 
 [![Web App](https://img.shields.io/badge/Web_App-Available-brightgreen?style=for-the-badge&logo=vercel)](https://aulert.vercel.app)
-[![Desktop App](https://img.shields.io/badge/Desktop_App-Unavailable-brightgreen?style=for-the-badge&logo=windows)](https://github.com/esrazti/Aulert-App)
+[![Desktop App](https://img.shields.io/badge/Desktop_App-Unavailable-red?style=for-the-badge&logo=windows)](https://github.com/esrazti/Aulert-App)
 [![Issues](https://img.shields.io/github/issues/Sapfire151/Aulert?style=for-the-badge)](https://github.com/Sapfire151/Aulert/issues)
 
 Aulert is a free student dashboard that monitors your Google Classroom courses in real time — surfacing announcements, assignments, and deadlines in one clean feed with live notifications, a homework tracker and calendar sync.

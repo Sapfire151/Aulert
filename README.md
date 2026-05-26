@@ -73,5 +73,5 @@ Aulert is proudly designed and built by students, for students:
 <br>
 
 <div align="center">
-  <b>Free to use</b> &nbsp;·&nbsp; <a href="https://aulert.vercel.app">Web App</a> &nbsp;·&nbsp; <a href="https://github.com/esrazti/Aulert-App">Desktop App</a>
+  <b>Free to use</b> &nbsp;·&nbsp; <a href="https://aulert.vercel.app">Web App</a>
 </div>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Aulert - Terms of Service</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@300;400;500;600;700&family=Pridi:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .page-enter {
+      animation: fadeUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    @keyframes fadeUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="scrollBar"></div>
+  <div id="auroraFollower"></div>
+  <div class="aurora">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <div class="page-enter" style="max-width: 800px; margin: 100px auto; padding: 0 24px; position: relative; z-index: 2;">
+    <h1 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 3rem; margin-bottom: 24px;">Terms of Service</h1>
+    <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 16px;">
+      By accessing or using Aulert, you agree to be bound by these Terms of Service. Please read them carefully.
+    </p>
+    <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 16px;">
+      Aulert is provided "as is" without warranties of any kind. We are not responsible for missed deadlines or incorrect information, although we strive to ensure notifications are delivered accurately and promptly.
+    </p>
+    <a href="index.html" class="btn-hero btn-hero-primary" style="display: inline-block; margin-top: 32px; text-decoration: none;">Back to Home</a>
+  </div>
+
+  <button class="theme-switcher-btn" id="globalThemeBtn" onclick="toggleTheme()" aria-label="Toggle theme">
+    <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" />
+      <path
+        d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    </svg>
+  </button>
+  <script src="script-landing.js"></script>
+</body>
+</html>

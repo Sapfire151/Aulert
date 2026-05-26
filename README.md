@@ -44,7 +44,7 @@ Have a suggestion or found a bug? Send feedback directly from inside the app.
 3. Sign in with your Google account and allow access
 4. That's it — your classes load automatically
 
-> Aulert only requests **read-only** access to your Classroom data. It cannot post, submit, or modify anything on your behalf.
+> Aulert requests secure access to your Classroom data so you can track updates and submit your work directly through the app.
 
 ---
 

@@ -30,11 +30,11 @@ const SCOPES = [
 
 const POLL_MS        = 1 * 60 * 1000;
 const COURSE_COLORS  = ['var(--teal)', 'var(--violet)', 'var(--amber)', 'var(--rose)', 'var(--sky)', 'var(--green)', 'var(--orange)', 'var(--pink)', 'var(--emerald)', 'var(--gamemaster)'];
-const TYPE_META      = {
-  announcement: { label:'Announcement', color:'var(--teal)' },
-  assignment:   { label:'Assignment',   color:'var(--violet)' },
-  material:     { label:'Material',     color:'var(--rose)' },
-};
+const TYPE_META = new Map([
+  ['announcement', { label:'Announcement', color:'var(--teal)' }],
+  ['assignment',   { label:'Assignment',   color:'var(--violet)' }],
+  ['material',     { label:'Material',     color:'var(--rose)' }]
+]);
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
 /* ════════════════════════════════════════════
@@ -57,7 +57,6 @@ let S = {
   seenIds:  new Set(JSON.parse(localStorage.getItem('aul_seen')  || '[]')),
   settings: JSON.parse(localStorage.getItem('aul_settings') || JSON.stringify({
     stream:true, announcements:true, assignments:true, grades:true, comments:true, materials:true,
-    push:false, quietHours:false, quietStart:'22:00', quietEnd:'07:00', sound:false,
     gcalSync: false,
   })),
 };
@@ -89,7 +88,7 @@ async function loadTabs() {
 
 window.addEventListener('load', async () => {
   const cookieMatch = document.cookie.match('(^|;) ?aul_token=([^;]*)(;|$)');
-  const saved = cookieMatch ? cookieMatch[2] : null;
+  const saved = (cookieMatch ? cookieMatch[2] : null) || sessionStorage.getItem('aul_token');
   if (saved) {
     S.token = saved;
     // await loadTabs(); // Removed to prevent duplicating hardcoded tabs
@@ -100,10 +99,11 @@ window.addEventListener('load', async () => {
         console.error('loadEverything failed:', err);
         if (!err || !err.message || err.message.includes('401') || err.message.includes('Token')) {
           document.cookie = "aul_token=; max-age=0; path=/";
+          sessionStorage.removeItem('aul_token');
           window.location.href = 'index.html';
         } else {
           const feed = document.getElementById('notifFeed');
-          if (feed) feed.innerHTML = '<div class="empty-s" style="padding:60px 0"><h3 style="margin-bottom:8px">Could not load your classes</h3><p style="color:var(--text-2);margin-bottom:20px;font-size:14px">Network error — check your connection.</p><button class="btn-sm" onclick="location.reload()">Retry</button><button class="btn-sm" style="margin-left:8px" onclick="document.cookie=\'aul_token=; max-age=0; path=/\';location.href=\'index.html\'">Sign out</button></div>';
+          if (feed) feed.innerHTML = '<div class="empty-s" style="padding:60px 0"><h3 style="margin-bottom:8px">Could not load your classes</h3><p style="color:var(--text-2);margin-bottom:20px;font-size:14px">Network error — check your connection.</p><button class="btn-sm" onclick="location.reload()">Retry</button><button class="btn-sm" style="margin-left:8px" onclick="document.cookie=\'aul_token=; max-age=0; path=/\';sessionStorage.removeItem(\'aul_token\');location.href=\'index.html\'">Sign out</button></div>';
         }
       });
   } else {
@@ -210,6 +210,7 @@ async function classroomApi(path) {
   if (res.status === 401) {
     S.token = null;
     document.cookie = "aul_token=; max-age=0; path=/";
+    sessionStorage.removeItem('aul_token');
     clearInterval(S.pollTimer);
     showToast('Session expired', 'Please reconnect your Google account');
     setTimeout(() => { hideLoadingApp(); }, 1500);
@@ -259,7 +260,7 @@ async function loadEverything() {
     id:      c.id,
     name:    c.name,
     section: c.section || '',
-    color:   COURSE_COLORS[i % COURSE_COLORS.length],
+    color:   COURSE_COLORS.at(Number(i) % COURSE_COLORS.length),
     abbr:    c.name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase(),
     link:    c.alternateLink || 'https://classroom.google.com',
   }));
@@ -301,13 +302,13 @@ async function fetchAllContent(initial = false) {
   });
 
   if (!initial) {
-    const oldMap = {};
-    S.notifs.forEach(n => { oldMap[n.id] = n; });
+    const oldMap = new Map();
+    S.notifs.forEach(n => { oldMap.set(n.id, n); });
     newNotifs.forEach(n => {
-      const old = oldMap[n.id];
+      const old = oldMap.get(n.id);
       if (old && old.updatedAt && n.updatedAt && old.updatedAt !== n.updatedAt) {
         const c = courseById(n.courseId);
-        let msg = `Updated ${TYPE_META[n.type]?.label}`;
+        let msg = `Updated ${TYPE_META.get(n.type)?.label}`;
         const low = (n.title + ' ' + n.body).toLowerCase();
         if (low.includes('graded')) msg = 'Assignment graded';
         else if (low.includes('resubmit') || low.includes('resubmission')) msg = 'Resubmission requested';
@@ -315,15 +316,11 @@ async function fetchAllContent(initial = false) {
         S.seenIds.delete(n.id);
       }
     });
-    const inQuiet = isQuietHours();
     newNotifs
       .filter(n => !S.seenIds.has(n.id))
       .forEach(n => {
         const c = courseById(n.courseId);
-        if (!inQuiet) showToast(`New ${TYPE_META[n.type]?.label}`, `${c.name} — ${n.title}`);
-        if (!inQuiet && S.settings.push && Notification.permission === 'granted') {
-          new Notification(`Aulert · ${c.name}`, { body: n.title });
-        }
+        showToast(`New ${TYPE_META.get(n.type)?.label}`, `${c.name} — ${n.title}`);
         S.seenIds.add(n.id);
       });
     saveSeen();
@@ -354,11 +351,11 @@ async function fetchCourse(course) {
   ]);
 
   const turnedInIds = new Set();
-  const submissionIds = {};
+  const submissionIds = new Map();
   if (subs.status === 'fulfilled' && subs.value.studentSubmissions) {
     subs.value.studentSubmissions.forEach(s => {
       if (s.state === 'TURNED_IN' || s.state === 'RETURNED') turnedInIds.add(s.courseWorkId);
-      submissionIds[s.courseWorkId] = s.id;
+      submissionIds.set(s.courseWorkId, s.id);
     });
   }
 
@@ -387,7 +384,7 @@ async function fetchCourse(course) {
         type:         'assignment',
         courseId:     course.id,
         courseWorkId: w.id,
-        submissionId: submissionIds[w.id],
+        submissionId: submissionIds.get(w.id),
         title:        w.title || 'New Assignment',
         body:         w.description || `Posted in ${course.name}`,
         createdAt:    w.creationTime,
@@ -478,13 +475,7 @@ function launchApp() {
   startPolling();
   fetchAllContent(false);
   showToast('Connected!', `Monitoring ${S.courses.length} course${S.courses.length !== 1 ? 's' : ''}`);
-  if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission().then(p => {
-      S.settings.push = p === 'granted';
-      saveSettings();
-      if (p === 'granted') new Notification('Aulert', { body: 'Push notifications enabled! You\'ll get alerts for new classroom updates.' });
-    });
-  }
+
 }
 
 function disconnect() {
@@ -492,6 +483,7 @@ function disconnect() {
   clearInterval(S.countdownTimer);
   S.token = null;
   document.cookie = "aul_token=; max-age=0; path=/";
+  sessionStorage.removeItem('aul_token');
   if (window.google?.accounts?.oauth2 && S.user?.id) {
     google.accounts.oauth2.revoke(S.token, () => {});
   }
@@ -600,10 +592,10 @@ function fbkPopAnim(el) {
    TAB SYSTEM
 ════════════════════════════════════════════ */
 
-const _tabBadgeCounts = { feed: 0, cal: 0, hw: 0, com: 0, set: 0, fbk: 0 };
+const _tabBadgeCounts = new Map([['feed', 0], ['cal', 0], ['hw', 0], ['com', 0], ['set', 0], ['fbk', 0]]);
 
 function updateTabBadge(tabId, count) {
-  _tabBadgeCounts[tabId] = count || 0;
+  _tabBadgeCounts.set(tabId, count || 0);
   const el = document.getElementById('badge-' + tabId);
   if (!el) return;
   const n = Math.max(0, count || 0);
@@ -637,11 +629,20 @@ function goTab(name) {
 function openSheet(id) {
   const n = S.notifs.find(x => x.id === id); if (!n) return;
   S.openId = id;
-  const c = courseById(n.courseId), t = TYPE_META[n.type] || {};
+  const c = courseById(n.courseId), t = TYPE_META.get(n.type) || {};
 
-  document.getElementById('shEyebrow').innerHTML =
-    `<span class="cls-tag" style="background:${c.color}18;color:${c.color};border:1px solid ${c.color}30">${c.name}</span>
-     <span style="font-size:11px;color:var(--text-3)">${t.label||''}</span>`;
+  const shEyebrow = document.getElementById('shEyebrow');
+  shEyebrow.innerHTML = '';
+  const tagSpan = document.createElement('span');
+  tagSpan.className = 'cls-tag';
+  tagSpan.style.cssText = `background:${c.color}18;color:${c.color};border:1px solid ${c.color}30`;
+  tagSpan.textContent = c.name;
+  shEyebrow.appendChild(tagSpan);
+  shEyebrow.appendChild(document.createTextNode(' '));
+  const lblSpan = document.createElement('span');
+  lblSpan.style.cssText = 'font-size:11px;color:var(--text-3)';
+  lblSpan.textContent = t.label || '';
+  shEyebrow.appendChild(lblSpan);
   document.getElementById('shTitle').textContent = n.title;
   document.getElementById('shSub').textContent = n.time;
   document.getElementById('shText').textContent = n.body;
@@ -829,7 +830,7 @@ function removePendingFile(index) {
 }
 
 function openPendingFile(index) {
-  const file = _pendingFiles[index];
+  const file = _pendingFiles.at(index);
   if (!file) return;
   const url = URL.createObjectURL(file);
   window.open(url, '_blank');
@@ -852,26 +853,52 @@ function renderFileList() {
     dropZone.style.background = 'rgba(0,255,217,0.05)';
   }
 
-  let html = '';
-  for (let i = 0; i < _pendingFiles.length; i++) {
-    const file = _pendingFiles[i];
+  container.innerHTML = '';
+  _pendingFiles.forEach((file, i) => {
     const sizeKB = (file.size / 1024).toFixed(1);
     const sizeStr = sizeKB > 1024 ? (file.size / 1048576).toFixed(1) + ' MB' : sizeKB + ' KB';
-    html += '<div style="display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--surface-2); border-radius:10px; border:1px solid var(--rim);">'
-      + '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0; color:var(--teal);"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-      + '<div style="flex:1; min-width:0;">'
-      + '<div style="font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;" onclick="openPendingFile(' + i + ')" title="Click to preview">' + file.name + '</div>'
-      + '<div style="font-size:11px; color:var(--text-3);">' + sizeStr + '</div>'
-      + '</div>'
-      + '<button onclick="openPendingFile(' + i + ')" title="Open file" style="background:none; border:none; color:var(--text-3); cursor:pointer; padding:4px; display:flex; transition:color 0.15s;" onmouseover="this.style.color=\'var(--teal)\'" onmouseout="this.style.color=\'var(--text-3)\'">'
-      + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
-      + '</button>'
-      + '<button onclick="removePendingFile(' + i + ')" title="Remove" style="background:none; border:none; color:var(--text-3); cursor:pointer; padding:4px; display:flex; transition:color 0.15s;" onmouseover="this.style.color=\'var(--rose)\'" onmouseout="this.style.color=\'var(--text-3)\'">'
-      + '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>'
-      + '</button>'
-      + '</div>';
-  }
-  container.innerHTML = html;
+    
+    const div = document.createElement('div');
+    div.style.cssText = 'display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--surface-2); border-radius:10px; border:1px solid var(--rim);';
+    
+    const svgIcon = document.createElement('div');
+    svgIcon.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0; color:var(--teal);"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    div.appendChild(svgIcon.firstChild);
+    
+    const textCol = document.createElement('div');
+    textCol.style.cssText = 'flex:1; min-width:0;';
+    const nameEl = document.createElement('div');
+    nameEl.style.cssText = 'font-size:13px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; cursor:pointer;';
+    nameEl.title = 'Click to preview';
+    nameEl.textContent = file.name;
+    nameEl.onclick = () => openPendingFile(i);
+    const sizeEl = document.createElement('div');
+    sizeEl.style.cssText = 'font-size:11px; color:var(--text-3);';
+    sizeEl.textContent = sizeStr;
+    textCol.appendChild(nameEl);
+    textCol.appendChild(sizeEl);
+    div.appendChild(textCol);
+    
+    const btnOpen = document.createElement('button');
+    btnOpen.title = 'Open file';
+    btnOpen.style.cssText = 'background:none; border:none; color:var(--text-3); cursor:pointer; padding:4px; display:flex; transition:color 0.15s;';
+    btnOpen.onmouseover = function() { this.style.color = 'var(--teal)'; };
+    btnOpen.onmouseout = function() { this.style.color = 'var(--text-3)'; };
+    btnOpen.onclick = () => openPendingFile(i);
+    btnOpen.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+    div.appendChild(btnOpen);
+    
+    const btnRemove = document.createElement('button');
+    btnRemove.title = 'Remove';
+    btnRemove.style.cssText = 'background:none; border:none; color:var(--text-3); cursor:pointer; padding:4px; display:flex; transition:color 0.15s;';
+    btnRemove.onmouseover = function() { this.style.color = 'var(--rose)'; };
+    btnRemove.onmouseout = function() { this.style.color = 'var(--text-3)'; };
+    btnRemove.onclick = () => removePendingFile(i);
+    btnRemove.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+    div.appendChild(btnRemove);
+    
+    container.appendChild(div);
+  });
 }
 
 // Drag & drop and paste setup (multiple files)
@@ -884,9 +911,9 @@ function renderFileList() {
       const modal = document.getElementById('submitUnifiedModal');
       if (modal && modal.style.display !== 'none' && e.clipboardData) {
         const items = e.clipboardData.items;
-        for (let i = 0; i < items.length; i++) {
-          if (items[i].type.indexOf('image') !== -1) {
-            const blob = items[i].getAsFile();
+        Array.from(items).forEach(item => {
+          if (item.type.indexOf('image') !== -1) {
+            const blob = item.getAsFile();
             if (blob) {
               const d = new Date();
               const filename = `Pasted_Image_${d.getFullYear()}${(d.getMonth()+1).toString().padStart(2,'0')}${d.getDate().toString().padStart(2,'0')}_${d.getHours().toString().padStart(2,'0')}${d.getMinutes().toString().padStart(2,'0')}${d.getSeconds().toString().padStart(2,'0')}.png`;
@@ -894,7 +921,7 @@ function renderFileList() {
               addPendingFile(file);
             }
           }
-        }
+        });
       }
     });
 
@@ -936,18 +963,16 @@ async function processUnifiedSubmit() {
   if (files.length === 0 && !linkUrl) return;
 
   const modalBtn = document.getElementById('unifiedSubmitBtn');
-  const origModalHtml = modalBtn ? modalBtn.innerHTML : '';
   if (modalBtn) {
-    modalBtn.innerHTML = 'Submitting\u2026';
+    modalBtn.textContent = 'Submitting\u2026';
     modalBtn.disabled = true;
     modalBtn.style.opacity = '0.7';
     modalBtn.style.pointerEvents = 'none';
   }
 
   const btn = document.getElementById('submitWorkBtn');
-  const origHtml = btn ? btn.innerHTML : '';
   if (btn) {
-    btn.innerHTML = 'Submitting\u2026';
+    btn.textContent = 'Submitting\u2026';
     btn.disabled = true;
     btn.style.opacity = '0.7';
   }
@@ -1023,30 +1048,43 @@ async function processUnifiedSubmit() {
     if (err.message && err.message.includes('@ProjectPermissionDenied')) {
       const content = document.querySelector('.submit-modal-content');
       if (content && n.link) {
-        content.innerHTML = `
-          <h3 style="font-size: 18px; font-weight: 650; color: var(--rose); margin-bottom: 16px;">API Restriction</h3>
-          <p style="font-size: 14px; color: var(--text-2); margin-bottom: 24px; line-height: 1.5;">
-            Google Classroom prohibits third-party apps from turning in assignments created by teachers. <br><br>
-            Your files were uploaded to your Google Drive! Please open the assignment in Classroom to attach them from your "Recent" files and turn it in.
-          </p>
-          <div style="display: flex; gap: 12px; justify-content: center;">
-            <button onclick="closeSubmitUnifiedModal(); setTimeout(() => loadEverything(), 300);" style="padding: 10px 16px; border-radius: 10px; border: 1px solid var(--rim); background: transparent; color: var(--text); font-weight: 600; cursor: pointer;">Cancel</button>
-            <a href="${n.link}" target="_blank" onclick="closeSubmitUnifiedModal(); setTimeout(() => loadEverything(), 300);" style="text-decoration: none; padding: 10px 16px; border-radius: 10px; border: none; background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.35);">Open in Classroom</a>
-          </div>
-        `;
+        content.innerHTML = '';
+        const h3 = document.createElement('h3');
+        h3.style.cssText = 'font-size: 18px; font-weight: 650; color: var(--rose); margin-bottom: 16px;';
+        h3.textContent = 'API Restriction';
+        const p = document.createElement('p');
+        p.style.cssText = 'font-size: 14px; color: var(--text-2); margin-bottom: 24px; line-height: 1.5;';
+        p.innerHTML = 'Google Classroom prohibits third-party apps from turning in assignments created by teachers. <br><br>Your files were uploaded to your Google Drive! Please open the assignment in Classroom to attach them from your "Recent" files and turn it in.';
+        const div = document.createElement('div');
+        div.style.cssText = 'display: flex; gap: 12px; justify-content: center;';
+        const btnC = document.createElement('button');
+        btnC.onclick = () => { closeSubmitUnifiedModal(); setTimeout(() => loadEverything(), 300); };
+        btnC.style.cssText = 'padding: 10px 16px; border-radius: 10px; border: 1px solid var(--rim); background: transparent; color: var(--text); font-weight: 600; cursor: pointer;';
+        btnC.textContent = 'Cancel';
+        const a = document.createElement('a');
+        a.href = n.link;
+        a.target = '_blank';
+        a.onclick = btnC.onclick;
+        a.style.cssText = 'text-decoration: none; padding: 10px 16px; border-radius: 10px; border: none; background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.35);';
+        a.textContent = 'Open in Classroom';
+        div.appendChild(btnC);
+        div.appendChild(a);
+        content.appendChild(h3);
+        content.appendChild(p);
+        content.appendChild(div);
         return; // Leave modal open with the new content
       }
     }
 
     showToast('Submission Failed', err.message);
     if (modalBtn) {
-      modalBtn.innerHTML = origModalHtml;
+      modalBtn.textContent = 'Submit';
       modalBtn.disabled = false;
       modalBtn.style.opacity = '1';
       modalBtn.style.pointerEvents = 'auto';
     }
     if (btn) {
-      btn.innerHTML = origHtml;
+      btn.textContent = 'Submit';
       btn.disabled = false;
       btn.style.opacity = '1';
     }

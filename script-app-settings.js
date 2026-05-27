@@ -18,8 +18,13 @@ function renderAccount() {
   const ava = document.querySelector('.user-pill .ava');
   const pillName = document.querySelector('.user-pill-name');
   if (ava) {
+    ava.innerHTML = '';
     if (picture) {
-      ava.innerHTML = `<img src="${escHtml(picture)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer">`;
+      const img = document.createElement('img');
+      img.src = picture;
+      img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover';
+      img.referrerPolicy = 'no-referrer';
+      ava.appendChild(img);
     } else {
       ava.textContent = initials;
     }
@@ -30,8 +35,13 @@ function renderAccount() {
   const profName  = document.getElementById('profName');
   const profEmail = document.getElementById('profEmailText');
   if (profAva) {
+    profAva.innerHTML = '';
     if (picture) {
-      profAva.innerHTML = `<img src="${escHtml(picture)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer">`;
+      const img = document.createElement('img');
+      img.src = picture;
+      img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover';
+      img.referrerPolicy = 'no-referrer';
+      profAva.appendChild(img);
     } else {
       profAva.textContent = initials;
     }
@@ -48,48 +58,118 @@ function renderSidebar() {
   const cntEl = document.getElementById('sc-dl-count');
   if (cntEl) cntEl.textContent = upcoming.length;
   if (dlEl) {
-    dlEl.innerHTML = upcoming.length
-      ? upcoming.map(dl => {
-          const c = courseById(dl.courseId);
-          const diff = Math.ceil((dl.date - nowDay) / 86400000);
-          const when = diff === 0 ? 'Today' : diff === 1 ? 'Tomorrow' : `${diff}d`;
-          const cls2 = dl.urg === 'urg' ? 'when-urg' : dl.urg === 'soo' ? 'when-soo' : 'when-ok';
-          return `<div class="mini-dl" onclick="openSheet('${dl.notifId}')"><div class="mini-dl-bar" style="background:${c.color}"></div><div class="mini-dl-info"><div class="mini-dl-title">${escHtml(dl.title)}</div><div class="mini-dl-class">${escHtml(c.name)}</div></div><div class="mini-dl-when ${cls2}">${when}</div></div>`;
-        }).join('')
-      : `<div style="padding:16px;text-align:center;font-size:12px;color:var(--text-3)">No upcoming deadlines</div>`;
+    dlEl.innerHTML = '';
+    if (upcoming.length) {
+      upcoming.forEach(dl => {
+        const c = courseById(dl.courseId);
+        const diff = Math.ceil((dl.date - nowDay) / 86400000);
+        const when = diff === 0 ? 'Today' : diff === 1 ? 'Tomorrow' : `${diff}d`;
+        const cls2 = dl.urg === 'urg' ? 'when-urg' : dl.urg === 'soo' ? 'when-soo' : 'when-ok';
+        const div = document.createElement('div');
+        div.className = 'mini-dl';
+        div.onclick = () => openSheet(dl.notifId);
+        const bar = document.createElement('div');
+        bar.className = 'mini-dl-bar';
+        bar.style.background = c.color;
+        const info = document.createElement('div');
+        info.className = 'mini-dl-info';
+        const title = document.createElement('div');
+        title.className = 'mini-dl-title';
+        title.textContent = dl.title;
+        const clsName = document.createElement('div');
+        clsName.className = 'mini-dl-class';
+        clsName.textContent = c.name;
+        info.appendChild(title);
+        info.appendChild(clsName);
+        const whenEl = document.createElement('div');
+        whenEl.className = 'mini-dl-when ' + cls2;
+        whenEl.textContent = when;
+        div.appendChild(bar);
+        div.appendChild(info);
+        div.appendChild(whenEl);
+        dlEl.appendChild(div);
+      });
+    } else {
+      dlEl.innerHTML = '<div style="padding:16px;text-align:center;font-size:12px;color:var(--text-3)">No upcoming deadlines</div>';
+    }
   }
 
   const clsEl = document.getElementById('sidebarClsList');
   if (clsEl) {
-    // start with a special "All classes" item
-    let html = `<div class="sidebar-cls${S.courseFilter==='all'?' active':''}" onclick="setCourseFilter('all',this)">
-        <div class="sidebar-cls-dot" style="background:transparent"></div>
-        <div class="sidebar-cls-info">
-          <div class="sidebar-cls-name">All classes</div>
-        </div>
-      </div>`;
-    html += S.courses.map(c => {
+    clsEl.innerHTML = '';
+    const addCls = (id, color, name, section, count) => {
+      const div = document.createElement('div');
+      div.className = 'sidebar-cls' + (S.courseFilter === id ? ' active' : '');
+      div.onclick = function() { setCourseFilter(id, this); };
+      const dot = document.createElement('div');
+      dot.className = 'sidebar-cls-dot';
+      dot.style.background = color;
+      div.appendChild(dot);
+      const info = document.createElement('div');
+      info.className = 'sidebar-cls-info';
+      const nEl = document.createElement('div');
+      nEl.className = 'sidebar-cls-name';
+      nEl.textContent = name;
+      info.appendChild(nEl);
+      if (section) {
+        const sEl = document.createElement('div');
+        sEl.className = 'sidebar-cls-teacher';
+        sEl.textContent = section;
+        info.appendChild(sEl);
+      }
+      div.appendChild(info);
+      if (count > 0) {
+        const cEl = document.createElement('div');
+        cEl.className = 'sidebar-cls-cnt';
+        cEl.style.cssText = `background:${color}18;color:${color};border-color:${color}30`;
+        cEl.textContent = count;
+        div.appendChild(cEl);
+      }
+      clsEl.appendChild(div);
+    };
+    addCls('all', 'transparent', 'All classes', null, 0);
+    S.courses.forEach(c => {
       const count = S.notifs.filter(n => n.courseId === c.id && !n.read).length;
-      return `<div class="sidebar-cls${S.courseFilter===c.id?' active':''}" onclick="setCourseFilter('${c.id}',this)">
-        <div class="sidebar-cls-dot" style="background:${c.color}"></div>
-        <div class="sidebar-cls-info">
-          <div class="sidebar-cls-name">${escHtml(c.name)}</div>
-          ${c.section ? `<div class="sidebar-cls-teacher">${escHtml(c.section)}</div>` : ''}
-        </div>
-        ${count > 0 ? `<div class="sidebar-cls-cnt" style="background:${c.color}18;color:${c.color};border-color:${c.color}30">${count}</div>` : ''}
-      </div>`;
-    }).join('');
-    clsEl.innerHTML = html;
+      addCls(c.id, c.color, c.name, c.section, count);
+    });
   }
 }
 
 function renderClasses() {
-  document.getElementById('clsBody').innerHTML = S.courses.map(c => `
-<div class="cls-row">
-  <div class="cls-swatch" style="background:${c.color}; color:var(--invertext)">${escHtml(c.abbr)}</div>
-  <div class="cls-info"><b>${escHtml(c.name)}</b>${c.section ? `<span>${escHtml(c.section)}</span>` : ''}</div>
-  <label class="tog"><input type="checkbox" checked onchange="saved()"><div class="tog-track"></div></label>
-</div>`).join('');
+  const body = document.getElementById('clsBody');
+  body.innerHTML = '';
+  S.courses.forEach(c => {
+    const row = document.createElement('div');
+    row.className = 'cls-row';
+    const swatch = document.createElement('div');
+    swatch.className = 'cls-swatch';
+    swatch.style.cssText = `background:${c.color}; color:var(--invertext)`;
+    swatch.textContent = c.abbr;
+    row.appendChild(swatch);
+    const info = document.createElement('div');
+    info.className = 'cls-info';
+    const b = document.createElement('b');
+    b.textContent = c.name;
+    info.appendChild(b);
+    if (c.section) {
+      const span = document.createElement('span');
+      span.textContent = c.section;
+      info.appendChild(span);
+    }
+    row.appendChild(info);
+    const lbl = document.createElement('label');
+    lbl.className = 'tog';
+    const chk = document.createElement('input');
+    chk.type = 'checkbox';
+    chk.checked = true;
+    chk.onchange = saved;
+    const trk = document.createElement('div');
+    trk.className = 'tog-track';
+    lbl.appendChild(chk);
+    lbl.appendChild(trk);
+    row.appendChild(lbl);
+    body.appendChild(row);
+  });
 }
 
 function saved() {
@@ -102,276 +182,14 @@ function saved() {
 }
 
 function saveSetting(key, val) {
-  S.settings[key] = val;
-  saveSettings();
-  saved();
-}
-
-function saveQuietTime() {
-  S.settings.quietStart = document.getElementById('quietStart')?.value || '22:00';
-  S.settings.quietEnd   = document.getElementById('quietEnd')?.value   || '07:00';
-  saveSettings();
-  saved();
-  qtpRenderTimeline();
-}
-
-function isQuietHours() {
-  if (!S.settings.quietHours) return false;
-  const now = new Date();
-  const [sh, sm] = (S.settings.quietStart || '22:00').split(':').map(Number);
-  const [eh, em] = (S.settings.quietEnd   || '07:00').split(':').map(Number);
-  const nowMins   = now.getHours() * 60 + now.getMinutes();
-  const startMins = sh * 60 + sm;
-  const endMins   = eh * 60 + em;
-  if (startMins > endMins) return nowMins >= startMins || nowMins < endMins;
-  return nowMins >= startMins && nowMins < endMins;
-}
-
-/* ════════════════════════════════════════════
-   CUSTOM QUIET-HOURS TIME PICKER
-════════════════════════════════════════════ */
-let _qtpState = { start: { h: 22, m: 0 }, end: { h: 7, m: 0 } };
-
-function qtpPad(n) { return String(n).padStart(2, '0'); }
-
-function qtpRender() {
-  const s = _qtpState;
-  document.getElementById('qtp-start-h').textContent = qtpPad(s.start.h);
-  document.getElementById('qtp-start-m').textContent = qtpPad(s.start.m);
-  document.getElementById('qtp-end-h').textContent   = qtpPad(s.end.h);
-  document.getElementById('qtp-end-m').textContent   = qtpPad(s.end.m);
-
-  // Sync hidden native inputs
-  const vs = qtpPad(s.start.h) + ':' + qtpPad(s.start.m);
-  const ve = qtpPad(s.end.h)   + ':' + qtpPad(s.end.m);
-  const qs = document.getElementById('quietStart');
-  const qe = document.getElementById('quietEnd');
-  if (qs) qs.value = vs;
-  if (qe) qe.value = ve;
-
-  S.settings.quietStart = vs;
-  S.settings.quietEnd   = ve;
-  saveSettings();
-  saved();
-  qtpRenderTimeline();
-}
-
-function qtpStep(which, unit, dir) {
-  const t = _qtpState[which];
-  if (unit === 'h') {
-    t.h = (t.h + dir + 24) % 24;
-  } else {
-    t.m = (t.m + dir * 5 + 60) % 60;
-  }
-  qtpRender();
-  // animate the changed value
-  const el = document.getElementById(`qtp-${which}-${unit}`);
-  if (el) {
-    el.style.transform = dir > 0 ? 'translateY(-4px)' : 'translateY(4px)';
-    el.style.opacity = '0.4';
-    requestAnimationFrame(() => {
-      el.style.transition = 'transform .18s cubic-bezier(.34,1.56,.64,1), opacity .15s';
-      el.style.transform = 'translateY(0)';
-      el.style.opacity   = '1';
-      setTimeout(() => { el.style.transition = ''; }, 200);
-    });
-  }
-}
-
-function qtpLoadFromSettings() {
-  const sv = S.settings.quietStart || '22:00';
-  const ev = S.settings.quietEnd   || '07:00';
-  const [sh, sm] = sv.split(':').map(Number);
-  const [eh, em] = ev.split(':').map(Number);
-  _qtpState.start = { h: sh, m: sm };
-  _qtpState.end   = { h: eh, m: em };
-  document.getElementById('qtp-start-h').textContent = qtpPad(sh);
-  document.getElementById('qtp-start-m').textContent = qtpPad(sm);
-  document.getElementById('qtp-end-h').textContent   = qtpPad(eh);
-  document.getElementById('qtp-end-m').textContent   = qtpPad(em);
-  qtpRenderTimeline();
-}
-
-function qtpToggleVisibility() {
-  const enabled = document.getElementById('set_quietHours')?.checked;
-  const times   = document.getElementById('qtpTimes');
-  const timeline= document.getElementById('quietTimeline');
-  if (times) times.style.opacity = enabled ? '1' : '0.35';
-  if (times) times.style.pointerEvents = enabled ? '' : 'none';
-  if (timeline) timeline.classList.toggle('qt-visible', !!enabled);
-}
-
-/* ── 24-hour timeline bar ── */
-function qtpMinsToPercent(h, m) { return ((h * 60 + m) / 1440) * 100; }
-function qtpPercentToHM(pct) {
-  const totalMins = Math.round((pct / 100) * 1440 / 5) * 5; // snap to 5-min
-  return { h: Math.floor(totalMins / 60) % 24, m: totalMins % 60 };
-}
-
-function qtpRenderTimeline() {
-  const s        = _qtpState;
-  const startPct = qtpMinsToPercent(s.start.h, s.start.m);
-  const endPct   = qtpMinsToPercent(s.end.h,   s.end.m);
-
-  const fill1      = document.getElementById('qtrFill');
-  const fill2      = document.getElementById('qtrFill2');
-  const thumbStart = document.getElementById('qtrThumbStart');
-  const thumbEnd   = document.getElementById('qtrThumbEnd');
-  const lblStart   = document.getElementById('qtrLabelStart');
-  const lblEnd     = document.getElementById('qtrLabelEnd');
-  if (!fill1) return;
-
-  // Position thumbs — direct, no transitions
-  thumbStart.style.left = startPct + '%';
-  thumbEnd.style.left   = endPct   + '%';
-
-  // Normal case: start ≤ end — single segment
-  if (startPct <= endPct) {
-    // Segment A: start→end
-    fill1.style.display = 'block';
-    fill1.style.left    = startPct + '%';
-    fill1.style.width   = (endPct - startPct) + '%';
-    // Full gradient across segment
-    fill1.style.background = `linear-gradient(90deg, var(--violet) 0%, var(--gamemaster) 100%)`;
-    fill1.style.borderRadius = '99px';
-
-    // Segment B: hidden
-    fill2.style.display = 'none';
-
-  } else {
-    // Overnight wrap: end < start — two segments
-    // Segment A: 0% → endPct  (teal side, start of day)
-    // Segment B: startPct → 100% (violet side, end of day)
-    // We want the gradient to feel continuous: violet at start, teal at end
-    // So segment B (start→right edge) is the violet portion,
-    // and segment A (left edge→end) is the teal portion.
-
-    // The full arc spans: (100 - startPct) + endPct total width
-    const totalPct = (100 - startPct) + endPct;
-
-    // Segment B: startPct → 100% — violet at left, partial gradient
-    const bWidth = 100 - startPct;
-    const bGradEnd = totalPct > 0 ? (bWidth / totalPct) * 100 : 50; // where teal starts within full grad
-    fill1.style.display  = 'block';
-    fill1.style.left     = startPct + '%';
-    fill1.style.width    = bWidth + '%';
-    fill1.style.borderRadius = '99px 0 0 99px';
-    fill1.style.background   = `linear-gradient(90deg, var(--violet) 0%, color-mix(in srgb, var(--violet) ${100 - bGradEnd}%, var(--gamemaster) ${bGradEnd}%) 100%)`;
-
-    // Segment A: 0% → endPct — teal at right, partial gradient
-    const aWidth = endPct;
-    fill2.style.display  = 'block';
-    fill2.style.left     = '0%';
-    fill2.style.width    = aWidth + '%';
-    fill2.style.borderRadius = '0 99px 99px 0';
-    fill2.style.background   = `linear-gradient(90deg, color-mix(in srgb, var(--violet) ${100 - bGradEnd}%, var(--gamemaster) ${bGradEnd}%) 0%, var(--gamemaster) 100%)`;
-  }
-
-  // Labels
-  lblStart.textContent = qtpPad(s.start.h) + ':' + qtpPad(s.start.m);
-  lblEnd.textContent   = qtpPad(s.end.h)   + ':' + qtpPad(s.end.m);
-}
-
-/* Drag thumbs — zero-lag, no CSS transition during drag */
-(function initQtrDrag() {
-  let activeDrag = null; // 'start' | 'end' | null
-  const bar = () => document.getElementById('qtrBar');
-
-  function pctFromClient(clientX) {
-    const rect = bar().getBoundingClientRect();
-    return Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
-  }
-
-  function applyMove(clientX) {
-    const pct       = pctFromClient(clientX);
-    const { h, m }  = qtpPercentToHM(pct);
-    _qtpState[activeDrag] = { h, m };
-
-    // Update thumb position directly (no qtpRender to avoid stepper animation overhead)
-    const thumbEl = document.getElementById(activeDrag === 'start' ? 'qtrThumbStart' : 'qtrThumbEnd');
-    if (thumbEl) thumbEl.style.left = pct + '%';
-    qtpRenderTimeline();
-
-    // Also sync steppers and hidden inputs without triggering bounce animation
-    const t = _qtpState[activeDrag];
-    document.getElementById(`qtp-${activeDrag}-h`).textContent = qtpPad(t.h);
-    document.getElementById(`qtp-${activeDrag}-m`).textContent = qtpPad(t.m);
-    const vs = qtpPad(_qtpState.start.h) + ':' + qtpPad(_qtpState.start.m);
-    const ve = qtpPad(_qtpState.end.h)   + ':' + qtpPad(_qtpState.end.m);
-    const qs = document.getElementById('quietStart');
-    const qe = document.getElementById('quietEnd');
-    if (qs) qs.value = vs;
-    if (qe) qe.value = ve;
-    S.settings.quietStart = vs;
-    S.settings.quietEnd   = ve;
-  }
-
-  function startDrag(which) {
-    activeDrag = which;
-    bar().classList.add('qtr-is-dragging');
-    document.body.style.userSelect = 'none';
-  }
-
-  function endDrag() {
-    if (!activeDrag) return;
-    activeDrag = null;
-    bar().classList.remove('qtr-is-dragging');
-    document.body.style.userSelect = '';
+  if (Object.prototype.hasOwnProperty.call(S.settings, key)) {
+    S.settings[key] = val;
     saveSettings();
     saved();
   }
+}
 
-  function setupThumb(thumbId, which) {
-    const thumb = document.getElementById(thumbId);
-    if (!thumb) return;
 
-    thumb.addEventListener('mousedown', e => {
-      e.preventDefault();
-      startDrag(which);
-    });
-    thumb.addEventListener('touchstart', e => {
-      startDrag(which);
-    }, { passive: true });
-  }
-
-  // Global move/up listeners (attached once, check activeDrag)
-  document.addEventListener('mousemove', e => {
-    if (!activeDrag) return;
-    applyMove(e.clientX);
-  });
-  document.addEventListener('mouseup', () => endDrag());
-
-  document.addEventListener('touchmove', e => {
-    if (!activeDrag) return;
-    e.preventDefault();
-    applyMove(e.touches[0].clientX);
-  }, { passive: false });
-  document.addEventListener('touchend', () => endDrag());
-
-  // Also allow clicking anywhere on the bar to jump nearest thumb
-  const barEl = document.getElementById('qtrBar');
-  if (barEl) {
-    barEl.addEventListener('mousedown', e => {
-      if (e.target.classList.contains('qtr-thumb')) return; // handled by thumb
-      const pct = pctFromClient(e.clientX);
-      // Move whichever thumb is closer
-      const startPct = qtpMinsToPercent(_qtpState.start.h, _qtpState.start.m);
-      const endPct   = qtpMinsToPercent(_qtpState.end.h,   _qtpState.end.m);
-      const dStart   = Math.abs(pct - startPct);
-      const dEnd     = Math.abs(pct - endPct);
-      startDrag(dStart <= dEnd ? 'start' : 'end');
-      applyMove(e.clientX);
-    });
-  }
-
-  function init() {
-    setupThumb('qtrThumbStart', 'start');
-    setupThumb('qtrThumbEnd',   'end');
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
-  else init();
-})();
 
 /* ════════════════════════════════════════════
    GOOGLE CALENDAR SYNC
@@ -542,42 +360,9 @@ function renderSettings() {
   set('set_assignments', m.assignments);
   set('set_grades', m.grades);
   set('set_materials', m.materials);
-  set('set_push', m.push);
-  set('set_quietHours', m.quietHours);
-  set('set_sound', m.sound);
-  const qs = document.getElementById('quietStart');
-  const qe = document.getElementById('quietEnd');
-  if (qs) qs.value = m.quietStart || '22:00';
-  if (qe) qe.value = m.quietEnd   || '07:00';
-  qtpLoadFromSettings();
-  qtpToggleVisibility();
+
   set('set_gcalSync', m.gcalSync);
   gcalRenderStatus();
 }
 
-function reqPush(el) {
-  if (el.checked && 'Notification' in window) {
-    Notification.requestPermission().then(p => {
-      S.settings.push = p === 'granted';
-      saveSettings();
-      if (p === 'granted') new Notification('Aulert', { body: 'Push notifications enabled!' });
-    });
-  } else {
-    S.settings.push = false;
-    saveSettings();
-  }
-  saved();
-}
 
-/* ── Mouse wheel support on time values ── */
-document.addEventListener('wheel', function(e) {
-  const el = e.target.closest('.qtp-wrap');
-  if (!el) return;
-  e.preventDefault();
-  const which = el.id === 'qtpStartWrap' ? 'start' : 'end';
-  const col = e.target.closest('.qtp-col');
-  if (!col) return;
-  const valEl = col.querySelector('.qtp-val');
-  const unit = valEl?.id.endsWith('-h') ? 'h' : 'm';
-  qtpStep(which, unit, e.deltaY < 0 ? 1 : -1);
-}, { passive: false });

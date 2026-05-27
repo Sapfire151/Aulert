@@ -88,7 +88,8 @@ async function loadTabs() {
 }
 
 window.addEventListener('load', async () => {
-  const saved = sessionStorage.getItem('aul_token');
+  const cookieMatch = document.cookie.match('(^|;) ?aul_token=([^;]*)(;|$)');
+  const saved = cookieMatch ? cookieMatch[2] : null;
   if (saved) {
     S.token = saved;
     // await loadTabs(); // Removed to prevent duplicating hardcoded tabs
@@ -98,11 +99,11 @@ window.addEventListener('load', async () => {
       .catch((err) => {
         console.error('loadEverything failed:', err);
         if (!err || !err.message || err.message.includes('401') || err.message.includes('Token')) {
-          sessionStorage.removeItem('aul_token');
+          document.cookie = "aul_token=; max-age=0; path=/";
           window.location.href = 'index.html';
         } else {
           const feed = document.getElementById('notifFeed');
-          if (feed) feed.innerHTML = '<div class="empty-s" style="padding:60px 0"><h3 style="margin-bottom:8px">Could not load your classes</h3><p style="color:var(--text-2);margin-bottom:20px;font-size:14px">Network error — check your connection.</p><button class="btn-sm" onclick="location.reload()">Retry</button><button class="btn-sm" style="margin-left:8px" onclick="sessionStorage.removeItem(\'aul_token\');location.href=\'index.html\'">Sign out</button></div>';
+          if (feed) feed.innerHTML = '<div class="empty-s" style="padding:60px 0"><h3 style="margin-bottom:8px">Could not load your classes</h3><p style="color:var(--text-2);margin-bottom:20px;font-size:14px">Network error — check your connection.</p><button class="btn-sm" onclick="location.reload()">Retry</button><button class="btn-sm" style="margin-left:8px" onclick="document.cookie=\'aul_token=; max-age=0; path=/\';location.href=\'index.html\'">Sign out</button></div>';
         }
       });
   } else {
@@ -156,7 +157,7 @@ async function onToken(resp) {
   if (btn) { btn.disabled = false; btn.innerHTML = `<svg width="20" height="20" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg> Continue with Google`; }
   if (resp.error) { console.error('OAuth error:', resp.error); return; }
   S.token = resp.access_token;
-  sessionStorage.setItem('aul_token', S.token);
+  document.cookie = `aul_token=${S.token}; max-age=${resp.expires_in || 3600}; path=/; SameSite=Lax`;
   document.getElementById('authModal').classList.remove('open');
   showLoadingApp();
   await loadEverything();
@@ -208,7 +209,7 @@ async function classroomApi(path) {
   });
   if (res.status === 401) {
     S.token = null;
-    sessionStorage.removeItem('aul_token');
+    document.cookie = "aul_token=; max-age=0; path=/";
     clearInterval(S.pollTimer);
     showToast('Session expired', 'Please reconnect your Google account');
     setTimeout(() => { hideLoadingApp(); }, 1500);
@@ -490,7 +491,7 @@ function disconnect() {
   clearInterval(S.pollTimer);
   clearInterval(S.countdownTimer);
   S.token = null;
-  sessionStorage.removeItem('aul_token');
+  document.cookie = "aul_token=; max-age=0; path=/";
   if (window.google?.accounts?.oauth2 && S.user?.id) {
     google.accounts.oauth2.revoke(S.token, () => {});
   }

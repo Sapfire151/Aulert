@@ -18,7 +18,7 @@ function renderCal() {
   const days  = new Date(S.calYear, S.calMonth + 1, 0).getDate();
   const prev  = new Date(S.calYear, S.calMonth, 0).getDate();
 
-  const dmap = {};
+  const dmap = Object.create(null);
   S.deadlines.forEach(dl => {
     if (dl.date.getFullYear() === S.calYear && dl.date.getMonth() === S.calMonth) {
       const k = dl.date.getDate();
@@ -136,9 +136,9 @@ function renderDl(day) {
     if (dl._hwTask) {
       const urg = diff < 0 ? 'urg' : diff <= 1 ? 'urg' : diff <= 5 ? 'soo' : 'ok';
       const urgLabel = diff < 0 ? 'Overdue' : diff <= 1 ? 'Urgent' : diff <= 5 ? 'Soon' : 'On track';
-      return `<div class="dl-row"><div class="dl-stripe" style="background:var(--gamemaster)"></div><div class="dl-info"><div class="dl-t">${dl.title}</div><div class="dl-c" style="color:var(--gamemaster);opacity:.8">Homework</div></div><div class="dl-meta"><span class="dl-date">${ds} · ${when}</span><span class="dl-badge ${urg}">${urgLabel}</span></div></div>`;
+      return `<div class="dl-row" onclick="goTab('hw')"><div class="dl-stripe" style="background:var(--gamemaster)"></div><div class="dl-info"><div class="dl-t">${escHtml(dl.title)}</div><div class="dl-c" style="color:var(--gamemaster);opacity:.8">Homework</div></div><div class="dl-meta"><span class="dl-date">${ds} · ${when}</span><span class="dl-badge ${urg}">${urgLabel}</span></div></div>`;
     }
     const c = courseById(dl.courseId);
-    return `<div class="dl-row"><div class="dl-stripe" style="background:${c.color}"></div><div class="dl-info"><div class="dl-t">${dl.title}</div><div class="dl-c">${c.name}</div></div><div class="dl-meta"><span class="dl-date">${ds} · ${when}</span><span class="dl-badge ${dl.urg}">${ul[dl.urg]}</span></div></div>`;
+    return `<div class="dl-row" onclick="openSheet('${dl.notifId}')"><div class="dl-stripe" style="background:${c.color}"></div><div class="dl-info"><div class="dl-t">${escHtml(dl.title)}</div><div class="dl-c">${escHtml(c.name)}</div></div><div class="dl-meta"><span class="dl-date">${ds} · ${when}</span><span class="dl-badge ${dl.urg}">${ul[dl.urg] || 'On track'}</span></div></div>`;
   }).join('');
 }

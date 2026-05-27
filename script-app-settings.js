@@ -19,7 +19,7 @@ function renderAccount() {
   const pillName = document.querySelector('.user-pill-name');
   if (ava) {
     if (picture) {
-      ava.innerHTML = `<img src="${picture}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer">`;
+      ava.innerHTML = `<img src="${escHtml(picture)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer">`;
     } else {
       ava.textContent = initials;
     }
@@ -31,7 +31,7 @@ function renderAccount() {
   const profEmail = document.getElementById('profEmailText');
   if (profAva) {
     if (picture) {
-      profAva.innerHTML = `<img src="${picture}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer">`;
+      profAva.innerHTML = `<img src="${escHtml(picture)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover" referrerpolicy="no-referrer">`;
     } else {
       profAva.textContent = initials;
     }
@@ -54,7 +54,7 @@ function renderSidebar() {
           const diff = Math.ceil((dl.date - nowDay) / 86400000);
           const when = diff === 0 ? 'Today' : diff === 1 ? 'Tomorrow' : `${diff}d`;
           const cls2 = dl.urg === 'urg' ? 'when-urg' : dl.urg === 'soo' ? 'when-soo' : 'when-ok';
-          return `<div class="mini-dl"><div class="mini-dl-bar" style="background:${c.color}"></div><div class="mini-dl-info"><div class="mini-dl-title">${dl.title}</div><div class="mini-dl-class">${c.name}</div></div><div class="mini-dl-when ${cls2}">${when}</div></div>`;
+          return `<div class="mini-dl" onclick="openSheet('${dl.notifId}')"><div class="mini-dl-bar" style="background:${c.color}"></div><div class="mini-dl-info"><div class="mini-dl-title">${escHtml(dl.title)}</div><div class="mini-dl-class">${escHtml(c.name)}</div></div><div class="mini-dl-when ${cls2}">${when}</div></div>`;
         }).join('')
       : `<div style="padding:16px;text-align:center;font-size:12px;color:var(--text-3)">No upcoming deadlines</div>`;
   }
@@ -73,8 +73,8 @@ function renderSidebar() {
       return `<div class="sidebar-cls${S.courseFilter===c.id?' active':''}" onclick="setCourseFilter('${c.id}',this)">
         <div class="sidebar-cls-dot" style="background:${c.color}"></div>
         <div class="sidebar-cls-info">
-          <div class="sidebar-cls-name">${c.name}</div>
-          ${c.section ? `<div class="sidebar-cls-teacher">${c.section}</div>` : ''}
+          <div class="sidebar-cls-name">${escHtml(c.name)}</div>
+          ${c.section ? `<div class="sidebar-cls-teacher">${escHtml(c.section)}</div>` : ''}
         </div>
         ${count > 0 ? `<div class="sidebar-cls-cnt" style="background:${c.color}18;color:${c.color};border-color:${c.color}30">${count}</div>` : ''}
       </div>`;
@@ -86,8 +86,8 @@ function renderSidebar() {
 function renderClasses() {
   document.getElementById('clsBody').innerHTML = S.courses.map(c => `
 <div class="cls-row">
-  <div class="cls-swatch" style="background:${c.color}; color:var(--invertext)">${c.abbr}</div>
-  <div class="cls-info"><b>${c.name}</b>${c.section ? `<span>${c.section}</span>` : ''}</div>
+  <div class="cls-swatch" style="background:${c.color}; color:var(--invertext)">${escHtml(c.abbr)}</div>
+  <div class="cls-info"><b>${escHtml(c.name)}</b>${c.section ? `<span>${escHtml(c.section)}</span>` : ''}</div>
   <label class="tog"><input type="checkbox" checked onchange="saved()"><div class="tog-track"></div></label>
 </div>`).join('');
 }
@@ -381,8 +381,9 @@ const GCAL_API = 'https://www.googleapis.com/calendar/v3';
 const GCAL_STORE_KEY = 'aul_gcal_ids';
 
 function gcalLoadMap() {
-  try { return JSON.parse(localStorage.getItem(GCAL_STORE_KEY) || '{}'); }
-  catch(e) { return {}; }
+  let obj = {};
+  try { obj = JSON.parse(localStorage.getItem(GCAL_STORE_KEY) || '{}'); } catch(e) {}
+  return Object.assign(Object.create(null), obj);
 }
 
 function gcalSaveMap(map) {

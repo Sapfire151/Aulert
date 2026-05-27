@@ -70,7 +70,8 @@ let _tokenClient;
 
 window.addEventListener('load', () => {
   // If already authenticated, go straight to the app
-  const saved = sessionStorage.getItem('aul_token');
+  const cookieMatch = document.cookie.match('(^|;) ?aul_token=([^;]*)(;|$)');
+  const saved = cookieMatch ? cookieMatch[2] : null;
   if (saved) {
     window.location.href = 'app.html';
     return;
@@ -110,7 +111,7 @@ function doAuth() {
 
 async function onToken(resp) {
   // Save token and navigate to the app page
-  sessionStorage.setItem('aul_token', resp.access_token);
+  document.cookie = `aul_token=${resp.access_token}; max-age=${resp.expires_in || 3600}; path=/; SameSite=Lax`;
   window.location.href = 'app.html';
 }
 
@@ -376,7 +377,10 @@ function toggleFaq(btn) {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [a[i], a[j]] = [a[j], a[i]];
+      const valI = a.at(i);
+      const valJ = a.at(j);
+      a.splice(i, 1, valJ);
+      a.splice(j, 1, valI);
     }
     return a;
   }
@@ -403,7 +407,7 @@ function toggleFaq(btn) {
         idx++;
         if (idx >= words.length) {
           // reshuffle for next round, avoid repeating last word
-          const last = words[words.length - 1];
+          const last = words.at(-1);
           words = shuffle(allWords);
           if (words[0] === last) words.push(words.shift());
           idx = 0;
@@ -458,12 +462,10 @@ function toggleFaq(btn) {
 
   // effectiveType → how many signal bars to light up
   function barsForType(type) {
-    return {
-      'slow-2g': 1,
-      '2g': 2,
-      '3g': 3,
-      '4g': 4,
-    }[type] || 4;
+    if (type === 'slow-2g') return 1;
+    if (type === '2g') return 2;
+    if (type === '3g') return 3;
+    return 4;
   }
 
   function update() {
@@ -497,7 +499,7 @@ function toggleFaq(btn) {
       wifi.arcs.forEach((arc, i) => {
         // arc[0]=inner, arc[1]=mid, arc[2]=outer
         // show based on bars: 4→all, 3→all, 2→inner+mid, 1→inner only
-        const threshold = [0, 2, 1, 0][i] || 0; // min bars needed
+        const threshold = i === 0 ? 0 : i === 1 ? 2 : i === 2 ? 1 : 0;
         if (arc) arc.style.opacity = (bars > threshold) ? '1' : DIM;
       });
       if (wifi.dot) wifi.dot.style.opacity = '1';

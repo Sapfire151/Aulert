@@ -88,13 +88,26 @@ async function loadTabs() {
 
 window.addEventListener('load', async () => {
   // 1. Check if returning from Google OAuth redirect
-  const hash = window.location.hash.substring(1);
-  const params = new URLSearchParams(hash);
-  const hashToken = params.get('access_token');
-  if (hashToken) {
-    const expiresIn = params.get('expires_in') || 3600;
-    document.cookie = `aul_token=${hashToken}; max-age=${expiresIn}; path=/; SameSite=Lax`;
-    window.history.replaceState(null, '', window.location.pathname + window.location.search);
+  const hashStr = window.location.hash.substring(1);
+  const searchStr = window.location.search.substring(1);
+  const paramsHash = new URLSearchParams(hashStr);
+  const paramsSearch = new URLSearchParams(searchStr);
+  
+  const token = paramsHash.get('access_token') || paramsSearch.get('access_token');
+  const error = paramsHash.get('error') || paramsSearch.get('error');
+
+  if (error) {
+    alert('Google Auth Error: ' + error);
+    window.location.hash = '';
+    window.history.replaceState(null, '', window.location.pathname);
+  }
+
+  if (token) {
+    const expiresIn = paramsHash.get('expires_in') || paramsSearch.get('expires_in') || 3600;
+    document.cookie = `aul_token=${token}; max-age=${expiresIn}; path=/; SameSite=Lax`;
+    sessionStorage.setItem('aul_token', token); // Fallback
+    window.location.hash = '';
+    window.history.replaceState(null, '', window.location.pathname);
   }
 
   // 2. Read token from cookie/session

@@ -72,14 +72,33 @@ const courseById = id => S.courses.find(c => c.id === id) || { color: 'var(--vio
 let _tokenClient;
 
 window.addEventListener('load', () => {
-  // 1. Check if returning from Google OAuth redirect
-  const hash = window.location.hash.substring(1);
-  const params = new URLSearchParams(hash);
-  const hashToken = params.get('access_token');
-  if (hashToken) {
-    const expiresIn = params.get('expires_in') || 3600;
-    document.cookie = `aul_token=${hashToken}; max-age=${expiresIn}; path=/; SameSite=Lax`;
+  // 1. Check if returning from Google OAuth redirect (check both hash and query string)
+  const hashStr = window.location.hash.substring(1);
+  const searchStr = window.location.search.substring(1);
+  const paramsHash = new URLSearchParams(hashStr);
+  const paramsSearch = new URLSearchParams(searchStr);
+  
+  const token = paramsHash.get('access_token') || paramsSearch.get('access_token');
+  const error = paramsHash.get('error') || paramsSearch.get('error');
+
+  if (error) {
+    alert('Google Auth Error: ' + error);
+    window.location.hash = '';
+    window.location.search = '';
+    return;
+  }
+
+  if (token) {
+    const expiresIn = paramsHash.get('expires_in') || paramsSearch.get('expires_in') || 3600;
+    document.cookie = `aul_token=${token}; max-age=${expiresIn}; path=/; SameSite=Lax`;
+    sessionStorage.setItem('aul_token', token); // Fallback if cookies are blocked
     window.location.hash = ''; // clear hash
+    
+    // Clear search string if it was used without reloading
+    if (searchStr) {
+      window.history.replaceState(null, '', window.location.pathname);
+    }
+    
     window.location.href = 'app.html';
     return;
   }

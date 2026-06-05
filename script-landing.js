@@ -72,7 +72,19 @@ const courseById = id => S.courses.find(c => c.id === id) || { color: 'var(--vio
 let _tokenClient;
 
 window.addEventListener('load', () => {
-  // If already authenticated, go straight to the app
+  // 1. Check if returning from Google OAuth redirect
+  const hash = window.location.hash.substring(1);
+  const params = new URLSearchParams(hash);
+  const hashToken = params.get('access_token');
+  if (hashToken) {
+    const expiresIn = params.get('expires_in') || 3600;
+    document.cookie = `aul_token=${hashToken}; max-age=${expiresIn}; path=/; SameSite=Lax`;
+    window.location.hash = ''; // clear hash
+    window.location.href = 'app.html';
+    return;
+  }
+
+  // 2. If already authenticated, go straight to the app
   const cookieMatch = document.cookie.match('(^|;) ?aul_token=([^;]*)(;|$)');
   const saved = cookieMatch ? cookieMatch[2] : null;
   if (saved) {
@@ -88,7 +100,8 @@ function waitForGSI(attempts = 0) {
     _tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: CLIENT_ID,
       scope: SCOPES,
-      callback: onToken,
+      ux_mode: 'redirect',
+      redirect_uri: window.location.origin + window.location.pathname,
     });
   } else if (attempts < 30) {
     setTimeout(() => waitForGSI(attempts + 1), 200);
@@ -106,7 +119,8 @@ function doAuth() {
   _tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
-    callback: onToken,
+    ux_mode: 'redirect',
+    redirect_uri: window.location.origin + window.location.pathname,
     prompt: 'select_account',
   });
   _tokenClient.requestAccessToken();

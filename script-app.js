@@ -146,8 +146,7 @@ function waitForGSI(attempts = 0) {
     _tokenClient = google.accounts.oauth2.initTokenClient({
       client_id: CLIENT_ID,
       scope: SCOPES,
-      ux_mode: 'redirect',
-      redirect_uri: window.location.origin + window.location.pathname,
+      callback: onToken,
     });
   } else if (attempts < 30) {
     setTimeout(() => waitForGSI(attempts + 1), 200);
@@ -168,8 +167,7 @@ function doAuth() {
   _tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
-    ux_mode: 'redirect',
-    redirect_uri: window.location.origin + window.location.pathname,
+    callback: onToken,
     prompt: 'select_account',
   });
   const btn = document.getElementById('gBtn');

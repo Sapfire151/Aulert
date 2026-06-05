@@ -63,37 +63,22 @@ function pickDay(d, el) {
 }
 
 function exportToGoogleCalendar() {
-  const nowDay = new Date(); nowDay.setHours(0,0,0,0);
-  const list = S.deadlines.filter(dl => dl.date >= nowDay).sort((a,b) => a.date - b.date);
-  if (!list.length) {
-    showToast('No deadlines', 'Add some assignments first to export to Google Calendar');
+  if (S.settings.gcalSync) {
+    showToast('Syncing...', 'Your deadlines are already set to sync. Forcing a refresh now.');
+    gcalSyncAll();
     return;
   }
-  const pad = n => String(n).padStart(2,'0');
-  const toICSDate = d => `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}T235900Z`;
-  const dtstamp = () => {
-    const n = new Date();
-    return `${n.getFullYear()}${pad(n.getMonth()+1)}${pad(n.getDate())}T${pad(n.getHours())}${pad(n.getMinutes())}${pad(n.getSeconds())}Z`;
-  };
-  let ics = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//Aulert//Classroom Deadlines//EN\r\n';
-  list.forEach((dl, i) => {
-    const c = courseById(dl.courseId);
-    const start = toICSDate(dl.date);
-    const end = new Date(dl.date); end.setDate(end.getDate()+1);
-    const endStr = toICSDate(end);
-    const esc = s => String(s).replace(/[\\,;]/g, '\\$&');
-    const summary = esc(dl.title || 'Deadline');
-    const desc = esc(`${c.name} — ${dl.title || 'Deadline'}`);
-    ics += `BEGIN:VEVENT\r\nUID:aulert-${dl.notifId || i}-${Date.now()}@aulert.app\r\nDTSTAMP:${dtstamp()}\r\nDTSTART:${start}\r\nDTEND:${endStr}\r\nSUMMARY:${summary}\r\nDESCRIPTION:${desc}\r\nEND:VEVENT\r\n`;
-  });
-  ics += 'END:VCALENDAR';
-  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = 'Aulert-Deadlines.ics';
-  a.click();
-  URL.revokeObjectURL(a.href);
-  showToast('Exported!', `Add ${list.length} deadline${list.length!==1?'s':''} to Google Calendar via import`);
+  
+  S.settings.gcalSync = true;
+  saveSettings();
+  
+  // Update UI if settings tab is loaded
+  const toggle = document.getElementById('set_gcalSync');
+  if (toggle) toggle.checked = true;
+  if (typeof gcalRenderStatus === 'function') gcalRenderStatus();
+  
+  showToast('Calendar Sync Enabled', 'Syncing deadlines to Google Calendar...');
+  gcalSyncAll();
 }
 
 function renderDl(day) {

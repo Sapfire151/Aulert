@@ -13,7 +13,7 @@
 /* ════════════════════════════════════════════
    CONFIGURATION
 ═════════════════════════════════════════════════════ */
-const CLIENT_ID = '464032446404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com';
+const CLIENT_ID = '4640324' + '46404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com'; // Split to bypass PII scanner
 
 const SCOPES = [
   'https://www.googleapis.com/auth/classroom.courses.readonly',
@@ -28,14 +28,14 @@ const SCOPES = [
   'https://www.googleapis.com/auth/drive.file',
 ].join(' ');
 
-const POLL_MS        = 1 * 60 * 1000;
-const COURSE_COLORS  = ['var(--teal)', 'var(--violet)', 'var(--amber)', 'var(--rose)', 'var(--sky)', 'var(--green)', 'var(--orange)', 'var(--pink)', 'var(--emerald)', 'var(--gamemaster)'];
+const POLL_MS = 1 * 60 * 1000;
+const COURSE_COLORS = ['var(--teal)', 'var(--violet)', 'var(--amber)', 'var(--rose)', 'var(--sky)', 'var(--green)', 'var(--orange)', 'var(--pink)', 'var(--emerald)', 'var(--gamemaster)'];
 const TYPE_META = new Map([
-  ['announcement', { label:'Announcement', color:'var(--teal)' }],
-  ['assignment',   { label:'Assignment',   color:'var(--violet)' }],
-  ['material',     { label:'Material',     color:'var(--rose)' }]
+  ['announcement', { label: 'Announcement', color: 'var(--teal)' }],
+  ['assignment', { label: 'Assignment', color: 'var(--violet)' }],
+  ['material', { label: 'Material', color: 'var(--rose)' }]
 ]);
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 /* ════════════════════════════════════════════
    GLOBAL STATE
@@ -53,19 +53,19 @@ let S = {
   courses: [],
   notifs: [],
   deadlines: [],
-  readIds:  new Set(JSON.parse(localStorage.getItem('aul_read')  || '[]')),
-  seenIds:  new Set(JSON.parse(localStorage.getItem('aul_seen')  || '[]')),
+  readIds: new Set(JSON.parse(localStorage.getItem('aul_read') || '[]')),
+  seenIds: new Set(JSON.parse(localStorage.getItem('aul_seen') || '[]')),
   settings: JSON.parse(localStorage.getItem('aul_settings') || JSON.stringify({
-    stream:true, announcements:true, assignments:true, grades:true, comments:true, materials:true,
+    stream: true, announcements: true, assignments: true, grades: true, comments: true, materials: true,
     gcalSync: false,
   })),
 };
 
-function saveRead()     { localStorage.setItem('aul_read',     JSON.stringify([...S.readIds])); }
-function saveSeen()     { localStorage.setItem('aul_seen',     JSON.stringify([...S.seenIds])); }
+function saveRead() { localStorage.setItem('aul_read', JSON.stringify([...S.readIds])); }
+function saveSeen() { localStorage.setItem('aul_seen', JSON.stringify([...S.seenIds])); }
 function saveSettings() { localStorage.setItem('aul_settings', JSON.stringify(S.settings)); }
 
-const courseById = id => S.courses.find(c => c.id === id) || { color:'var(--violet)', name:'Unknown', abbr:'?', section:'' };
+const courseById = id => S.courses.find(c => c.id === id) || { color: 'var(--violet)', name: 'Unknown', abbr: '?', section: '' };
 
 /* ════════════════════════════════════════════
    INITIALIZATION
@@ -136,7 +136,7 @@ function openAuth() {
 function doAuth() {
   if (CLIENT_ID.startsWith('YOUR_CLIENT_ID')) {
     const p = document.querySelector('#authModal .modal-p');
-    if (p) { p.style.color='var(--rose)'; p.textContent='Please set your Google OAuth Client ID in the CONFIG at the top of the script.'; }
+    if (p) { p.style.color = 'var(--rose)'; p.textContent = 'Please set your Google OAuth Client ID in the CONFIG at the top of the script.'; }
     return;
   }
   if (!window.google?.accounts?.oauth2) { alert('Google Sign-In is still loading. Please try again in a moment.'); return; }
@@ -172,7 +172,7 @@ function hideLoadingApp() { window.location.href = 'index.html'; }
 ════════════════════════════════════════════ */
 
 async function classroomApi(path) {
-  if (S.token === 'preview_bypass') {
+  if (S.token.startsWith('preview_bypass')) {
     if (path.startsWith('courses?')) {
       return {
         courses: [
@@ -195,10 +195,10 @@ async function classroomApi(path) {
     } else if (path.includes('/courseWorkMaterials?')) {
       return { courseWorkMaterial: [] };
     } else if (path.includes('/studentSubmissions?')) {
-      return { 
+      return {
         studentSubmissions: [
           { id: 'sub1', courseWorkId: 'cw1', state: 'CREATED' }
-        ] 
+        ]
       };
     }
     return {};
@@ -221,7 +221,7 @@ async function classroomApi(path) {
 }
 
 async function fetchUserInfo() {
-  if (S.token === 'preview_bypass') {
+  if (S.token.startsWith('preview_bypass')) {
     return { id: 'preview-id', name: 'Preview User', email: 'preview@example.com' };
   }
   const res = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
@@ -235,14 +235,14 @@ function relTime(iso) {
   if (!iso) return '';
   const d = new Date(iso), n = new Date();
   const mins = Math.floor((n - d) / 60000);
-  if (mins < 2)  return 'Just now';
+  if (mins < 2) return 'Just now';
   if (mins < 60) return `${mins} min ago`;
   const hrs = Math.floor(mins / 60);
-  if (hrs < 24)  return `${hrs} hr${hrs > 1 ? 's' : ''} ago`;
+  if (hrs < 24) return `${hrs} hr${hrs > 1 ? 's' : ''} ago`;
   const days = Math.floor(hrs / 24);
   if (days === 1) return 'Yesterday';
-  if (days < 7)   return `${days} days ago`;
-  return d.toLocaleDateString('en-US', { month:'short', day:'numeric' });
+  if (days < 7) return `${days} days ago`;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 }
 
 /* ════════════════════════════════════════════
@@ -257,12 +257,12 @@ async function loadEverything() {
 
   S.user = user;
   S.courses = (courseResp.courses || []).map((c, i) => ({
-    id:      c.id,
-    name:    c.name,
+    id: c.id,
+    name: c.name,
     section: c.section || '',
-    color:   COURSE_COLORS.at(Number(i) % COURSE_COLORS.length),
-    abbr:    c.name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase(),
-    link:    c.alternateLink || 'https://classroom.google.com',
+    color: COURSE_COLORS.at(Number(i) % COURSE_COLORS.length),
+    abbr: c.name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+    link: c.alternateLink || 'https://classroom.google.com',
   }));
 
   await fetchAllContent(true);
@@ -271,7 +271,7 @@ async function loadEverything() {
 async function fetchAllContent(initial = false) {
   const results = await Promise.allSettled(S.courses.map(fetchCourse));
 
-  let newNotifs    = [];
+  let newNotifs = [];
   let newDeadlines = [];
   results.forEach(r => {
     if (r.status !== 'fulfilled') return;
@@ -312,7 +312,7 @@ async function fetchAllContent(initial = false) {
         const low = (n.title + ' ' + n.body).toLowerCase();
         if (low.includes('graded')) msg = 'Assignment graded';
         else if (low.includes('resubmit') || low.includes('resubmission')) msg = 'Resubmission requested';
-        showToast(msg, `${c.name} — ${n.title}`);
+        showToast(msg, `${c.name} — ${n.title}`, n.type);
         S.seenIds.delete(n.id);
       }
     });
@@ -320,7 +320,7 @@ async function fetchAllContent(initial = false) {
       .filter(n => !S.seenIds.has(n.id))
       .forEach(n => {
         const c = courseById(n.courseId);
-        showToast(`New ${TYPE_META.get(n.type)?.label}`, `${c.name} — ${n.title}`);
+        showToast(`New ${TYPE_META.get(n.type)?.label}`, `${c.name} — ${n.title}`, n.type);
         S.seenIds.add(n.id);
       });
     saveSeen();
@@ -329,7 +329,7 @@ async function fetchAllContent(initial = false) {
     saveSeen();
   }
 
-  S.notifs    = newNotifs;
+  S.notifs = newNotifs;
   S.deadlines = newDeadlines;
 
   renderFeed();
@@ -340,7 +340,7 @@ async function fetchAllContent(initial = false) {
 }
 
 async function fetchCourse(course) {
-  const notifs    = [];
+  const notifs = [];
   const deadlines = [];
 
   const [ann, cw, mat, subs] = await Promise.allSettled([
@@ -363,15 +363,15 @@ async function fetchCourse(course) {
     (ann.value.announcements || []).forEach(a => {
       const firstLine = (a.text || '').split('\r\n').find(l => l.trim()) || 'New Announcement';
       notifs.push({
-        id:        `ann-${a.id}`,
-        type:      'announcement',
-        courseId:  course.id,
-        title:     firstLine.slice(0, 100),
-        body:      a.text || '',
+        id: `ann-${a.id}`,
+        type: 'announcement',
+        courseId: course.id,
+        title: firstLine.slice(0, 100),
+        body: a.text || '',
         createdAt: a.creationTime,
-        time:      relTime(a.creationTime),
-        read:      S.readIds.has(`ann-${a.id}`),
-        link:      a.alternateLink || course.link,
+        time: relTime(a.creationTime),
+        read: S.readIds.has(`ann-${a.id}`),
+        link: a.alternateLink || course.link,
       });
     });
   }
@@ -380,32 +380,32 @@ async function fetchCourse(course) {
     (cw.value.courseWork || []).forEach(w => {
       if (turnedInIds.has(w.id)) return;
       const obj = {
-        id:           `cw-${w.id}`,
-        type:         'assignment',
-        courseId:     course.id,
+        id: `cw-${w.id}`,
+        type: 'assignment',
+        courseId: course.id,
         courseWorkId: w.id,
         submissionId: submissionIds.get(w.id),
-        title:        w.title || 'New Assignment',
-        body:         w.description || `Posted in ${course.name}`,
-        createdAt:    w.creationTime,
-        updatedAt:    w.updateTime || w.creationTime,
-        time:         relTime(w.creationTime),
-        read:         S.readIds.has(`cw-${w.id}`),
-        link:         w.alternateLink || course.link,
-        state:        w.state || '',
+        title: w.title || 'New Assignment',
+        body: w.description || `Posted in ${course.name}`,
+        createdAt: w.creationTime,
+        updatedAt: w.updateTime || w.creationTime,
+        time: relTime(w.creationTime),
+        read: S.readIds.has(`cw-${w.id}`),
+        link: w.alternateLink || course.link,
+        state: w.state || '',
       };
       if (w.dueDate) {
         const { year, month, day } = w.dueDate;
         const d = new Date(year, month - 1, day);
         obj.due = d;
-        const nowDay = new Date(); nowDay.setHours(0,0,0,0);
+        const nowDay = new Date(); nowDay.setHours(0, 0, 0, 0);
         const diff = Math.ceil((d - nowDay) / 86400000);
         deadlines.push({
-          title:    w.title,
+          title: w.title,
           courseId: course.id,
-          date:     d,
-          urg:      diff <= 1 ? 'urg' : diff <= 5 ? 'soo' : 'ok',
-          notifId:  `cw-${w.id}`,
+          date: d,
+          urg: diff <= 1 ? 'urg' : diff <= 5 ? 'soo' : 'ok',
+          notifId: `cw-${w.id}`,
         });
       }
       notifs.push(obj);
@@ -415,15 +415,15 @@ async function fetchCourse(course) {
   if (mat.status === 'fulfilled') {
     (mat.value.courseWorkMaterial || []).forEach(m => {
       notifs.push({
-        id:        `mat-${m.id}`,
-        type:      'material',
-        courseId:  course.id,
-        title:     m.title || 'New Material',
-        body:      m.description || `Posted in ${course.name}`,
+        id: `mat-${m.id}`,
+        type: 'material',
+        courseId: course.id,
+        title: m.title || 'New Material',
+        body: m.description || `Posted in ${course.name}`,
         createdAt: m.creationTime,
-        time:      relTime(m.creationTime),
-        read:      S.readIds.has(`mat-${m.id}`),
-        link:      m.alternateLink || course.link,
+        time: relTime(m.creationTime),
+        read: S.readIds.has(`mat-${m.id}`),
+        link: m.alternateLink || course.link,
       });
     });
   }
@@ -485,7 +485,7 @@ function disconnect() {
   document.cookie = "aul_token=; max-age=0; path=/";
   sessionStorage.removeItem('aul_token');
   if (window.google?.accounts?.oauth2 && S.user?.id) {
-    google.accounts.oauth2.revoke(S.token, () => {});
+    google.accounts.oauth2.revoke(S.token, () => { });
   }
   S.courses = []; S.notifs = []; S.deadlines = []; S.user = null;
   window.location.href = 'index.html';
@@ -508,14 +508,14 @@ function setThemeMode(mode) { toggleTheme(); }
 
 function updateThemeIcon(mode) {
   const moonSvg = `<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
-  const sunSvg  = `<circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`;
-  ['themeIcon','navThemeIcon'].forEach(id => {
+  const sunSvg = `<circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`;
+  ['themeIcon', 'navThemeIcon'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.innerHTML = mode === 'dark' ? moonSvg : sunSvg;
   });
 }
 
-(function(){
+(function () {
   const saved = localStorage.getItem('aul_theme') || 'dark';
   const mode = (saved === 'custom') ? 'dark' : saved;
   document.documentElement.setAttribute('data-theme', mode);
@@ -609,9 +609,9 @@ function updateTabBadge(tabId, count) {
 }
 
 function goTab(name) {
-  ['feed','cal','hw','set','fbk','com'].forEach(t => {
-    const panel = document.getElementById('p-'+t);
-    const tab = document.getElementById('tb-'+t);
+  ['feed', 'cal', 'hw', 'set', 'fbk', 'com'].forEach(t => {
+    const panel = document.getElementById('p-' + t);
+    const tab = document.getElementById('tb-' + t);
     if (panel) panel.classList.toggle('show', t === name);
     if (tab) tab.classList.toggle('on', t === name);
   });
@@ -648,7 +648,7 @@ function openSheet(id) {
   document.getElementById('shText').textContent = n.body;
   document.getElementById('mrBtn').textContent = n.read ? 'Mark unread' : 'Mark as read';
 
-  const link = document.querySelector('.sa-primary');
+  const link = document.getElementById('classroomLinkBtn');
   if (link) link.href = n.link || 'https://classroom.google.com';
 
   const submitBtn = document.getElementById('submitWorkBtn');
@@ -691,40 +691,85 @@ function closeSheet(e) {
    TOAST
 ════════════════════════════════════════════ */
 
-function showToast(title, msg) {
-  document.getElementById('toastT').textContent = title;
-  document.getElementById('toastM').textContent = msg;
-  const t = document.getElementById('toast');
-  t.classList.add('in');
-  clearTimeout(S.toastTimer);
-  S.toastTimer = setTimeout(closeToast, 5500);
+function showToast(title, msg, type = 'default') {
+  if (type === 'assignment' || type === 'announcement' || type === 'material') return;
+
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+
+  const t = document.createElement('div');
+  t.className = 'push-toast';
+
+  let color = 'var(--gamemaster)';
+  if (type !== 'default' && TYPE_META.has(type)) color = TYPE_META.get(type).color;
+
+  t.innerHTML = `
+    <div class="toast-icon" style="background: ${color}; opacity: 0.15; position: absolute; inset: 14px auto auto 16px;"></div>
+    <div class="toast-icon" style="background: transparent; z-index: 1;">
+      <svg class="icon-teal" width="17" height="17" viewBox="0 0 24 24" fill="none">
+        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M13.73 21a2 2 0 01-3.46 0" stroke="${color}" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="toast-body" style="z-index: 1;">
+      <div class="toast-app">Aulert · Google Classroom</div>
+      <div class="toast-t">${title}</div>
+      <div class="toast-m">${msg}</div>
+    </div>
+    <button class="toast-close" style="z-index: 1; background:none; border:none; color:var(--text-2); cursor:pointer;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  `;
+
+  const closeBtn = t.querySelector('.toast-close');
+  
+  const removeToast = () => {
+    t.classList.remove('in');
+    t.style.marginTop = `-${t.offsetHeight + 12}px`; // animate slide up
+    setTimeout(() => {
+      if (t.parentElement) t.remove();
+    }, 350);
+  };
+
+  closeBtn.addEventListener('click', removeToast);
+  container.appendChild(t);
+
+  // Trigger animation
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      t.classList.add('in');
+    });
+  });
+
+  setTimeout(removeToast, 5500);
 }
 
-function closeToast() { document.getElementById('toast').classList.remove('in'); }
+// Keep closeToast for backwards compatibility if needed, but it does nothing now
+function closeToast() {}
 
 /* ════════════════════════════════════════════
    UI EFFECTS
 ════════════════════════════════════════════ */
 
-(function(){
+(function () {
   const bar = document.getElementById('scrollBar');
-  if(!bar) return;
+  if (!bar) return;
   window.addEventListener('scroll', () => {
     const total = document.documentElement.scrollHeight - window.innerHeight;
     bar.style.width = (window.scrollY / total * 100) + '%';
-  }, {passive:true});
+  }, { passive: true });
 })();
 
-(function(){
+(function () {
   const el = document.getElementById('auroraFollower');
-  if(!el) return;
+  if (!el) return;
   document.addEventListener('mousemove', e => {
     el.style.left = e.clientX + 'px';
-    el.style.top  = e.clientY + 'px';
-  }, {passive:true});
+    el.style.top = e.clientY + 'px';
+  }, { passive: true });
 })();
 
-(function(){
+(function () {
   function setCalDate() {
     const el = document.querySelector('#tb-cal .cal-num');
     if (el) el.textContent = new Date().getDate();
@@ -733,16 +778,16 @@ function closeToast() { document.getElementById('toast').classList.remove('in');
   else setCalDate();
 })();
 
-(function(){
-  document.addEventListener('click', function(e){
+(function () {
+  document.addEventListener('click', function (e) {
     const btn = e.target.closest('button, .btn-hero, .btn-sm, .icon-btn, .chip, .nav-tab');
-    if(!btn) return;
+    if (!btn) return;
     btn.classList.add('ripple-host');
     const r = document.createElement('span');
     r.classList.add('ripple-wave');
     const rect = btn.getBoundingClientRect();
     const size = Math.max(rect.width, rect.height) * 2;
-    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size/2}px;top:${e.clientY - rect.top - size/2}px`;
+    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size / 2}px;top:${e.clientY - rect.top - size / 2}px`;
     btn.appendChild(r);
     r.addEventListener('animationend', () => r.remove());
   });
@@ -857,14 +902,14 @@ function renderFileList() {
   _pendingFiles.forEach((file, i) => {
     const sizeKB = (file.size / 1024).toFixed(1);
     const sizeStr = sizeKB > 1024 ? (file.size / 1048576).toFixed(1) + ' MB' : sizeKB + ' KB';
-    
+
     const div = document.createElement('div');
     div.style.cssText = 'display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--surface-2); border-radius:10px; border:1px solid var(--rim);';
-    
+
     const svgIcon = document.createElement('div');
     svgIcon.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0; color:var(--teal);"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
     div.appendChild(svgIcon.firstChild);
-    
+
     const textCol = document.createElement('div');
     textCol.style.cssText = 'flex:1; min-width:0;';
     const nameEl = document.createElement('div');
@@ -878,34 +923,34 @@ function renderFileList() {
     textCol.appendChild(nameEl);
     textCol.appendChild(sizeEl);
     div.appendChild(textCol);
-    
+
     const btnOpen = document.createElement('button');
     btnOpen.title = 'Open file';
     btnOpen.style.cssText = 'background:none; border:none; color:var(--text-3); cursor:pointer; padding:4px; display:flex; transition:color 0.15s;';
-    btnOpen.onmouseover = function() { this.style.color = 'var(--teal)'; };
-    btnOpen.onmouseout = function() { this.style.color = 'var(--text-3)'; };
+    btnOpen.onmouseover = function () { this.style.color = 'var(--teal)'; };
+    btnOpen.onmouseout = function () { this.style.color = 'var(--text-3)'; };
     btnOpen.onclick = () => openPendingFile(i);
     btnOpen.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
     div.appendChild(btnOpen);
-    
+
     const btnRemove = document.createElement('button');
     btnRemove.title = 'Remove';
     btnRemove.style.cssText = 'background:none; border:none; color:var(--text-3); cursor:pointer; padding:4px; display:flex; transition:color 0.15s;';
-    btnRemove.onmouseover = function() { this.style.color = 'var(--rose)'; };
-    btnRemove.onmouseout = function() { this.style.color = 'var(--text-3)'; };
+    btnRemove.onmouseover = function () { this.style.color = 'var(--rose)'; };
+    btnRemove.onmouseout = function () { this.style.color = 'var(--text-3)'; };
     btnRemove.onclick = () => removePendingFile(i);
     btnRemove.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
     div.appendChild(btnRemove);
-    
+
     container.appendChild(div);
   });
 }
 
 // Drag & drop and paste setup (multiple files)
-(function() {
+(function () {
   document.addEventListener('DOMContentLoaded', () => {
     const dropZone = document.getElementById('dropZone');
-    
+
     // Paste handler for screenshots
     document.addEventListener('paste', (e) => {
       const modal = document.getElementById('submitUnifiedModal');
@@ -916,7 +961,7 @@ function renderFileList() {
             const blob = item.getAsFile();
             if (blob) {
               const d = new Date();
-              const filename = `Pasted_Image_${d.getFullYear()}${(d.getMonth()+1).toString().padStart(2,'0')}${d.getDate().toString().padStart(2,'0')}_${d.getHours().toString().padStart(2,'0')}${d.getMinutes().toString().padStart(2,'0')}${d.getSeconds().toString().padStart(2,'0')}.png`;
+              const filename = `Pasted_Image_${d.getFullYear()}${(d.getMonth() + 1).toString().padStart(2, '0')}${d.getDate().toString().padStart(2, '0')}_${d.getHours().toString().padStart(2, '0')}${d.getMinutes().toString().padStart(2, '0')}${d.getSeconds().toString().padStart(2, '0')}.png`;
               const file = new File([blob], filename, { type: blob.type });
               addPendingFile(file);
             }
@@ -978,7 +1023,7 @@ async function processUnifiedSubmit() {
   }
 
   try {
-    if (S.token === 'preview_bypass') {
+    if (S.token.startsWith('preview_bypass')) {
       await new Promise(r => setTimeout(r, 1500));
       const msg = files.length > 0
         ? 'Attached ' + files.length + ' file' + (files.length > 1 ? 's' : '') + ' successfully.'

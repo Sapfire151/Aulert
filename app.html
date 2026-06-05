@@ -1,51 +1,60 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Aulert</title>
-<link rel="icon" type="image/webp"
-    href="data:image/webp;base64,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cDovL25zLmF0dHJpYnV0aW9uLmNvbS9hZHMvMS4wLyc+CiAgPEF0dHJpYjpBZHM+CiAgIDxyZGY6U2VxPgogICAgPHJkZjpsaSByZGY6cGFyc2VUeXBlPSdSZXNvdXJjZSc+CiAgICAgPEF0dHJpYjpDcmVhdGVkPjIwMjYtMDUtMTc8L0F0dHJpYjpDcmVhdGVkPgogICAgIDxBdHRyaWI6RGF0YT57JnF1b3Q7ZG9jJnF1b3Q7OiZxdW90O0RBSEo3VFU4UUhVJnF1b3Q7LCZxdW90O3VzZXImcXVvdDs6JnF1b3Q7VUFGa0JDZExxRkkmcXVvdDssJnF1b3Q7YnJhbmQmcXVvdDs6JnF1b3Q7QkFGa0JNcUowTW8mcXVvdDt9PC9BdHRyaWI6RGF0YT4KICAgICA8QXR0cmliOkV4dElkPjVhMGJhZmE4LTFhNWMtNDY0NS1hZjhhLWU0YjY2NWNmZGU3YTwvQXR0cmliOkV4dElkPgogICAgIDxBdHRyaWI6RmJJZD41MjUyNjU5MTQxNzk1ODA8L0F0dHJpYjpGYklkPgogICAgIDxBdHRyaWI6VG91Y2hUeXBlPjI8L0F0dHJpYjpUb3VjaFR5cGU+CiAgICA8L3JkZjpsaT4KICAgPC9yZGY6U2VxPgogIDwvQXR0cmliOkFkcz4KIDwvcmRmOkRlc2NyaXB0aW9uPgoKIDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PScnCiAgeG1sbnM6ZGM9J2h0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvJz4KICA8ZGM6dGl0bGU+CiAgIDxyZGY6QWx0PgogICAgPHJkZjpsaSB4bWw6bGFuZz0neC1kZWZhdWx0Jz5VbnRpdGxlZCBkZXNpZ24gLSAxPC9yZGY6bGk+CiAgIDwvcmRmOkFsdD4KICA8L2RjOnRpdGxlPgogPC9yZGY6RGVzY3JpcHRpb24+CgogPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9JycKICB4bWxuczpwZGY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vcGRmLzEuMy8nPgogIDxwZGY6QXV0aG9yPk5ld2JpZTwvcGRmOkF1dGhvcj4KIDwvcmRmOkRlc2NyaXB0aW9uPgoKIDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PScnCiAgeG1sbnM6eG1wPSdodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvJz4KICA8eG1wOkNyZWF0b3JUb29sPkNhbnZhIGRvYz1EQUhKN1RVOFFIVSB1c2VyPVVBRmtCQ2RMcUZJIGJyYW5kPUJBRmtCTXFKME1vPC94bXA6Q3JlYXRvclRvb2w+CiA8L3JkZjpEZXNjcmlwdGlvbj4KPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KPD94cGFja2V0IGVuZD0ncic/PgA=">
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<!-- EmailJS SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@300;400;500;600;700&family=Pridi:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="styles.css"/>
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-</head>
-<body>
-<div id="scrollBar"></div>
-<div id="auroraFollower"></div>
-<div class="aurora">
-  <div class="orb orb-1"></div>
-  <div class="orb orb-2"></div>
-  <div class="orb orb-3"></div>
-</div>
 
-<!-- APP -->
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>Aulert</title>
+  <link rel="icon" type="image/webp"
+    href="data:image/webp;base64,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cDovL25zLmF0dHJpYnV0aW9uLmNvbS9hZHMvMS4wLyc+CiAgPEF0dHJpYjpBZHM+CiAgIDxyZGY6U2VxPgogICAgPHJkZjpsaSByZGY6cGFyc2VUeXBlPSdSZXNvdXJjZSc+CiAgICAgPEF0dHJpYjpDcmVhdGVkPjIwMjYtMDUtMTc8L0F0dHJpYjpDcmVhdGVkPgogICAgIDxBdHRyaWI6RGF0YT57JnF1b3Q7ZG9jJnF1b3Q7OiZxdW90O0RBSEo3VFU4UUhVJnF1b3Q7LCZxdW90O3VzZXImcXVvdDs6JnF1b3Q7VUFGa0JDZExxRkkmcXVvdDssJnF1b3Q7YnJhbmQmcXVvdDs6JnF1b3Q7QkFGa0JNcUowTW8mcXVvdDt9PC9BdHRyaWI6RGF0YT4KICAgICA8QXR0cmliOkV4dElkPjVhMGJhZmE4LTFhNWMtNDY0NS1hZjhhLWU0YjY2NWNmZGU3YTwvQXR0cmliOkV4dElkPgogICAgIDxBdHRyaWI6RmJJZD41MjUyNjU5MTQxNzk1ODA8L0F0dHJpYjpGYklkPgogICAgIDxBdHRyaWI6VG91Y2hUeXBlPjI8L0F0dHJpYjpUb3VjaFR5cGU+CiAgICA8L3JkZjpsaT4KICAgPC9yZGY6U2VxPgogIDwvQXR0cmliOkFkcz4KIDwvcmRmOkRlc2NyaXB0aW9uPgoKIDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PScnCiAgeG1sbnM6ZGM9J2h0dHA6Ly9wdXJsLm9yZy9kYy9lbGVtZW50cy8xLjEvJz4KICA8ZGM6dGl0bGU+CiAgIDxyZGY6QWx0PgogICAgPHJkZjpsaSB4bWw6bGFuZz0neC1kZWZhdWx0Jz5VbnRpdGxlZCBkZXNpZ24gLSAxPC9yZGY6bGk+CiAgIDwvcmRmOkFsdD4KICA8L2RjOnRpdGxlPgogPC9yZGY6RGVzY3JpcHRpb24+CgogPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9JycKICB4bWxuczpwZGY9J2h0dHA6Ly9ucy5hZG9iZS5jb20vcGRmLzEuMy8nPgogIDxwZGY6QXV0aG9yPk5ld2JpZTwvcGRmOkF1dGhvcj4KIDwvcmRmOkRlc2NyaXB0aW9uPgoKIDxyZGY6RGVzY3JpcHRpb24gcmRmOmFib3V0PScnCiAgeG1sbnM6eG1wPSdodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvJz4KICA8eG1wOkNyZWF0b3JUb29sPkNhbnZhIGRvYz1EQUhKN1RVOFFIVSB1c2VyPVVBRmtCQ2RMcUZJIGJyYW5kPUJBRmtCTXFKME1vPC94bXA6Q3JlYXRvclRvb2w+CiA8L3JkZjpEZXNjcmlwdGlvbj4KPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KPD94cGFja2V0IGVuZD0ncic/PgA=">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@300;400;500;600;700&family=Pridi:wght@300;400;500;600&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body>
+  <div id="scrollBar"></div>
+  <div id="auroraFollower"></div>
+  <div class="aurora">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+  </div>
+
+  <!-- APP -->
 
   <!-- Top Nav -->
   <nav class="app-nav">
     <div class="nav-logo">Aulert</div>
     <div class="nav-tabs">
       <button class="nav-tab on" id="tb-feed" onclick="bellRingAnim(this);goTab('feed',this)">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
         <span>Notifications</span>
         <span class="tab-badge" id="badge-feed"></span>
       </button>
       <button class="nav-tab" id="tb-cal" onclick="calFlipAnim(this);goTab('cal',this)">
         <svg class="nav-icon" id="cal-svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
           <!-- body -->
-          <rect class="cal-body" x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/>
+          <rect class="cal-body" x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2" />
           <!-- header bar fill -->
-          <rect class="cal-header" x="3" y="4" width="18" height="6" rx="2" fill="currentColor" opacity="0.15"/>
+          <rect class="cal-header" x="3" y="4" width="18" height="6" rx="2" fill="currentColor" opacity="0.15" />
           <!-- ring pins -->
-          <path class="cal-rings" d="M8 2v4M16 2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path class="cal-rings" d="M8 2v4M16 2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           <!-- divider line -->
-          <path class="cal-line" d="M3 10h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+          <path class="cal-line" d="M3 10h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
           <!-- date number "7" -->
-          <text class="cal-num" x="12" y="20" text-anchor="middle" font-size="8" font-weight="700" fill="currentColor" font-family="inherit">7</text>
+          <text class="cal-num" x="12" y="20" text-anchor="middle" font-size="8" font-weight="700" fill="currentColor"
+            font-family="inherit">7</text>
 
         </svg>
         <span>Calendar</span>
@@ -54,32 +63,41 @@
       <button class="nav-tab" id="tb-hw" onclick="hwCheckAnim(this);goTab('hw',this)">
         <svg class="nav-icon" id="hw-svg" width="16" height="16" viewBox="0 0 24 24" fill="none">
           <!-- clipboard body -->
-          <path class="hw-board" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path class="hw-board" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
           <!-- clip tab -->
-          <rect class="hw-clip" x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="2"/>
+          <rect class="hw-clip" x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="2" />
           <!-- line 1 (fades out on click) -->
-          <path class="hw-line1" d="M9 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path class="hw-line1" d="M9 12h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           <!-- line 2 (fades out on click) -->
-          <path class="hw-line2" d="M9 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <path class="hw-line2" d="M9 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           <!-- checkmark drawn directly on the note, no circle -->
-          <path class="hw-check-draw" d="M8 13.5l2.5 2.5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="20" stroke-dashoffset="20" opacity="0"/>
+          <path class="hw-check-draw" d="M8 13.5l2.5 2.5 5-5" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="20" stroke-dashoffset="20" opacity="0" />
         </svg>
         <span>Homework</span>
         <span class="tab-badge" id="badge-hw"></span>
       </button>
 
       <button class="nav-tab" id="tb-set" onclick="gearSpinAnim(this);goTab('set',this)">
-        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <svg class="nav-icon" width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+          <path
+            d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
         <span>Settings</span>
       </button>
       <button class="nav-tab" id="tb-fbk" onclick="fbkPopAnim(this);goTab('fbk',this)">
         <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
           <!-- bubble body -->
-          <path class="fbk-body" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path class="fbk-body" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor"
+            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
           <!-- three typing dots -->
-          <circle class="fbk-dot fbk-dot-1" cx="8"  cy="12" r="1.3" fill="currentColor" opacity="0.9"/>
-          <circle class="fbk-dot fbk-dot-2" cx="12" cy="12" r="1.3" fill="currentColor" opacity="0.9"/>
-          <circle class="fbk-dot fbk-dot-3" cx="16" cy="12" r="1.3" fill="currentColor" opacity="0.9"/>
+          <circle class="fbk-dot fbk-dot-1" cx="8" cy="12" r="1.3" fill="currentColor" opacity="0.9" />
+          <circle class="fbk-dot fbk-dot-2" cx="12" cy="12" r="1.3" fill="currentColor" opacity="0.9" />
+          <circle class="fbk-dot fbk-dot-3" cx="16" cy="12" r="1.3" fill="currentColor" opacity="0.9" />
 
         </svg>
         <span>Feedbacks</span>
@@ -87,14 +105,22 @@
     </div>
     <div class="nav-r">
       <!-- Theme toggle (in-nav) -->
-      <div class="icon-btn icon-btn-animate" id="navThemeBtn" onclick="iconPop(this);toggleTheme()" title="Toggle theme">
+      <div class="icon-btn icon-btn-animate" id="navThemeBtn" onclick="iconPop(this);toggleTheme()"
+        title="Toggle theme">
         <svg id="navThemeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
-          <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" />
+          <path
+            d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" />
         </svg>
       </div>
-      <div class="icon-btn icon-btn-animate" id="bellBtn" onclick="iconPop(this);bellRingAnim(this);toggleNotifPanel(event)" title="Notifications">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <div class="icon-btn icon-btn-animate" id="bellBtn"
+        onclick="iconPop(this);bellRingAnim(this);toggleNotifPanel(event)" title="Notifications">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
         <div class="notif-pip" id="pip" style="display:none"></div>
       </div>
       <!-- User -->
@@ -116,14 +142,21 @@
       <div class="np-actions">
         <button class="np-mark-all" onclick="markAllRead()">Mark all read</button>
         <div class="np-close-btn" onclick="closeNotifPanel()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+            <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
         </div>
       </div>
     </div>
     <div class="np-list" id="npList"></div>
     <div class="np-footer">
-      <button class="np-view-all icon-btn-animate" onclick="iconPop(this);closeNotifPanel();goTab('feed',document.getElementById('tb-feed'))">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <button class="np-view-all icon-btn-animate"
+        onclick="iconPop(this);closeNotifPanel();goTab('feed',document.getElementById('tb-feed'))">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
         View all in feed
       </button>
     </div>
@@ -156,27 +189,55 @@
       <div class="dash-stats">
         <div class="dstat">
           <div class="dstat-icon" style="background:var(--teal-icon-bg)">
-            <svg class="icon-teal" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="var(--teal)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg class="icon-teal" width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="var(--teal)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
           </div>
-          <div><div class="dstat-num" id="cnt-announcement">0</div><div class="dstat-lbl">Announcements</div></div>
+          <div>
+            <div class="dstat-num" id="cnt-announcement">0</div>
+            <div class="dstat-lbl">Announcements</div>
+          </div>
         </div>
         <div class="dstat">
           <div class="dstat-icon" style="background:var(--violet-icon-bg)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="var(--violet)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14,2 14,8 20,8" stroke="var(--violet)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="var(--violet)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" />
+              <polyline points="14,2 14,8 20,8" stroke="var(--violet)" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
           </div>
-          <div><div class="dstat-num" id="cnt-assignment">0</div><div class="dstat-lbl">Assignments</div></div>
+          <div>
+            <div class="dstat-num" id="cnt-assignment">0</div>
+            <div class="dstat-lbl">Assignments</div>
+          </div>
         </div>
         <div class="dstat">
           <div class="dstat-icon" style="background:var(--rose-icon-bg)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="var(--rose)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="var(--rose)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="var(--rose)" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="var(--rose)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
           </div>
-          <div><div class="dstat-num" id="cnt-material">0</div><div class="dstat-lbl">Materials</div></div>
+          <div>
+            <div class="dstat-num" id="cnt-material">0</div>
+            <div class="dstat-lbl">Materials</div>
+          </div>
         </div>
         <div class="dstat">
           <div class="dstat-icon" style="background:var(--sky-icon-bg)">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="var(--sky)" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="var(--sky)" stroke-width="2" stroke-linecap="round"/></svg>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="4" width="18" height="18" rx="2" stroke="var(--sky)" stroke-width="2" />
+              <path d="M16 2v4M8 2v4M3 10h18" stroke="var(--sky)" stroke-width="2" stroke-linecap="round" />
+            </svg>
           </div>
-          <div><div class="dstat-num" id="cnt-deadline">0</div><div class="dstat-lbl">Deadlines</div></div>
+          <div>
+            <div class="dstat-num" id="cnt-deadline">0</div>
+            <div class="dstat-lbl">Deadlines</div>
+          </div>
         </div>
       </div>
 
@@ -193,8 +254,15 @@
             </div>
             <div style="display:flex;align-items:center;gap:8px">
               <span id="pollCountdown" style="font-size:11px;color:var(--text-3);letter-spacing:.3px"></span>
-              <button onclick="manualRefresh()" title="Refresh now" style="background:none;border:1px solid var(--border);border-radius:8px;padding:5px 8px;cursor:pointer;color:var(--text-2);display:flex;align-items:center;gap:5px;font-size:11px" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
-                <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <button onclick="manualRefresh()" title="Refresh now"
+                style="background:none;border:1px solid var(--border);border-radius:8px;padding:5px 8px;cursor:pointer;color:var(--text-2);display:flex;align-items:center;gap:5px;font-size:11px"
+                onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
+                <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none">
+                  <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                  <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
                 Refresh
               </button>
             </div>
@@ -202,21 +270,36 @@
 
           <!-- search box -->
           <div class="search-wrap">
-            <input style="font-family:var(--ff-body)" type="text" id="searchInp" placeholder="Search work..." oninput="onSearch(this.value)">
+            <input style="font-family:var(--ff-body)" type="text" id="searchInp" placeholder="Search work..."
+              oninput="onSearch(this.value)">
           </div>
 
           <div class="chips">
-            <div class="chip active" onclick="setChip('all',this)">All <span class="chip-badge" id="cnt-all">0</span></div>
+            <div class="chip active" onclick="setChip('all',this)">All <span class="chip-badge" id="cnt-all">0</span>
+            </div>
             <div class="chip" onclick="setChip('announcement',this)">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
               Announcements
             </div>
             <div class="chip" onclick="setChip('assignment',this)">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round" />
+                <polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
               Assignments
             </div>
             <div class="chip" onclick="setChip('material',this)">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" stroke="currentColor"
+                  stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
               Materials
             </div>
           </div>
@@ -256,23 +339,39 @@
         <div class="mnav-wrap">
           <div class="mnav">
             <div class="mnav-btn" onclick="navMo(-1)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="15,18 9,12 15,6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                <polyline points="15,18 9,12 15,6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
             </div>
             <div class="mnav-label" id="moLabel">February 2026</div>
             <div class="mnav-btn" onclick="navMo(1)">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="9,18 15,12 9,6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                <polyline points="9,18 15,12 9,6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+              </svg>
             </div>
           </div>
-          <button class="mnav-add-cal icon-btn-animate" onclick="iconPop(this);exportToGoogleCalendar()" title="Add deadlines to Google Calendar">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 14v4M10 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <button class="mnav-add-cal icon-btn-animate" onclick="iconPop(this);exportToGoogleCalendar()"
+            title="Add deadlines to Google Calendar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              <path d="M12 14v4M10 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
             Add to Calendar
           </button>
         </div>
       </div>
       <div class="cal-card">
         <div class="dow-row">
-          <div class="dow">Sun</div><div class="dow">Mon</div><div class="dow">Tue</div>
-          <div class="dow">Wed</div><div class="dow">Thu</div><div class="dow">Fri</div><div class="dow">Sat</div>
+          <div class="dow">Sun</div>
+          <div class="dow">Mon</div>
+          <div class="dow">Tue</div>
+          <div class="dow">Wed</div>
+          <div class="dow">Thu</div>
+          <div class="dow">Fri</div>
+          <div class="dow">Sat</div>
         </div>
         <div class="cal-grid" id="calGrid"></div>
       </div>
@@ -290,7 +389,13 @@
           </div>
           <div class="hw-header-actions">
             <button class="hw-btn hw-btn-export" onclick="hwExportPDF()" title="Export as PDF">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="7 10 12 15 17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round" />
+                <polyline points="7 10 12 15 17 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                  stroke-linejoin="round" />
+                <line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+              </svg>
               Export PDF
             </button>
 
@@ -300,33 +405,40 @@
         <!-- Add task form -->
         <div class="hw-form">
           <div class="hw-form-row">
-            <input class="hw-input" id="hwSubject" placeholder="Subject (e.g. Math, Biology)" maxlength="80"/>
+            <input class="hw-input" id="hwSubject" placeholder="Subject (e.g. Math, Biology)" maxlength="80" />
             <!-- Custom Date+Time Picker Trigger -->
             <div class="hwdtp-wrap" id="hwDtpWrap">
               <button type="button" class="hwdtp-trigger hw-input" id="hwDtpTrigger" onclick="hwDtpToggle()">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="flex-shrink:0;opacity:.6">
-                  <rect x="3" y="4" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8"/>
-                  <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                  <rect x="3" y="4" width="18" height="18" rx="3" stroke="currentColor" stroke-width="1.8" />
+                  <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
                 </svg>
                 <span id="hwDtpLabel">Pick deadline…</span>
-                <svg id="hwDtpClear" width="13" height="13" viewBox="0 0 24 24" fill="none" onclick="hwDtpClear(event)" style="display:none;margin-left:auto;flex-shrink:0;opacity:.5;cursor:pointer" class="hwdtp-x">
-                  <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-                  <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                <svg id="hwDtpClear" width="13" height="13" viewBox="0 0 24 24" fill="none" onclick="hwDtpClear(event)"
+                  style="display:none;margin-left:auto;flex-shrink:0;opacity:.5;cursor:pointer" class="hwdtp-x">
+                  <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
+                  <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
                 </svg>
               </button>
               <!-- Hidden value holder -->
-              <input type="hidden" id="hwDate"/>
+              <input type="hidden" id="hwDate" />
               <!-- Dropdown panel -->
               <div class="hwdtp-panel" id="hwDtpPanel">
                 <!-- Calendar section -->
                 <div class="hwdtp-cal">
                   <div class="hwdtp-nav">
                     <button type="button" class="hwdtp-nav-btn" onclick="hwDtpShiftMonth(-1)">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="15 18 9 12 15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <polyline points="15 18 9 12 15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                          stroke-linejoin="round" />
+                      </svg>
                     </button>
                     <span class="hwdtp-month-lbl" id="hwDtpMonthLbl"></span>
                     <button type="button" class="hwdtp-nav-btn" onclick="hwDtpShiftMonth(1)">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                        <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                          stroke-linejoin="round" />
+                      </svg>
                     </button>
                   </div>
                   <div class="hwdtp-dow-row">
@@ -339,43 +451,48 @@
                 <!-- Time section -->
                 <div class="hwdtp-time-section">
                   <div class="hwdtp-time-lbl">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8" />
+                      <path d="M12 7v5l3 3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                    </svg>
                     Time
                   </div>
                   <div class="hwdtp-time-row">
                     <div class="hwdtp-time-col">
                       <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(1)">▲</button>
-                      <input class="hwdtp-time-val" id="hwDtpHourVal" type="text" inputmode="numeric" maxlength="2" value="23"
-                        onfocus="this.select()"
-                        oninput="hwDtpHourInput(this)"
-                        onblur="hwDtpHourBlur(this)"
-                        onkeydown="hwDtpTimeKey(event,'hour')"/>
+                      <input class="hwdtp-time-val" id="hwDtpHourVal" type="text" inputmode="numeric" maxlength="2"
+                        value="23" onfocus="this.select()" oninput="hwDtpHourInput(this)" onblur="hwDtpHourBlur(this)"
+                        onkeydown="hwDtpTimeKey(event,'hour')" />
                       <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(-1)">▼</button>
                     </div>
                     <span class="hwdtp-colon">:</span>
                     <div class="hwdtp-time-col">
                       <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(5)">▲</button>
-                      <input class="hwdtp-time-val" id="hwDtpMinVal" type="text" inputmode="numeric" maxlength="2" value="59"
-                        onfocus="this.select()"
-                        oninput="hwDtpMinInput(this)"
-                        onblur="hwDtpMinBlur(this)"
-                        onkeydown="hwDtpTimeKey(event,'min')"/>
+                      <input class="hwdtp-time-val" id="hwDtpMinVal" type="text" inputmode="numeric" maxlength="2"
+                        value="59" onfocus="this.select()" oninput="hwDtpMinInput(this)" onblur="hwDtpMinBlur(this)"
+                        onkeydown="hwDtpTimeKey(event,'min')" />
                       <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(-5)">▼</button>
                     </div>
                   </div>
                 </div>
                 <!-- Footer -->
                 <div class="hwdtp-footer">
-                  <button type="button" class="hwdtp-done-btn" onclick="document.querySelectorAll('.hwdtp-day.selected,.hwdtp-day.day-flash').forEach(el=>el.classList.remove('selected','day-flash'));hwDtpConfirm()">Set Deadline</button>
+                  <button type="button" class="hwdtp-done-btn"
+                    onclick="document.querySelectorAll('.hwdtp-day.selected,.hwdtp-day.day-flash').forEach(el=>el.classList.remove('selected','day-flash'));hwDtpConfirm()">Set
+                    Deadline</button>
                 </div>
               </div>
             </div>
           </div>
-          <textarea class="hw-textarea" id="hwDesc" placeholder="Description — what needs to be done?" rows="3"></textarea>
+          <textarea class="hw-textarea" id="hwDesc" placeholder="Description — what needs to be done?"
+            rows="3"></textarea>
           <div class="hw-form-footer">
             <span class="hw-form-hint">Date &amp; time optional — pick your exact deadline</span>
             <button class="hw-btn hw-btn-add" onclick="hwAdd()">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                <line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                <line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              </svg>
               Add Task
             </button>
           </div>
@@ -384,7 +501,12 @@
         <!-- Task list -->
         <div class="hw-list" id="hwList">
           <div class="hw-empty" id="hwEmpty">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" style="opacity:.2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" stroke-width="1.5"/><rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.5"/><path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" style="opacity:.2">
+              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor"
+                stroke-width="1.5" />
+              <rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.5" />
+              <path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
             <p>No tasks yet — add one above</p>
           </div>
         </div>
@@ -403,7 +525,9 @@
           <div class="prof-info">
             <div class="prof-name" id="profName">Student User</div>
             <div class="prof-email" id="profEmail" style="display:flex;align-items:center;gap:6px;margin-top:3px;">
-              <img src="data:image/webp;base64,UklGRvYDAABXRUJQVlA4WAoAAAAQAAAALwAAMAAAQUxQSD0CAAABkCzJtmlb89q2bbP1jJ5t27Zt20bP17atZ9s+fGc+rbnW3l8QERMA3Ab+g3ZlP/ii0Wm+PsrfPyLECKR16H/2ngKpqkdXhjlL4DS9Uo382trZzoKM+pfpUKyuvJ+hCI9DP1D8970ufEnFKG1WFE/3uyj1Hn1a9ycodYoPkJPvodQpnkD2LEFOzYuqtGup5U9VrBRPIBsdQvrL04OCbYwNja0Deh9+8p8UT6D3/0H6cjBaH4ihuz8hpngC3akMqY099IGu16MlxRM4p+soeeHAH+QOnI6VSCwOABkOUBMexIMMDc4jWz0e5Bhwn5BqKYshCpayL8hyN7Kr7GkOIYJdcwnbgT737Suhb84/ZGkHcqxCwc1fWJ8SOVaKeqthPQ+Qh0LHeuwtj18a1vMAeeAX1udEeagfsLSD5PEph4U75HF3F6HKnhYzdgxx5FEdK3OwgqXsS+NcjezdAfdYmGopzKaEpRpucI6gniCsn4L1JAz6q1n4MF6QYwGyr5qAQwUBi/yFGG5Ftm4SAEzVETA3TIDRIgXhvh8AOJVSsLGHAY/LLgUSt8K/fb9T8MvhWAOK7eBSpD4O+4/hfhLiq3NDw+xMjUysvTutKFEheTH8372Ahqh9XZt1K6Pi0Q/kzHJgQHwbh+hHyUDs/FAGHwYAuVObZB/HAmdcnkTPhgC3295vUhS1A4GGvYp+iXq9wRXEOkwqVYl4eSQBxNv1PnX7J0n7JmdRhD5Iqu/bb2vanQ9KrfLzw6LjUxOtgBcAVlA4IJIBAACQCwCdASowADEAPoE0lUelIyIhN/cdUKAQCWwAnTL/+S+3fkB+QHyi1R+3fgnKL+hDlm97vqb8RrcPftN60vor82b/AdZn6AHScgQB9I/EgAtcbST+7cnXXVOLaOX0w5/uxm7vgAD+UivGRn2Kiy7nnRJ6Al1yTkg8vDQlaZQ8rXXwPvqqPiKnTTbNo6+3hAokP5WRy0UAvc8yepd+yrR01uaTikpMU2A/9vst3bmWubmaxLoEyNADe46yfzwuQTXgFuf+dhsCw6LNWYG+FOocmuudXp51oLAvTBSqb+XiIGv/p1P/+PQfVUL72hqk+ik6bEg7H+D4/wQBA8lRJ0iaiwM1IaqwtVqyWk2RiMFMbLeHPh4TAzNe0XJgUis5XwLHTQJuTO65q/6Ox8WIa0H05vfE6Ix21yKFNWWzaAX6NT9znrWbVdPOnS1TtbYnHxZ/2LqiQuyk2//Cb4jctfI9pCL/8k49QTOaRT6m1BU8Bq2uo7/h0f/8gt9Dsv0Oy/f+OB+v+TcAf/xwP1/ybgAAAAA=" width="12" height="12" style="flex-shrink:0" alt="Google">
+              <img
+                src="data:image/webp;base64,UklGRvYDAABXRUJQVlA4WAoAAAAQAAAALwAAMAAAQUxQSD0CAAABkCzJtmlb89q2bbP1jJ5t27Zt20bP17atZ9s+fGc+rbnW3l8QERMA3Ab+g3ZlP/ii0Wm+PsrfPyLECKR16H/2ngKpqkdXhjlL4DS9Uo382trZzoKM+pfpUKyuvJ+hCI9DP1D8970ufEnFKG1WFE/3uyj1Hn1a9ycodYoPkJPvodQpnkD2LEFOzYuqtGup5U9VrBRPIBsdQvrL04OCbYwNja0Deh9+8p8UT6D3/0H6cjBaH4ihuz8hpngC3akMqY099IGu16MlxRM4p+soeeHAH+QOnI6VSCwOABkOUBMexIMMDc4jWz0e5Bhwn5BqKYshCpayL8hyN7Kr7GkOIYJdcwnbgT737Suhb84/ZGkHcqxCwc1fWJ8SOVaKeqthPQ+Qh0LHeuwtj18a1vMAeeAX1udEeagfsLSD5PEph4U75HF3F6HKnhYzdgxx5FEdK3OwgqXsS+NcjezdAfdYmGopzKaEpRpucI6gniCsn4L1JAz6q1n4MF6QYwGyr5qAQwUBi/yFGG5Ftm4SAEzVETA3TIDRIgXhvh8AOJVSsLGHAY/LLgUSt8K/fb9T8MvhWAOK7eBSpD4O+4/hfhLiq3NDw+xMjUysvTutKFEheTH8372Ahqh9XZt1K6Pi0Q/kzHJgQHwbh+hHyUDs/FAGHwYAuVObZB/HAmdcnkTPhgC3295vUhS1A4GGvYp+iXq9wRXEOkwqVYl4eSQBxNv1PnX7J0n7JmdRhD5Iqu/bb2vanQ9KrfLzw6LjUxOtgBcAVlA4IJIBAACQCwCdASowADEAPoE0lUelIyIhN/cdUKAQCWwAnTL/+S+3fkB+QHyi1R+3fgnKL+hDlm97vqb8RrcPftN60vor82b/AdZn6AHScgQB9I/EgAtcbST+7cnXXVOLaOX0w5/uxm7vgAD+UivGRn2Kiy7nnRJ6Al1yTkg8vDQlaZQ8rXXwPvqqPiKnTTbNo6+3hAokP5WRy0UAvc8yepd+yrR01uaTikpMU2A/9vst3bmWubmaxLoEyNADe46yfzwuQTXgFuf+dhsCw6LNWYG+FOocmuudXp51oLAvTBSqb+XiIGv/p1P/+PQfVUL72hqk+ik6bEg7H+D4/wQBA8lRJ0iaiwM1IaqwtVqyWk2RiMFMbLeHPh4TAzNe0XJgUis5XwLHTQJuTO65q/6Ox8WIa0H05vfE6Ix21yKFNWWzaAX6NT9znrWbVdPOnS1TtbYnHxZ/2LqiQuyk2//Cb4jctfI9pCL/8k49QTOaRT6m1BU8Bq2uo7/h0f/8gt9Dsv0Oy/f+OB+v+TcAf/xwP1/ybgAAAAA="
+                width="12" height="12" style="flex-shrink:0" alt="Google">
               <span id="profEmailText">student@example.com</span>
             </div>
           </div>
@@ -414,11 +538,51 @@
       <div class="sg sg-notify">
         <div class="sg-lbl">Notify me about</div>
         <div class="sg-body">
-          <div class="srow"><div class="srow-info"><h4>Stream Posts</h4><p>Class stream</p></div><label class="tog"><input type="checkbox" id="set_stream" onchange="saveSetting('stream',this.checked)"><div class="tog-track"></div></label></div>
-          <div class="srow"><div class="srow-info"><h4>Announcements</h4><p>Teacher announcements</p></div><label class="tog"><input type="checkbox" id="set_announcements" onchange="saveSetting('announcements',this.checked)"><div class="tog-track"></div></label></div>
-          <div class="srow"><div class="srow-info"><h4>Assignments</h4><p>New work posted</p></div><label class="tog"><input type="checkbox" id="set_assignments" onchange="saveSetting('assignments',this.checked)"><div class="tog-track"></div></label></div>
-          <div class="srow"><div class="srow-info"><h4>Grades</h4><p>When graded</p></div><label class="tog"><input type="checkbox" id="set_grades" onchange="saveSetting('grades',this.checked)"><div class="tog-track"></div></label></div>
-          <div class="srow"><div class="srow-info"><h4>Materials</h4><p>Study resources</p></div><label class="tog"><input type="checkbox" id="set_materials" onchange="saveSetting('materials',this.checked)"><div class="tog-track"></div></label></div>
+          <div class="srow">
+            <div class="srow-info">
+              <h4>Stream Posts</h4>
+              <p>Class stream</p>
+            </div><label class="tog"><input type="checkbox" id="set_stream"
+                onchange="saveSetting('stream',this.checked)">
+              <div class="tog-track"></div>
+            </label>
+          </div>
+          <div class="srow">
+            <div class="srow-info">
+              <h4>Announcements</h4>
+              <p>Teacher announcements</p>
+            </div><label class="tog"><input type="checkbox" id="set_announcements"
+                onchange="saveSetting('announcements',this.checked)">
+              <div class="tog-track"></div>
+            </label>
+          </div>
+          <div class="srow">
+            <div class="srow-info">
+              <h4>Assignments</h4>
+              <p>New work posted</p>
+            </div><label class="tog"><input type="checkbox" id="set_assignments"
+                onchange="saveSetting('assignments',this.checked)">
+              <div class="tog-track"></div>
+            </label>
+          </div>
+          <div class="srow">
+            <div class="srow-info">
+              <h4>Grades</h4>
+              <p>When graded</p>
+            </div><label class="tog"><input type="checkbox" id="set_grades"
+                onchange="saveSetting('grades',this.checked)">
+              <div class="tog-track"></div>
+            </label>
+          </div>
+          <div class="srow">
+            <div class="srow-info">
+              <h4>Materials</h4>
+              <p>Study resources</p>
+            </div><label class="tog"><input type="checkbox" id="set_materials"
+                onchange="saveSetting('materials',this.checked)">
+              <div class="tog-track"></div>
+            </label>
+          </div>
         </div>
       </div>
 
@@ -432,17 +596,32 @@
               <h4>Sync Deadlines &amp; Homework</h4>
               <p>Auto-add assignment due dates and homework deadlines to your Google Calendar</p>
             </div>
-            <label class="tog tog-disabled"><input type="checkbox" id="set_gcalSync" onchange="gcalToggle(this)" disabled><div class="tog-track"></div></label>
+            <label class="tog tog-disabled"><input type="checkbox" id="set_gcalSync" onchange="gcalToggle(this)"
+                disabled>
+              <div class="tog-track"></div>
+            </label>
           </div>
-          <div class="srow" style="flex-direction:column;align-items:flex-start;gap:10px;border-top:1px solid var(--border);padding-top:14px">
+          <div class="srow"
+            style="flex-direction:column;align-items:flex-start;gap:10px;border-top:1px solid var(--border);padding-top:14px">
             <p id="gcalStatusText" style="font-size:12px;color:var(--text-3);margin:0">Sync disabled</p>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button id="gcalSyncBtn" class="btn-sm" onclick="gcalSyncAll()" style="display:none;align-items:center;gap:6px;font-size:12px">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <button id="gcalSyncBtn" class="btn-sm" onclick="gcalSyncAll()"
+                style="display:none;align-items:center;gap:6px;font-size:12px">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                  <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                  <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor"
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
                 Sync now
               </button>
-              <button id="gcalUnsyncBtn" class="btn-sm" onclick="gcalUnsyncAll()" style="display:none;align-items:center;gap:6px;font-size:12px;color:var(--rose);border-color:var(--rose)">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <button id="gcalUnsyncBtn" class="btn-sm" onclick="gcalUnsyncAll()"
+                style="display:none;align-items:center;gap:6px;font-size:12px;color:var(--rose);border-color:var(--rose)">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                  <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                  <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" stroke-width="2"
+                    stroke-linecap="round" />
+                </svg>
                 Remove all events
               </button>
             </div>
@@ -459,16 +638,31 @@
     <!-- ═══ TAB: FEEDBACK ═══ -->
     <div class="panel" id="p-fbk">
       <div class="fbk-wrapper" style="max-width: 600px; margin-top: 32px;">
-        <div class="fbk-card" style="padding: 48px 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); text-align: center;">
-          <div style="width: 64px; height: 64px; background: var(--violet-icon-bg); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="var(--violet)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <div class="fbk-card"
+          style="padding: 48px 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); text-align: center;">
+          <div
+            style="width: 64px; height: 64px; background: var(--violet-icon-bg); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="var(--violet)" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
           </div>
           <h3 style="margin-bottom: 12px; font-size: 20px; color: var(--text); font-weight: 600;">Help Us Improve</h3>
-          <p style="font-size: 15px; color: var(--text-2); margin-bottom: 32px; max-width: 400px; margin-left: auto; margin-right: auto; line-height: 1.5;">
-            Got a feature request, found a bug, or just want to share your thoughts? Let us know through our official feedback form.
+          <p
+            style="font-size: 15px; color: var(--text-2); margin-bottom: 32px; max-width: 400px; margin-left: auto; margin-right: auto; line-height: 1.5;">
+            Got a feature request, found a bug, or just want to share your thoughts? Let us know through our official
+            feedback form.
           </p>
-          <button class="btn-hero btn-hero-primary" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfAMPxrACJjnqb68kdvO_bSTBmY9otYxZiNqrri_uRNBFzIMQ/formResponse');" style="font-size: 15px; padding: 14px 28px; border-radius: 12px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="margin-right: 8px;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <button class="btn-hero btn-hero-primary"
+            onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfAMPxrACJjnqb68kdvO_bSTBmY9otYxZiNqrri_uRNBFzIMQ/formResponse');"
+            style="font-size: 15px; padding: 14px 28px; border-radius: 12px;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="margin-right: 8px;">
+              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" />
+              <polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
             Open Feedback Form
           </button>
         </div>
@@ -477,109 +671,159 @@
 
   </div>
 
-      <!-- Sheet (detail) -->
-<div class="sheet-veil" id="sheetVeil" onclick="closeSheet(event)">
-  <div class="sheet" style="position:relative;">
-    <div class="sheet-grip"></div>
-    <button class="sheet-close" onclick="closeSheet()" aria-label="Close" style="position: absolute; top: 16px; right: 16px; z-index: 100;">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    </button>
-    <div class="sheet-top">
-      <div class="sheet-eyebrow" id="shEyebrow"></div>
-      <div class="sheet-h" id="shTitle"></div>
-      <div class="sheet-sub" id="shSub"></div>
-    </div>
-    <div class="sheet-content">
-      <div class="sheet-body-text" id="shText"></div>
-      <div class="sheet-actions" style="flex-wrap: nowrap; gap: 6px; justify-content: flex-start;">
-        <!-- Hidden file input for submission -->
-        <input type="file" id="assignmentFileInput" style="display:none" multiple onchange="handleSubmissionUpload(event)">
-        
-        <!-- Submit work button (hidden by default, shown by JS when appropriate) -->
-        <button class="sa-primary" id="submitWorkBtn" style="display:none; background: linear-gradient(135deg, #3B82F6, #2563EB); border: none; color: #fff; padding: 8px 12px; border-radius: var(--r-pill); font-weight: 600; font-size: 13px; letter-spacing: 0.3px; box-shadow: 0 4px 14px rgba(37,99,235,0.35); transition: all 0.2s ease; cursor: pointer; white-space: nowrap; flex-shrink: 1;" onclick="showSubmitConfirm()" onmouseover="this.style.boxShadow='0 6px 20px rgba(37,99,235,0.5)';" onmouseout="this.style.boxShadow='0 4px 14px rgba(37,99,235,0.35)';">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="margin-right: 5px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path><polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></polyline><line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></line></svg>
-          Submit
-        </button>
+  <!-- Sheet (detail) -->
+  <div class="sheet-veil" id="sheetVeil" onclick="closeSheet(event)">
+    <div class="sheet" style="position:relative;">
+      <div class="sheet-grip"></div>
+      <button class="sheet-close" onclick="closeSheet()" aria-label="Close"
+        style="position: absolute; top: 16px; right: 16px; z-index: 100;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </button>
+      <div class="sheet-top">
+        <div class="sheet-eyebrow" id="shEyebrow"></div>
+        <div class="sheet-h" id="shTitle"></div>
+        <div class="sheet-sub" id="shSub"></div>
+      </div>
+      <div class="sheet-content">
+        <div class="sheet-body-text" id="shText"></div>
+        <div class="sheet-actions" style="flex-wrap: nowrap; gap: 6px; justify-content: flex-start;">
+          <!-- Hidden file input for submission -->
+          <input type="file" id="assignmentFileInput" style="display:none" multiple
+            onchange="handleSubmissionUpload(event)">
 
-        <a href="https://classroom.google.com" target="_blank" class="sa-primary" style="white-space: nowrap; flex-shrink: 1; padding: 8px 12px;">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="margin-right: 5px;"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-          Classroom
-        </a>
-        <button class="sa-ghost" id="mrBtn" onclick="toggleRead()" style="white-space: nowrap; flex-shrink: 1; padding: 8px 12px;">Mark as read</button>
+          <!-- Submit work button (hidden by default, shown by JS when appropriate) -->
+          <button class="sa-primary" id="submitWorkBtn"
+            style="display:none; background: linear-gradient(135deg, #3B82F6, #2563EB); border: none; color: #fff; padding: 8px 12px; border-radius: var(--r-pill); font-weight: 600; font-size: 13px; letter-spacing: 0.3px; box-shadow: 0 4px 14px rgba(37,99,235,0.35); transition: all 0.2s ease; cursor: pointer; white-space: nowrap; flex-shrink: 1;"
+            onclick="showSubmitConfirm()" onmouseover="this.style.boxShadow='0 6px 20px rgba(37,99,235,0.5)';"
+            onmouseout="this.style.boxShadow='0 4px 14px rgba(37,99,235,0.35)';">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="margin-right: 5px;">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"></path>
+              <polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round"></polyline>
+              <line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round"></line>
+            </svg>
+            Submit
+          </button>
+
+          <a href="https://classroom.google.com" target="_blank" class="sa-primary" id="classroomLinkBtn"
+            style="white-space: nowrap; flex-shrink: 1; padding: 8px 12px;">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style="margin-right: 5px;">
+              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round" />
+              <polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                stroke-linejoin="round" />
+              <line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            </svg>
+            Classroom
+          </a>
+          <button class="sa-ghost" id="mrBtn" onclick="toggleRead()"
+            style="white-space: nowrap; flex-shrink: 1; padding: 8px 12px;">Mark as read</button>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<!-- Push toast -->
-<div class="push-toast" id="toast">
-  <div class="toast-icon">
-    <svg class="icon-teal" width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="var(--gamemaster)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13.73 21a2 2 0 01-3.46 0" stroke="var(--gamemaster)" stroke-width="2" stroke-linecap="round"/></svg>
+  <!-- Push toast container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="snack" id="snack">Setting saved ✓</div>
+
+
+  <!-- Advanced Theme Switcher -->
+  <button class="theme-switcher-btn hidden" id="globalThemeBtn" onclick="toggleTheme()" aria-label="Toggle theme">
+    <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" />
+      <path
+        d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    </svg>
+  </button>
+
+  <!-- ════ Trust & Safety UI ════ -->
+  <div class="ts-rate-banner" id="tsRateBanner">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+      <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+      <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+    </svg>
+    <span id="tsRateBannerText">Slow down</span>
   </div>
-  <div class="toast-body">
-    <div class="toast-app">Aulert · Google Classroom</div>
-    <div class="toast-t" id="toastT">New notification</div>
-    <div class="toast-m" id="toastM">You have a new classroom update</div>
-  </div>
-  <div class="toast-close" onclick="closeToast()">
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-  </div>
-</div>
 
-<div class="snack" id="snack">Setting saved ✓</div>
+  <!-- Unified Submit Modal -->
+  <div id="submitUnifiedModal"
+    style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.55); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); align-items:center; justify-content:center; opacity:0; transition:opacity 0.25s ease;">
+    <div class="submit-modal-content"
+      style="position:relative; background: var(--bg-2); border: 1px solid var(--rim); border-radius: 20px; padding: 32px; max-width: 420px; width: 90%; box-shadow: 0 24px 80px rgba(0,0,0,0.5); text-align: center; transform:scale(0.9) translateY(20px); transition:transform 0.3s cubic-bezier(.16,1,.3,1), opacity 0.25s ease; opacity:0;">
+      <button class="sheet-close-btn" onclick="closeSubmitUnifiedModal()"
+        style="position: absolute; top: 16px; right: 16px; background:none; border:none; color:var(--text-2); cursor:pointer; padding: 4px; display:flex; align-items:center; justify-content:center; transition: color 0.2s, transform 0.2s; border-radius: 50%;"
+        onmouseover="this.style.color='var(--teal)'; this.style.transform='rotate(90deg) scale(1.1)'; this.style.boxShadow='0 0 12px rgba(0,255,217,0.4)';"
+        onmouseout="this.style.color='var(--text-2)'; this.style.transform='none'; this.style.boxShadow='none';">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        </svg>
+      </button>
+      <h3 style="font-size: 18px; font-weight: 650; color: var(--text); margin-bottom: 24px;">
+        Submit Work</h3>
 
+      <!-- Drag & Drop Zone -->
+      <div id="dropZone" onclick="document.getElementById('assignmentFileInput').click()"
+        style="border: 2px dashed var(--rim); border-radius: 12px; padding: 32px 16px; cursor: pointer; transition: all 0.2s ease; background: rgba(0,0,0,0.02); margin-bottom: 20px;"
+        onmouseover="if(!this.style.background.includes('rgba(0, 255, 217')) { this.style.borderColor='var(--text-3)'; }"
+        onmouseout="if(!this.style.background.includes('rgba(0, 255, 217')) { this.style.borderColor='var(--rim)'; }">
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+          style="margin: 0 auto 12px auto; color: var(--text-3);">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" />
+          <polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+          <line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" />
+        </svg>
+        <div id="dropZoneText" style="font-size: 14px; font-weight: 500; color: var(--text-2);">Click to browse or drag
+          file here</div>
+      </div>
+      <div id="fileListContainer"
+        style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; text-align: left;"></div>
 
-<!-- Advanced Theme Switcher -->
-<button class="theme-switcher-btn hidden" id="globalThemeBtn" onclick="toggleTheme()" aria-label="Toggle theme">
-  <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none">
-    <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/>
-    <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-  </svg>
-</button>
+      <div style="display: flex; align-items: center; margin-bottom: 20px;">
+        <div style="flex: 1; height: 1px; background: var(--rim-2);"></div>
+        <div
+          style="margin: 0 12px; font-size: 12px; color: var(--text-3); font-weight: 600; text-transform: uppercase;">or
+        </div>
+        <div style="flex: 1; height: 1px; background: var(--rim-2);"></div>
+      </div>
 
-<!-- ════ Trust & Safety UI ════ -->
-<div class="ts-rate-banner" id="tsRateBanner">
-  <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-  <span id="tsRateBannerText">Slow down</span>
-</div>
+      <!-- Link Input -->
+      <div style="text-align: left; margin-bottom: 24px;">
+        <label
+          style="display: block; font-size: 13px; color: var(--text-2); font-weight: 600; margin-bottom: 8px;">Attach
+          Link</label>
+        <input type="url" id="submitLinkInput" placeholder="https://..."
+          style="width: 100%; box-sizing: border-box; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--rim); background: transparent; color: var(--text); font-size: 14px; outline: none; transition: border-color 0.2s;"
+          onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--rim)'"
+          oninput="handleLinkInput()">
+      </div>
 
-<!-- Unified Submit Modal -->
-<div id="submitUnifiedModal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.55); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); align-items:center; justify-content:center; opacity:0; transition:opacity 0.25s ease;">
-  <div class="submit-modal-content" style="position:relative; background: var(--bg-2); border: 1px solid var(--rim); border-radius: 20px; padding: 32px; max-width: 420px; width: 90%; box-shadow: 0 24px 80px rgba(0,0,0,0.5); text-align: center; transform:scale(0.9) translateY(20px); transition:transform 0.3s cubic-bezier(.16,1,.3,1), opacity 0.25s ease; opacity:0;">
-    <button class="sheet-close-btn" onclick="closeSubmitUnifiedModal()" style="position: absolute; top: 16px; right: 16px; background:none; border:none; color:var(--text-2); cursor:pointer; padding: 4px; display:flex; align-items:center; justify-content:center; transition: color 0.2s, transform 0.2s; border-radius: 50%;" onmouseover="this.style.color='var(--teal)'; this.style.transform='rotate(90deg) scale(1.1)'; this.style.boxShadow='0 0 12px rgba(0,255,217,0.4)';" onmouseout="this.style.color='var(--text-2)'; this.style.transform='none'; this.style.boxShadow='none';">
-       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-    </button>
-    <h3 style="font-size: 18px; font-weight: 650; color: var(--text); margin-bottom: 24px;">Submit Work</h3>
-    
-    <!-- Drag & Drop Zone -->
-    <div id="dropZone" onclick="document.getElementById('assignmentFileInput').click()" style="border: 2px dashed var(--rim); border-radius: 12px; padding: 32px 16px; cursor: pointer; transition: all 0.2s ease; background: rgba(0,0,0,0.02); margin-bottom: 20px;" onmouseover="if(!this.style.background.includes('rgba(0, 255, 217')) { this.style.borderColor='var(--text-3)'; }" onmouseout="if(!this.style.background.includes('rgba(0, 255, 217')) { this.style.borderColor='var(--rim)'; }">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" style="margin: 0 auto 12px auto; color: var(--text-3);"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <div id="dropZoneText" style="font-size: 14px; font-weight: 500; color: var(--text-2);">Click to browse or drag file here</div>
+      <!-- Submit Button -->
+      <button id="unifiedSubmitBtn" onclick="processUnifiedSubmit()"
+        style="width: 100%; padding: 12px; border-radius: 12px; border: none; background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.35); transition: all 0.15s; opacity: 0.5; pointer-events: none;"
+        onmouseover="this.style.boxShadow='0 6px 20px rgba(37,99,235,0.5)'"
+        onmouseout="this.style.boxShadow='0 4px 14px rgba(37,99,235,0.35)'">Submit Assignment</button>
     </div>
-    <div id="fileListContainer" style="margin-bottom: 20px; display: flex; flex-direction: column; gap: 8px; text-align: left;"></div>
-    
-    <div style="display: flex; align-items: center; margin-bottom: 20px;">
-      <div style="flex: 1; height: 1px; background: var(--rim-2);"></div>
-      <div style="margin: 0 12px; font-size: 12px; color: var(--text-3); font-weight: 600; text-transform: uppercase;">or</div>
-      <div style="flex: 1; height: 1px; background: var(--rim-2);"></div>
-    </div>
-    
-    <!-- Link Input -->
-    <div style="text-align: left; margin-bottom: 24px;">
-      <label style="display: block; font-size: 13px; color: var(--text-2); font-weight: 600; margin-bottom: 8px;">Attach Link</label>
-      <input type="url" id="submitLinkInput" placeholder="https://..." style="width: 100%; box-sizing: border-box; padding: 12px 16px; border-radius: 10px; border: 1px solid var(--rim); background: transparent; color: var(--text); font-size: 14px; outline: none; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--teal)'" onblur="this.style.borderColor='var(--rim)'" oninput="handleLinkInput()">
-    </div>
-    
-    <!-- Submit Button -->
-    <button id="unifiedSubmitBtn" onclick="processUnifiedSubmit()" style="width: 100%; padding: 12px; border-radius: 12px; border: none; background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.35); transition: all 0.15s; opacity: 0.5; pointer-events: none;" onmouseover="this.style.boxShadow='0 6px 20px rgba(37,99,235,0.5)'" onmouseout="this.style.boxShadow='0 4px 14px rgba(37,99,235,0.35)'">Submit Assignment</button>
   </div>
-</div>
 
-<script src="script-app-feed.js"></script>
-<script src="script-app-calendar.js"></script>
-<script src="script-app-homework.js"></script>
-<script src="script-app-settings.js"></script>
-<script src="script-app-feedback.js"></script>
-<script src="script-app.js"></script>
+  <script src="script-app-feed.js"></script>
+  <script src="script-app-calendar.js"></script>
+  <script src="script-app-homework.js"></script>
+  <script src="script-app-settings.js"></script>
+  <script src="script-app-feedback.js"></script>
+  <script src="script-app.js"></script>
 </body>
+
 </html>

@@ -199,9 +199,12 @@ const GCAL_API = 'https://www.googleapis.com/calendar/v3';
 const GCAL_STORE_KEY = 'aul_gcal_ids';
 
 function gcalLoadMap() {
-  let obj = {};
-  try { obj = JSON.parse(localStorage.getItem(GCAL_STORE_KEY) || '{}'); } catch(e) {}
-  return Object.assign(Object.create(null), obj);
+  try {
+    return JSON.parse(localStorage.getItem(GCAL_STORE_KEY)) || {};
+  } catch(e) {
+    console.warn('Failed to parse gcal map from localStorage', e);
+    return {};
+  }
 }
 
 function gcalSaveMap(map) {
@@ -285,7 +288,7 @@ async function gcalSyncAll() {
   for (const notifId of Object.keys(map)) {
     if (!activeIds.has(notifId)) {
       try { await gcalRequest('DELETE', '/calendars/primary/events/' + map[notifId]); removed++; }
-      catch(e) { /* already gone */ }
+      catch(e) { console.warn('Failed to delete gcal event:', e); }
       delete map[notifId];
     }
   }
@@ -324,7 +327,7 @@ async function gcalUnsyncAll() {
   let removed = 0;
   for (const gcalId of Object.values(map)) {
     try { await gcalRequest('DELETE', '/calendars/primary/events/' + gcalId); removed++; }
-    catch(e) { /* already gone */ }
+    catch(e) { console.warn('Failed to delete gcal event:', e); }
   }
   localStorage.removeItem(GCAL_STORE_KEY);
   showToast('Google Calendar unsynced', removed + ' event' + (removed !== 1 ? 's' : '') + ' removed');

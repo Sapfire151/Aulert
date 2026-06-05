@@ -326,20 +326,7 @@ async function fetchAllContent(initial = false) {
   });
 
   if (!initial) {
-    const oldMap = new Map();
-    S.notifs.forEach(n => { oldMap.set(n.id, n); });
-    newNotifs.forEach(n => {
-      const old = oldMap.get(n.id);
-      if (old && old.updatedAt && n.updatedAt && old.updatedAt !== n.updatedAt) {
-        const c = courseById(n.courseId);
-        let msg = `Updated ${TYPE_META.get(n.type)?.label}`;
-        const low = (n.title + ' ' + n.body).toLowerCase();
-        if (low.includes('graded')) msg = 'Assignment graded';
-        else if (low.includes('resubmit') || low.includes('resubmission')) msg = 'Resubmission requested';
-        showToast(msg, `${c.name} — ${n.title}`, n.type);
-        S.seenIds.delete(n.id);
-      }
-    });
+    // Only show notifications for brand new items that haven't been seen before
     newNotifs
       .filter(n => !S.seenIds.has(n.id))
       .forEach(n => {

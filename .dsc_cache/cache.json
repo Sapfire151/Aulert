@@ -558,6 +558,214 @@
     "C:\\Users\\Yell0\\OneDrive\\Documents\\Aulert\\terms.html": {
       "findings": [],
       "sha256": "e9b9c449b6502f6bcf8da434fb5144d5d50cc9c46018f852ee9ea7ae3067f711"
+    },
+    "D:\\Aulert\\README.md": {
+      "findings": [],
+      "sha256": "19c80dc1567b24693e808dcea3821cbbd11e002906c0d56e5c67430f963d110a"
+    },
+    "D:\\Aulert\\api\\riscWebhook.js": {
+      "findings": [
+        {
+          "column": 19,
+          "cwe": "CWE-208",
+          "entry_points": [],
+          "file_path": "D:\\Aulert\\api\\riscWebhook.js",
+          "fix_suggestion": null,
+          "line_end": 42,
+          "line_start": 42,
+          "message": "Equality comparison on potentially timing-sensitive data. Use a constant-time comparison (e.g., hmac.compare_digest, MessageDigest.isEqual, crypto_memcmp).",
+          "metadata": {
+            "confidence": 0.7,
+            "confidence_label": "medium",
+            "left_token_hit": false,
+            "line_token_hit": true,
+            "post_processor": "comparison_context_analyzer",
+            "right_token_hit": false
+          },
+          "reachability": "unknown",
+          "rule_id": "deva.cwe-208.javascript-timing-comparison",
+          "severity": "MEDIUM",
+          "snippet": "    if (!token || _actual.length !== _expected.length || !crypto.timingSafeEqual(_expected, _actual)) {",
+          "triage_confidence": 0.0,
+          "triage_label": "untriaged",
+          "triage_reasoning": null
+        }
+      ],
+      "sha256": "7e493a81dd9a41863acdd7c5f7be39e49237c8f0e52c0ab3578a9949d0dc0f3d"
+    },
+    "D:\\Aulert\\app.html": {
+      "findings": [
+        {
+          "column": 40,
+          "cwe": "CWE-359",
+          "entry_points": [],
+          "file_path": "D:\\Aulert\\app.html",
+          "fix_suggestion": "email exposure detected. Apply minimization (collect only what is needed under GDPR Art. 5(1)(c)) and pseudonymize before storage / transmission outside the trust boundary.",
+          "line_end": 546,
+          "line_start": 546,
+          "message": "PII (email) detected in general context. GDPR Art. 5 / CCPA \u00a7 1798.100 require minimization and pseudonymization.",
+          "metadata": {
+            "confidence": 0.4,
+            "confidence_label": "low",
+            "dsc": {
+              "context": "general",
+              "data_class": "pii",
+              "detector_kind": "email",
+              "is_comment": false,
+              "is_test_fixture": false,
+              "severity_tier": "info"
+            },
+            "fix_template": "email appears in D:\\Aulert\\app.html:546. Under GDPR Art. 5 / CCPA \u00a7 1798.100,\nthis counts as personal data and must follow data-minimization,\npurpose-limitation, and storage-limitation principles.\n\nRefactor `<span id=\"profEmailText\">student@example.com</span>` to:\n\n1. Verify the data subject's purpose for processing this email. If the\n   value is not strictly required for the general action, remove\n   it entirely.\n2. Apply pseudonymization (Art. 4(5)) before the value crosses the\n   process / network / storage boundary. Use a per-field salt and HMAC\n   so the mapping table stays inside the designated controller scope.\n3. Add an entry to the Record of Processing Activities (Art. 30) for\n   this field if it is not already covered.\n4. If the field is a real production identifier, prefer hashing or\n   tokenization over plaintext logging. Set the data-retention policy\n   so the row is purged once its purpose ends.\n\nShow the refactored snippet plus the change to the data-flow diagram or\nROPA entry.\n",
+            "pii_is_fixture": true,
+            "pii_kind": "email",
+            "post_processor": "pii_classifier"
+          },
+          "reachability": "unknown",
+          "rule_id": "deva.cwe-359.pii-email-or-phone",
+          "severity": "INFO",
+          "snippet": "<span id=\"profEmailText\">student@example.com</span>",
+          "triage_confidence": 0.0,
+          "triage_label": "untriaged",
+          "triage_reasoning": null
+        }
+      ],
+      "sha256": "a0ebe0b25f3fe424cbff295acbc434c65f0668642efe3a1ac716efa03cdef62b"
+    },
+    "D:\\Aulert\\google788c75ae59fad316.html": {
+      "findings": [],
+      "sha256": "7fa93c433df755d4cddb1c48d196fe8d0cb034071f83aea087398079fff05884"
+    },
+    "D:\\Aulert\\package.json": {
+      "findings": [],
+      "sha256": "14e6d7531c34f9e5b64f589575bac76e551e533fde078bec32eaccbc9e037469"
+    },
+    "D:\\Aulert\\privacy.html": {
+      "findings": [],
+      "sha256": "7aa42648cabfed8f6205e609eaef0192f459240f3d0f1322f387c4c6f76003e3"
+    },
+    "D:\\Aulert\\script-app-calendar.js": {
+      "findings": [],
+      "sha256": "5915966a535d8ea554a050a4e282ba419474bed5ba3a52f1e3d32645ca4a4a0a"
+    },
+    "D:\\Aulert\\script-app-feed.js": {
+      "findings": [],
+      "sha256": "f551886a81a9775d6f8d6cacafa7e787179749e72e4cc76b591e9beff4521544"
+    },
+    "D:\\Aulert\\script-app-feedback.js": {
+      "findings": [],
+      "sha256": "3ccffb98dc1cffcd57918a90c3c5744820f56add9d06af931790c86b81500000"
+    },
+    "D:\\Aulert\\script-app-homework.js": {
+      "findings": [],
+      "sha256": "7e8425f78fc7deeb5fb9a0104d05e7575a873f020d714da09b5bf90352c59967"
+    },
+    "D:\\Aulert\\script-app-settings.js": {
+      "findings": [],
+      "sha256": "be1a291c6af68c1421ee52b1d9954ac63ce858e926a065b49025add50b1c7f66"
+    },
+    "D:\\Aulert\\script-app.js": {
+      "findings": [
+        {
+          "column": 62,
+          "cwe": "CWE-359",
+          "entry_points": [],
+          "file_path": "D:\\Aulert\\script-app.js",
+          "fix_suggestion": "email exposure detected. Apply minimization (collect only what is needed under GDPR Art. 5(1)(c)) and pseudonymize before storage / transmission outside the trust boundary.",
+          "line_end": 333,
+          "line_start": 333,
+          "message": "PII (email) detected in general context. GDPR Art. 5 / CCPA \u00a7 1798.100 require minimization and pseudonymization.",
+          "metadata": {
+            "confidence": 0.4,
+            "confidence_label": "low",
+            "dsc": {
+              "context": "general",
+              "data_class": "pii",
+              "detector_kind": "email",
+              "is_comment": false,
+              "is_test_fixture": false,
+              "severity_tier": "info"
+            },
+            "fix_template": "email appears in D:\\Aulert\\script-app.js:333. Under GDPR Art. 5 / CCPA \u00a7 1798.100,\nthis counts as personal data and must follow data-minimization,\npurpose-limitation, and storage-limitation principles.\n\nRefactor `return { id: 'preview-id', name: 'Preview User', email: 'preview@example.com' };` to:\n\n1. Verify the data subject's purpose for processing this email. If the\n   value is not strictly required for the general action, remove\n   it entirely.\n2. Apply pseudonymization (Art. 4(5)) before the value crosses the\n   process / network / storage boundary. Use a per-field salt and HMAC\n   so the mapping table stays inside the designated controller scope.\n3. Add an entry to the Record of Processing Activities (Art. 30) for\n   this field if it is not already covered.\n4. If the field is a real production identifier, prefer hashing or\n   tokenization over plaintext logging. Set the data-retention policy\n   so the row is purged once its purpose ends.\n\nShow the refactored snippet plus the change to the data-flow diagram or\nROPA entry.\n",
+            "pii_is_fixture": true,
+            "pii_kind": "email",
+            "post_processor": "pii_classifier"
+          },
+          "reachability": "unknown",
+          "rule_id": "deva.cwe-359.pii-email-or-phone",
+          "severity": "INFO",
+          "snippet": "return { id: 'preview-id', name: 'Preview User', email: 'preview@example.com' };",
+          "triage_confidence": 0.0,
+          "triage_label": "untriaged",
+          "triage_reasoning": null
+        }
+      ],
+      "sha256": "ecf5e9f2e2a6853f9efacff492474fab3eaca3d592c8854568f9077aa6e54670"
+    },
+    "D:\\Aulert\\script-landing.js": {
+      "findings": [
+        {
+          "column": 16,
+          "cwe": "CWE-359",
+          "entry_points": [],
+          "file_path": "D:\\Aulert\\script-landing.js",
+          "fix_suggestion": "ipv4 exposure detected. Apply minimization (collect only what is needed under GDPR Art. 5(1)(c)) and pseudonymize before storage / transmission outside the trust boundary.",
+          "line_end": 10,
+          "line_start": 10,
+          "message": "PII (ipv4) detected in general context. GDPR Art. 5 / CCPA \u00a7 1798.100 require minimization and pseudonymization.",
+          "metadata": {
+            "confidence": 0.4,
+            "confidence_label": "low",
+            "dsc": {
+              "context": "general",
+              "data_class": "pii",
+              "detector_kind": "ipv4",
+              "is_comment": false,
+              "is_test_fixture": false,
+              "severity_tier": "info"
+            },
+            "fix_template": "ipv4 appears in D:\\Aulert\\script-landing.js:10. Under GDPR Art. 5 / CCPA \u00a7 1798.100,\nthis counts as personal data and must follow data-minimization,\npurpose-limitation, and storage-limitation principles.\n\nRefactor `http://127.0.0.1:5500  (VS Code Live Server)` to:\n\n1. Verify the data subject's purpose for processing this ipv4. If the\n   value is not strictly required for the general action, remove\n   it entirely.\n2. Apply pseudonymization (Art. 4(5)) before the value crosses the\n   process / network / storage boundary. Use a per-field salt and HMAC\n   so the mapping table stays inside the designated controller scope.\n3. Add an entry to the Record of Processing Activities (Art. 30) for\n   this field if it is not already covered.\n4. If the field is a real production identifier, prefer hashing or\n   tokenization over plaintext logging. Set the data-retention policy\n   so the row is purged once its purpose ends.\n\nShow the refactored snippet plus the change to the data-flow diagram or\nROPA entry.\n",
+            "pii_is_fixture": true,
+            "pii_kind": "ipv4",
+            "post_processor": "pii_classifier"
+          },
+          "reachability": "unknown",
+          "rule_id": "deva.cwe-359.pii-network-or-device",
+          "severity": "INFO",
+          "snippet": "http://127.0.0.1:5500  (VS Code Live Server)",
+          "triage_confidence": 0.0,
+          "triage_label": "untriaged",
+          "triage_reasoning": null
+        }
+      ],
+      "sha256": "60b10f6060c17c7e3db28dfabace00052ca69df2cf2573e02913b4925d6a0c63"
+    },
+    "D:\\Aulert\\styles.css": {
+      "findings": [],
+      "sha256": "228c4cfb8033d3f941d04cc55fcc417a0d3d7df8481afe4af465e0f304d28a29"
+    },
+    "D:\\Aulert\\tab-cal.html": {
+      "findings": [],
+      "sha256": "a867bfbdd536402d7d7417c58dc64a06ce8a268b6bda4ad66297ead1a7fd0c78"
+    },
+    "D:\\Aulert\\tab-fbk.html": {
+      "findings": [],
+      "sha256": "4242a4993f9a8fea122eb9a50dea72c8f81afa5287b2fda6c229f5bb730eec02"
+    },
+    "D:\\Aulert\\tab-feed.html": {
+      "findings": [],
+      "sha256": "2d1074a8768d628e6c0b77752b324a825570ee4c4394232812bce5a353b2f960"
+    },
+    "D:\\Aulert\\tab-hw.html": {
+      "findings": [],
+      "sha256": "e40e28b5f8266415963e9d7dfa00beb2533d01cef8826dc0db0051809b0f35f1"
+    },
+    "D:\\Aulert\\tab-set.html": {
+      "findings": [],
+      "sha256": "e07e89fef461944d93ff60c25d1b9f5d95098f4680884e12ab789ef5b3b9dc16"
+    },
+    "D:\\Aulert\\terms.html": {
+      "findings": [],
+      "sha256": "e66c9ca955b943c88f057c4d67bc0dc178aaafc09254f48cbb4f96870303aafb"
     }
   },
   "rulepack_fingerprint": "v3:a0c1fdd1d956ea17cb164ad7ef8be1ed34551cb88f79c2c9004cc5a6b3c82d3a",

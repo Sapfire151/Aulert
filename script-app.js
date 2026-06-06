@@ -145,13 +145,58 @@ window.addEventListener('load', async () => {
           const delay = 1500 * attempt; // 1.5s, 3s
           console.log(`Retrying in ${delay}ms...`);
           const feed = document.getElementById('notifFeed');
-          if (feed) feed.innerHTML = `<div class="empty-s" style="padding:60px 0"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" style="animation:spin .9s linear infinite;opacity:.4"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><h3 style="margin-top:16px">Retrying… (attempt ${attempt + 1}/${MAX_RETRIES})</h3></div>`;
+          if (feed) {
+            feed.textContent = '';
+            const wrap = document.createElement('div');
+            wrap.className = 'empty-s';
+            wrap.style.padding = '60px 0';
+            const svgNS = 'http://www.w3.org/2000/svg';
+            const svg = document.createElementNS(svgNS, 'svg');
+            svg.setAttribute('width', '32'); svg.setAttribute('height', '32');
+            svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('fill', 'none');
+            svg.style.animation = 'spin .9s linear infinite'; svg.style.opacity = '.4';
+            const path = document.createElementNS(svgNS, 'path');
+            path.setAttribute('d', 'M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83');
+            path.setAttribute('stroke', 'currentColor'); path.setAttribute('stroke-width', '2'); path.setAttribute('stroke-linecap', 'round');
+            svg.appendChild(path);
+            wrap.appendChild(svg);
+            const h3 = document.createElement('h3');
+            h3.style.marginTop = '16px';
+            h3.textContent = `Retrying\u2026 (attempt ${attempt + 1}/${MAX_RETRIES})`;
+            wrap.appendChild(h3);
+            feed.appendChild(wrap);
+          }
           await new Promise(r => setTimeout(r, delay));
           return tryLoad();
         }
         // All retries exhausted — show error state
         const feed = document.getElementById('notifFeed');
-        if (feed) feed.innerHTML = `<div class="empty-s" style="padding:60px 0"><h3 style="margin-bottom:8px">Could not load your classes</h3><p style="color:var(--text-2);margin-bottom:20px;font-size:14px;white-space:pre-wrap;text-align:left;">${err.stack || err.message || err}</p><button class="btn-sm" onclick="location.reload()">Retry</button><button class="btn-sm" style="margin-left:8px" onclick="document.cookie='aul_token=; max-age=0; path=/';sessionStorage.removeItem('aul_token');location.href='index.html'">Sign out</button></div>`;
+        if (feed) {
+          feed.textContent = '';
+          const wrap = document.createElement('div');
+          wrap.className = 'empty-s';
+          wrap.style.padding = '60px 0';
+          const h3 = document.createElement('h3');
+          h3.style.marginBottom = '8px';
+          h3.textContent = 'Could not load your classes';
+          wrap.appendChild(h3);
+          const p = document.createElement('p');
+          p.style.cssText = 'color:var(--text-2);margin-bottom:20px;font-size:14px;white-space:pre-wrap;text-align:left;';
+          p.textContent = String(err.stack || err.message || err);
+          wrap.appendChild(p);
+          const retryBtn = document.createElement('button');
+          retryBtn.className = 'btn-sm';
+          retryBtn.textContent = 'Retry';
+          retryBtn.onclick = () => location.reload();
+          wrap.appendChild(retryBtn);
+          const signOutBtn = document.createElement('button');
+          signOutBtn.className = 'btn-sm';
+          signOutBtn.style.marginLeft = '8px';
+          signOutBtn.textContent = 'Sign out';
+          signOutBtn.onclick = () => { document.cookie = 'aul_token=; max-age=0; path=/'; sessionStorage.removeItem('aul_token'); location.href = 'index.html'; };
+          wrap.appendChild(signOutBtn);
+          feed.appendChild(wrap);
+        }
       }
     }
     tryLoad();
@@ -190,7 +235,7 @@ function doAuth() {
   }
   if (!window.google?.accounts?.oauth2) { alert('Google Sign-In is still loading. Please try again in a moment.'); return; }
   
-  const stateToken = (window.crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296).toString(36).substring(2) + Date.now().toString(36);
+  const stateToken = (window.crypto.getRandomValues(new Uint32Array(1))[0] / (2 ** 32)).toString(36).substring(2) + Date.now().toString(36);
   sessionStorage.setItem('oauth_state', stateToken);
 
   _tokenClient = google.accounts.oauth2.initTokenClient({

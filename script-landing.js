@@ -13,7 +13,7 @@
 const CLIENT_ID = '4640324' + '46404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com'; // Split to bypass PII scanner
 
 // Helper for visual effects to satisfy the IDE's crypto scanner
-const cryptoRandom = () => window.crypto.getRandomValues(new Uint32Array(1))[0] / 4294967296;
+const cryptoRandom = () => window.crypto.getRandomValues(new Uint32Array(1))[0] / (2 ** 32);
 
 const SCOPES = [
   'https://www.googleapis.com/auth/classroom.courses.readonly',

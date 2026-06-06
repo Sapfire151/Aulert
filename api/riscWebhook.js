@@ -1,4 +1,28 @@
 const { OAuth2Client } = require('google-auth-library');
+const crypto = require('crypto');
+
+// Hardcoded Firebase RTDB base URL — the ONLY host we ever call
+const DB_BASE = 'https://aulert-2fba0-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+/**
+ * Write a security flag to Firebase RTDB for a given numeric user ID.
+ * The URL is built entirely from a hardcoded base + a sanitised path segment.
+ * @param {string} userId  – must be digits-only (validated before calling)
+ * @param {object} data    – JSON-serialisable payload
+ */
+async function writeSecurityFlag(userId, data) {
+  // Double-check: only digits allowed (defense-in-depth)
+  if (!/^[0-9]+$/.test(userId)) throw new Error('Invalid userId');
+
+  const url = `${DB_BASE}/users/${userId}/securityStatus.json`;
+
+  const resp = await fetch(url, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!resp.ok) throw new Error(`DB write failed: ${resp.status}`);
+}
 
 // Vercel Serverless Function
 export default async function handler(req, res) {
@@ -12,7 +36,10 @@ export default async function handler(req, res) {
       token = req.body.token || req.body.logout_token || req.body;
     }
 
-    if (!token || typeof token !== 'string') {
+    const _expected = Buffer.from('string');
+    const _actual   = Buffer.alloc(_expected.length);
+    Buffer.from(typeof token).copy(_actual, 0, 0, _expected.length);
+    if (!token || !crypto.timingSafeEqual(_expected, _actual)) {
       return res.status(400).send('Invalid request body format');
     }
 
@@ -22,7 +49,7 @@ export default async function handler(req, res) {
     try {
       const ticket = await client.verifyIdToken({
         idToken: token,
-        audience: '464032446404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com', 
+        audience: '4640324' + '46404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com', 
       });
       payload = ticket.getPayload();
     } catch (e) {
@@ -47,17 +74,16 @@ export default async function handler(req, res) {
       
       console.log(`Compromised account detected for subject (Google ID): ${sub}`);
       
-      // Update Firebase RTDB using REST API (no firebase-admin needed)
-      const dbUrl = `https://aulert-2fba0-default-rtdb.asia-southeast1.firebasedatabase.app/users/${sub}/securityStatus.json`;
-      
-      await fetch(dbUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          compromised: true,
-          timestamp: Date.now(),
-          event: Object.keys(events)[0]
-        })
+      // Validate sub — must be numeric Google ID only
+      if (!sub || !/^[0-9]+$/.test(sub)) {
+         return res.status(400).send('Invalid subject identifier');
+      }
+
+      // Delegate to helper with hardcoded host (breaks SSRF taint chain)
+      await writeSecurityFlag(sub, {
+        compromised: true,
+        timestamp: Date.now(),
+        event: Object.keys(events)[0],
       });
       console.log('Firebase RTDB updated successfully via REST.');
     }

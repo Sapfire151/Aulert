@@ -14,19 +14,30 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+*.log
 
 # IDE/editor configuration
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
 .DS_Store
+.DS_Store?
+Thumbs.db
+ehthumbs.db
+Desktop.ini
 
 # Firebase (legacy) debug logs
 firebase-debug.log
 firebase-debug.*.log
 
-# Build artifacts (if any)
+# Build artifacts
 build/
 dist/
+out/
 
 # Miscellaneous
 coverage/
@@ -38,3 +49,9 @@ coverage/
 .parcel-cache/
 .npm/
 .yarn/
+
+# DevTools cache
+.dsc_cache/
+
+# Testing scripts (keep out of production)
+trigger_risc.ps1

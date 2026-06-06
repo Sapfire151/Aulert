@@ -133,17 +133,30 @@ function doAuth() {
     return;
   }
   if (!window.google?.accounts?.oauth2) { alert('Google Sign-In is still loading. Please try again in a moment.'); return; }
+  
+  const stateToken = cryptoRandom().toString(36).substring(2) + Date.now().toString(36);
+  sessionStorage.setItem('oauth_state', stateToken);
+
   // Re-initialize client on every click so subsequent auths work correctly
   _tokenClient = google.accounts.oauth2.initTokenClient({
     client_id: CLIENT_ID,
     scope: SCOPES,
     callback: onToken,
     prompt: 'select_account',
+    state: stateToken,
   });
   _tokenClient.requestAccessToken();
 }
 
 async function onToken(resp) {
+  const savedState = sessionStorage.getItem('oauth_state');
+  if (resp.state !== savedState) {
+    console.error('State mismatch', resp.state, savedState);
+    alert('Security Error: OAuth state mismatch (possible CSRF attack).');
+    return;
+  }
+  sessionStorage.removeItem('oauth_state');
+  
   // Save token and navigate to the app page
   document.cookie = `aul_token=${resp.access_token}; max-age=${resp.expires_in || 3600}; path=/; SameSite=Lax`;
   window.location.href = 'app.html';
@@ -604,8 +617,8 @@ function toggleFaq(btn) {
    4. Fill in the three values below
 ════════════════════════════════════════════ */
 const FIREBASE_CONFIG = {
-  apiKey: 'AIzaSyB1' + '6s3r7g9eC2LtoPU' + 'EL4dRxivn562rp6Q', // Split to bypass CWE scanner
-  databaseURL: 'https://aulert-210c3-default-rtdb.asia-southeast1.firebasedatabase.app',
-  projectId: 'aulert-210c3',
+  apiKey: 'YOUR_NEW_API_KEY', // Be sure to update this from your Firebase Project Settings!
+  databaseURL: 'https://aulert-2fba0-default-rtdb.asia-southeast1.firebasedatabase.app',
+  projectId: 'aulert-2fba0',
 };
 

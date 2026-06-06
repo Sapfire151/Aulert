@@ -1,24 +1,40 @@
 # Dependencies
 node_modules/
 
-# Vercel
+# Vercel deployment files
 .vercel/
+.vercel_build_output/
 
 # Environment Variables
 .env
 .env.*
 !.env.example
 
-# Logs
+# Logs and debug files
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Editor
+# IDE/editor configuration
 .vscode/
 .idea/
 .DS_Store
 
-# Firebase (legacy)
+# Firebase (legacy) debug logs
 firebase-debug.log
 firebase-debug.*.log
+
+# Build artifacts (if any)
+build/
+dist/
+
+# Miscellaneous
+coverage/
+.cache/
+.tmp/
+
+# Build caches and frameworks
+.next/
+.parcel-cache/
+.npm/
+.yarn/

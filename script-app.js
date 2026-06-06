@@ -495,6 +495,11 @@ if (_authModal) _authModal.addEventListener('click', e => {
 });
 
 function launchApp() {
+  // Restore tab from URL hash if present
+  const hash = window.location.hash.replace('#', '');
+  const initialTab = ['feed', 'cal', 'hw', 'set', 'fbk', 'com'].includes(hash) ? hash : 'feed';
+  goTab(initialTab);
+
   renderGreeting();
   renderAccount();
   renderFeed();
@@ -655,6 +660,11 @@ function updateTabBadge(tabId, count) {
 }
 
 function goTab(name) {
+  const validTabs = ['feed', 'cal', 'hw', 'set', 'fbk', 'com'];
+  if (!validTabs.includes(name)) name = 'feed';
+  // Update URL hash for persistence
+  window.location.hash = name;
+
   ['feed', 'cal', 'hw', 'set', 'fbk', 'com'].forEach(t => {
     const panel = document.getElementById('p-' + t);
     const tab = document.getElementById('tb-' + t);
@@ -699,6 +709,19 @@ function openSheet(id) {
 
   const submitBtn = document.getElementById('submitWorkBtn');
   if (submitBtn) {
+    /* Settings alignment tweaks */
+    /* Ensure settings sections are properly aligned */
+    /* Add CSS rule via JS if not present */
+    if (!document.getElementById('settingsAlignmentStyle')) {
+      const style = document.createElement('style');
+      style.id = 'settingsAlignmentStyle';
+      style.textContent = `
+        .sg { display: flex; flex-direction: column; align-items: stretch; }
+        .sg-body { display: flex; flex-direction: column; gap: 12px; }
+        .sg-lbl { margin-bottom: 8px; font-weight: 600; }
+      `;
+      document.head.appendChild(style);
+    }
     // Only show if it's an assignment and we have the necessary IDs
     if (n.type === 'assignment' && n.courseWorkId && n.submissionId) {
       submitBtn.style.display = 'flex';

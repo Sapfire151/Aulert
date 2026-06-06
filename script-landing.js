@@ -99,7 +99,9 @@ window.addEventListener('load', () => {
       window.history.replaceState(null, '', window.location.pathname);
     }
     
-    window.location.href = 'app.html';
+    // Preserve hash (e.g., #set) when redirecting to app.html
+    const hash = window.location.hash;
+    window.location.href = 'app.html' + (hash ? hash : '');
     return;
   }
 

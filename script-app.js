@@ -77,7 +77,7 @@ const courseById = id => S.courses.find(c => c.id === id) || { color: 'var(--vio
 ════════════════════════════════════════════ */
 
 async function loadTabs() {
-  const tabs = ['feed', 'cal', 'hw', 'set', 'fbk'];
+  const tabs = ['cal', 'hw', 'set', 'fbk']; // 'feed' is already in app.html
   const appBody = document.getElementById('appBody');
   if (!appBody) return;
   for (const tab of tabs) {
@@ -120,21 +120,41 @@ window.addEventListener('load', async () => {
   const saved = (cookieMatch ? cookieMatch[2] : null) || sessionStorage.getItem('aul_token');
   if (saved) {
     S.token = saved;
-    // await loadTabs(); // Removed to prevent duplicating hardcoded tabs
+    await loadTabs(); // Load missing tabs before app starts
     showLoadingState();
-    loadEverything()
-      .then(() => launchApp())
-      .catch((err) => {
-        console.error('loadEverything failed:', err);
+
+    // Retry logic: attempt loadEverything up to 3 times with exponential backoff
+    const MAX_RETRIES = 3;
+    let attempt = 0;
+    async function tryLoad() {
+      attempt++;
+      try {
+        await loadEverything();
+        launchApp();
+      } catch (err) {
+        console.error(`loadEverything failed (attempt ${attempt}/${MAX_RETRIES}):`, err);
+        // Auth errors — clear token and redirect to login immediately
         if (!err || !err.message || err.message.includes('401') || err.message.includes('Token')) {
           document.cookie = "aul_token=; max-age=0; path=/";
           sessionStorage.removeItem('aul_token');
           window.location.href = 'index.html';
-        } else {
-          const feed = document.getElementById('notifFeed');
-          if (feed) feed.innerHTML = '<div class="empty-s" style="padding:60px 0"><h3 style="margin-bottom:8px">Could not load your classes</h3><p style="color:var(--text-2);margin-bottom:20px;font-size:14px">Network error — check your connection.</p><button class="btn-sm" onclick="location.reload()">Retry</button><button class="btn-sm" style="margin-left:8px" onclick="document.cookie=\'aul_token=; max-age=0; path=/\';sessionStorage.removeItem(\'aul_token\');location.href=\'index.html\'">Sign out</button></div>';
+          return;
         }
-      });
+        // Network / transient errors — retry with backoff
+        if (attempt < MAX_RETRIES) {
+          const delay = 1500 * attempt; // 1.5s, 3s
+          console.log(`Retrying in ${delay}ms...`);
+          const feed = document.getElementById('notifFeed');
+          if (feed) feed.innerHTML = `<div class="empty-s" style="padding:60px 0"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" style="animation:spin .9s linear infinite;opacity:.4"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><h3 style="margin-top:16px">Retrying… (attempt ${attempt + 1}/${MAX_RETRIES})</h3></div>`;
+          await new Promise(r => setTimeout(r, delay));
+          return tryLoad();
+        }
+        // All retries exhausted — show error state
+        const feed = document.getElementById('notifFeed');
+        if (feed) feed.innerHTML = `<div class="empty-s" style="padding:60px 0"><h3 style="margin-bottom:8px">Could not load your classes</h3><p style="color:var(--text-2);margin-bottom:20px;font-size:14px;white-space:pre-wrap;text-align:left;">${err.stack || err.message || err}</p><button class="btn-sm" onclick="location.reload()">Retry</button><button class="btn-sm" style="margin-left:8px" onclick="document.cookie='aul_token=; max-age=0; path=/';sessionStorage.removeItem('aul_token');location.href='index.html'">Sign out</button></div>`;
+      }
+    }
+    tryLoad();
   } else {
     window.location.href = 'index.html';
   }

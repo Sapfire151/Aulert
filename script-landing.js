@@ -105,11 +105,14 @@ window.addEventListener('load', () => {
     return;
   }
 
-  // 2. If already authenticated, go straight to the app
+  // 2. If already authenticated, go straight to the app (unless on privacy/terms pages)
   const cookieMatch = document.cookie.match('(^|;) ?aul_token=([^;]*)(;|$)');
   const saved = cookieMatch ? cookieMatch[2] : null;
   if (saved) {
-    window.location.href = 'app.html';
+    const path = window.location.pathname;
+    if (!path.includes('privacy') && !path.includes('terms')) {
+      window.location.href = 'app.html';
+    }
     return;
   }
   // Wait until GSI is ready

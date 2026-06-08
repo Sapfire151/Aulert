@@ -55,3 +55,9 @@ coverage/
 
 # Testing scripts (keep out of production)
 trigger_risc.ps1
+
+# Temporary debug/diff files
+diff.txt
+diff_utf8.txt
+*.ps1
+!trigger_risc.ps1

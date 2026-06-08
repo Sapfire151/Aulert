@@ -6,7 +6,7 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-75J29YEK16"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
 
     gtag('config', 'G-75J29YEK16');
@@ -209,8 +209,8 @@
                 </svg>
               </div>
               <div class="df-body">
-                <div class="df-h">Checks every 5 minutes</div>
-                <div class="df-p">Aulert monitors your Classroom around the clock, updating every five minutes to keep
+                <div class="df-h">Checks every 30 seconds</div>
+                <div class="df-p">Aulert monitors your Classroom around the clock, updating every 30 seconds to keep
                   you instantly in the loop.</div>
               </div>
             </div>
@@ -230,14 +230,14 @@
             <div class="demo-feat">
               <div class="df-icon" style="background:var(--amber-icon-bg)">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2a10 10 0 100 20A10 10 0 0012 2z" stroke="var(--amber)" stroke-width="2" />
-                  <path d="M12 6v6l4 2" stroke="var(--amber)" stroke-width="2" stroke-linecap="round" />
+                  <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="var(--amber)" stroke-width="2"
+                    stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
               </div>
               <div class="df-body">
-                <div class="df-h">Works 24 / 7</div>
-                <div class="df-p">Even at 2 AM, Aulert catches new updates within five minutes, ensuring you never miss
-                  a late-night study guide.</div>
+                <div class="df-h">One-Click Submissions</div>
+                <div class="df-p">Not just alerts. Submit your assignments and attach work directly from the dashboard
+                  without ever opening Classroom.</div>
               </div>
             </div>
           </div>
@@ -306,7 +306,7 @@
                     </svg>
                   </div>
                   <div class="pn-body">
-                    <div class="pn-app">Aulert · Advanced Mathemathics</div>
+                    <div class="pn-app">Aulert · Advanced Mathematics</div>
                     <div class="pn-title">Quiz 3 — Integration Techniques</div>
                     <div class="pn-msg">Due February 25 at 11:59 PM. Two attempts allowed — highest score counts.</div>
                     <div class="pn-time">2 hrs ago</div>
@@ -378,6 +378,60 @@
             <div class="step-h">Notify</div>
             <div class="step-p">You get a push notification the moment anything happens so you can tap it to see the
               full details</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRIVACY & SECURITY -->
+    <div class="land-section privacy-sec" style="background:var(--surface); padding:80px 24px; text-align:center;">
+      <div class="reveal">
+        <div class="sec-h" style="font-size:32px; margin-bottom:16px;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+            style="vertical-align:middle; margin-right:8px; color:var(--teal);">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Privacy &amp; Security First
+        </div>
+        <p class="sec-sub" style="max-width:800px; margin:0 auto 48px;">We use standard Google OAuth, meaning Aulert
+          never sees or stores your actual Google password.</p>
+      </div>
+      <div class="steps stagger" style="max-width:900px; margin:0 auto; gap:24px;">
+        <div class="step"
+          style="background:var(--card-bg); padding:24px; border:1px solid var(--rim-2); border-radius:16px; text-align:left;">
+          <div class="step-h" style="color:var(--text-1); font-size:18px; margin-bottom:8px;">Direct Google API
+            Connection</div>
+          <div class="step-p">Your credentials and OAuth tokens communicate directly with official Google servers,
+            meaning there is no middleman intercepting your login or your school data.</div>
+        </div>
+        <div class="step"
+          style="background:var(--card-bg); padding:24px; border:1px solid var(--rim-2); border-radius:16px; text-align:left;">
+          <div class="step-h" style="color:var(--text-1); font-size:18px; margin-bottom:8px;">Zero External Servers
+          </div>
+          <div class="step-p">Aulert is built to be entirely client-side. Your assignments, grades, and profile data are
+            processed locally on your device, so nothing is ever stored on external databases or third-party servers.
+          </div>
+        </div>
+        <div class="step"
+          style="background:var(--card-bg); padding:24px; border:1px solid var(--rim-2); border-radius:16px; text-align:left;">
+          <div class="step-h" style="color:var(--text-1); font-size:18px; margin-bottom:12px;">Secured by Partners
+          </div>
+          <div class="step-p" style="margin-bottom:16px;">We proudly use industry-leading extensions like Deva Security and GitLens to actively audit our codebase, detect vulnerabilities, and maintain the highest security standards.
+          </div>
+          <div style="display:flex; gap:16px; align-items:center;">
+            <!-- Deva Security Logo -->
+            <div style="display:flex; align-items:center; gap:6px; color:var(--text-1); font-size:14px; font-weight:700;">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--emerald)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              </svg>
+              Deva Security
+            </div>
+            <!-- GitLens Logo -->
+            <div style="display:flex; align-items:center; gap:6px; color:var(--text-1); font-size:14px; font-weight:700;">
+              <img src="data:image/png;base64,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" alt="GitLens Logo" width="20" height="20">
+              GitLens
+            </div>
           </div>
         </div>
       </div>
@@ -455,8 +509,8 @@
               </svg></div>
           </div>
           <div class="faq-a">
-            <div class="faq-a-inner">Aulert checks your Classroom every five minutes and sends a notification within
-              seconds of detecting any changes so you never experience a delay longer than five minutes.</div>
+            <div class="faq-a-inner">Aulert checks your Classroom every 30 seconds and sends a notification within
+              seconds of detecting any changes so you never experience a delay longer than 30 seconds.</div>
           </div>
         </div>
         <div class="faq-item">
@@ -528,3 +582,4 @@
 </body>
 
 </html>
+

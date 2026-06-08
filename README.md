@@ -49,8 +49,11 @@ That's it! Your classes will load automatically.
 Your privacy is our priority:
 
 - **Browser-First**: Aulert runs entirely in your browser. No sensitive Google Classroom data is stored on any Aulert server.
-- **Direct API Access**: Your Classroom data is fetched directly from Google's API using your own secure token.
+- **Direct API Access**: Your credentials and OAuth tokens communicate directly with official Google servers — there is no middleman intercepting your login or school data.
+- **Zero External Servers**: Assignments, grades, and profile data are processed locally on your device. Nothing is ever stored on external databases or third-party servers.
 - **Interactive, yet secure**: Aulert securely processes your data to let you submit assignments and get timely updates without compromising your privacy.
+- **Audited by Partners**: We use industry-leading tools — [Deva Security](https://marketplace.visualstudio.com/items?itemName=nicholasdeva.deva-security) and [GitLens](https://www.gitkraken.com/gitlens) — to actively audit our codebase, detect vulnerabilities, and maintain the highest security standards.
+- **Fully Open-Source**: Every line of code is publicly available on GitHub for anyone to review and verify.
 
 ---
 

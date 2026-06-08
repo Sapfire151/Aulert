@@ -7,7 +7,10 @@
 function renderGreeting() {
   const h = new Date().getHours();
   const el = document.getElementById('dashGreeting');
-  if (el) el.textContent = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  const navEl = document.getElementById('navGreeting');
+  const msg = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  if (el) el.textContent = msg;
+  if (navEl) navEl.textContent = msg;
 }
 
 function renderAccount() {

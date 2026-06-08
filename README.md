@@ -26,6 +26,7 @@ Aulert is a free student dashboard that monitors your Google Classroom courses i
 - **🔔 Live Notifications**: Get browser push notifications when new assignments or announcements are posted. Set quiet hours so you're not disturbed at night.
 - **💬 Community Chat**: Add your classmates as friends and message them directly. Create group chats to coordinate with your whole class.
 - **📣 Built-in Feedback**: Have a suggestion or found a bug? Send feedback directly from inside the app.
+- **✨ Modern UI**: Enjoy a sleek interface with skeleton loading screens and smooth animations.
 
 ---
 

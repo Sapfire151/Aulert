@@ -1798,7 +1798,7 @@ body::before {
   text-align: center;
   font-size: 9px;
   font-weight: 700;
-  color: var(--text-3);
+  color: var(--text-2);
   letter-spacing: .7px;
   text-transform: uppercase;
   padding: 2px 0;
@@ -1837,7 +1837,7 @@ body::before {
 }
 
 .cday.other {
-  opacity: .22;
+  opacity: .45;
 }
 
 .cday-n {
@@ -6559,6 +6559,10 @@ body::before {
   color: var(--amber);
 }
 
+.nav-greeting-container {
+  display: none;
+}
+
 .fbk-char-count.over {
   color: var(--rose);
 }
@@ -9504,38 +9508,91 @@ body::before {
 
 @media (max-width: 768px) {
 
-  /* ── Bottom bar ── */
+  /* ── Hide the desktop nav shell on mobile ── */
   .app-nav {
+    position: static;
+    height: auto;
+    background: none;
+    border: none;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    padding: 0;
+    display: contents;
+  }
+
+  /* Hide logo on mobile */
+  .app-nav .nav-logo {
+    display: none;
+  }
+
+  /* Top bar for theme toggle, bell, avatar */
+  .app-nav .nav-r {
     position: fixed;
-    top: auto;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 101;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    height: 54px;
+    padding: 0 14px;
+    background: var(--nav-bg);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border-bottom: 1px solid var(--rim-2);
+    border-radius: 0;
+  }
+
+  /* Show mobile greeting container and push icons to the right */
+  .nav-greeting-container {
+    display: flex !important;
+    flex-direction: column;
+    margin-right: auto;
+    justify-content: center;
+  }
+  
+  .nav-greeting {
+    font-family: var(--ff-head);
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--text-1);
+    text-transform: none;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+  
+  .nav-greeting-sub {
+    font-family: var(--ff-head);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-1);
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+  }
+  
+  .nav-greeting-sub .accent-text {
+    color: var(--teal);
+  }
+
+  /* Bottom tab bar */
+  .app-nav .nav-tabs {
+    position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     height: 60px;
     z-index: 100;
-    flex-direction: row;
-    justify-content: center;
-    padding: 0 4px;
-    border-bottom: none;
-    border-top: 1px solid var(--rim-2);
-    background: var(--nav-bg);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-  }
-
-  /* Hide logo and right section on mobile bottom bar */
-  .app-nav .nav-logo,
-  .app-nav .nav-r {
-    display: none;
-  }
-
-  /* Tab bar fills the bar */
-  .app-nav .nav-tabs {
     display: flex;
     justify-content: space-around;
     width: 100%;
     gap: 0;
     padding: 0;
+    background: var(--nav-bg);
+    border-top: 1px solid var(--rim-2);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
   }
 
   /* Tabs become vertical icon + label */
@@ -9579,7 +9636,7 @@ body::before {
 
   /* ── App body: fill viewport exactly ── */
   .app-body {
-    padding-top: 0;
+    padding-top: 54px;
     padding-bottom: 60px;
     min-height: 100dvh;
     max-height: 100dvh;
@@ -9608,19 +9665,7 @@ body::before {
 
   /* ── Compact welcome card ── */
   .dash-welcome {
-    padding: 16px 16px 12px;
-    margin: 0;
-    border-radius: 0;
-    border-left: none;
-    border-right: none;
-  }
-
-  .dash-welcome h1 {
-    font-size: 20px !important;
-  }
-
-  .dash-welcome-right {
-    display: none;
+    display: none !important;
   }
 
   /* ── Compact stats row ── */
@@ -9657,6 +9702,14 @@ body::before {
     grid-template-columns: 1fr;
     gap: 8px;
     padding: 0 12px;
+  }
+
+  /* Make sidebar appear before activity feed on mobile */
+  .dash-feed-col {
+    order: 2;
+  }
+  .dash-sidebar {
+    order: 1;
   }
 
   /* ── Notification cards compact ── */
@@ -9772,4 +9825,56 @@ body:has(#appBody) .sheet {
 [data-theme="light"] body:has(#appBody) .sheet {
   background: #ffffff;
   border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* ── Skeleton Loading ── */
+@keyframes pulseSkeleton {
+  0% { opacity: 0.7; }
+  50% { opacity: 0.3; }
+  100% { opacity: 0.7; }
+}
+
+.ncard.skeleton {
+  pointer-events: none;
+  animation: pulseSkeleton 1.5s ease-in-out infinite;
+  box-shadow: none;
+}
+
+.skeleton-text {
+  background: var(--surface-2);
+  border-radius: 4px;
+  height: 14px;
+  margin-bottom: 8px;
+}
+
+.skeleton-text.short {
+  width: 40%;
+}
+
+.skeleton-text.long {
+  width: 90%;
+}
+
+.skeleton-text.medium {
+  width: 70%;
+}
+
+.skeleton-tag {
+  background: var(--surface-2);
+  border-radius: var(--r-pill);
+  height: 22px;
+  width: 60px;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.skeleton-time {
+  background: var(--surface-2);
+  border-radius: 4px;
+  height: 12px;
+  width: 40px;
+}
+
+.ncard.skeleton .ncard-bar {
+  background: var(--surface-2) !important;
 }

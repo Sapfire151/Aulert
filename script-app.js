@@ -146,25 +146,7 @@ window.addEventListener('load', async () => {
           console.log(`Retrying in ${delay}ms...`);
           const feed = document.getElementById('notifFeed');
           if (feed) {
-            feed.textContent = '';
-            const wrap = document.createElement('div');
-            wrap.className = 'empty-s';
-            wrap.style.padding = '60px 0';
-            const svgNS = 'http://www.w3.org/2000/svg';
-            const svg = document.createElementNS(svgNS, 'svg');
-            svg.setAttribute('width', '32'); svg.setAttribute('height', '32');
-            svg.setAttribute('viewBox', '0 0 24 24'); svg.setAttribute('fill', 'none');
-            svg.style.animation = 'spin .9s linear infinite'; svg.style.opacity = '.4';
-            const path = document.createElementNS(svgNS, 'path');
-            path.setAttribute('d', 'M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83');
-            path.setAttribute('stroke', 'currentColor'); path.setAttribute('stroke-width', '2'); path.setAttribute('stroke-linecap', 'round');
-            svg.appendChild(path);
-            wrap.appendChild(svg);
-            const h3 = document.createElement('h3');
-            h3.style.marginTop = '16px';
-            h3.textContent = `Retrying\u2026 (attempt ${attempt + 1}/${MAX_RETRIES})`;
-            wrap.appendChild(h3);
-            feed.appendChild(wrap);
+            showLoadingState(`Retrying\u2026 (attempt ${attempt + 1}/${MAX_RETRIES})`);
           }
           await new Promise(r => setTimeout(r, delay));
           return tryLoad();
@@ -206,9 +188,34 @@ window.addEventListener('load', async () => {
   waitForGSI();
 });
 
-function showLoadingState() {
+function showLoadingState(msg) {
   const feed = document.getElementById('notifFeed');
-  if (feed) feed.innerHTML = `<div class="empty-s" style="padding:60px 0"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" style="animation:spin .9s linear infinite;opacity:.4"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><h3 style="margin-top:16px">Loading your classes…</h3></div>`;
+  if (feed) {
+    let html = msg ? `<div style="text-align:center; padding-top:10px; padding-bottom:20px; color:var(--text-2); font-size:14px; font-weight:600; animation:pulseSkeleton 1.5s infinite;">${msg}</div>` : '';
+    for (let i = 0; i < 4; i++) {
+      html += `
+<div class="ncard skeleton" style="animation-delay:${i * 0.15}s">
+  <div class="ncard-row">
+    <div class="ncard-bar"></div>
+    <div class="ncard-body">
+      <div class="ncard-top">
+        <div class="ncard-tags">
+          <span class="skeleton-tag"></span>
+          <span class="skeleton-tag" style="width: 40px;"></span>
+        </div>
+        <span class="skeleton-time"></span>
+      </div>
+      <div class="ncard-title" style="margin-bottom: 12px;"><div class="skeleton-text medium"></div></div>
+      <div class="ncard-preview">
+        <div class="skeleton-text long"></div>
+        <div class="skeleton-text short"></div>
+      </div>
+    </div>
+  </div>
+</div>`;
+    }
+    feed.innerHTML = html;
+  }
 }
 
 function waitForGSI(attempts = 0) {

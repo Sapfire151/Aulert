@@ -111,7 +111,7 @@ function renderDl(day) {
     ? `Deadlines on ${MONTHS[S.calMonth]} ${day}` : 'Upcoming deadlines';
 
   const el = document.getElementById('dlList');
-  if (!combined.length) { el.innerHTML = `<div class="empty-s" style="padding:32px 0"><h3>No deadlines${day?' on this day':''}</h3></div>`; return; }
+  if (!combined.length) { el.innerHTML = `<div class="empty-s" style="padding:32px 0"><p style="font-size:16px;font-weight:600;color:var(--text-2)">No deadlines${day?' on this day':''}</p></div>`; return; }
 
   const ul = { urg:'Urgent', soo:'Soon', ok:'On track' };
   el.innerHTML = combined.map(dl => {

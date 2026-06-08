@@ -33,7 +33,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/drive.file',
 ].join(' ');
 
-const POLL_MS = 1 * 60 * 1000;
+const POLL_MS = 5 * 60 * 1000;
 const COURSE_COLORS = ['var(--teal)', 'var(--violet)', 'var(--amber)', 'var(--rose)', 'var(--sky)', 'var(--green)', 'var(--orange)', 'var(--pink)', 'var(--emerald)', 'var(--gamemaster)'];
 const TYPE_META = new Map([
   ['announcement', { label: 'Announcement', color: 'var(--teal)' }],
@@ -279,7 +279,7 @@ function hideLoadingApp() { window.location.href = 'index.html'; }
    API & DATA HELPERS
 ════════════════════════════════════════════ */
 
-async function classroomApi(path) {
+async function classroomApi(path, retries = 3) {
   if (S.token.startsWith('preview_bypass')) {
     if (path.startsWith('courses?')) {
       return {
@@ -312,20 +312,32 @@ async function classroomApi(path) {
     return {};
   }
 
-  const res = await fetch(`https://classroom.googleapis.com/v1/${path}`, {
-    headers: { Authorization: `Bearer ${S.token}` },
-  });
-  if (res.status === 401) {
-    S.token = null;
-    document.cookie = "aul_token=; max-age=0; path=/";
-    sessionStorage.removeItem('aul_token');
-    clearInterval(S.pollTimer);
-    showToast('Session expired', 'Please reconnect your Google account');
-    setTimeout(() => { hideLoadingApp(); }, 1500);
-    throw new Error('Token expired');
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const res = await fetch(`https://classroom.googleapis.com/v1/${path}`, {
+      headers: { Authorization: `Bearer ${S.token}` },
+    });
+    
+    if (res.status === 401) {
+      S.token = null;
+      document.cookie = "aul_token=; max-age=0; path=/";
+      sessionStorage.removeItem('aul_token');
+      clearInterval(S.pollTimer);
+      showToast('Session expired', 'Please reconnect your Google account');
+      setTimeout(() => { hideLoadingApp(); }, 1500);
+      throw new Error('Token expired');
+    }
+    
+    if (res.status === 429 && attempt < retries) {
+      const retryAfter = res.headers.get('Retry-After');
+      const delay = retryAfter ? parseInt(retryAfter) * 1000 : 2000 * Math.pow(2, attempt);
+      console.warn(`API 429 on ${path}. Retrying in ${delay}ms...`);
+      await new Promise(r => setTimeout(r, delay));
+      continue;
+    }
+    
+    if (!res.ok) throw new Error(`API ${res.status}: ${path}`);
+    return res.json();
   }
-  if (!res.ok) throw new Error(`API ${res.status}: ${path}`);
-  return res.json();
 }
 
 async function fetchUserInfo() {
@@ -377,7 +389,15 @@ async function loadEverything() {
 }
 
 async function fetchAllContent(initial = false) {
-  const results = await Promise.allSettled(S.courses.map(fetchCourse));
+  const results = [];
+  for (let i = 0; i < S.courses.length; i += 2) {
+    const batch = S.courses.slice(i, i + 2);
+    const batchResults = await Promise.allSettled(batch.map(fetchCourse));
+    results.push(...batchResults);
+    if (i + 2 < S.courses.length) {
+      await new Promise(r => setTimeout(r, 400)); // stagger to prevent 429s
+    }
+  }
 
   let newNotifs = [];
   let newDeadlines = [];

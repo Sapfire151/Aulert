@@ -3,13 +3,20 @@
 
 <head>
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-75J29YEK16"></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        var script = document.createElement('script');
+        script.async = true;
+        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-75J29YEK16';
+        document.head.appendChild(script);
 
-    gtag('config', 'G-75J29YEK16');
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-75J29YEK16');
+      }, 500);
+    });
   </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
@@ -20,10 +27,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <!-- Firebase SDK (Community) -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
   <!-- EmailJS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <link
     href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@300;400;500;600;700&family=Pridi:wght@300;400;500;600&display=swap"
     rel="stylesheet" />
@@ -124,7 +131,7 @@
 
 
     <!-- PROBLEM: COMPARE -->
-    <div class="problem-sec">
+    <div class="problem-sec" style="content-visibility: auto; contain-intrinsic-size: auto 600px;">
       <div class="reveal">
         <div class="sec-h">What Classroom isn't telling you</div>
         <p class="sec-sub">Google Classroom misses important updates like comment replies and material changes but
@@ -196,7 +203,7 @@
     </div>
 
     <!-- LIVE DEMO SECTION -->
-    <div class="demo-sec">
+    <div class="demo-sec" style="content-visibility: auto; contain-intrinsic-size: auto 800px;">
       <div class="demo-inner">
         <div class="demo-copy reveal-left">
           <div class="sec-h">Always in the loop.<br>Zero effort.</div>
@@ -354,7 +361,7 @@
     </div>
 
     <!-- HOW IT WORKS (steps) -->
-    <div class="hiw">
+    <div class="hiw" style="content-visibility: auto; contain-intrinsic-size: auto 600px;">
       <div class="hiw-inner">
         <div class="reveal" style="text-align:center">
           <div class="hiw-title">How Aulert works</div>
@@ -384,7 +391,7 @@
     </div>
 
     <!-- PRIVACY & SECURITY -->
-    <div class="land-section privacy-sec" style="background:var(--surface); padding:80px 24px; text-align:center;">
+    <div class="land-section privacy-sec" style="background:var(--surface); padding:80px 24px; text-align:center; content-visibility: auto; contain-intrinsic-size: auto 600px;">
       <div class="reveal">
         <div class="sec-h" style="font-size:32px; margin-bottom:16px;">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
@@ -438,7 +445,7 @@
     </div>
 
     <!-- DOWNLOAD / OPEN SOURCE -->
-    <div class="land-section reveal" id="download" style="text-align:center;padding:100px 48px;position:relative">
+    <div class="land-section reveal" id="download" style="text-align:center;padding:100px 48px;position:relative; content-visibility: auto; contain-intrinsic-size: auto 400px;">
       <div class="sec-h">Everything is open-source!</div>
       <p class="sec-sub" style="margin-bottom: 18px;">You're welcome to download and refine these to perfectly match
         your vision or feel free to browse our dashboard for a firsthand look.</p>
@@ -460,7 +467,7 @@
     </div>
 
     <!-- FAQ -->
-    <div class="faq-sec">
+    <div class="faq-sec" style="content-visibility: auto; contain-intrinsic-size: auto 800px;">
       <div class="reveal">
         <div class="sec-h">Got a question?</div>
       </div>

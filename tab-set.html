@@ -1,9 +1,9 @@
     <div class="panel" id="p-set">
-      <h1>Settings</h1>
+      <h1 data-i18n="set_title">Settings</h1>
       <p class="sub">Control your account, notifications, and connected classes</p>
 
       <div class="sg sg-account">
-        <div class="sg-lbl">Account</div>
+        <div class="sg-lbl" data-i18n="set_acct">Account</div>
         <div class="prof-row">
           <div class="prof-ava" id="profAva">S</div>
           <div class="prof-info">
@@ -13,12 +13,12 @@
               <span id="profEmailText"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="82f1f6f7e6e7ecf6c2f1e1eaededeeace7e6f7">[email&#160;protected]</a></span>
             </div>
           </div>
-          <button class="disc-btn" onclick="disconnect()">Disconnect</button>
+          <button class="disc-btn" onclick="disconnect()" data-i18n="set_logout">Disconnect</button>
         </div>
       </div>
 
       <div class="sg sg-notify">
-        <div class="sg-lbl">Notify me about</div>
+        <div class="sg-lbl" data-i18n="set_notif">Notify me about</div>
         <div class="sg-body">
           <div class="srow"><div class="srow-info"><h4>Stream Posts</h4><p>Class stream</p></div><label class="tog"><input type="checkbox" id="set_stream" onchange="saveSetting('stream',this.checked)"><div class="tog-track"></div></label></div>
           <div class="srow"><div class="srow-info"><h4>Announcements</h4><p>Teacher announcements</p></div><label class="tog"><input type="checkbox" id="set_announcements" onchange="saveSetting('announcements',this.checked)"><div class="tog-track"></div></label></div>
@@ -31,12 +31,12 @@
 
 
       <div class="sg sg-gcal">
-        <div class="sg-lbl">Google Calendar</div>
+        <div class="sg-lbl" data-i18n="set_gcal">Google Calendar</div>
         <div class="sg-body">
           <div class="srow">
             <div class="srow-info">
-              <h4>Sync Deadlines &amp; Homework</h4>
-              <p>Auto-add assignment due dates and homework deadlines to your Google Calendar</p>
+              <h4 data-i18n="set_gcal_title">Sync Deadlines &amp; Homework</h4>
+              <p data-i18n="set_gcal_sub">Auto-add assignment due dates and homework deadlines to your Google Calendar</p>
             </div>
             <label class="tog tog-disabled"><input type="checkbox" id="set_gcalSync" onchange="gcalToggle(this)" disabled><div class="tog-track"></div></label>
           </div>
@@ -56,8 +56,24 @@
         </div>
       </div>
 
+      <div class="sg sg-email">
+        <div class="sg-lbl" data-i18n="set_daily_email">Daily Email Summary</div>
+        <div class="sg-body">
+          <div class="srow">
+            <div class="srow-info">
+              <h4 data-i18n="set_daily_email_title">Send daily digest</h4>
+              <p data-i18n="set_daily_email_sub">Receive a morning email with new Classroom items from the past 24 hours</p>
+            </div>
+            <label class="tog">
+              <input type="checkbox" id="set_dailyEmail" onchange="dailyEmailToggle(this)">
+              <div class="tog-track"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
       <div class="sg sg-classes">
-        <div class="sg-lbl">Connected Classes</div>
+        <div class="sg-lbl" data-i18n="set_classes">Connected Classes</div>
         <div class="sg-body" id="clsBody"></div>
       </div>
     </div>

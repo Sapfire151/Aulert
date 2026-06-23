@@ -103,7 +103,9 @@ function renderSidebar() {
     const addCls = (id, color, name, section, count) => {
       const div = document.createElement('div');
       div.className = 'sidebar-cls' + (S.courseFilter === id ? ' active' : '');
+      div.tabIndex = 0;
       div.onclick = function() { setCourseFilter(id, this); };
+      div.onkeydown = function(e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setCourseFilter(id, this); } };
       const dot = document.createElement('div');
       dot.className = 'sidebar-cls-dot';
       dot.style.background = color;
@@ -185,10 +187,19 @@ function saved() {
 }
 
 function saveSetting(key, val) {
-  if (Object.prototype.hasOwnProperty.call(S.settings, key)) {
-    S.settings[key] = val;
+  if (!Object.prototype.hasOwnProperty.call(S.settings, key)) return;
+  const prev = S.settings[key];
+  S.settings[key] = val;
+  try {
     saveSettings();
     saved();
+  } catch(e) {
+    // Revert on storage failure
+    S.settings[key] = prev;
+    const el = document.getElementById('set_' + key);
+    if (el) el.checked = !!prev;
+    console.error('saveSetting failed:', e);
+    showToast('Save failed', 'Could not save setting — storage error');
   }
 }
 
@@ -262,7 +273,7 @@ function gcalBuildHwEvent(task) {
 }
 
 async function gcalSyncAll() {
-  if (!S.token || !S.settings.gcalSync) return;
+  if (!S.token) throw new Error('Not signed in');
   const map = gcalLoadMap();
   const nowDay = new Date(); nowDay.setHours(0, 0, 0, 0);
 
@@ -314,13 +325,20 @@ async function gcalSyncAll() {
   }
 
   gcalSaveMap(map);
+
+  // If every single operation failed (and there were items), treat as a hard failure
+  const totalOps = allItems.length + removed;
+  if (totalOps > 0 && errors === totalOps) {
+    throw new Error('All Calendar operations failed — check permissions');
+  }
+
   const parts = [];
   if (created) parts.push(created + ' added');
   if (updated) parts.push(updated + ' updated');
   if (removed) parts.push(removed + ' removed');
   const msg = parts.length ? parts.join(', ') : 'Already up to date';
-  if (errors) showToast('Calendar sync (partial)', msg + ' \u00b7 ' + errors + ' failed');
-  else        showToast('Google Calendar synced \u2713', msg);
+  if (errors) showToast('Calendar sync (partial)', msg + ' · ' + errors + ' failed');
+  else        showToast('Google Calendar synced ✓', msg);
   gcalRenderStatus();
 }
 
@@ -351,11 +369,43 @@ function gcalRenderStatus() {
 }
 
 function gcalToggle(el) {
-  S.settings.gcalSync = el.checked;
-  saveSettings();
-  gcalRenderStatus();
-  if (el.checked) gcalSyncAll();
-  saved();
+  const checked = el.checked;
+
+  if (!checked) {
+    // Turning off: revert immediately in UI, then unsync in background
+    S.settings.gcalSync = false;
+    saveSettings();
+    gcalRenderStatus();
+    saved();
+    gcalUnsyncAll();
+    return;
+  }
+
+  // Turning on: disable toggle until sync confirms success
+  el.disabled = true;
+  el.closest('label')?.classList.add('tog-loading');
+
+  gcalSyncAll()
+    .then(result => {
+      // Only mark as enabled if sync didn't fully fail
+      S.settings.gcalSync = true;
+      saveSettings();
+      gcalRenderStatus();
+      saved();
+    })
+    .catch(err => {
+      console.error('gcalToggle sync failed:', err);
+      // Revert toggle
+      el.checked = false;
+      S.settings.gcalSync = false;
+      saveSettings();
+      gcalRenderStatus();
+      showToast('Calendar sync failed', err.message || 'Could not connect to Google Calendar');
+    })
+    .finally(() => {
+      el.disabled = false;
+      el.closest('label')?.classList.remove('tog-loading');
+    });
 }
 
 function renderSettings() {
@@ -369,6 +419,114 @@ function renderSettings() {
 
   set('set_gcalSync', m.gcalSync);
   gcalRenderStatus();
+  
+  set('set_dailyEmail', m.dailyEmail);
+  dailyEmailRenderStatus();
 }
 
+/* ════════════════════════════════════════════
+   DAILY EMAIL SUMMARY
+════════════════════════════════════════════ */
 
+function dailyEmailRenderStatus() {
+  const el = document.getElementById('emailPrefText');
+  if (el) el.textContent = S.settings.dailyEmail ? 'Enabled — Emails sent daily at 7 AM UTC' : 'Disabled';
+}
+
+function dailyEmailToggle(el) {
+  const checked = el.checked;
+
+  // Lock toggle while the async operation is in-flight
+  el.disabled = true;
+  el.closest('label')?.classList.add('tog-loading');
+  const unlock = () => {
+    el.disabled = false;
+    el.closest('label')?.classList.remove('tog-loading');
+  };
+
+  if (!checked) {
+    // ─── DISABLE ─────────────────────────────────────────────────────────────
+    // Call API first; only confirm state change on success
+    fetch('/api/emailPrefs', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + S.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dailyEmail: false })
+    })
+    .then(res => {
+      if (!res.ok) throw new Error('Server returned ' + res.status);
+      S.settings.dailyEmail = false;
+      saveSettings();
+      dailyEmailRenderStatus();
+      saved();
+    })
+    .catch(e => {
+      console.warn('Failed to disable daily email:', e);
+      el.checked = true; // revert — server still has it enabled
+      showToast('Could not disable', 'Server error — please try again');
+    })
+    .finally(unlock);
+    return;
+  }
+
+  // ─── ENABLE ──────────────────────────────────────────────────────────────
+  if (!window.google?.accounts?.oauth2) {
+    el.checked = false;
+    unlock();
+    showToast('Not ready', 'Google Sign-In is still loading');
+    return;
+  }
+
+  let oauthCompleted = false;
+
+  const client = google.accounts.oauth2.initCodeClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    access_type: 'offline',
+    callback: async (resp) => {
+      oauthCompleted = true;
+      if (resp.error) {
+        console.warn('OAuth code error:', resp.error);
+        el.checked = false;
+        unlock();
+        showToast('Permission denied', 'Offline access is required for daily emails');
+        return;
+      }
+
+      try {
+        const apiRes = await fetch('/api/emailPrefs', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + S.token, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dailyEmail: true, authCode: resp.code })
+        });
+
+        const body = await apiRes.json().catch(() => ({}));
+        if (!apiRes.ok) throw new Error(body.error || 'Server returned ' + apiRes.status);
+
+        // Confirmed success — now save state
+        S.settings.dailyEmail = true;
+        saveSettings();
+        dailyEmailRenderStatus();
+        saved();
+      } catch(e) {
+        console.warn('Failed to enable daily email:', e);
+        el.checked = false;
+        showToast('Failed to enable', e.message || 'Server error — please try again');
+      } finally {
+        unlock();
+      }
+    }
+  });
+
+  // Detect if user closes/cancels the OAuth popup without completing
+  window.addEventListener('focus', function onWindowFocus() {
+    window.removeEventListener('focus', onWindowFocus);
+    setTimeout(() => {
+      if (!oauthCompleted) {
+        el.checked = false;
+        unlock();
+      }
+    }, 400);
+  }, { once: true });
+
+  client.requestCode();
+}

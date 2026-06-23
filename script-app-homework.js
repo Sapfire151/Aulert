@@ -310,15 +310,20 @@ function hwAdd() {
     done: false,
     created: new Date().toISOString()
   });
-  hwSave();
-  hwRender();
-  // Refresh calendar dots if calendar tab is open
-  if (document.getElementById('tb-cal')?.classList.contains('on')) renderCal();
+  try {
+    hwSave();
+    hwRender();
+    if (document.getElementById('tb-cal')?.classList.contains('on')) renderCal();
 
-  // Clear form
-  document.getElementById('hwSubject').value = '';
-  document.getElementById('hwDesc').value = '';
-  hwDtpReset();
+    document.getElementById('hwSubject').value = '';
+    document.getElementById('hwDesc').value = '';
+    hwDtpReset();
+
+    showHwSnack('✓ Task added successfully');
+  } catch(e) {
+    console.error('hwAdd Error:', e);
+    showHwSnack('❌ Failed to add task (Storage error?)');
+  }
 }
 
 function hwDelete(id) {
@@ -327,16 +332,34 @@ function hwDelete(id) {
     card.style.transform = 'scale(.95) translateX(10px)';
     card.style.opacity = '0';
     setTimeout(() => {
-      _hwTasks = _hwTasks.filter(t => t.id !== id);
-      hwSave();
-      hwRender();
+      try {
+        _hwTasks = _hwTasks.filter(t => t.id !== id);
+        hwSave();
+        hwRender();
+        showHwSnack('✓ Task deleted');
+      } catch(e) {
+        console.error('hwDelete Error:', e);
+        showHwSnack('❌ Failed to delete task');
+      }
     }, 250);
   }
 }
 
 function hwToggleDone(id) {
   const task = _hwTasks.find(t => t.id === id);
-  if (task) { task.done = !task.done; hwSave(); hwRender(); }
+  if (task) { 
+    task.done = !task.done; 
+    try {
+      hwSave(); 
+      hwRender(); 
+      showHwSnack(task.done ? '✓ Marked as done' : '✓ Marked as to-do');
+    } catch(e) {
+      task.done = !task.done; // revert
+      hwRender(); // revert visually
+      console.error('hwToggleDone Error:', e);
+      showHwSnack('❌ Action failed');
+    }
+  }
 }
 
 function hwFormatDate(date) {
@@ -491,67 +514,171 @@ function hwExportPDF() {
   if (!_hwTasks.length) { showToast('Nothing to export', 'Add some tasks first'); return; }
   const win = window.open('', '_blank');
   const now = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
-  const rows = _hwTasks.map(t => {
+  
+  // Sort tasks
+  const todayMidnight = new Date();
+  todayMidnight.setHours(0, 0, 0, 0);
+
+  const overdue = [];
+  const upcoming = [];
+  const done = [];
+
+  _hwTasks.forEach(t => {
+    if (t.done) {
+      done.push(t);
+    } else {
+      if (t.date) {
+        const datePart = t.date.includes('T') ? t.date.split('T')[0] : t.date;
+        const [y, m, d] = datePart.split('-').map(Number);
+        const dueDate = t.date.includes('T') ? new Date(t.date) : new Date(y, m - 1, d);
+        if (dueDate < todayMidnight) overdue.push(t);
+        else upcoming.push(t);
+      } else {
+        upcoming.push(t);
+      }
+    }
+  });
+
+  const allSorted = [...overdue, ...upcoming, ...done];
+  const completionPercent = _hwTasks.length > 0 ? Math.round((done.length / _hwTasks.length) * 100) : 0;
+
+  let currentSection = '';
+
+  const rows = allSorted.map(t => {
     const date = hwFormatDate(t.date);
-    const statusIcon = t.done ? '✓' : '○';
-    const statusColor = t.done ? 'var(--emerald)' : '#6b7280';
+    
+    let sectionHeader = '';
+    let sectionClass = '';
+    if (t.done) sectionClass = 'done';
+    else if (overdue.includes(t)) sectionClass = 'overdue';
+    else sectionClass = 'upcoming';
+
+    if (sectionClass !== currentSection) {
+      currentSection = sectionClass;
+      let label = currentSection === 'done' ? 'Done' : currentSection === 'overdue' ? 'Overdue' : 'Upcoming';
+      sectionHeader = `<tr><td colspan="4" class="section-header">${label}</td></tr>`;
+    }
+
+    let statusHtml = '';
+    if (t.done) statusHtml = `<span class="pill pill-done">Done</span>`;
+    else if (overdue.includes(t)) statusHtml = `<span class="pill pill-overdue">Overdue</span>`;
+    else {
+       // Check if due soon
+       let dueSoon = false;
+       if (t.date) {
+         const datePart = t.date.includes('T') ? t.date.split('T')[0] : t.date;
+         const [y, m, d] = datePart.split('-').map(Number);
+         const dueDate = t.date.includes('T') ? new Date(t.date) : new Date(y, m - 1, d);
+         const diffDays = Math.ceil((dueDate - todayMidnight) / 86400000);
+         if (diffDays <= 5) dueSoon = true;
+       }
+       statusHtml = dueSoon ? `<span class="pill pill-soon">Due soon</span>` : `<span class="pill pill-todo">To do</span>`;
+    }
+
+    const rowClass = t.done ? 'done-row' : overdue.includes(t) ? 'overdue-row' : 'upcoming-row';
+    const altClass = allSorted.indexOf(t) % 2 === 0 ? 'alt-row' : '';
+
     return `
-      <tr class="${t.done ? 'done-row' : ''}">
-        <td class="status" style="color:${statusColor}">${statusIcon}</td>
-        <td class="subject">${escHtml(t.subject)}</td>
-        <td class="desc">${t.desc ? escHtml(t.desc) : '<span class="na">—</span>'}</td>
-        <td class="date">${date || '<span class="na">—</span>'}</td>
+      ${sectionHeader}
+      <tr class="${rowClass} ${altClass}">
+        <td class="status-col">${statusHtml}</td>
+        <td class="subject-col"><div class="subject-text">${escHtml(t.subject)}</div></td>
+        <td class="desc-col">${t.desc ? escHtml(t.desc) : '<span class="na">—</span>'}</td>
+        <td class="date-col">${date || '<span class="na">—</span>'}</td>
       </tr>`;
   }).join('');
 
   win.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8">
   <title>Homework List — ${now}</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    @page { margin: 0.75in; }
     * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family: -apple-system, 'Segoe UI', sans-serif; padding: 48px; color: #0f172a; }
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; }
-    .header-left h1 { font-size: 28px; font-weight: 800; letter-spacing: -.5px; background: linear-gradient(135deg,#3533cd,#00c9a7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
-    .header-left p { font-size: 13px; color: #64748b; margin-top: 4px; }
-    .badge { display: inline-flex; gap: 12px; }
-    .badge span { font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 999px; }
-    .badge .total { background: #f1f5f9; color: #475569; }
-    .badge .done-b { background: #dcfce7; color: var(--emerald); }
+    body { font-family: 'Inter', -apple-system, sans-serif; padding: 48px; color: #0f172a; background: #fff; }
+    
+    .accent-bar { display: none; }
+    
+    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+    .header-left { display: flex; align-items: center; gap: 16px; }
+    .logo-mark { width: 36px; height: 36px; background: transparent; border: 1px solid #cbd5e1; border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #4f46e5; }
+    .header-text h1 { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; color: #0f172a; }
+    .header-text p { font-size: 13px; color: #64748b; margin-top: 2px; }
+    
+    .stats-bar { display: flex; gap: 24px; padding: 16px 20px; background: transparent; border: 1px solid #cbd5e1; border-radius: 12px; margin-bottom: 32px; }
+    .stat { display: flex; flex-direction: column; gap: 4px; }
+    .stat-lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; }
+    .stat-val { font-size: 18px; font-weight: 700; color: #0f172a; }
+    .stat-val.c-overdue { color: #e11d48; }
+    .stat-val.c-done { color: #10b981; }
+    
     table { width: 100%; border-collapse: collapse; }
-    th { text-align: left; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #94a3b8; padding: 0 12px 10px; }
-    td { padding: 12px; font-size: 13px; border-top: 1px solid #f1f5f9; vertical-align: top; }
-    .status { width: 32px; text-align: center; font-size: 15px; }
-    .subject { font-weight: 700; color: #1e293b; min-width: 120px; }
-    .desc { color: #475569; line-height: 1.5; }
-    .date { white-space: nowrap; color: #3533cd; font-weight: 600; font-size: 12px; min-width: 100px; }
+    th { text-align: left; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; padding: 0 16px 12px; border-bottom: 2px solid #e2e8f0; }
+    td { padding: 14px 16px; font-size: 13px; vertical-align: top; border-bottom: 1px solid #f1f5f9; }
+    
+    .section-header { padding: 24px 16px 8px; font-size: 14px; font-weight: 700; color: #334155; border-bottom: none; }
+    
+    .status-col { width: 100px; }
+    .subject-col { width: 200px; }
+    .date-col { width: 140px; text-align: right; font-weight: 500; color: #4f46e5; }
+    
+    .subject-text { font-weight: 600; color: #1e293b; }
+    .desc-col { color: #475569; line-height: 1.5; }
     .na { color: #cbd5e1; }
-    .done-row td { opacity: .55; }
-    .done-row .subject { text-decoration: line-through; }
-    .footer { margin-top: 32px; padding-top: 16px; border-top: 1px solid #e2e8f0; font-size: 11px; color: #94a3b8; text-align: center; }
-    @media print { body { padding: 24px; } }
+    
+    .pill { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 600; background: transparent; }
+    .pill-done { border: 1px solid #059669; color: #059669; }
+    .pill-overdue { border: 1px solid #e11d48; color: #e11d48; }
+    .pill-soon { border: 1px solid #d97706; color: #d97706; }
+    .pill-todo { border: 1px solid #64748b; color: #475569; }
+    
+    .done-row td { opacity: 0.6; }
+    .done-row .subject-text { text-decoration: line-through; }
+    .overdue-row td:first-child { position: relative; }
+    .overdue-row td:first-child::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: #e11d48; }
+    
+    .alt-row td { background: transparent; }
+    
+    .footer { margin-top: 48px; padding-top: 24px; border-top: 1px solid #e2e8f0; font-size: 12px; color: #94a3b8; text-align: center; }
+    
+    @media print { 
+      body { padding: 0; } 
+      .accent-bar { display: none; }
+      .pill, .stats-bar, .logo-mark, .overdue-row td:first-child::before { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
   </style>
   </head><body>
+  <div class="accent-bar"></div>
   <div class="header">
     <div class="header-left">
-      <h1>Homework List</h1>
-      <p>Exported ${now} via Aulert</p>
-    </div>
-    <div class="badge">
-      <span class="total">${_hwTasks.length} tasks</span>
-      <span class="done-b">${_hwTasks.filter(t=>t.done).length} done</span>
+      <div class="logo-mark">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="header-text">
+        <h1>Homework Report</h1>
+        <p>Exported ${now}</p>
+      </div>
     </div>
   </div>
+  
+  <div class="stats-bar">
+    <div class="stat"><span class="stat-lbl">Total Tasks</span><span class="stat-val">${_hwTasks.length}</span></div>
+    <div class="stat"><span class="stat-lbl">Done</span><span class="stat-val c-done">${done.length}</span></div>
+    <div class="stat"><span class="stat-lbl">Overdue</span><span class="stat-val c-overdue">${overdue.length}</span></div>
+    <div class="stat"><span class="stat-lbl">Completion</span><span class="stat-val">${completionPercent}%</span></div>
+  </div>
+  
   <table>
     <thead><tr>
-      <th></th><th>Subject</th><th>Description</th><th>Due Date</th>
+      <th class="status-col">Status</th>
+      <th class="subject-col">Subject</th>
+      <th>Description</th>
+      <th class="date-col" style="text-align: right;">Due Date</th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>
   <div class="footer">Exported from Aulert</div>
   <script>window.onload=()=>window.print();<\/script>
-  
-</div>
-
-</body></html>`);
+  </body></html>`);
   win.document.close();
 }
 

@@ -31,6 +31,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/calendar.events',
   'https://www.googleapis.com/auth/drive.file',
+  'https://www.googleapis.com/auth/gmail.send',
 ].join(' ');
 
 const POLL_MS = 5 * 60 * 1000;
@@ -62,7 +63,7 @@ let S = {
   seenIds: new Set(JSON.parse(localStorage.getItem('aul_seen') || '[]')),
   settings: JSON.parse(localStorage.getItem('aul_settings') || JSON.stringify({
     stream: true, announcements: true, assignments: true, grades: true, comments: true, materials: true,
-    gcalSync: false,
+    gcalSync: false, dailyEmail: false
   })),
 };
 

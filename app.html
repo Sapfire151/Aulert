@@ -6,7 +6,7 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-75J29YEK16"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
 
     gtag('config', 'G-75J29YEK16');
@@ -54,7 +54,7 @@
             stroke-linecap="round" stroke-linejoin="round" />
           <path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
         </svg>
-        <span>Notifications</span>
+        <span data-i18n="nav_notif">Notifications</span>
         <span class="tab-badge" id="badge-feed"></span>
       </button>
       <button class="nav-tab" id="tb-cal" onclick="calFlipAnim(this);goTab('cal',this)">
@@ -72,7 +72,7 @@
             font-family="inherit">7</text>
 
         </svg>
-        <span>Calendar</span>
+        <span data-i18n="nav_cal">Calendar</span>
         <span class="tab-badge" id="badge-cal"></span>
       </button>
       <button class="nav-tab" id="tb-hw" onclick="hwCheckAnim(this);goTab('hw',this)">
@@ -90,7 +90,7 @@
           <path class="hw-check-draw" d="M8 13.5l2.5 2.5 5-5" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="20" stroke-dashoffset="20" opacity="0" />
         </svg>
-        <span>Homework</span>
+        <span data-i18n="nav_hw">Homework</span>
         <span class="tab-badge" id="badge-hw"></span>
       </button>
 
@@ -122,7 +122,8 @@
       <!-- Mobile Greeting -->
       <div class="nav-greeting-container">
         <div class="nav-greeting" id="navGreeting">Good morning</div>
-        <div class="nav-greeting-sub">Ready to <span class="accent-text">stay ahead?</span></div>
+        <div class="nav-greeting-sub" data-i18n="nav_greeting_sub">Ready to <span class="accent-text">stay ahead?</span>
+        </div>
       </div>
       <!-- Theme toggle (in-nav) -->
       <div class="icon-btn icon-btn-animate" id="navThemeBtn" onclick="iconPop(this);toggleTheme()"
@@ -146,7 +147,7 @@
       <!-- User -->
       <div class="user-pill icon-btn-animate" onclick="iconPop(this);goTab('set',document.getElementById('tb-set'))">
         <div class="ava">S</div>
-        <span class="user-pill-name">Student</span>
+        <span class="user-pill-name" data-i18n="nav_student">Student</span>
       </div>
     </div>
   </nav>
@@ -364,7 +365,7 @@
                   stroke-linejoin="round" />
               </svg>
             </div>
-            <div class="mnav-label" id="moLast Updated: June 6, 2026</div>
+            <div class="mnav-label" id="moLabel">June</div>
             <div class="mnav-btn" onclick="navMo(1)">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
                 <polyline points="9,18 15,12 9,6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
@@ -447,14 +448,15 @@
                 <!-- Calendar section -->
                 <div class="hwdtp-cal">
                   <div class="hwdtp-nav">
-                    <button type="button" class="hwdtp-nav-btn" onclick="hwDtpShiftMonth(-1)">
+                    <button type="button" class="hwdtp-nav-btn" onclick="hwDtpShiftMonth(-1)"
+                      aria-label="Previous month">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                         <polyline points="15 18 9 12 15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                           stroke-linejoin="round" />
                       </svg>
                     </button>
                     <span class="hwdtp-month-lbl" id="hwDtpMonthLbl"></span>
-                    <button type="button" class="hwdtp-nav-btn" onclick="hwDtpShiftMonth(1)">
+                    <button type="button" class="hwdtp-nav-btn" onclick="hwDtpShiftMonth(1)" aria-label="Next month">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
                         <polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                           stroke-linejoin="round" />
@@ -479,19 +481,23 @@
                   </div>
                   <div class="hwdtp-time-row">
                     <div class="hwdtp-time-col">
-                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(1)">▲</button>
+                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(1)"
+                        aria-label="Increase hour">▲</button>
                       <input class="hwdtp-time-val" id="hwDtpHourVal" type="text" inputmode="numeric" maxlength="2"
                         value="23" onfocus="this.select()" oninput="hwDtpHourInput(this)" onblur="hwDtpHourBlur(this)"
                         onkeydown="hwDtpTimeKey(event,'hour')" />
-                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(-1)">▼</button>
+                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(-1)"
+                        aria-label="Decrease hour">▼</button>
                     </div>
                     <span class="hwdtp-colon">:</span>
                     <div class="hwdtp-time-col">
-                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(5)">▲</button>
+                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(5)"
+                        aria-label="Increase minutes">▲</button>
                       <input class="hwdtp-time-val" id="hwDtpMinVal" type="text" inputmode="numeric" maxlength="2"
                         value="59" onfocus="this.select()" oninput="hwDtpMinInput(this)" onblur="hwDtpMinBlur(this)"
                         onkeydown="hwDtpTimeKey(event,'min')" />
-                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(-5)">▼</button>
+                      <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(-5)"
+                        aria-label="Decrease minutes">▼</button>
                     </div>
                   </div>
                 </div>
@@ -609,7 +615,7 @@
 
 
       <div class="sg sg-gcal">
-        <div class="sg-lbl">Google Calendar</div>
+        <div class="sg-lbl">Historic button</div>
         <div class="sg-body">
           <div class="srow">
             <div class="srow-info">
@@ -649,14 +655,30 @@
         </div>
       </div>
 
+      <div class="sg sg-email">
+        <div class="sg-lbl">Daily Email Summary</div>
+        <div class="sg-body">
+          <div class="srow">
+            <div class="srow-info">
+              <h4>Send daily digest</h4>
+              <p>Receive a morning email with new Classroom items from the past 24 hours</p>
+            </div>
+            <label class="tog">
+              <input type="checkbox" id="set_dailyEmail" onchange="dailyEmailToggle(this)">
+              <div class="tog-track"></div>
+            </label>
+          </div>
+        </div>
+      </div>
+
       <div class="sg sg-classes">
         <div class="sg-lbl">Connected Classes</div>
         <div class="sg-body" id="clsBody"></div>
       </div>
-    <div class="sg sg-legal" style="margin-top:24px; font-size:14px; text-align:center;">
+      <div class="sg sg-legal" style="margin-top:24px; font-size:14px; text-align:center;">
         <a href="privacy.html" style="color: var(--text-2); text-decoration:none; margin-right:12px;">Privacy Policy</a>
         <a href="terms.html" style="color: var(--text-2); text-decoration:none;">Terms of Service</a>
-    </div>
+      </div>
     </div>
 
     <!-- ═══ TAB: FEEDBACK ═══ -->

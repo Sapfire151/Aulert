@@ -53,7 +53,11 @@ function isDigestDueNow(digest, now = new Date()) {
   const { hour, minute } = getLocalTimeParts(now, tz);
   const currentMins = hour * 60 + minute;
   const targetMins = targetHour * 60 + targetMinute;
-  return minutesApart(currentMins, targetMins) < 15;
+
+  // Vercel Hobby cron runs once per day (±59 min jitter). Match the configured
+  // local hour so users get their digest when the daily cron fires.
+  if (hour !== targetHour) return false;
+  return minutesApart(currentMins, targetMins) < 60;
 }
 
 function wasSentRecently(digest, now = new Date()) {

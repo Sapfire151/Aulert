@@ -63,7 +63,8 @@ let S = {
   seenIds: new Set(JSON.parse(localStorage.getItem('aul_seen') || '[]')),
   settings: JSON.parse(localStorage.getItem('aul_settings') || JSON.stringify({
     stream: true, announcements: true, assignments: true, grades: true, comments: true, materials: true,
-    gcalSync: false, dailyEmail: false
+    gcalSync: false, dailyEmail: false,
+    digestHour: 7, digestMinute: 0, digestTimezone: (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return 'UTC'; } })()
   })),
 };
 
@@ -378,12 +379,38 @@ function relTime(iso) {
 ════════════════════════════════════════════ */
 
 async function loadEverything() {
+  const cachedUser = localStorage.getItem('aul_cache_user');
+  const cachedCourses = localStorage.getItem('aul_cache_courses');
+  const cachedNotifs = localStorage.getItem('aul_cache_notifs');
+  const cachedDeadlines = localStorage.getItem('aul_cache_deadlines');
+
+  if (cachedCourses && cachedNotifs) {
+    try {
+      if (cachedUser) S.user = JSON.parse(cachedUser);
+      S.courses = JSON.parse(cachedCourses);
+      S.notifs = JSON.parse(cachedNotifs);
+      S.deadlines = cachedDeadlines ? JSON.parse(cachedDeadlines).map(d => ({...d, date: new Date(d.date)})) : [];
+      
+      // initial render from cache
+      if (typeof renderGreeting === 'function') renderGreeting();
+      if (typeof renderAccount === 'function') renderAccount();
+      if (typeof renderClasses === 'function') renderClasses();
+      if (typeof renderFeed === 'function') renderFeed();
+      if (typeof renderCal === 'function') renderCal();
+      if (typeof updatePip === 'function') updatePip();
+    } catch(e) {
+      console.warn('Cache parse error', e);
+    }
+  }
+
   const [user, courseResp] = await Promise.all([
     fetchUserInfo(),
     classroomApi('courses?courseStates=ACTIVE&pageSize=30'),
   ]);
 
   S.user = user;
+  localStorage.setItem('aul_cache_user', JSON.stringify(user));
+
   S.courses = (courseResp.courses || []).map((c, i) => ({
     id: c.id,
     name: c.name,
@@ -392,6 +419,7 @@ async function loadEverything() {
     abbr: c.name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase(),
     link: c.alternateLink || 'https://classroom.google.com',
   }));
+  localStorage.setItem('aul_cache_courses', JSON.stringify(S.courses));
 
   await fetchAllContent(true);
 }
@@ -454,6 +482,9 @@ async function fetchAllContent(initial = false) {
 
   S.notifs = newNotifs;
   S.deadlines = newDeadlines;
+  
+  localStorage.setItem('aul_cache_notifs', JSON.stringify(S.notifs));
+  localStorage.setItem('aul_cache_deadlines', JSON.stringify(S.deadlines));
 
   renderFeed();
   renderSidebar();

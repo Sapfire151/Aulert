@@ -1,94 +1,161 @@
 const { OAuth2Client } = require('google-auth-library');
-
-const DB_BASE = 'https://aulert-2fba0-default-rtdb.asia-southeast1.firebasedatabase.app';
-const CLIENT_ID = '4640324' + '46404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com';
-const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const {
+  sendDigestForUser,
+  safeFetch,
+  DB_BASE,
+  CLIENT_ID,
+  CLIENT_SECRET,
+} = require('./lib/digestCore');
 
 const ALLOWED_HOSTS = [
   'www.googleapis.com',
   'aulert-2fba0-default-rtdb.asia-southeast1.firebasedatabase.app'
 ];
 
-function safeFetch(urlStr, options) {
-  const url = new URL(urlStr);
-  if (!ALLOWED_HOSTS.includes(url.hostname)) {
-    throw new Error('Blocked: URL not in allow-list (SSRF Protection)');
-  }
-  return fetch(url.toString(), options);
-}
-
-/**
- * Validates and sanitizes the userId to prevent Firebase path injection.
- * Only allows numeric user IDs (Google sub values).
- */
 function isValidUserId(id) {
   return typeof id === 'string' && /^[0-9]{1,30}$/.test(id);
 }
 
+function parseDigestTime(body) {
+  const hour = body.digestHour;
+  const minute = body.digestMinute;
+  const timezone = body.digestTimezone;
+
+  const parsed = {};
+  if (hour !== undefined) {
+    const h = Number(hour);
+    if (!Number.isInteger(h) || h < 0 || h > 23) return { error: 'Invalid digest hour' };
+    parsed.digestHour = h;
+  }
+  if (minute !== undefined) {
+    const m = Number(minute);
+    if (!Number.isInteger(m) || m < 0 || m > 59) return { error: 'Invalid digest minute' };
+    parsed.digestMinute = m;
+  }
+  if (timezone !== undefined) {
+    if (typeof timezone !== 'string' || timezone.length > 64) return { error: 'Invalid timezone' };
+    try {
+      Intl.DateTimeFormat(undefined, { timeZone: timezone });
+    } catch {
+      return { error: 'Invalid timezone' };
+    }
+    parsed.digestTimezone = timezone;
+  }
+  return { parsed };
+}
+
+async function verifyUser(req) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return { error: 'Missing or invalid authorization header', status: 401 };
+  }
+  const token = authHeader.split(' ')[1];
+  if (!token || token.length < 10) {
+    return { error: 'Invalid token', status: 401 };
+  }
+
+  let userId;
+  let email;
+
+  try {
+    const client = new OAuth2Client(CLIENT_ID);
+    const ticket = await client.verifyIdToken({ idToken: token, audience: CLIENT_ID });
+    const payload = ticket.getPayload();
+    userId = payload.sub;
+    email = payload.email;
+  } catch {
+    const userInfoRes = await safeFetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!userInfoRes.ok) {
+      return { error: 'Token verification failed', status: 401 };
+    }
+    const info = await userInfoRes.json();
+    userId = info.id;
+    email = info.email;
+  }
+
+  if (!userId || !isValidUserId(userId)) {
+    return { error: 'Invalid user identity', status: 400 };
+  }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { error: 'Invalid email address', status: 400 };
+  }
+
+  return { userId, email };
+}
+
 export default async function handler(req, res) {
-  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || 'https://aulert.vercel.app');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method Not Allowed' });
-  }
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method Not Allowed' });
 
   try {
-    // Validate Authorization header
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return res.status(401).json({ error: 'Missing or invalid authorization header' });
-    }
-    const token = authHeader.split(' ')[1];
+    const auth = await verifyUser(req);
+    if (auth.error) return res.status(auth.status).json({ error: auth.error });
+    const { userId, email } = auth;
 
-    if (!token || token.length < 10) {
-      return res.status(401).json({ error: 'Invalid token' });
-    }
+    const body = req.body || {};
+    const { dailyEmail, authCode, sendNow } = body;
 
-    // Verify token to get user identity
-    let userId, email;
+    const digestUrl = `${DB_BASE}/users/${encodeURIComponent(userId)}/digest.json`;
 
-    try {
-      // Try as ID token first
-      const client = new OAuth2Client(CLIENT_ID);
-      const ticket = await client.verifyIdToken({
-        idToken: token,
-        audience: CLIENT_ID,
-      });
-      const payload = ticket.getPayload();
-      userId = payload.sub;
-      email = payload.email;
-    } catch {
-      // Fall back to access token — fetch user info from Google
-      const userInfoRes = await safeFetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      if (!userInfoRes.ok) {
-        return res.status(401).json({ error: 'Token verification failed' });
+    // === SEND NOW ===
+    if (sendNow) {
+      const existingResp = await safeFetch(digestUrl);
+      if (!existingResp.ok) {
+        return res.status(404).json({ error: 'Daily digest is not enabled' });
       }
-      const info = await userInfoRes.json();
-      userId = info.id;
-      email = info.email;
+      const digest = await existingResp.json();
+      if (!digest?.dailyEmail) {
+        return res.status(400).json({ error: 'Daily digest is not enabled' });
+      }
+
+      try {
+        const result = await sendDigestForUser(userId, digest, { manual: true });
+        if (result.sent) {
+          return res.status(200).json({ success: true, message: 'Digest sent', itemCount: result.itemCount });
+        }
+        return res.status(200).json({
+          success: true,
+          message: 'No new items in the last 24 hours',
+          itemCount: 0,
+        });
+      } catch (e) {
+        console.error('sendNow failed:', e.message);
+        return res.status(500).json({ error: 'Failed to send digest' });
+      }
     }
 
-    if (!userId || !isValidUserId(userId)) {
-      return res.status(400).json({ error: 'Invalid user identity' });
+    // === UPDATE SEND TIME ===
+    const timeParse = parseDigestTime(body);
+    if (timeParse.error) return res.status(400).json({ error: timeParse.error });
+    if (Object.keys(timeParse.parsed).length > 0) {
+      const existingResp = await safeFetch(digestUrl);
+      if (!existingResp.ok) {
+        return res.status(404).json({ error: 'Daily digest is not enabled' });
+      }
+      const existing = await existingResp.json();
+      const updated = { ...existing, ...timeParse.parsed, updatedAt: Date.now() };
+      const putResp = await safeFetch(digestUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      });
+      if (!putResp.ok) {
+        return res.status(500).json({ error: 'Failed to save send time' });
+      }
+      if (dailyEmail === undefined && !authCode) {
+        return res.status(200).json({ success: true, message: 'Send time updated' });
+      }
     }
-
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return res.status(400).json({ error: 'Invalid email address' });
-    }
-
-    const { dailyEmail, authCode } = req.body || {};
 
     // === DISABLE daily email ===
-    if (!dailyEmail) {
-      const url = `${DB_BASE}/users/${encodeURIComponent(userId)}/digest.json`;
-      const delResp = await safeFetch(url, { method: 'DELETE' });
+    if (dailyEmail === false) {
+      const delResp = await safeFetch(digestUrl, { method: 'DELETE' });
       if (!delResp.ok) {
         console.error('Firebase DELETE failed:', delResp.status);
         return res.status(500).json({ error: 'Failed to remove email preference' });
@@ -105,7 +172,6 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Server configuration error: missing client secret' });
     }
 
-    // Exchange authorization code for tokens
     const oAuth2Client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET, 'postmessage');
     let tokens;
     try {
@@ -118,20 +184,25 @@ export default async function handler(req, res) {
 
     if (!tokens.refresh_token) {
       return res.status(400).json({
-        error: 'No refresh token received. Please revoke Aulert access in your Google Account settings and try again.'
+        error: 'No refresh token received. Please revoke Aulert access in your Google Account settings and try again.',
       });
     }
 
-    const url = `${DB_BASE}/users/${encodeURIComponent(userId)}/digest.json`;
-    const resp = await safeFetch(url, {
+    const defaultTz = body.digestTimezone || 'UTC';
+    const digestPayload = {
+      dailyEmail: true,
+      email,
+      refreshToken: tokens.refresh_token,
+      digestHour: timeParse.parsed.digestHour ?? 7,
+      digestMinute: timeParse.parsed.digestMinute ?? 0,
+      digestTimezone: timeParse.parsed.digestTimezone ?? defaultTz,
+      updatedAt: Date.now(),
+    };
+
+    const resp = await safeFetch(digestUrl, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        dailyEmail: true,
-        email: email,
-        refreshToken: tokens.refresh_token,
-        updatedAt: Date.now()
-      }),
+      body: JSON.stringify(digestPayload),
     });
 
     if (!resp.ok) {
@@ -140,7 +211,6 @@ export default async function handler(req, res) {
     }
 
     res.status(200).json({ success: true, message: 'Daily email enabled' });
-
   } catch (error) {
     console.error('Error in emailPrefs handler:', error);
     res.status(500).json({ error: 'Internal server error' });

@@ -88,7 +88,7 @@
   --sky-icon-bg: rgba(56, 189, 248, 0.27);
   --amber-icon-bg: rgba(251, 191, 36, 0.27);
   --teal: #00FFD9;
-  --teal: #008471;
+  --teal: #006d5d;
   --violet: #6D28D9;
   --amber: #B45309;
   --rose: #E11D48;
@@ -2942,8 +2942,8 @@ body::before {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--rose);
-  color: #fff;
+  background: #c81e1e;
+  color: #ffffff;
   font-size: 10px;
   font-weight: 800;
   margin-left: 7px;
@@ -5006,7 +5006,7 @@ body::before {
 
 .hw-title {
   font-family: var(--ff-head);
-  font-size: 22px;
+  font-size: 30px;
   font-weight: 800;
   letter-spacing: -.5px;
 }
@@ -5819,6 +5819,69 @@ body::before {
   color: var(--text-3);
   font-size: 13px;
   text-align: center;
+}
+
+.hw-empty-icon {
+  color: var(--text-3);
+  opacity: 0.55;
+}
+
+[data-theme="dark"] .hw-empty-icon {
+  color: var(--text-2);
+  opacity: 0.7;
+}
+
+[data-theme="light"] .hw-empty-icon {
+  opacity: 0.45;
+}
+
+/* Settings legal links */
+.sg-legal {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+  margin-top: 24px;
+  font-size: 14px;
+}
+
+.sg-legal a {
+  color: var(--text-2);
+  text-decoration: none;
+}
+
+.sg-legal a:hover {
+  color: var(--text);
+}
+
+.sg-legal-sep {
+  color: var(--text-3);
+  user-select: none;
+}
+
+/* Daily digest time controls */
+.digest-time-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.digest-time-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.digest-time-input {
+  font-family: var(--ff-body);
+  font-size: 13px;
+  padding: 6px 10px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--rim);
+  background: var(--surface);
+  color: var(--text);
 }
 
 /* Task card */
@@ -8409,9 +8472,8 @@ body::before {
   height: 16px;
   padding: 0 4px;
   border-radius: 5px;
-  /* rounded square */
-  background: #EF4444;
-  color: #fff;
+  background: #c81e1e;
+  color: #ffffff;
   font-size: 9.5px;
   font-weight: 800;
   line-height: 16px;
@@ -8420,7 +8482,7 @@ body::before {
   /* hidden when zero */
   pointer-events: none;
   z-index: 10;
-  box-shadow: 0 1px 4px rgba(239, 68, 68, .45);
+  box-shadow: 0 1px 4px rgba(200, 30, 30, .45);
   letter-spacing: .2px;
   border: 1.5px solid var(--bg);
   transition: transform .2s var(--spring), opacity .2s;
@@ -8440,9 +8502,10 @@ body::before {
 }
 
 [data-theme="light"] .tab-badge {
-  background: #DC2626;
+  background: #c81e1e;
+  color: #ffffff;
   border-color: var(--bg);
-  box-shadow: 0 1px 4px rgba(220, 38, 38, .35);
+  box-shadow: 0 1px 4px rgba(200, 30, 30, .35);
 }
 
 /* ════════════════════════════════════════════
@@ -9656,7 +9719,7 @@ body::before {
   }
   
   .nav-greeting-sub .accent-text {
-    color: var(--teal);
+    color: #006d5d;
   }
 
   /* Bottom tab bar */
@@ -9960,4 +10023,40 @@ body:has(#appBody) .sheet {
 
 .ncard.skeleton .ncard-bar {
   background: var(--surface-2) !important;
+}
+
+/* ── UI Optimizations & Styling Fixes ── */
+.dash-greeting, .nav-greeting {
+  font-family: var(--ff-head) !important;
+}
+
+[data-theme="light"] .prof-ava, [data-theme="light"] .user-pill .ava {
+  color: #000 !important;
+}
+
+.btn, .btn-sm, .icon-btn, .nav-tab, .chip, .ncard, .tog-track, a, button {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@media (max-width: 768px) {
+  body, html {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+  .dash-main {
+    flex-direction: column;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .app-body {
+    padding: 10px;
+  }
+  .dash-welcome {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .hero-inner {
+    grid-template-columns: 1fr;
+  }
 }

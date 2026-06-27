@@ -102,6 +102,9 @@ function setCourseFilter(cid, el) {
   renderFeed();
 }
 
+let _feedObserver = null;
+let _feedRenderCount = 0;
+
 function renderFeed() {
   const cnt = { all:0, announcement:0, assignment:0, material:0 };
   S.notifs.forEach(n => { cnt.all++; if (cnt[n.type] !== undefined) cnt[n.type]++; });
@@ -142,12 +145,7 @@ function renderFeed() {
     }
     return true;
   });
-  // update count meta based on current filters
-  if (fcm) {
-    const fu = filtered.filter(n => !n.read).length;
-    fcm.textContent = `${filtered.length} total · ${fu} unread`;
-  }
-
+  
   const feed = document.getElementById('notifFeed');
   // update filtered counts meta
   if (fcm) {
@@ -158,20 +156,17 @@ function renderFeed() {
   if (!filtered.length) {
     feed.innerHTML = `<div class="empty-s"><svg class="icon-teal" width="42" height="42" viewBox="0 0 24 24" fill="none" style="opacity:.2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="var(--gamemaster)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><h3>Nothing here</h3><p>No notifications match this filter.<br>Try clearing filters/search to see everything.</p></div>`;
     const pg = document.getElementById('pagination'); if (pg) pg.innerHTML = '';
+    if (_feedObserver) _feedObserver.disconnect();
     return;
   }
 
-  // pagination
-  const per = 20;
-  const total = filtered.length;
-  const pages = Math.ceil(total / per) || 1;
-  if (!S.page || S.page > pages) S.page = 1;
-  const start = (S.page - 1) * per;
-  const pageItems = filtered.slice(start, start + per);
+  _feedRenderCount = 20;
 
-  feed.innerHTML = pageItems.map((n, i) => {
-    const c = courseById(n.courseId), t = TYPE_META[n.type] || {};
-    return `<div class="ncard${n.read?' is-read':''}" style="animation-delay:${Math.min(i,.8)*0.05}s" onclick="openSheet('${n.id}')">
+  function renderChunk() {
+    const items = filtered.slice(0, _feedRenderCount);
+    feed.innerHTML = items.map((n, i) => {
+      const c = courseById(n.courseId), t = TYPE_META[n.type] || {};
+      return `<div class="ncard${n.read?' is-read':''}" style="animation-delay:${Math.min(i%20,.8)*0.05}s" onclick="openSheet('${n.id}')">
   <div class="ncard-row">
     <div class="ncard-bar" style="background:${c.color}"></div>
     <div class="ncard-body">
@@ -193,29 +188,32 @@ function renderFeed() {
     </div>
   </div>
 </div>`;
-  }).join('');
+    }).join('');
 
-  // pagination controls
-  const pg = document.getElementById('pagination');
-  if (pg) {
-    if (pages <= 1) {
-      pg.innerHTML = '';
-    } else {
-      let html = '';
-      html += `<div class="page-btn" onclick="setPage(${Math.max(1,S.page-1)})">Previous</div>`;
-      for (let p = 1; p <= pages; p++) {
-        html += `<div class="page-btn${p===S.page?' active':''}" onclick="setPage(${p})">${p}</div>`;
-      }
-      html += `<div class="page-btn" onclick="setPage(${Math.min(pages,S.page+1)})">Next</div>`;
-      pg.innerHTML = `<div class="pagination">${html}</div>`;
+    if (_feedRenderCount < filtered.length) {
+      const target = document.createElement('div');
+      target.id = 'feed-observer-target';
+      target.style.height = '1px';
+      feed.appendChild(target);
+      
+      if (_feedObserver) _feedObserver.disconnect();
+      _feedObserver = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) {
+          _feedRenderCount += 20;
+          renderChunk();
+        }
+      });
+      _feedObserver.observe(target);
     }
   }
+
+  renderChunk();
+
+  const pg = document.getElementById('pagination');
+  if (pg) pg.innerHTML = '';
 }
 
-function setPage(n) {
-  S.page = n;
-  renderFeed();
-}
+
 
 function updatePip() {
   const pip = document.getElementById('pip');

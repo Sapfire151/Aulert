@@ -25,6 +25,7 @@ function renderAccount() {
     if (picture) {
       const img = document.createElement('img');
       img.src = picture;
+      img.alt = name ? `${name}'s avatar` : 'User profile';
       img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover';
       img.referrerPolicy = 'no-referrer';
       ava.appendChild(img);
@@ -42,6 +43,7 @@ function renderAccount() {
     if (picture) {
       const img = document.createElement('img');
       img.src = picture;
+      img.alt = name ? `${name}'s avatar` : 'User profile';
       img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover';
       img.referrerPolicy = 'no-referrer';
       profAva.appendChild(img);
@@ -424,13 +426,110 @@ function renderSettings() {
   dailyEmailRenderStatus();
 }
 
-/* ════════════════════════════════════════════
-   DAILY EMAIL SUMMARY
-════════════════════════════════════════════ */
+function getDigestTimezone() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+  } catch {
+    return 'UTC';
+  }
+}
+
+function formatDigestTimeLabel(hour, minute, tz) {
+  const h = String(hour).padStart(2, '0');
+  const m = String(minute).padStart(2, '0');
+  return `${h}:${m} (${tz})`;
+}
 
 function dailyEmailRenderStatus() {
-  const el = document.getElementById('emailPrefText');
-  if (el) el.textContent = S.settings.dailyEmail ? 'Enabled — Emails sent daily at 7 AM UTC' : 'Disabled';
+  const enabled = S.settings.dailyEmail;
+  const row = document.getElementById('digestTimeRow');
+  const statusEl = document.getElementById('emailPrefText');
+  const timeEl = document.getElementById('set_digestTime');
+  const hour = S.settings.digestHour ?? 7;
+  const minute = S.settings.digestMinute ?? 0;
+  const tz = S.settings.digestTimezone || getDigestTimezone();
+
+  if (row) row.style.display = enabled ? 'flex' : 'none';
+  if (statusEl) {
+    statusEl.textContent = enabled
+      ? `Enabled — Emails sent daily at ${formatDigestTimeLabel(hour, minute, tz)}`
+      : 'Disabled';
+  }
+  if (timeEl) {
+    timeEl.value = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
+    timeEl.disabled = !enabled;
+  }
+  const sendBtn = document.getElementById('digestSendNowBtn');
+  if (sendBtn) sendBtn.disabled = !enabled;
+}
+
+function digestTimeChange(el) {
+  const [hourStr, minuteStr] = el.value.split(':');
+  const hour = parseInt(hourStr, 10);
+  const minute = parseInt(minuteStr, 10);
+  if (Number.isNaN(hour) || Number.isNaN(minute)) return;
+
+  const tz = getDigestTimezone();
+  S.settings.digestHour = hour;
+  S.settings.digestMinute = minute;
+  S.settings.digestTimezone = tz;
+  saveSettings();
+  dailyEmailRenderStatus();
+
+  if (!S.settings.dailyEmail || !S.token) return;
+
+  el.disabled = true;
+  fetch('/api/emailPrefs', {
+    method: 'POST',
+    headers: { 'Authorization': 'Bearer ' + S.token, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ digestHour: hour, digestMinute: minute, digestTimezone: tz }),
+  })
+  .then(res => {
+    if (!res.ok) throw new Error('Server returned ' + res.status);
+    saved();
+  })
+  .catch(e => {
+    console.warn('Failed to save digest time:', e);
+    showToast('Could not save time', 'Server error — please try again');
+  })
+  .finally(() => { el.disabled = !S.settings.dailyEmail; });
+}
+
+async function digestSendNow() {
+  const btn = document.getElementById('digestSendNowBtn');
+  if (!S.settings.dailyEmail || !S.token) {
+    showToast('Digest disabled', 'Enable daily digest first');
+    return;
+  }
+
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+  }
+
+  try {
+    const res = await fetch('/api/emailPrefs', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + S.token, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sendNow: true }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body.error || 'Server returned ' + res.status);
+
+    if (body.itemCount > 0) {
+      showToast('Digest sent ✓', `${body.itemCount} new item${body.itemCount > 1 ? 's' : ''} in your inbox`);
+    } else {
+      showToast('Nothing to send', 'No new Classroom items in the last 24 hours');
+    }
+  } catch (e) {
+    console.warn('digestSendNow failed:', e);
+    showToast('Send failed', e.message || 'Could not send digest');
+  } finally {
+    if (btn) {
+      btn.disabled = !S.settings.dailyEmail;
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Send now';
+    }
+  }
 }
 
 function dailyEmailToggle(el) {
@@ -496,7 +595,13 @@ function dailyEmailToggle(el) {
         const apiRes = await fetch('/api/emailPrefs', {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + S.token, 'Content-Type': 'application/json' },
-          body: JSON.stringify({ dailyEmail: true, authCode: resp.code })
+          body: JSON.stringify({
+            dailyEmail: true,
+            authCode: resp.code,
+            digestHour: S.settings.digestHour ?? 7,
+            digestMinute: S.settings.digestMinute ?? 0,
+            digestTimezone: S.settings.digestTimezone || getDigestTimezone(),
+          })
         });
 
         const body = await apiRes.json().catch(() => ({}));

@@ -15,17 +15,26 @@
 ═════════════════════════════════════════════════════ */
 const CLIENT_ID = '4640324' + '46404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com'; // Split to bypass PII scanner
 const FIREBASE_CONFIG = {
-  apiKey: 'YOUR_NEW_API_KEY', // Be sure to update this from your Firebase Project Settings!
-  databaseURL: 'https://aulert-2fba0-default-rtdb.asia-southeast1.firebasedatabase.app',
-  projectId: 'aulert-2fba0',
+  apiKey: 'AIzaSyDP18fvle5Ls1mPPd6OVHII7Ay2_thaHbQ',
+  authDomain: 'tcasx-48020.firebaseapp.com',
+  projectId: 'tcasx-48020',
+  storageBucket: 'tcasx-48020.firebasestorage.app',
+  messagingSenderId: '782302455229',
+  appId: '1:782302455229:web:5655f95a226e0015e59ed4',
+  measurementId: 'G-JXR0PHP08E',
+  // Copy the exact URL from Firebase Console → Realtime Database if this differs
+  databaseURL: 'https://tcasx-48020-default-rtdb.asia-southeast1.firebasedatabase.app/',
 };
+
+function isFirebaseConfigured() {
+  return FIREBASE_CONFIG.apiKey && !FIREBASE_CONFIG.apiKey.includes('YOUR_NEW');
+}
 
 const SCOPES = [
   'https://www.googleapis.com/auth/classroom.courses.readonly',
   'https://www.googleapis.com/auth/classroom.announcements.readonly',
   'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
   'https://www.googleapis.com/auth/classroom.student-submissions.me.readonly',
-  'https://www.googleapis.com/auth/classroom.student-submissions.students',
   'https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly',
   'https://www.googleapis.com/auth/userinfo.profile',
   'https://www.googleapis.com/auth/userinfo.email',

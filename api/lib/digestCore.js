@@ -1,13 +1,13 @@
 const { google } = require('googleapis');
 const { OAuth2Client } = require('google-auth-library');
 
-const DB_BASE = 'https://aulert-2fba0-default-rtdb.asia-southeast1.firebasedatabase.app';
+const DB_BASE = 'https://tcasx-48020-default-rtdb.asia-southeast1.firebasedatabase.app';
 const CLIENT_ID = '4640324' + '46404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com';
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
 const ALLOWED_HOSTS = [
   'www.googleapis.com',
-  'aulert-2fba0-default-rtdb.asia-southeast1.firebasedatabase.app'
+  'tcasx-48020-default-rtdb.asia-southeast1.firebasedatabase.app'
 ];
 
 function safeFetch(urlStr, options) {

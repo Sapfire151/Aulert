@@ -9,7 +9,7 @@ const {
 
 const ALLOWED_HOSTS = [
   'www.googleapis.com',
-  'aulert-2fba0-default-rtdb.asia-southeast1.firebasedatabase.app'
+  'tcasx-48020-default-rtdb.asia-southeast1.firebasedatabase.app'
 ];
 
 function isValidUserId(id) {

@@ -2,7 +2,7 @@ const { OAuth2Client } = require('google-auth-library');
 const crypto = require('crypto');
 
 // Hardcoded Firebase RTDB base URL — the ONLY host we ever call
-const DB_BASE = 'https://aulert-2fba0-default-rtdb.asia-southeast1.firebasedatabase.app';
+const DB_BASE = 'https://tcasx-48020-default-rtdb.asia-southeast1.firebasedatabase.app';
 
 /**
  * Write a security flag to Firebase RTDB for a given numeric user ID.

@@ -622,8 +622,13 @@ function toggleFaq(btn) {
    4. Fill in the three values below
 ════════════════════════════════════════════ */
 const FIREBASE_CONFIG = {
-  apiKey: 'YOUR_NEW_API_KEY', // Be sure to update this from your Firebase Project Settings!
-  databaseURL: 'https://aulert-2fba0-default-rtdb.asia-southeast1.firebasedatabase.app',
-  projectId: 'aulert-2fba0',
+  apiKey: 'AIzaSyDP18fvle5Ls1mPPd6OVHII7Ay2_thaHbQ',
+  authDomain: 'tcasx-48020.firebaseapp.com',
+  projectId: 'tcasx-48020',
+  storageBucket: 'tcasx-48020.firebasestorage.app',
+  messagingSenderId: '782302455229',
+  appId: '1:782302455229:web:5655f95a226e0015e59ed4',
+  measurementId: 'G-JXR0PHP08E',
+  databaseURL: 'https://tcasx-48020-default-rtdb.asia-southeast1.firebasedatabase.app',
 };
 

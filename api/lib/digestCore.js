@@ -103,6 +103,7 @@ async function sendDigestForUser(userId, digest, { manual = false } = {}) {
 
   await oAuth2Client.getAccessToken();
 
+  const classroom = google.classroom({ version: 'v1', auth: oAuth2Client });
   let coursesRes;
   try {
     coursesRes = await classroom.courses.list({ courseStates: ['ACTIVE'], pageSize: 30 });

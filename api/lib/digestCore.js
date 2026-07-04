@@ -1,6 +1,6 @@
 const { google } = require('googleapis');
 const { OAuth2Client } = require('google-auth-library');
-const { db } = require('./firebaseAdmin');
+const { getDb } = require('./firebaseAdmin');
 
 const CLIENT_ID = '4640324' + '46404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com'; // Split to bypass PII scanner
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -66,20 +66,20 @@ function wasSentRecently(digest, now = new Date()) {
 // ─── Firebase Admin SDK helpers ───────────────────────────────────────────────
 
 async function dbGet(path) {
-  const snap = await db.ref(path).get();
+  const snap = await getDb().ref(path).get();
   return snap.exists() ? snap.val() : null;
 }
 
 async function dbSet(path, data) {
-  await db.ref(path).set(data);
+  await getDb().ref(path).set(data);
 }
 
 async function dbUpdate(path, data) {
-  await db.ref(path).update(data);
+  await getDb().ref(path).update(data);
 }
 
 async function dbDelete(path) {
-  await db.ref(path).remove();
+  await getDb().ref(path).remove();
 }
 
 // ─── Main digest sender ───────────────────────────────────────────────────────

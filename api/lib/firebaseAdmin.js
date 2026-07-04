@@ -1,4 +1,5 @@
-const admin = require('firebase-admin');
+const { initializeApp, getApps, cert } = require('firebase-admin/app');
+const { getDatabase } = require('firebase-admin/database');
 const path = require('path');
 const fs = require('fs');
 
@@ -12,7 +13,7 @@ let _db = null;
 function getDb() {
   if (_db) return _db;
 
-  if (!admin.apps.length) {
+  if (getApps().length === 0) {
     let serviceAccount;
 
     if (process.env.FIREBASE_SERVICE_ACCOUNT) {
@@ -41,13 +42,13 @@ function getDb() {
       }
     }
 
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount),
+    initializeApp({
+      credential: cert(serviceAccount),
       databaseURL: 'https://tcasx-48020-default-rtdb.asia-southeast1.firebasedatabase.app',
     });
   }
 
-  _db = admin.database();
+  _db = getDatabase();
   return _db;
 }
 

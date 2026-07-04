@@ -98,7 +98,7 @@ async function sendDigestForUser(userId, digest, { manual = false } = {}) {
     throw new Error('GOOGLE_CLIENT_SECRET not configured');
   }
 
-  const oAuth2Client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET);
+  const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET);
   oAuth2Client.setCredentials({ refresh_token: digest.refreshToken });
 
   try {

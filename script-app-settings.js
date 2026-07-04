@@ -581,6 +581,7 @@ function dailyEmailToggle(el) {
     client_id: CLIENT_ID,
     scope: SCOPES,
     access_type: 'offline',
+    prompt: 'consent',
     callback: async (resp) => {
       oauthCompleted = true;
       if (resp.error) {

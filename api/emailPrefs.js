@@ -178,8 +178,9 @@ export default async function handler(req, res) {
       const tokenResponse = await oAuth2Client.getToken(authCode);
       tokens = tokenResponse.tokens;
     } catch (tokenErr) {
-      console.error('Token exchange failed');
-      return res.status(400).json({ error: 'Failed to exchange authorization code. Please try again.' });
+      console.error('Token exchange failed:', tokenErr.message, tokenErr.response?.data);
+      const detail = tokenErr.response?.data?.error_description || tokenErr.response?.data?.error || tokenErr.message;
+      return res.status(400).json({ error: 'Failed to exchange authorization code: ' + (detail || 'Please try again.') });
     }
 
     if (!tokens.refresh_token) {

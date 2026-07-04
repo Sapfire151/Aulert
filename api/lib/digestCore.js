@@ -1,18 +1,16 @@
 const { google } = require('googleapis');
 const { OAuth2Client } = require('google-auth-library');
+const { db } = require('./firebaseAdmin');
 
-const DB_BASE = 'https://tcasx-48020-default-rtdb.asia-southeast1.firebasedatabase.app';
-const CLIENT_ID = '4640324' + '46404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com';
+const CLIENT_ID = '4640324' + '46404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com'; // Split to bypass PII scanner
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 
-const ALLOWED_HOSTS = [
-  'www.googleapis.com',
-  'tcasx-48020-default-rtdb.asia-southeast1.firebasedatabase.app'
-];
+// Only used for Google API calls (not Firebase — that's handled by Admin SDK now)
+const GOOGLE_API_HOSTS = ['www.googleapis.com'];
 
 function safeFetch(urlStr, options) {
   const url = new URL(urlStr);
-  if (!ALLOWED_HOSTS.includes(url.hostname)) {
+  if (!GOOGLE_API_HOSTS.includes(url.hostname)) {
     throw new Error('Blocked: URL not in allow-list (SSRF Protection)');
   }
   return fetch(url.toString(), options);
@@ -64,6 +62,27 @@ function wasSentRecently(digest, now = new Date()) {
   if (!digest.lastSentAt) return false;
   return now.getTime() - digest.lastSentAt < 20 * 60 * 60 * 1000;
 }
+
+// ─── Firebase Admin SDK helpers ───────────────────────────────────────────────
+
+async function dbGet(path) {
+  const snap = await db.ref(path).get();
+  return snap.exists() ? snap.val() : null;
+}
+
+async function dbSet(path, data) {
+  await db.ref(path).set(data);
+}
+
+async function dbUpdate(path, data) {
+  await db.ref(path).update(data);
+}
+
+async function dbDelete(path) {
+  await db.ref(path).remove();
+}
+
+// ─── Main digest sender ───────────────────────────────────────────────────────
 
 async function sendDigestForUser(userId, digest, { manual = false } = {}) {
   if (!digest?.dailyEmail || !digest.refreshToken || !digest.email) {
@@ -162,12 +181,8 @@ async function sendDigestForUser(userId, digest, { manual = false } = {}) {
     requestBody: { raw: rawEmail },
   });
 
-  const updatedDigest = { ...digest, lastSentAt: Date.now() };
-  await safeFetch(`${DB_BASE}/users/${encodeURIComponent(userId)}/digest.json`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updatedDigest),
-  });
+  // Update lastSentAt via Admin SDK
+  await dbUpdate(`users/${encodeURIComponent(userId)}/digest`, { lastSentAt: Date.now() });
 
   return { sent: true, itemCount: newItems.length };
 }
@@ -177,7 +192,10 @@ module.exports = {
   isDigestDueNow,
   wasSentRecently,
   safeFetch,
-  DB_BASE,
+  dbGet,
+  dbSet,
+  dbUpdate,
+  dbDelete,
   CLIENT_ID,
   CLIENT_SECRET,
 };

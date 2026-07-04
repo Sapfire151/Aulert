@@ -2,8 +2,8 @@ const { OAuth2Client } = require('google-auth-library');
 const crypto = require('crypto');
 const {
   sendDigestForUser,
-  safeFetch,
-  DB_BASE,
+  dbGet,
+  dbDelete,
   CLIENT_SECRET,
 } = require('./lib/digestCore');
 
@@ -25,9 +25,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const usersResp = await fetch(`${DB_BASE}/users.json`);
-    if (!usersResp.ok) throw new Error('Failed to fetch users from database');
-    const allUsers = await usersResp.json();
+    const allUsers = await dbGet('users');
 
     if (!allUsers) return res.status(200).json({ message: 'No users registered', sent: 0 });
 
@@ -50,7 +48,7 @@ export default async function handler(req, res) {
         if (e.message && (e.message.includes('invalid_grant') || e.message.includes('Token has been expired or revoked'))) {
           console.warn(`Removing stale digest entry for user ${userId}`);
           try {
-            await safeFetch(`${DB_BASE}/users/${userId}/digest.json`, { method: 'DELETE' });
+            await dbDelete(`users/${userId}/digest`);
           } catch (cleanupErr) {
             console.warn('Cleanup failed:', cleanupErr.message);
           }

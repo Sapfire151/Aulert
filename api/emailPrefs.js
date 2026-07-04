@@ -2,15 +2,13 @@ const { OAuth2Client } = require('google-auth-library');
 const {
   sendDigestForUser,
   safeFetch,
-  DB_BASE,
+  dbGet,
+  dbSet,
+  dbUpdate,
+  dbDelete,
   CLIENT_ID,
   CLIENT_SECRET,
 } = require('./lib/digestCore');
-
-const ALLOWED_HOSTS = [
-  'www.googleapis.com',
-  'tcasx-48020-default-rtdb.asia-southeast1.firebasedatabase.app'
-];
 
 function isValidUserId(id) {
   return typeof id === 'string' && /^[0-9]{1,30}$/.test(id);
@@ -101,16 +99,15 @@ export default async function handler(req, res) {
     const body = req.body || {};
     const { dailyEmail, authCode, sendNow } = body;
 
-    const digestUrl = `${DB_BASE}/users/${encodeURIComponent(userId)}/digest.json`;
+    const digestPath = `users/${encodeURIComponent(userId)}/digest`;
 
     // === SEND NOW ===
     if (sendNow) {
-      const existingResp = await safeFetch(digestUrl);
-      if (!existingResp.ok) {
+      const digest = await dbGet(digestPath);
+      if (!digest) {
         return res.status(404).json({ error: 'Daily digest is not enabled' });
       }
-      const digest = await existingResp.json();
-      if (!digest?.dailyEmail) {
+      if (!digest.dailyEmail) {
         return res.status(400).json({ error: 'Daily digest is not enabled' });
       }
 
@@ -130,36 +127,21 @@ export default async function handler(req, res) {
       }
     }
 
-    // === UPDATE SEND TIME ===
+    // === UPDATE SEND TIME (only when not an enable/disable request) ===
     const timeParse = parseDigestTime(body);
     if (timeParse.error) return res.status(400).json({ error: timeParse.error });
     if (Object.keys(timeParse.parsed).length > 0 && dailyEmail === undefined && !authCode) {
-      const existingResp = await safeFetch(digestUrl);
-      if (!existingResp.ok) {
+      const existing = await dbGet(digestPath);
+      if (!existing) {
         return res.status(404).json({ error: 'Daily digest is not enabled' });
       }
-      const existing = await existingResp.json();
-      const updated = { ...existing, ...timeParse.parsed, updatedAt: Date.now() };
-      const putResp = await safeFetch(digestUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated),
-      });
-      if (!putResp.ok) {
-        return res.status(500).json({ error: 'Failed to save send time' });
-      }
-      if (dailyEmail === undefined && !authCode) {
-        return res.status(200).json({ success: true, message: 'Send time updated' });
-      }
+      await dbUpdate(digestPath, { ...timeParse.parsed, updatedAt: Date.now() });
+      return res.status(200).json({ success: true, message: 'Send time updated' });
     }
 
     // === DISABLE daily email ===
     if (dailyEmail === false) {
-      const delResp = await safeFetch(digestUrl, { method: 'DELETE' });
-      if (!delResp.ok) {
-        console.error('Firebase DELETE failed:', delResp.status);
-        return res.status(500).json({ error: 'Failed to remove email preference' });
-      }
+      await dbDelete(digestPath);
       return res.status(200).json({ success: true, message: 'Daily email disabled' });
     }
 
@@ -200,16 +182,7 @@ export default async function handler(req, res) {
       updatedAt: Date.now(),
     };
 
-    const resp = await safeFetch(digestUrl, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(digestPayload),
-    });
-
-    if (!resp.ok) {
-      console.error('Firebase PUT failed:', resp.status);
-      return res.status(500).json({ error: 'Failed to save email preference' });
-    }
+    await dbSet(digestPath, digestPayload);
 
     res.status(200).json({ success: true, message: 'Daily email enabled' });
   } catch (error) {

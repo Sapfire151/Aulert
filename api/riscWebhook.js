@@ -1,28 +1,19 @@
 const { OAuth2Client } = require('google-auth-library');
 const crypto = require('crypto');
-
-// Hardcoded Firebase RTDB base URL — the ONLY host we ever call
-const DB_BASE = 'https://tcasx-48020-default-rtdb.asia-southeast1.firebasedatabase.app';
+const { dbSet } = require('./lib/digestCore');
 
 /**
  * Write a security flag to Firebase RTDB for a given numeric user ID.
- * The URL is built entirely from a hardcoded base + a sanitised path segment.
+ * Uses Firebase Admin SDK — bypasses security rules with full admin access.
  * @param {string} userId  – must be digits-only (validated before calling)
  * @param {object} data    – JSON-serialisable payload
  */
 async function writeSecurityFlag(userId, data) {
   // Double-check: only digits allowed (defense-in-depth)
   if (!/^[0-9]+$/.test(userId)) throw new Error('Invalid userId');
-
-  const url = `${DB_BASE}/users/${userId}/securityStatus.json`;
-
-  const resp = await fetch(url, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  if (!resp.ok) throw new Error(`DB write failed: ${resp.status}`);
+  await dbSet(`users/${userId}/securityStatus`, data);
 }
+
 
 // Vercel Serverless Function
 export default async function handler(req, res) {

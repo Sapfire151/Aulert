@@ -122,8 +122,8 @@ export default async function handler(req, res) {
           itemCount: 0,
         });
       } catch (e) {
-        console.error('sendNow failed:', e.message);
-        return res.status(500).json({ error: 'Failed to send digest' });
+        console.error('sendNow failed:', e.stack);
+        return res.status(500).json({ error: 'Failed to send digest: ' + e.message });
       }
     }
 

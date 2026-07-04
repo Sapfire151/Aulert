@@ -103,8 +103,12 @@ async function sendDigestForUser(userId, digest, { manual = false } = {}) {
 
   await oAuth2Client.getAccessToken();
 
-  const classroom = google.classroom({ version: 'v1', auth: oAuth2Client });
-  const coursesRes = await classroom.courses.list({ courseStates: ['ACTIVE'], pageSize: 30 });
+  let coursesRes;
+  try {
+    coursesRes = await classroom.courses.list({ courseStates: ['ACTIVE'], pageSize: 30 });
+  } catch (err) {
+    throw new Error('Google Classroom API failed. Make sure the Classroom API is enabled in Google Cloud Console. Details: ' + err.message);
+  }
   const courses = coursesRes.data.courses || [];
 
   const now = new Date();
@@ -176,13 +180,21 @@ async function sendDigestForUser(userId, digest, { manual = false } = {}) {
   ];
   const rawEmail = Buffer.from(emailLines.join('\r\n')).toString('base64url');
 
-  await gmail.users.messages.send({
-    userId: 'me',
-    requestBody: { raw: rawEmail },
-  });
+  try {
+    await gmail.users.messages.send({
+      userId: 'me',
+      requestBody: { raw: rawEmail },
+    });
+  } catch (err) {
+    throw new Error('Gmail API failed. Make sure the Gmail API is enabled in Google Cloud Console. Details: ' + err.message);
+  }
 
   // Update lastSentAt via Admin SDK
-  await dbUpdate(`users/${encodeURIComponent(userId)}/digest`, { lastSentAt: Date.now() });
+  try {
+    await dbUpdate(`users/${encodeURIComponent(userId)}/digest`, { lastSentAt: Date.now() });
+  } catch (err) {
+    throw new Error('Firebase dbUpdate failed: ' + err.message);
+  }
 
   return { sent: true, itemCount: newItems.length };
 }

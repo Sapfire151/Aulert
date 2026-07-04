@@ -160,13 +160,17 @@ function renderFeed() {
     return;
   }
 
-  _feedRenderCount = 20;
+  const PAGE_SIZE = 10;
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  if (S.page > totalPages) S.page = totalPages;
+  if (S.page < 1) S.page = 1;
 
-  function renderChunk() {
-    const items = filtered.slice(0, _feedRenderCount);
-    feed.innerHTML = items.map((n, i) => {
-      const c = courseById(n.courseId), t = TYPE_META[n.type] || {};
-      return `<div class="ncard${n.read?' is-read':''}" style="animation-delay:${Math.min(i%20,.8)*0.05}s" onclick="openSheet('${n.id}')">
+  const start = (S.page - 1) * PAGE_SIZE;
+  const items = filtered.slice(start, start + PAGE_SIZE);
+
+  feed.innerHTML = items.map((n, i) => {
+    const c = courseById(n.courseId), t = TYPE_META[n.type] || {};
+    return `<div class="ncard${n.read?' is-read':''}" style="animation-delay:${Math.min(i%20,.8)*0.05}s" onclick="openSheet('${n.id}')">
   <div class="ncard-row">
     <div class="ncard-bar" style="background:${c.color}"></div>
     <div class="ncard-body">
@@ -188,29 +192,33 @@ function renderFeed() {
     </div>
   </div>
 </div>`;
-    }).join('');
+  }).join('');
 
-    if (_feedRenderCount < filtered.length) {
-      const target = document.createElement('div');
-      target.id = 'feed-observer-target';
-      target.style.height = '1px';
-      feed.appendChild(target);
-      
-      if (_feedObserver) _feedObserver.disconnect();
-      _feedObserver = new IntersectionObserver(entries => {
-        if (entries[0].isIntersecting) {
-          _feedRenderCount += 20;
-          renderChunk();
-        }
-      });
-      _feedObserver.observe(target);
-    }
+  if (_feedObserver) {
+    _feedObserver.disconnect();
+    _feedObserver = null;
   }
 
-  renderChunk();
-
   const pg = document.getElementById('pagination');
-  if (pg) pg.innerHTML = '';
+  if (pg) {
+    if (totalPages > 1) {
+      pg.innerHTML = `
+        <div class="pagination-controls" style="display:flex; justify-content:center; align-items:center; gap:16px; margin-top:20px; margin-bottom:20px;">
+          <button onclick="setPage(${S.page - 1})" ${S.page === 1 ? 'disabled' : ''} style="background:var(--surface); border:1px solid var(--border); padding:6px 12px; border-radius:6px; color:var(--text-1); cursor:${S.page === 1 ? 'not-allowed' : 'pointer'}; opacity:${S.page === 1 ? 0.5 : 1}">Previous</button>
+          <span style="color:var(--text-2); font-size:14px;">Page ${S.page} of ${totalPages}</span>
+          <button onclick="setPage(${S.page + 1})" ${S.page === totalPages ? 'disabled' : ''} style="background:var(--surface); border:1px solid var(--border); padding:6px 12px; border-radius:6px; color:var(--text-1); cursor:${S.page === totalPages ? 'not-allowed' : 'pointer'}; opacity:${S.page === totalPages ? 0.5 : 1}">Next</button>
+        </div>
+      `;
+    } else {
+      pg.innerHTML = '';
+    }
+  }
+}
+
+function setPage(p) {
+  S.page = p;
+  renderFeed();
+  document.querySelector('.dash-feed-col')?.scrollIntoView({ behavior: 'smooth' });
 }
 
 

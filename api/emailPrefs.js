@@ -133,7 +133,7 @@ export default async function handler(req, res) {
     // === UPDATE SEND TIME ===
     const timeParse = parseDigestTime(body);
     if (timeParse.error) return res.status(400).json({ error: timeParse.error });
-    if (Object.keys(timeParse.parsed).length > 0) {
+    if (Object.keys(timeParse.parsed).length > 0 && dailyEmail === undefined && !authCode) {
       const existingResp = await safeFetch(digestUrl);
       if (!existingResp.ok) {
         return res.status(404).json({ error: 'Daily digest is not enabled' });

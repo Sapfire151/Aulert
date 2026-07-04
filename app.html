@@ -662,7 +662,10 @@
             <div class="digest-time-controls">
               <label class="digest-time-label" for="set_digestTime">Send at</label>
               <div class="custom-select-wrapper" style="position:relative;display:inline-block;">
-                <select id="set_digestTime" class="custom-select digest-time-input" onchange="digestTimeChange(this)" style="appearance:none;-webkit-appearance:none;background:var(--surface-2);color:var(--text-1);border:1px solid var(--border);border-radius:8px;padding:8px 32px 8px 12px;font-size:14px;font-family:inherit;cursor:pointer;outline:none;transition:border-color 0.2s,box-shadow 0.2s;">
+                <select id="set_digestTime" class="custom-select digest-time-input" onchange="digestTimeChange(this)" 
+                  style="appearance:none;-webkit-appearance:none;background:var(--dd-frost-bg, var(--surface-2));color:var(--text);border:1px solid var(--dd-frost-rim, var(--border));border-radius:12px;padding:10px 36px 10px 16px;font-size:14px;font-family:inherit;font-weight:500;cursor:pointer;outline:none;box-shadow:0 8px 32px rgba(0,0,0,0.2);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);transition:all 0.2s cubic-bezier(0.16,1,0.3,1);"
+                  onmouseover="this.style.borderColor='var(--dd-frost-divider, #666)'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 12px 40px rgba(0,0,0,0.3)';" 
+                  onmouseout="this.style.borderColor='var(--dd-frost-rim, var(--border))'; this.style.transform='none'; this.style.boxShadow='0 8px 32px rgba(0,0,0,0.2)';">
                   <option value="00:00">12:00 AM</option>
                   <option value="01:00">1:00 AM</option>
                   <option value="02:00">2:00 AM</option>

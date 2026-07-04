@@ -101,7 +101,19 @@ async function sendDigestForUser(userId, digest, { manual = false } = {}) {
   const oAuth2Client = new OAuth2Client(CLIENT_ID, CLIENT_SECRET);
   oAuth2Client.setCredentials({ refresh_token: digest.refreshToken });
 
-  await oAuth2Client.getAccessToken();
+  try {
+    const tokenData = await oAuth2Client.getAccessToken();
+    if (!tokenData || !tokenData.token) {
+      throw new Error('No access token returned from getAccessToken()');
+    }
+    // Explicitly set the access token just in case
+    oAuth2Client.setCredentials({ 
+      refresh_token: digest.refreshToken,
+      access_token: tokenData.token 
+    });
+  } catch (err) {
+    throw new Error('Failed to refresh access token: ' + err.message);
+  }
 
   const classroom = google.classroom({ version: 'v1', auth: oAuth2Client });
   let coursesRes;

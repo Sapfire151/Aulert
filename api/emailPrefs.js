@@ -187,6 +187,6 @@ export default async function handler(req, res) {
     res.status(200).json({ success: true, message: 'Daily email enabled' });
   } catch (error) {
     console.error('Error in emailPrefs handler:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error: ' + error.message });
   }
 }

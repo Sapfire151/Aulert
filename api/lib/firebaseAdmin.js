@@ -24,7 +24,11 @@ function getDb() {
       }
     } else {
       // Local dev: load from the service account JSON file in the repo root
-      const keyPath = path.resolve(__dirname, '../../tcasx-48020-firebase-adminsdk-fbsvc-a8b8b295e4.json');
+      let keyPath = path.resolve(__dirname, '../../tcasx-48020-firebase-adminsdk-fbsvc-a8b8b295e4.json');
+      if (!fs.existsSync(keyPath)) {
+        keyPath = path.resolve(process.cwd(), 'tcasx-48020-firebase-adminsdk-fbsvc-a8b8b295e4.json');
+      }
+      
       if (!fs.existsSync(keyPath)) {
         throw new Error(
           'Firebase Admin: FIREBASE_SERVICE_ACCOUNT env var not set and no local key file found at ' + keyPath

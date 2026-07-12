@@ -112,7 +112,7 @@ export default async function handler(req, res) {
       }
 
       try {
-        const result = await sendDigestForUser(userId, digest, { manual: true });
+        const result = await sendDigestForUser(userId, digest, { manual: true, test: body.test });
         if (result.sent) {
           return res.status(200).json({ success: true, message: 'Digest sent', itemCount: result.itemCount });
         }
@@ -160,7 +160,7 @@ export default async function handler(req, res) {
       const tokenResponse = await oAuth2Client.getToken(authCode);
       tokens = tokenResponse.tokens;
     } catch (tokenErr) {
-      console.error('Token exchange failed:', tokenErr.message, tokenErr.response?.data);
+      console.error('Token exchange failed during setup');
       const detail = tokenErr.response?.data?.error_description || tokenErr.response?.data?.error || tokenErr.message;
       return res.status(400).json({ error: 'Failed to exchange authorization code: ' + (detail || 'Please try again.') });
     }

@@ -127,7 +127,7 @@ function renderFeed() {
   const fm = document.getElementById('feedMeta');
   if (fm) fm.textContent = unread
     ? `${unread} unread · ${S.courses.length} classes monitored`
-    : `All caught up · ${S.courses.length} classes monitored`;
+    : `You're all caught up, bestie. Touch grass! 🌿 · ${S.courses.length} classes monitored`;
 
   // update counts; later we'll recompute after filtering as well
   const fcm = document.getElementById('feedCountMeta');
@@ -154,7 +154,7 @@ function renderFeed() {
   }
 
   if (!filtered.length) {
-    feed.innerHTML = `<div class="empty-s"><svg class="icon-teal" width="42" height="42" viewBox="0 0 24 24" fill="none" style="opacity:.2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="var(--gamemaster)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><h3>Nothing here</h3><p>No notifications match this filter.<br>Try clearing filters/search to see everything.</p></div>`;
+    feed.innerHTML = `<div class="empty-s"><div style="font-size:40px;margin-bottom:6px">🔍</div><h3>Hmm, nothing here!</h3><p>No notifications match this filter.<br>Try clearing the filters to see everything! 🎯</p></div>`;
     const pg = document.getElementById('pagination'); if (pg) pg.innerHTML = '';
     if (_feedObserver) _feedObserver.disconnect();
     return;

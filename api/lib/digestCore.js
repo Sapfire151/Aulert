@@ -84,7 +84,7 @@ async function dbDelete(path) {
 
 // ─── Main digest sender ───────────────────────────────────────────────────────
 
-async function sendDigestForUser(userId, digest, { manual = false } = {}) {
+async function sendDigestForUser(userId, digest, { manual = false, test = false } = {}) {
   if (!digest?.dailyEmail || !digest.refreshToken || !digest.email) {
     return { sent: false, reason: 'not_enabled' };
   }
@@ -128,7 +128,8 @@ async function sendDigestForUser(userId, digest, { manual = false } = {}) {
   const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
   const newItems = [];
 
-  for (const course of courses) {
+  if (!test) {
+    for (const course of courses) {
     try {
       const annRes = await classroom.courses.announcements.list({ courseId: course.id, pageSize: 10 });
       (annRes.data.announcements || []).forEach((a) => {
@@ -161,8 +162,9 @@ async function sendDigestForUser(userId, digest, { manual = false } = {}) {
       console.warn(`Failed to fetch coursework for course ${course.id}:`, e.message);
     }
   }
+  }
 
-  if (newItems.length === 0) {
+  if (!test && newItems.length === 0) {
     return { sent: false, reason: 'no_items', itemCount: 0 };
   }
 
@@ -171,17 +173,29 @@ async function sendDigestForUser(userId, digest, { manual = false } = {}) {
   let htmlContent = [
     '<div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto">',
     '<h2 style="color:#4f46e5">Aulert Daily Digest</h2>',
-    `<p>Here is your summary for the last 24 hours (${newItems.length} new item${newItems.length > 1 ? 's' : ''}):</p>`,
-    '<ul style="padding-left:20px">',
-  ].join('');
+  ];
 
-  newItems.forEach((item) => {
-    const safeCourse = escapeHtml(item.course);
-    const safeText = escapeHtml(item.text.slice(0, 120));
-    const safeLink = encodeURI(item.link);
-    htmlContent += `<li style="margin-bottom:8px"><b>${safeCourse}</b> [${item.type}]: <a href="${safeLink}">${safeText}</a></li>`;
-  });
-  htmlContent += '</ul><p style="color:#888;font-size:12px">You can disable this digest from Aulert Settings.</p></div>';
+  if (test) {
+    htmlContent.push(
+      '<p>This is a test email from Aulert to verify your email delivery settings.</p>',
+      '<p style="color:#888;font-size:12px">You can disable this digest from Aulert Settings.</p></div>'
+    );
+  } else {
+    htmlContent.push(
+      `<p>Here is your summary for the last 24 hours (${newItems.length} new item${newItems.length > 1 ? 's' : ''}):</p>`,
+      '<ul style="padding-left:20px">'
+    );
+
+    newItems.forEach((item) => {
+      const safeCourse = escapeHtml(item.course);
+      const safeText = escapeHtml(item.text.slice(0, 120));
+      const safeLink = encodeURI(item.link);
+      htmlContent.push(`<li style="margin-bottom:8px"><b>${safeCourse}</b> [${item.type}]: <a href="${safeLink}">${safeText}</a></li>`);
+    });
+    htmlContent.push('</ul><p style="color:#888;font-size:12px">You can disable this digest from Aulert Settings.</p></div>');
+  }
+
+  htmlContent = htmlContent.join('');
 
   const emailLines = [
     `To: ${digest.email}`,

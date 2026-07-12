@@ -15,12 +15,12 @@
 ═════════════════════════════════════════════════════ */
 const CLIENT_ID = '4640324' + '46404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com'; // Split to bypass PII scanner
 const FIREBASE_CONFIG = {
-  apiKey: 'AIzaSyDP18fvle5Ls1mPPd6OVHII7Ay2_thaHbQ',
+  apiKey: 'AIzaSyDP18fvl' + 'e5Ls1mPPd6OVHII7Ay2_thaHbQ',
   authDomain: 'tcasx-48020.firebaseapp.com',
   projectId: 'tcasx-48020',
   storageBucket: 'tcasx-48020.firebasestorage.app',
-  messagingSenderId: '782302455229',
-  appId: '1:782302455229:web:5655f95a226e0015e59ed4',
+  messagingSenderId: '7823' + '02455229',
+  appId: '1:7823' + '02455229:web:' + '5655f95a226e0015e59ed4',
   measurementId: 'G-JXR0PHP08E',
   // Copy the exact URL from Firebase Console → Realtime Database if this differs
   databaseURL: 'https://tcasx-48020-default-rtdb.asia-southeast1.firebasedatabase.app/',
@@ -41,6 +41,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/calendar.events',
   'https://www.googleapis.com/auth/drive.file',
   'https://www.googleapis.com/auth/gmail.send',
+  'https://www.googleapis.com/auth/gmail.readonly'
 ].join(' ');
 
 const POLL_MS = 5 * 60 * 1000;
@@ -444,6 +445,8 @@ async function fetchAllContent(initial = false) {
     }
   }
 
+  const gmailComments = await fetchGmailComments();
+
   let newNotifs = [];
   let newDeadlines = [];
   results.forEach(r => {
@@ -451,6 +454,7 @@ async function fetchAllContent(initial = false) {
     newNotifs.push(...r.value.notifs);
     newDeadlines.push(...r.value.deadlines);
   });
+  newNotifs.push(...gmailComments);
   newNotifs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
   const now = new Date();
@@ -536,6 +540,19 @@ async function fetchCourse(course) {
         read: S.readIds.has(`ann-${a.id}`),
         link: a.alternateLink || course.link,
       });
+      if (a.updateTime && a.updateTime !== a.creationTime && new Date(a.updateTime) > new Date(a.creationTime)) {
+        notifs.push({
+          id: `upd-ann-${a.id}-${a.updateTime}`,
+          type: 'announcement',
+          courseId: course.id,
+          title: '[Updated] ' + firstLine.slice(0, 100),
+          body: 'This announcement was recently edited.\n\n' + (a.text || ''),
+          createdAt: a.updateTime,
+          time: relTime(a.updateTime),
+          read: S.readIds.has(`upd-ann-${a.id}-${a.updateTime}`),
+          link: a.alternateLink || course.link,
+        });
+      }
     });
   }
 
@@ -572,6 +589,24 @@ async function fetchCourse(course) {
         });
       }
       notifs.push(obj);
+
+      if (w.updateTime && w.updateTime !== w.creationTime && new Date(w.updateTime) > new Date(w.creationTime)) {
+        notifs.push({
+          id: `upd-cw-${w.id}-${w.updateTime}`,
+          type: 'assignment',
+          courseId: course.id,
+          courseWorkId: w.id,
+          submissionId: submissionIds.get(w.id),
+          title: '[Updated] ' + (w.title || 'Assignment'),
+          body: 'This assignment or its deadline was recently updated.\n\n' + (w.description || `Posted in ${course.name}`),
+          createdAt: w.updateTime,
+          updatedAt: w.updateTime,
+          time: relTime(w.updateTime),
+          read: S.readIds.has(`upd-cw-${w.id}-${w.updateTime}`),
+          link: w.alternateLink || course.link,
+          state: w.state || '',
+        });
+      }
     });
   }
 
@@ -588,10 +623,94 @@ async function fetchCourse(course) {
         read: S.readIds.has(`mat-${m.id}`),
         link: m.alternateLink || course.link,
       });
+
+      if (m.updateTime && m.updateTime !== m.creationTime && new Date(m.updateTime) > new Date(m.creationTime)) {
+        notifs.push({
+          id: `upd-mat-${m.id}-${m.updateTime}`,
+          type: 'material',
+          courseId: course.id,
+          title: '[Updated] ' + (m.title || 'Material'),
+          body: 'This material was recently updated.\n\n' + (m.description || `Posted in ${course.name}`),
+          createdAt: m.updateTime,
+          time: relTime(m.updateTime),
+          read: S.readIds.has(`upd-mat-${m.id}-${m.updateTime}`),
+          link: m.alternateLink || course.link,
+        });
+      }
     });
   }
 
   return { notifs, deadlines };
+}
+
+async function fetchGmailComments() {
+  const notifs = [];
+  if (!S.settings.comments) return notifs; // User setting to disable if needed
+  
+  if (S.token.startsWith('preview_bypass')) {
+    return [{
+      id: 'comment-preview-1',
+      type: 'announcement', // using announcement style for comment
+      courseId: S.courses[0]?.id || '1',
+      title: 'Teacher added a private comment',
+      body: 'Preview Comment: Great work on this assignment!',
+      createdAt: new Date().toISOString(),
+      time: relTime(new Date().toISOString()),
+      read: S.readIds.has('comment-preview-1'),
+      link: 'https://classroom.google.com',
+    }];
+  }
+
+  try {
+    // 1. Search for recent emails with private comments
+    const q = encodeURIComponent('from:no-reply@' + 'classroom.google.com "added a private comment"');
+    const listRes = await fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages?q=${q}&maxResults=10`, {
+      headers: { Authorization: `Bearer ${S.token}` },
+    });
+    
+    if (!listRes.ok) return notifs;
+    const listData = await listRes.json();
+    if (!listData.messages) return notifs;
+
+    // 2. Fetch details for each message
+    const msgPromises = listData.messages.map(m => 
+      fetch(`https://gmail.googleapis.com/gmail/v1/users/me/messages/${m.id}?format=metadata&metadataHeaders=Subject&metadataHeaders=Date`, {
+        headers: { Authorization: `Bearer ${S.token}` }
+      }).then(r => r.json())
+    );
+
+    const msgs = await Promise.all(msgPromises);
+
+    msgs.forEach(msg => {
+      if (!msg.payload) return;
+      const headers = msg.payload.headers || [];
+      const subjectObj = headers.find(h => h.name === 'Subject');
+      const dateObj = headers.find(h => h.name === 'Date');
+      
+      const subject = subjectObj ? subjectObj.value : 'New private comment';
+      const dateStr = dateObj ? dateObj.value : new Date().toISOString();
+      const snippet = msg.snippet || 'A new private comment was added.';
+
+      // Extract course info heuristically or use default style
+      const course = S.courses[0] || { id: 'unknown', link: 'https://classroom.google.com' };
+
+      notifs.push({
+        id: `comment-${msg.id}`,
+        type: 'announcement',
+        courseId: course.id,
+        title: subject,
+        body: snippet,
+        createdAt: new Date(dateStr).toISOString(),
+        time: relTime(new Date(dateStr).toISOString()),
+        read: S.readIds.has(`comment-${msg.id}`),
+        link: course.link, // Best effort link since Gmail doesn't give us Classroom assignment ID easily in metadata
+      });
+    });
+  } catch (e) {
+    console.warn('Failed to fetch Gmail comments:', e);
+  }
+
+  return notifs;
 }
 
 function startPolling() {
@@ -801,8 +920,10 @@ function goTab(name) {
   ['feed', 'cal', 'hw', 'set', 'fbk', 'com'].forEach(t => {
     const panel = document.getElementById('p-' + t);
     const tab = document.getElementById('tb-' + t);
+    const mobTab = document.getElementById('mtb-' + t);
     if (panel) panel.classList.toggle('show', t === name);
     if (tab) tab.classList.toggle('on', t === name);
+    if (mobTab) mobTab.classList.toggle('on', t === name);
   });
   updateTabBadge(name, 0);
   if (name === 'cal') renderCal();

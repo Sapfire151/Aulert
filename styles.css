@@ -4,24 +4,24 @@
 [data-theme="dark"] {
   --bg: #080A12;
   --bg-2: #0E1020;
-  --surface: rgba(255, 255, 255, 0.04);
-  --surface-2: rgba(255, 255, 255, 0.08);
-  --rim: rgba(255, 255, 255, 0.10);
-  --rim-2: rgba(255, 255, 255, 0.05);
+  --surface: rgba(255, 255, 255, 0.01);
+  --surface-2: rgba(255, 255, 255, 0.02);
+  --rim: rgba(255, 255, 255, 0.04);
+  --rim-2: rgba(255, 255, 255, 0.01);
   --text: #EEF0FF;
   --invertext: #0D0F1E;
   --text-2: rgba(238, 240, 255, 0.58);
   --text-3: rgba(238, 240, 255, 0.28);
-  --nav-bg: rgba(8, 10, 18, 0.45);
-  --card-bg: rgba(255, 255, 255, 0.03);
-  --card-hover: rgba(255, 255, 255, 0.07);
-  --modal-bg: rgba(16, 18, 30, 0.55);
-  --sheet-bg: rgba(14, 16, 26, 0.55);
+  --nav-bg: rgba(8, 10, 18, 0.03);
+  --card-bg: rgba(255, 255, 255, 0.01);
+  --card-hover: rgba(255, 255, 255, 0.03);
+  --modal-bg: rgba(16, 18, 30, 0.15);
+  --sheet-bg: rgba(14, 16, 26, 0.15);
   --orb-1: rgba(139, 92, 246, .25);
   --orb-2: rgba(0, 255, 217, .15);
   --orb-3: rgba(251, 191, 36, .14);
   --shadow: 0 20px 60px rgba(0, 0, 0, .5);
-  --blur: blur(40px);
+  --blur: blur(4px);
   --theme-icon: '☀️';
   --dd-frost-bg:
     url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
@@ -53,24 +53,24 @@
 [data-theme="light"] {
   --bg: #F0F2FA;
   --bg-2: #E8EAF6;
-  --surface: rgba(255, 255, 255, 0.45);
-  --surface-2: rgba(255, 255, 255, 0.65);
-  --rim: rgba(0, 0, 0, 0.08);
-  --rim-2: rgba(0, 0, 0, 0.04);
+  --surface: rgba(255, 255, 255, 0.11);
+  --surface-2: rgba(255, 255, 255, 0.19);
+  --rim: rgba(0, 0, 0, 0.15);
+  --rim-2: rgba(0, 0, 0, 0.12);
   --text: #0D0F1E;
   --invertext: #EEF0FF;
   --text-2: rgba(13, 15, 30, 0.60);
   --text-3: rgba(13, 15, 30, 0.35);
-  --nav-bg: rgba(240, 242, 250, 0.50);
-  --card-bg: rgba(255, 255, 255, 0.40);
-  --card-hover: rgba(255, 255, 255, 0.65);
-  --modal-bg: rgba(248, 249, 255, 0.55);
-  --sheet-bg: rgba(248, 249, 255, 0.55);
+  --nav-bg: rgba(240, 242, 250, 0.03);
+  --card-bg: rgba(255, 255, 255, 0.09);
+  --card-hover: rgba(255, 255, 255, 0.16);
+  --modal-bg: rgba(248, 249, 255, 0.14);
+  --sheet-bg: rgba(248, 249, 255, 0.14);
   --orb-1: rgba(139, 92, 246, .12);
   --orb-2: rgba(0, 255, 217, .10);
   --orb-3: rgba(251, 191, 36, .10);
   --shadow: 0 20px 60px rgba(0, 0, 0, .12);
-  --blur: blur(40px);
+  --blur: blur(4px);
   --theme-icon: '🌙';
   --dd-frost-bg:
     url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E"),
@@ -300,8 +300,6 @@ body::before {
 /* ── HERO ── */
 .hero {
   min-height: 100svh;
-  display: flex;
-  align-items: center;
   padding: 60px 48px 80px;
   position: relative;
 }
@@ -633,8 +631,8 @@ body::before {
   background: var(--surface-2);
   border: 1px solid var(--rim);
   border-radius: var(--r-lg);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   padding: 16px 18px;
   box-shadow: var(--shadow);
   width: 300px;
@@ -1026,7 +1024,7 @@ body::before {
   inset: 0;
   z-index: 200;
   background: rgba(0, 0, 0, .35);
-  backdrop-filter: blur(40px);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1373,6 +1371,7 @@ body::before {
     opacity: 0;
     transform: translateY(12px) scale(0.99);
   }
+
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -2414,19 +2413,35 @@ body::before {
 }
 
 @keyframes tog-pulse {
-  0% { transform: translateX(0) scale(1); }
-  50% { transform: translateX(0) scale(0.85); }
-  100% { transform: translateX(0) scale(1); }
+  0% {
+    transform: translateX(0) scale(1);
+  }
+
+  50% {
+    transform: translateX(0) scale(0.85);
+  }
+
+  100% {
+    transform: translateX(0) scale(1);
+  }
 }
 
-.tog.tog-loading input:checked + .tog-track::before {
+.tog.tog-loading input:checked+.tog-track::before {
   animation: tog-pulse-checked 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 @keyframes tog-pulse-checked {
-  0% { transform: translateX(19px) scale(1); }
-  50% { transform: translateX(19px) scale(0.85); }
-  100% { transform: translateX(19px) scale(1); }
+  0% {
+    transform: translateX(19px) scale(1);
+  }
+
+  50% {
+    transform: translateX(19px) scale(0.85);
+  }
+
+  100% {
+    transform: translateX(19px) scale(1);
+  }
 }
 
 /* Profile */
@@ -2446,7 +2461,7 @@ body::before {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: transparent;
+  background: linear-gradient(135deg, #8B5CF6, #00ffd9);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2500,7 +2515,8 @@ body::before {
   transition: background .15s, transform .1s;
 }
 
-.cls-row:hover, .cls-row:focus-within {
+.cls-row:hover,
+.cls-row:focus-within {
   background: var(--surface-2);
 }
 
@@ -2548,8 +2564,8 @@ body::before {
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, .4);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   opacity: 0;
   pointer-events: none;
   transition: opacity .3s var(--ease);
@@ -2710,7 +2726,7 @@ body::before {
   display: flex;
   gap: 13px;
   align-items: flex-start;
-  backdrop-filter: blur(40px);
+  backdrop-filter: blur(4px);
   box-shadow: 0 16px 50px rgba(0, 0, 0, .45);
   transform: translateX(370px);
   opacity: 0;
@@ -2786,7 +2802,7 @@ body::before {
   color: var(--teal);
   font-size: 13px;
   font-weight: 700;
-  backdrop-filter: blur(40px);
+  backdrop-filter: blur(4px);
   pointer-events: none;
   transition: transform .3s var(--spring), opacity .3s;
   white-space: nowrap;
@@ -2902,8 +2918,8 @@ body::before {
   border-radius: var(--r-xl);
   background: var(--modal-bg);
   border: 1px solid var(--rim);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   box-shadow: 0 24px 80px rgba(0, 0, 0, .55), 0 0 0 1px var(--rim-2);
   display: flex;
   flex-direction: column;
@@ -3142,7 +3158,7 @@ body::before {
   border-radius: var(--r-xl);
   background: linear-gradient(135deg, rgba(139, 92, 246, .14) 0%, rgba(0, 255, 217, .10) 60%, rgba(251, 191, 36, .08) 100%);
   border: 1px solid rgba(139, 92, 246, .25);
-  backdrop-filter: blur(40px);
+  backdrop-filter: blur(4px);
   padding: 28px 32px;
   display: flex;
   align-items: center;
@@ -3205,7 +3221,7 @@ body::before {
   border: 1px solid var(--rim);
   border-radius: var(--r-lg);
   padding: 14px 20px;
-  backdrop-filter: blur(40px);
+  backdrop-filter: blur(4px);
 }
 
 .dub-num {
@@ -3855,7 +3871,7 @@ body::before {
   opacity: 0;
   transform: translateY(16px) scale(.96);
   transition: opacity .4s var(--ease), transform .4s var(--ease);
-  backdrop-filter: blur(40px);
+  backdrop-filter: blur(4px);
 }
 
 [data-theme="light"] .phone-notif {
@@ -4942,8 +4958,8 @@ body::before {
   border-radius: var(--r-pill);
   background: var(--surface);
   border: 1px solid var(--rim);
-  backdrop-filter: blur(40px);
-  -webkit-backdrop-filter: blur(40px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   gap: 7px;
@@ -7926,8 +7942,8 @@ body::before {
   inset: 0;
   z-index: 2000;
   background: rgba(0, 0, 0, .5);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -8107,8 +8123,8 @@ body::before {
   display: flex;
   align-items: center;
   gap: 8px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   transition: opacity .25s, transform .25s var(--spring);
   white-space: nowrap;
 }
@@ -8154,8 +8170,8 @@ body::before {
   display: flex;
   align-items: center;
   gap: 8px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
   transition: opacity .25s, transform .25s var(--spring);
   white-space: nowrap;
 }
@@ -8606,7 +8622,7 @@ body::before {
   inset: 0;
   z-index: 300;
   background: rgba(0, 0, 0, .35);
-  backdrop-filter: blur(40px);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -9651,224 +9667,210 @@ body::before {
    Moves the top navbar to a bottom tab bar on
    mobile. Everything fits in one screen.
 ═══════════════════════════════════════════════ */
+/* ── Global Hide Mobile Nav ── */
+.mob-nav { display: none; }
 
 @media (max-width: 768px) {
 
   /* ── Hide the desktop nav shell on mobile ── */
   .app-nav {
-    position: static;
-    height: auto;
-    background: none;
-    border: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    padding: 0;
-    display: contents;
+    display: none !important;
   }
 
-  /* Hide logo on mobile */
-  .app-nav .nav-logo {
-    display: none;
-  }
-
-  /* Top bar for theme toggle, bell, avatar */
-  .app-nav .nav-r {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 101;
+  /* ── Mobile Bottom Tab Bar ── */
+  .mob-nav {
     display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    gap: 6px;
-    height: 54px;
-    padding: 0 14px;
-    background: var(--nav-bg);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    border-bottom: 1px solid var(--rim-2);
-    border-radius: 0;
-  }
-
-  /* Show mobile greeting container and push icons to the right */
-  .nav-greeting-container {
-    display: flex !important;
-    flex-direction: column;
-    margin-right: auto;
-    justify-content: center;
-  }
-  
-  .nav-greeting {
-    font-family: var(--ff-head);
-    font-size: 16px;
-    font-weight: 800;
-    color: var(--text-1);
-    text-transform: none;
-    letter-spacing: -0.5px;
-    line-height: 1.1;
-  }
-  
-  .nav-greeting-sub {
-    font-family: var(--ff-head);
-    font-size: 14px;
-    font-weight: 700;
-    color: var(--text-1);
-    letter-spacing: -0.5px;
-    line-height: 1.1;
-  }
-  
-  .nav-greeting-sub .accent-text {
-    color: #006d5d;
-  }
-
-  /* Bottom tab bar */
-  .app-nav .nav-tabs {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 60px;
-    z-index: 100;
-    display: flex;
+    height: calc(56px + env(safe-area-inset-bottom));
+    padding-bottom: env(safe-area-inset-bottom);
+    align-items: center;
     justify-content: space-around;
-    width: 100%;
-    gap: 0;
-    padding: 0;
     background: var(--nav-bg);
     border-top: 1px solid var(--rim-2);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    z-index: 100;
   }
 
-  /* Tabs become vertical icon + label */
-  .app-nav .nav-tab {
+  .mob-tab {
+    display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
-    padding: 6px 8px;
-    font-size: 10px;
-    border-radius: 0;
-    flex: 1;
-    justify-content: center;
-    min-width: 0;
+    gap: 3px;
+    padding: 8px 20px;
+    cursor: pointer;
+    color: var(--text-3);
+    transition: color .2s;
+    position: relative;
+    border: none;
+    background: none;
   }
 
-  .app-nav .nav-tab span {
-    display: block;
-    font-size: 10px;
-    font-weight: 500;
-    letter-spacing: 0;
-    opacity: 0.6;
-  }
-
-  .app-nav .nav-tab.on span {
-    opacity: 1;
-  }
-
-  .app-nav .nav-tab.on {
-    background: transparent;
-    box-shadow: none;
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
+  .mob-tab.on {
     color: var(--teal);
   }
 
-  .app-nav .nav-tab svg,
-  .app-nav .nav-tab .nav-icon {
-    width: 20px;
-    height: 20px;
-  }
-
-  /* ── App body: fill viewport exactly ── */
+  /* ── App body: adjust padding ── */
   .app-body {
-    padding-top: 54px;
-    padding-bottom: 60px;
-    min-height: 100dvh;
-    max-height: 100dvh;
-    height: 100dvh;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
+    padding-top: 0;
+    padding-bottom: 0;
   }
 
-  /* Panels fill remaining space and scroll internally */
-  .panel.show {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    min-height: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    -webkit-overflow-scrolling: touch;
+  /* ── Global Panel Padding ── */
+  #p-feed,
+  #p-cal,
+  #p-hw,
+  #p-set {
+    padding: 20px 20px 90px;
   }
 
-  /* Prevent body scroll on app page — everything is contained */
-  body:has(#appBody) {
-    overflow: hidden;
-    height: 100dvh;
-  }
-
-  /* ── Compact welcome card ── */
-  .dash-welcome {
-    display: none !important;
-  }
-
-  /* ── Compact stats row ── */
-  .dash-stats {
-    padding: 8px 16px;
-    gap: 6px;
-    margin-bottom: 8px;
+  .ncard-body {
+    padding: 14px 14px 12px;
   }
 
   .dstat {
-    padding: 8px 10px;
+    padding: 12px 14px;
   }
 
-  .dstat-icon {
-    width: 28px;
-    height: 28px;
+  .sg {
+    padding: 16px;
   }
 
-  .dstat-icon svg {
-    width: 14px;
-    height: 14px;
+  /* ── Feed Tab ── */
+  .dash-welcome {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 20px 16px;
   }
 
   .dstat-num {
-    font-size: 16px;
+    font-size: 18px;
   }
 
   .dstat-lbl {
-    font-size: 9px;
+    font-size: 10px;
   }
 
-  /* ── Feed layout compact ── */
+  .dstat-icon {
+    width: 30px;
+    height: 30px;
+  }
+
   .dash-main {
     grid-template-columns: 1fr;
     gap: 8px;
-    padding: 0 12px;
   }
 
-  /* Make sidebar appear before activity feed on mobile */
-  .dash-feed-col {
-    order: 2;
-  }
   .dash-sidebar {
-    order: 1;
+    display: none;
   }
 
-  /* ── Notification cards compact ── */
-  .ncard {
-    padding: 12px;
+  /* ── Calendar Tab ── */
+  .cal-header-row {
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-start;
   }
 
-  /* ── Sheet detail ── */
-  .sheet {
+  .mnav-wrap {
     width: 100%;
-    max-width: 100%;
-    height: 100dvh;
-    border-radius: 0;
+    justify-content: space-between;
+  }
+
+  .cday {
+    min-height: 40px;
+    font-size: 13px;
+  }
+
+  .cal-card {
+    padding: 14px 12px;
+  }
+
+  /* ── Homework Tab ── */
+  .hw-form-row {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .hw-input,
+  .hwdtp-trigger {
+    width: 100%;
+  }
+
+  .hw-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .hw-header-actions {
+    width: 100%;
+  }
+
+  .hw-btn-export {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hwdtp-panel {
+    position: fixed;
+    bottom: 72px;
+    left: 0;
+    right: 0;
+    border-radius: 20px 20px 0 0;
+    max-height: 80svh;
+    overflow-y: auto;
+  }
+
+  /* ── Settings Tab ── */
+  .prof-row {
+    /* side-by-side profile on mobile */
+    align-items: center;
+    gap: 12px;
+    display: flex;
+    flex-direction: row;
+  }
+
+  .disc-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  #p-set h1 {
+    font-size: 26px;
+  }
+
+  .sg-legal {
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+  }
+
+  .sg-legal-sep {
+    display: inline !important;
+  }
+
+  /* ── Detail Sheet ── */
+  .sheet {
+    width: 100% !important;
+    right: 0;
+    border-radius: 20px 20px 0 0;
+    bottom: 0;
+    top: auto;
+    height: 85svh;
+    transform: translateY(100%);
+  }
+
+  .sheet.open {
+    transform: translateY(0);
   }
 
   /* ── Hide aurora follower on mobile ── */
@@ -9975,9 +9977,17 @@ body:has(#appBody) .sheet {
 
 /* ── Skeleton Loading ── */
 @keyframes pulseSkeleton {
-  0% { opacity: 0.7; }
-  50% { opacity: 0.3; }
-  100% { opacity: 0.7; }
+  0% {
+    opacity: 0.7;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
+
+  100% {
+    opacity: 0.7;
+  }
 }
 
 .ncard.skeleton {
@@ -10010,6 +10020,27 @@ body:has(#appBody) .sheet {
   border-radius: var(--r-pill);
   height: 22px;
   width: 60px;
+
+  @media (max-width: 768px) {
+
+    /* ── Mobile fixed theme button ── */
+    body:has(#appBody) .theme-switcher-btn.hidden {
+      opacity: 1 !important;
+      pointer-events: all !important;
+      transform: scale(1) !important;
+    }
+  }
+
+  ::selection {
+    background: var(--teal);
+    color: #000;
+  }
+
+  [data-theme="light"] ::selection {
+    background: rgba(139, 92, 246, 0.3);
+    /* or whatever was default, let's just leave default for light mode */
+  }
+
   display: inline-block;
   margin-right: 8px;
 }
@@ -10026,37 +10057,182 @@ body:has(#appBody) .sheet {
 }
 
 /* ── UI Optimizations & Styling Fixes ── */
-.dash-greeting, .nav-greeting {
+.dash-greeting,
+.nav-greeting {
   font-family: var(--ff-head) !important;
 }
 
-[data-theme="light"] .prof-ava, [data-theme="light"] .user-pill .ava {
+[data-theme="light"] .prof-ava,
+[data-theme="light"] .user-pill .ava {
   color: #000 !important;
 }
 
-.btn, .btn-sm, .icon-btn, .nav-tab, .chip, .ncard, .tog-track, a, button {
+.btn,
+.btn-sm,
+.icon-btn,
+.nav-tab,
+.chip,
+.ncard,
+.tog-track,
+a,
+button {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @media (max-width: 768px) {
-  body, html {
+
+  body,
+  html {
     overflow-x: hidden;
     max-width: 100vw;
   }
+
   .dash-main {
     flex-direction: column;
     padding: 10px;
     width: 100%;
     box-sizing: border-box;
   }
+
   .app-body {
     padding: 10px;
   }
+
   .dash-welcome {
     flex-direction: column;
     align-items: flex-start;
   }
+
   .hero-inner {
     grid-template-columns: 1fr;
   }
+}
+
+/* ── Calendar Animation ── */
+@keyframes slideLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideRight {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.slide-left {
+  animation: slideLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.slide-right {
+  animation: slideRight 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Layout Fixes ── */
+.phone-notif-list {
+  min-height: 400px;
+}
+
+.hero-h {
+  min-height: 120px;
+}
+
+/* ── DOM Simplification Fixes ── */
+.demo-feat {
+  display: grid;
+  grid-template-areas:
+    "icon title"
+    "icon desc";
+  grid-template-columns: min-content 1fr;
+  align-items: center;
+}
+
+.demo-feat .df-icon {
+  grid-area: icon;
+}
+
+.demo-feat .df-h {
+  grid-area: title;
+}
+
+.demo-feat .df-p {
+  grid-area: desc;
+}
+
+/* ── Dashboard Gradient Text -> Solid Color Overrides ── */
+.nav-logo,
+.modal-logo,
+.stat-num,
+.dub-num,
+.cday.today .cday-n,
+.feed-col-title,
+.com-join-banner .join-group-nm {
+  background: none !important;
+  -webkit-background-clip: border-box !important;
+  background-clip: border-box !important;
+}
+
+.nav-logo {
+  color: var(--teal) !important;
+}
+
+[data-theme="light"] .nav-logo {
+  color: #3533cd !important;
+}
+
+.modal-logo {
+  color: var(--teal) !important;
+}
+
+.stat-num {
+  color: var(--text) !important;
+}
+
+[data-theme="light"] .stat-num {
+  color: #3533cd !important;
+}
+
+.dub-num {
+  color: var(--violet) !important;
+}
+
+[data-theme="light"] .dub-num {
+  color: #3533cd !important;
+}
+
+.cday.today .cday-n {
+  color: var(--teal) !important;
+}
+
+[data-theme="light"] .cday.today .cday-n {
+  color: #4f46e5 !important;
+}
+
+.feed-col-title {
+  color: var(--text) !important;
+}
+
+[data-theme="light"] .feed-col-title {
+  color: #0D0F1E !important;
+}
+
+.com-join-banner .join-group-nm {
+  color: var(--violet) !important;
+}
+
+body:has(#appBody) .bg-fx {
+  display: none;
 }

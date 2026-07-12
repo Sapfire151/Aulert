@@ -104,19 +104,7 @@
         </svg>
         <span>Settings</span>
       </button>
-      <button class="nav-tab" id="tb-fbk" onclick="fbkPopAnim(this);goTab('fbk',this)">
-        <svg class="nav-icon" width="16" height="16" viewBox="0 0 24 24" fill="none">
-          <!-- bubble body -->
-          <path class="fbk-body" d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-          <!-- three typing dots -->
-          <circle class="fbk-dot fbk-dot-1" cx="8" cy="12" r="1.3" fill="currentColor" opacity="0.9" />
-          <circle class="fbk-dot fbk-dot-2" cx="12" cy="12" r="1.3" fill="currentColor" opacity="0.9" />
-          <circle class="fbk-dot fbk-dot-3" cx="16" cy="12" r="1.3" fill="currentColor" opacity="0.9" />
 
-        </svg>
-        <span>Feedbacks</span>
-      </button>
     </div>
     <div class="nav-r">
       <!-- Mobile Greeting -->
@@ -150,6 +138,41 @@
         <span class="user-pill-name" data-i18n="nav_student">Student</span>
       </div>
     </div>
+  </nav>
+
+  <!-- Mobile Bottom Nav -->
+  <nav class="mob-nav">
+    <button class="mob-tab on" id="mtb-feed" onclick="bellRingAnim(this);goTab('feed',this)" title="Notifications">
+      <svg class="nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round" />
+        <path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+    </button>
+    <button class="mob-tab" id="mtb-cal" onclick="calFlipAnim(this);goTab('cal',this)" title="Calendar">
+      <svg class="nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2" />
+        <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+        <rect x="3" y="4" width="18" height="6" rx="2" fill="currentColor" opacity="0.15" />
+      </svg>
+    </button>
+    <button class="mob-tab" id="mtb-hw" onclick="hwCheckAnim(this);goTab('hw',this)" title="Homework">
+      <svg class="nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        <rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="2" />
+        <path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+      </svg>
+    </button>
+    <button class="mob-tab" id="mtb-set" onclick="gearSpinAnim(this);goTab('set',this)" title="Settings">
+      <svg class="nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none">
+        <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" />
+        <path
+          d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
   </nav>
 
   <!-- ── NOTIFICATION PANEL ── -->
@@ -371,15 +394,7 @@
               </svg>
             </div>
           </div>
-          <button class="mnav-add-cal icon-btn-animate" onclick="iconPop(this);exportToGoogleCalendar()"
-            title="Add deadlines to Google Calendar">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-              <path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-              <path d="M12 14v4M10 16h4" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            </svg>
-            Add to Calendar
-          </button>
+
         </div>
       </div>
       <div class="cal-card">
@@ -521,14 +536,10 @@
 
         <!-- Task list -->
         <div class="hw-list" id="hwList">
-          <div class="hw-empty" id="hwEmpty">
-            <svg class="hw-empty-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor"
-                stroke-width="1.5" />
-              <rect x="9" y="3" width="6" height="4" rx="1" stroke="currentColor" stroke-width="1.5" />
-              <path d="M9 12h6M9 16h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-            </svg>
-            <p>No tasks yet</p>
+          <div class="hw-empty empty-s" id="hwEmpty">
+            <div style="font-size:40px;margin-bottom:0">🎉</div>
+            <h3>Woohoo! All caught up!</h3>
+            <p>Time to relax, or add a new task above! ✨</p>
           </div>
         </div>
       </div>
@@ -603,46 +614,7 @@
 
 
 
-      <div class="sg sg-gcal">
-        <div class="sg-lbl">Historic button</div>
-        <div class="sg-body">
-          <div class="srow">
-            <div class="srow-info">
-              <h4>Sync Deadlines &amp; Homework</h4>
-              <p>Bro disabled for its whole life</p>
-            </div>
-            <label class="tog tog-disabled"><input type="checkbox" id="set_gcalSync" onchange="gcalToggle(this)"
-                disabled>
-              <div class="tog-track"></div>
-            </label>
-          </div>
-          <div class="srow"
-            style="flex-direction:column;align-items:flex-start;gap:10px;border-top:1px solid var(--border);padding-top:14px">
-            <p id="gcalStatusText" style="font-size:12px;color:var(--text-3);margin:0">Sync disabled</p>
-            <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button id="gcalSyncBtn" class="btn-sm" onclick="gcalSyncAll()"
-                style="display:none;align-items:center;gap:6px;font-size:12px">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-                  <path d="M23 4v6h-6M1 20v-6h6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                    stroke-linejoin="round" />
-                  <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" stroke="currentColor"
-                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-                Sync now
-              </button>
-              <button id="gcalUnsyncBtn" class="btn-sm" onclick="gcalUnsyncAll()"
-                style="display:none;align-items:center;gap:6px;font-size:12px;color:var(--rose);border-color:var(--rose)">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-                  <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-                  <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" stroke-width="2"
-                    stroke-linecap="round" />
-                </svg>
-                Remove all events
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+
 
       <div class="sg sg-email">
         <div class="sg-lbl">Daily Email Summary</div>
@@ -669,7 +641,7 @@
                 <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2"
                   stroke-linecap="round" stroke-linejoin="round" />
               </svg>
-              Send now
+              Send test
             </button>
           </div>
         </div>
@@ -683,37 +655,14 @@
         <a href="privacy.html">Privacy Policy</a>
         <span class="sg-legal-sep" aria-hidden="true">·</span>
         <a href="terms.html">Terms of Service</a>
+        <span class="sg-legal-sep" aria-hidden="true">·</span>
+        <a
+          href="https://docs.google.com/forms/d/e/1FAIpQLSfAMPxrACJjnqb68kdvO_bSTBmY9otYxZiNqrri_uRNBFzIMQ/formResponse"
+          target="_blank" rel="noopener noreferrer">Feedback</a>
       </div>
     </div>
 
-    <!-- ═══ TAB: FEEDBACK ═══ -->
-    <div class="panel" id="p-fbk">
-      <div class="fbk-wrapper" style="max-width: 600px; margin-top: 32px;">
-        <div class="fbk-card"
-          style="padding: 48px 32px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); text-align: center;">
-          <div
-            style="width: 64px; height: 64px; background: var(--violet-icon-bg); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
-              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="var(--violet)" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </div>
-          <h3 style="margin-bottom: 12px; font-size: 20px; color: var(--text); font-weight: 600;">Help Us Improve</h3>
-          <button class="btn-hero btn-hero-primary"
-            onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfAMPxrACJjnqb68kdvO_bSTBmY9otYxZiNqrri_uRNBFzIMQ/formResponse');"
-            style="font-size: 15px; padding: 14px 28px; border-radius: 12px;">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="margin-right: 8px;">
-              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" />
-              <polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round" />
-              <line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            </svg>
-            Open Feedback Form
-          </button>
-        </div>
-      </div>
-    </div>
+
 
   </main>
 
@@ -777,7 +726,7 @@
   <!-- Push toast container -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <div class="snack" id="snack">Setting saved ✓</div>
+  <div class="snack" id="snack">Settings locked in 🔒</div>
 
 
   <!-- Advanced Theme Switcher -->

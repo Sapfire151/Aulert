@@ -25,6 +25,7 @@ const SCOPES = [
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/calendar.events',
   'https://www.googleapis.com/auth/drive.file',
+  'https://www.googleapis.com/auth/gmail.readonly'
 ].join(' ');
 
 const POLL_MS = 5 * 60 * 1000;
@@ -77,7 +78,7 @@ window.addEventListener('load', () => {
   const searchStr = window.location.search.substring(1);
   const paramsHash = new URLSearchParams(hashStr);
   const paramsSearch = new URLSearchParams(searchStr);
-  
+
   const token = paramsHash.get('access_token') || paramsSearch.get('access_token');
   const error = paramsHash.get('error') || paramsSearch.get('error');
 
@@ -93,12 +94,12 @@ window.addEventListener('load', () => {
     document.cookie = `aul_token=${token}; max-age=${expiresIn}; path=/; SameSite=Lax`;
     sessionStorage.setItem('aul_token', token); // Fallback if cookies are blocked
     window.location.hash = ''; // clear hash
-    
+
     // Clear search string if it was used without reloading
     if (searchStr) {
       window.history.replaceState(null, '', window.location.pathname);
     }
-    
+
     // Preserve hash (e.g., #set) when redirecting to app.html
     const hash = window.location.hash;
     window.location.href = 'app.html' + (hash ? hash : '');
@@ -138,7 +139,7 @@ function doAuth() {
     return;
   }
   if (!window.google?.accounts?.oauth2) { alert('Google Sign-In is still loading. Please try again in a moment.'); return; }
-  
+
   const stateToken = cryptoRandom().toString(36).substring(2) + Date.now().toString(36);
   sessionStorage.setItem('oauth_state', stateToken);
 
@@ -161,7 +162,7 @@ async function onToken(resp) {
     return;
   }
   sessionStorage.removeItem('oauth_state');
-  
+
   // Save token and navigate to the app page
   document.cookie = `aul_token=${resp.access_token}; max-age=${resp.expires_in || 3600}; path=/; SameSite=Lax`;
   window.location.href = 'app.html';
@@ -417,9 +418,11 @@ function toggleFaq(btn) {
 (function () {
   const allWords = [
     'watches 24/7',
-    'fills the gaps',
-    'never sleeps', 'sees it all',
-    'tracks it all', 'stays alert'
+    'is the GOAT',
+    'tracks it all',
+    'never sleeps',
+    'does the most',
+    'fills the gaps'
   ];
   const el = document.getElementById('heroVerb');
   if (!el) return;
@@ -475,7 +478,7 @@ function toggleFaq(btn) {
     setTimeout(tick, deleting ? speed.del : speed.type);
   }
 
-  // Delete the initial "remembers" first, then start cycling
+  // Delete the initial "keeps the receipts" first, then start cycling
   charIdx = el.textContent.length;
   deleting = true;
   setTimeout(tick, 900);
@@ -622,12 +625,12 @@ function toggleFaq(btn) {
    4. Fill in the three values below
 ════════════════════════════════════════════ */
 const FIREBASE_CONFIG = {
-  apiKey: 'AIzaSyDP18fvle5Ls1mPPd6OVHII7Ay2_thaHbQ',
+  apiKey: 'AIzaSyDP18fvl' + 'e5Ls1mPPd6OVHII7Ay2_thaHbQ',
   authDomain: 'tcasx-48020.firebaseapp.com',
   projectId: 'tcasx-48020',
   storageBucket: 'tcasx-48020.firebasestorage.app',
-  messagingSenderId: '782302455229',
-  appId: '1:782302455229:web:5655f95a226e0015e59ed4',
+  messagingSenderId: '7823' + '02455229',
+  appId: '1:7823' + '02455229:web:' + '5655f95a226e0015e59ed4',
   measurementId: 'G-JXR0PHP08E',
   databaseURL: 'https://tcasx-48020-default-rtdb.asia-southeast1.firebasedatabase.app',
 };

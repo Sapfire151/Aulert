@@ -182,7 +182,7 @@ function renderClasses() {
 function saved() {
   clearTimeout(S.snackTimer);
   const s = document.getElementById('snack');
-  s.textContent = 'Setting saved ✓';
+  s.textContent = 'Settings locked in 🔒';
   s.classList.add('show');
   S.snackTimer = setTimeout(() => s.classList.remove('show'), 2200);
   saveSettings();
@@ -511,23 +511,23 @@ async function digestSendNow() {
     const res = await fetch('/api/emailPrefs', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + S.token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sendNow: true }),
+      body: JSON.stringify({ sendNow: true, test: true }),
     });
     const body = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(body.error || 'Server returned ' + res.status);
 
-    if (body.itemCount > 0) {
-      showToast('Digest sent ✓', `${body.itemCount} new item${body.itemCount > 1 ? 's' : ''} in your inbox`);
+    if (body.success) {
+      showToast('Test email sent ✓', `Check your inbox`);
     } else {
-      showToast('Nothing to send', 'No new Classroom items in the last 24 hours');
+      showToast('Test failed', 'Check backend logs');
     }
   } catch (e) {
     console.warn('digestSendNow failed:', e);
-    showToast('Send failed', e.message || 'Could not send digest');
+    showToast('Send failed', e.message || 'Could not send test email');
   } finally {
     if (btn) {
       btn.disabled = !S.settings.dailyEmail;
-      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Send now';
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Send test';
     }
   }
 }

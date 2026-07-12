@@ -8,10 +8,10 @@ function navMo(d) {
   S.calMonth += d;
   if (S.calMonth < 0)  { S.calMonth = 11; S.calYear--; }
   if (S.calMonth > 11) { S.calMonth = 0;  S.calYear++; }
-  renderCal();
+  renderCal(d);
 }
 
-function renderCal() {
+function renderCal(direction = 0) {
   document.getElementById('moLabel').textContent = `${MONTHS[S.calMonth]} ${S.calYear}`;
   const today = new Date();
   const first = new Date(S.calYear, S.calMonth, 1).getDay();
@@ -52,8 +52,17 @@ function renderCal() {
   for (let i = 1; i <= 42 - (first + days); i++)
     h += `<div class="cday other"><div class="cday-n">${i}</div></div>`;
 
-  document.getElementById('calGrid').innerHTML = h;
-  renderDl(null);
+  const grid = document.getElementById('calGrid');
+  grid.innerHTML = h;
+  
+  if (direction !== 0) {
+    grid.classList.remove('slide-left', 'slide-right');
+    // Trigger reflow
+    void grid.offsetWidth;
+    grid.classList.add(direction > 0 ? 'slide-left' : 'slide-right');
+  }
+
+  renderDl(null, direction);
 }
 
 function pickDay(d, el) {
@@ -81,7 +90,7 @@ function exportToGoogleCalendar() {
   gcalSyncAll();
 }
 
-function renderDl(day) {
+function renderDl(day, direction = 0) {
   const nowDay = new Date(); nowDay.setHours(0,0,0,0);
 
   // Classroom deadlines
@@ -126,4 +135,10 @@ function renderDl(day) {
     const c = courseById(dl.courseId);
     return `<div class="dl-row" onclick="openSheet('${dl.notifId}')"><div class="dl-stripe" style="background:${c.color}"></div><div class="dl-info"><div class="dl-t">${escHtml(dl.title)}</div><div class="dl-c">${escHtml(c.name)}</div></div><div class="dl-meta"><span class="dl-date">${ds} · ${when}</span><span class="dl-badge ${dl.urg}">${ul[dl.urg] || 'On track'}</span></div></div>`;
   }).join('');
+  
+  if (direction !== 0) {
+    el.classList.remove('slide-left', 'slide-right');
+    void el.offsetWidth; // Trigger reflow
+    el.classList.add(direction > 0 ? 'slide-left' : 'slide-right');
+  }
 }

@@ -95,7 +95,7 @@ function renderSidebar() {
         dlEl.appendChild(div);
       });
     } else {
-      dlEl.innerHTML = '<div style="padding:16px;text-align:center;font-size:12px;color:var(--text-3)">No upcoming deadlines</div>';
+      dlEl.innerHTML = '<div style="padding:16px;text-align:center;font-size:12px;color:var(--text-3)">☀️ Clear skies! No deadlines ahead now go touch grass. 🌿</div>';
     }
   }
 
@@ -421,218 +421,217 @@ function renderSettings() {
 
   set('set_gcalSync', m.gcalSync);
   gcalRenderStatus();
-  
-  set('set_dailyEmail', m.dailyEmail);
-  dailyEmailRenderStatus();
+  renderDiscordIntegration();
+  loadDiscordConfiguration();
 }
 
-function getDigestTimezone() {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-  } catch {
-    return 'UTC';
-  }
+const DISCORD_OFFLINE_SCOPES = [
+  'https://www.googleapis.com/auth/classroom.courses.readonly',
+  'https://www.googleapis.com/auth/classroom.announcements.readonly',
+  'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
+  'https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly',
+].join(' ');
+
+let discordConfig = { enabled: false, webhooks: [] };
+
+function escapeDiscordText(value) {
+  const node = document.createElement('span');
+  node.textContent = String(value || '');
+  return node.innerHTML;
 }
 
-function formatDigestTimeLabel(hour, minute, tz) {
-  const h = String(hour).padStart(2, '0');
-  const m = String(minute).padStart(2, '0');
-  return `${h}:${m} (${tz})`;
-}
-
-function dailyEmailRenderStatus() {
-  const enabled = S.settings.dailyEmail;
-  const row = document.getElementById('digestTimeRow');
-  const statusEl = document.getElementById('emailPrefText');
-  const timeEl = document.getElementById('set_digestTime');
-  const hour = S.settings.digestHour ?? 7;
-  const minute = S.settings.digestMinute ?? 0;
-  const tz = S.settings.digestTimezone || getDigestTimezone();
-
-  if (row) row.style.display = enabled ? 'flex' : 'none';
-  if (statusEl) {
-    statusEl.textContent = enabled
-      ? `Enabled — Emails sent daily at ${formatDigestTimeLabel(hour, minute, tz)}`
-      : 'Disabled';
-  }
-  if (timeEl) {
-    timeEl.value = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
-    timeEl.disabled = !enabled;
-  }
-  const sendBtn = document.getElementById('digestSendNowBtn');
-  if (sendBtn) sendBtn.disabled = !enabled;
-}
-
-function digestTimeChange(el) {
-  const [hourStr, minuteStr] = el.value.split(':');
-  const hour = parseInt(hourStr, 10);
-  const minute = parseInt(minuteStr, 10);
-  if (Number.isNaN(hour) || Number.isNaN(minute)) return;
-
-  const tz = getDigestTimezone();
-  S.settings.digestHour = hour;
-  S.settings.digestMinute = minute;
-  S.settings.digestTimezone = tz;
-  saveSettings();
-  dailyEmailRenderStatus();
-
-  if (!S.settings.dailyEmail || !S.token) return;
-
-  el.disabled = true;
-  fetch('/api/emailPrefs', {
-    method: 'POST',
-    headers: { 'Authorization': 'Bearer ' + S.token, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ digestHour: hour, digestMinute: minute, digestTimezone: tz }),
-  })
-  .then(res => {
-    if (!res.ok) throw new Error('Server returned ' + res.status);
-    saved();
-  })
-  .catch(e => {
-    console.warn('Failed to save digest time:', e);
-    showToast('Could not save time', 'Server error — please try again');
-  })
-  .finally(() => { el.disabled = !S.settings.dailyEmail; });
-}
-
-async function digestSendNow() {
-  const btn = document.getElementById('digestSendNowBtn');
-  if (!S.settings.dailyEmail || !S.token) {
-    showToast('Digest disabled', 'Enable daily digest first');
-    return;
-  }
-
-  if (btn) {
-    btn.disabled = true;
-    btn.textContent = 'Sending…';
-  }
-
-  try {
-    const res = await fetch('/api/emailPrefs', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + S.token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sendNow: true, test: true }),
-    });
-    const body = await res.json().catch(() => ({}));
-    if (!res.ok) throw new Error(body.error || 'Server returned ' + res.status);
-
-    if (body.success) {
-      showToast('Test email sent ✓', `Check your inbox`);
-    } else {
-      showToast('Test failed', 'Check backend logs');
+function renderDiscordIntegration() {
+  const webhooks = Array.isArray(discordConfig.webhooks) ? discordConfig.webhooks : [];
+  document.querySelectorAll('.discord-integration').forEach((section) => {
+    const status = section.querySelector('.discord-status');
+    const list = section.querySelector('.discord-list');
+    if (status) {
+      status.textContent = webhooks.length
+        ? `${webhooks.length} destination${webhooks.length === 1 ? '' : 's'} connected · checks every 10 minutes`
+        : 'Add a Discord incoming webhook to receive new Classroom updates, even while Aulert is closed.';
     }
-  } catch (e) {
-    console.warn('digestSendNow failed:', e);
-    showToast('Send failed', e.message || 'Could not send test email');
-  } finally {
-    if (btn) {
-      btn.disabled = !S.settings.dailyEmail;
-      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg> Send test';
+    if (list) {
+      list.innerHTML = webhooks.length
+        ? webhooks.map((webhook) => `<div class="discord-destination">
+            <div><strong>${escapeDiscordText(webhook.label)}</strong><span>${webhook.lastError ? `Needs attention: ${escapeDiscordText(webhook.lastError)}` : webhook.lastDeliveryAt ? 'Last delivery successful' : 'Ready for delivery'}</span></div>
+            <div class="discord-destination-actions"><button type="button" class="btn-sm" data-webhook-id="${webhook.id}" onclick="discordTest(this.dataset.webhookId)">Test</button><button type="button" class="btn-sm discord-remove" data-webhook-id="${webhook.id}" onclick="discordRemove(this.dataset.webhookId)">Remove</button></div>
+          </div>`).join('')
+        : '<p class="discord-empty">No Discord destinations connected.</p>';
     }
-  }
-}
-
-function dailyEmailToggle(el) {
-  const checked = el.checked;
-
-  // Lock toggle while the async operation is in-flight
-  el.disabled = true;
-  el.closest('label')?.classList.add('tog-loading');
-  const unlock = () => {
-    el.disabled = false;
-    el.closest('label')?.classList.remove('tog-loading');
-  };
-
-  if (!checked) {
-    // ─── DISABLE ─────────────────────────────────────────────────────────────
-    // Call API first; only confirm state change on success
-    fetch('/api/emailPrefs', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + S.token, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dailyEmail: false })
-    })
-    .then(res => {
-      if (!res.ok) throw new Error('Server returned ' + res.status);
-      S.settings.dailyEmail = false;
-      saveSettings();
-      dailyEmailRenderStatus();
-      saved();
-    })
-    .catch(e => {
-      console.warn('Failed to disable daily email:', e);
-      el.checked = true; // revert — server still has it enabled
-      showToast('Could not disable', 'Server error — please try again');
-    })
-    .finally(unlock);
-    return;
-  }
-
-  // ─── ENABLE ──────────────────────────────────────────────────────────────
-  if (!window.google?.accounts?.oauth2) {
-    el.checked = false;
-    unlock();
-    showToast('Not ready', 'Google Sign-In is still loading');
-    return;
-  }
-
-  let oauthCompleted = false;
-
-  const client = google.accounts.oauth2.initCodeClient({
-    client_id: CLIENT_ID,
-    scope: SCOPES,
-    access_type: 'offline',
-    prompt: 'consent',
-    callback: async (resp) => {
-      oauthCompleted = true;
-      if (resp.error) {
-        console.warn('OAuth code error:', resp.error);
-        el.checked = false;
-        unlock();
-        showToast('Permission denied', 'Offline access is required for daily emails');
-        return;
-      }
-
-      try {
-        const apiRes = await fetch('/api/emailPrefs', {
-          method: 'POST',
-          headers: { 'Authorization': 'Bearer ' + S.token, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            dailyEmail: true,
-            authCode: resp.code,
-            digestHour: S.settings.digestHour ?? 7,
-            digestMinute: S.settings.digestMinute ?? 0,
-            digestTimezone: S.settings.digestTimezone || getDigestTimezone(),
-          })
-        });
-
-        const body = await apiRes.json().catch(() => ({}));
-        if (!apiRes.ok) throw new Error(body.error || 'Server returned ' + apiRes.status);
-
-        // Confirmed success — now save state
-        S.settings.dailyEmail = true;
-        saveSettings();
-        dailyEmailRenderStatus();
-        saved();
-      } catch(e) {
-        console.warn('Failed to enable daily email:', e);
-        el.checked = false;
-        showToast('Failed to enable', e.message || 'Server error — please try again');
-      } finally {
-        unlock();
-      }
-    }
+    section.querySelectorAll('.discord-add-button').forEach((button) => { button.disabled = webhooks.length >= 5; });
+    section.querySelectorAll('.discord-disconnect').forEach((button) => { button.hidden = !webhooks.length; });
   });
+}
 
-  // Detect if user closes/cancels the OAuth popup without completing
-  window.addEventListener('focus', function onWindowFocus() {
-    window.removeEventListener('focus', onWindowFocus);
-    setTimeout(() => {
-      if (!oauthCompleted) {
-        el.checked = false;
-        unlock();
-      }
-    }, 400);
-  }, { once: true });
+async function discordApi(payload) {
+  const response = await fetch('/api/emailPrefs', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${S.token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(body.error || `Server returned ${response.status}`);
+  return body;
+}
 
-  client.requestCode();
+async function loadDiscordConfiguration() {
+  if (S.token?.startsWith('preview_bypass')) {
+    discordConfig = S.settings.discordConfig || { enabled: false, webhooks: [] };
+    renderDiscordIntegration();
+    return;
+  }
+  if (!S.token) return;
+  try {
+    discordConfig = await discordApi({ action: 'list' });
+  } catch (error) {
+    console.warn('Failed to load Discord configuration:', error);
+  }
+  renderDiscordIntegration();
+}
+
+function requestDiscordAuthorization() {
+  if (!window.google?.accounts?.oauth2) return Promise.reject(new Error('Google Sign-In is still loading'));
+  return new Promise((resolve, reject) => {
+    const client = google.accounts.oauth2.initCodeClient({
+      client_id: CLIENT_ID,
+      scope: DISCORD_OFFLINE_SCOPES,
+      access_type: 'offline',
+      prompt: 'consent',
+      callback: (response) => response.error ? reject(new Error('Google authorization was cancelled')) : resolve(response.code),
+    });
+    client.requestCode();
+  });
+}
+
+async function discordAdd(form) {
+  const labelInput = form.querySelector('[data-discord-label]');
+  const webhookInput = form.querySelector('[data-discord-url]');
+  const button = form.querySelector('.discord-add-button');
+  const webhookUrl = webhookInput?.value.trim();
+  if (!webhookUrl) {
+    showToast('Webhook URL required', 'Paste a Discord incoming webhook URL to continue');
+    webhookInput?.focus();
+    return;
+  }
+  if (button) { button.disabled = true; button.textContent = 'Connecting…'; }
+  try {
+    if (S.token?.startsWith('preview_bypass')) {
+      discordConfig.webhooks.push({ id: `preview-${Date.now()}`, label: labelInput?.value.trim() || 'Discord webhook' });
+      discordConfig.enabled = true;
+      S.settings.discordConfig = discordConfig;
+      saveSettings();
+    } else {
+      const authCode = discordConfig.enabled ? undefined : await requestDiscordAuthorization();
+      discordConfig = await discordApi({ action: 'add', label: labelInput?.value, webhookUrl, authCode });
+    }
+    form.reset();
+    renderDiscordIntegration();
+    showToast('Discord connected', 'Aulert sent a test message and will check for updates every 10 minutes.');
+  } catch (error) {
+    showToast('Could not connect Discord', error.message || 'Please try again');
+  } finally {
+    if (button) { button.disabled = false; button.textContent = 'Add destination'; }
+  }
+}
+
+async function discordTest(webhookId) {
+  try {
+    if (S.token?.startsWith('preview_bypass')) {
+      showToast('Test message sent', 'Preview Mode — no Discord message was delivered.');
+      return;
+    }
+    await discordApi({ action: 'test', webhookId });
+    await loadDiscordConfiguration();
+    showToast('Test message sent', 'Check the selected Discord channel.');
+  } catch (error) {
+    showToast('Discord test failed', error.message || 'Please try again');
+  }
+}
+
+async function discordRemove(webhookId) {
+  if (!await showConfirmDialog('Remove destination?', 'This Discord webhook will stop receiving Classroom updates.', 'Remove')) return;
+  try {
+    if (S.token?.startsWith('preview_bypass')) {
+      discordConfig.webhooks = discordConfig.webhooks.filter((webhook) => webhook.id !== webhookId);
+      discordConfig.enabled = Boolean(discordConfig.webhooks.length);
+      S.settings.discordConfig = discordConfig;
+      saveSettings();
+    } else {
+      discordConfig = await discordApi({ action: 'remove', webhookId });
+    }
+    renderDiscordIntegration();
+    showToast('Destination removed', 'It will no longer receive Aulert updates.');
+  } catch (error) {
+    showToast('Could not remove destination', error.message || 'Please try again');
+  }
+}
+
+async function discordDisconnect() {
+  if (!await showConfirmDialog('Disconnect all Discord destinations?', 'This permanently removes the stored offline authorization and all webhooks.', 'Disconnect')) return;
+  try {
+    if (S.token?.startsWith('preview_bypass')) {
+      discordConfig = { enabled: false, webhooks: [] };
+      S.settings.discordConfig = discordConfig;
+      saveSettings();
+    } else {
+      discordConfig = await discordApi({ action: 'disconnect' });
+    }
+    renderDiscordIntegration();
+    showToast('Discord disconnected', 'All stored Discord destinations and offline access were removed.');
+  } catch (error) {
+    showToast('Could not disconnect Discord', error.message || 'Please try again');
+  }
+}
+
+/* ════════════════════════════════════════════
+   CUSTOM CONFIRM DIALOG — centered card
+════════════════════════════════════════════ */
+function showConfirmDialog(title, message, confirmLabel = 'Confirm') {
+  return new Promise((resolve) => {
+    const veil = document.createElement('div');
+    veil.className = 'confirm-veil';
+
+    const card = document.createElement('div');
+    card.className = 'confirm-card';
+    card.setAttribute('role', 'dialog');
+    card.setAttribute('aria-modal', 'true');
+    card.setAttribute('aria-labelledby', 'confirm-title');
+
+    card.innerHTML = `
+      <div class="confirm-card-title" id="confirm-title">${title}</div>
+      <div class="confirm-card-msg">${message}</div>
+      <div class="confirm-card-divider"></div>
+      <div class="confirm-card-actions">
+        <button class="confirm-btn-cancel">Cancel</button>
+        <button class="confirm-btn-ok">${confirmLabel}</button>
+      </div>
+    `;
+
+    veil.appendChild(card);
+    document.body.appendChild(veil);
+
+    const cleanup = () => {
+      veil.classList.remove('open');
+      setTimeout(() => veil.remove(), 280);
+      document.removeEventListener('keydown', onKey);
+    };
+
+    const onKey = (e) => {
+      if (e.key === 'Escape') { cleanup(); resolve(false); }
+    };
+
+    veil.addEventListener('click', (e) => {
+      if (e.target === veil) { cleanup(); resolve(false); }
+    });
+
+    card.querySelector('.confirm-btn-cancel').onclick = () => { cleanup(); resolve(false); };
+    card.querySelector('.confirm-btn-ok').onclick    = () => { cleanup(); resolve(true);  };
+
+    document.addEventListener('keydown', onKey);
+
+    // Trigger open animation on next frame
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => veil.classList.add('open'));
+    });
+  });
 }

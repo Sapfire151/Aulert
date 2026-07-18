@@ -170,6 +170,16 @@ function renderFeed() {
 
   feed.innerHTML = items.map((n, i) => {
     const c = courseById(n.courseId), t = TYPE_META[n.type] || {};
+    const isUpdated = n.title.startsWith('[Updated]');
+    const displayTitle = isUpdated ? n.title.replace(/^\[Updated\]\s*/, '') : n.title;
+    // Parse update date for badge: use updatedAt if available, else fall back to createdAt
+    let updatedLabel = '';
+    if (isUpdated) {
+      const updDate = n.updatedAt ? new Date(n.updatedAt) : (n.createdAt ? new Date(n.createdAt) : null);
+      if (updDate && !isNaN(updDate)) {
+        updatedLabel = updDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      }
+    }
     return `<div class="ncard${n.read?' is-read':''}" style="animation-delay:${Math.min(i%20,.8)*0.05}s" onclick="openSheet('${n.id}')">
   <div class="ncard-row">
     <div class="ncard-bar" style="background:${c.color}"></div>
@@ -178,10 +188,11 @@ function renderFeed() {
         <div class="ncard-tags">
           <span class="cls-tag" style="background:${c.color}18;color:${c.color};border:1px solid ${c.color}30">${c.name}</span>
           <span class="type-tag">${t.label||''}</span>
+          ${isUpdated ? `<span class="updated-badge">✦ Updated${updatedLabel ? ' ' + updatedLabel : ''}</span>` : ''}
         </div>
         <span class="ncard-time">${n.time}</span>
       </div>
-      <div class="ncard-title">${n.title}</div>
+      <div class="ncard-title">${displayTitle}</div>
       <div class="ncard-preview">${n.body}</div>
       <div class="ncard-foot">
         <div class="unread-mark">

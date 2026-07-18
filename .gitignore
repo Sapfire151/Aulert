@@ -55,7 +55,7 @@ coverage/
 .yarn/
 
 # DevTools cache
-.dsc_cache/
+.dsc_cache
 
 # Testing scripts (keep out of production)
 trigger_risc.ps1
@@ -65,3 +65,4 @@ diff.txt
 diff_utf8.txt
 *.ps1
 !trigger_risc.ps1
+.vscode

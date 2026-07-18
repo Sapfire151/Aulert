@@ -71,8 +71,67 @@ const courseById = id => S.courses.find(c => c.id === id) || { color: 'var(--vio
    OAUTH — Google Identity Services
 ════════════════════════════════════════════ */
 let _tokenClient;
+let _sessionRestoreAttempted = false;
+
+function loadAnalyticsIfAllowed() {
+  if (window.__aulertAnalyticsLoaded || !window.AULERT_ANALYTICS_ID) return;
+  let consent;
+  try { consent = JSON.parse(localStorage.getItem('aul_cookie_consent_v1') || 'null'); } catch { consent = null; }
+  if (!consent?.analytics) return;
+  window.__aulertAnalyticsLoaded = true;
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(window.AULERT_ANALYTICS_ID)}`;
+  document.head.appendChild(script);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function gtag() { window.dataLayer.push(arguments); };
+  window.gtag('js', new Date());
+  window.gtag('config', window.AULERT_ANALYTICS_ID, { anonymize_ip: true });
+}
+
+function initCookieConsent() {
+  const banner = document.getElementById('cookieBanner');
+  if (!banner) return;
+  let consent;
+  try { consent = JSON.parse(localStorage.getItem('aul_cookie_consent_v1') || 'null'); } catch { consent = null; }
+  if (consent?.version === 1) {
+    loadAnalyticsIfAllowed();
+    return;
+  }
+  banner.classList.add('is-visible');
+  banner.querySelectorAll('[data-cookie-choice]').forEach((button) => button.addEventListener('click', () => {
+    const selection = { version: 1, essential: true, analytics: button.dataset.cookieChoice === 'accept', updatedAt: Date.now() };
+    try { localStorage.setItem('aul_cookie_consent_v1', JSON.stringify(selection)); } catch { /* functional storage may be blocked */ }
+    banner.classList.remove('is-visible');
+    loadAnalyticsIfAllowed();
+  }));
+}
+
+function persistAccessToken(accessToken, expiresIn) {
+  const maxAge = Math.max(60, Number(expiresIn) || 3600);
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `aul_token=${encodeURIComponent(accessToken)}; max-age=${maxAge}; path=/; SameSite=Lax${secure}`;
+  sessionStorage.setItem('aul_token', accessToken);
+}
+
+function attemptSessionRestore() {
+  if (_sessionRestoreAttempted || !window.google?.accounts?.oauth2) return;
+  _sessionRestoreAttempted = true;
+  const client = google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    prompt: '',
+    callback: (response) => {
+      if (!response?.access_token) return;
+      persistAccessToken(response.access_token, response.expires_in);
+      window.location.href = 'app.html';
+    },
+  });
+  client.requestAccessToken({ prompt: '' });
+}
 
 window.addEventListener('load', () => {
+  initCookieConsent();
   // 1. Check if returning from Google OAuth redirect (check both hash and query string)
   const hashStr = window.location.hash.substring(1);
   const searchStr = window.location.search.substring(1);
@@ -91,8 +150,7 @@ window.addEventListener('load', () => {
 
   if (token) {
     const expiresIn = paramsHash.get('expires_in') || paramsSearch.get('expires_in') || 3600;
-    document.cookie = `aul_token=${token}; max-age=${expiresIn}; path=/; SameSite=Lax`;
-    sessionStorage.setItem('aul_token', token); // Fallback if cookies are blocked
+    persistAccessToken(token, expiresIn);
     window.location.hash = ''; // clear hash
 
     // Clear search string if it was used without reloading
@@ -108,7 +166,7 @@ window.addEventListener('load', () => {
 
   // 2. If already authenticated, go straight to the app (unless on privacy/terms pages)
   const cookieMatch = document.cookie.match('(^|;) ?aul_token=([^;]*)(;|$)');
-  const saved = cookieMatch ? cookieMatch[2] : null;
+  const saved = (cookieMatch ? decodeURIComponent(cookieMatch[2]) : null) || sessionStorage.getItem('aul_token');
   if (saved) {
     const path = window.location.pathname;
     if (!path.includes('privacy') && !path.includes('terms')) {
@@ -116,7 +174,8 @@ window.addEventListener('load', () => {
     }
     return;
   }
-  // Wait until GSI is ready
+
+  // Wait until GSI is ready and attempt a no-prompt restoration when Google permits it.
   waitForGSI();
 });
 
@@ -164,7 +223,7 @@ async function onToken(resp) {
   sessionStorage.removeItem('oauth_state');
 
   // Save token and navigate to the app page
-  document.cookie = `aul_token=${resp.access_token}; max-age=${resp.expires_in || 3600}; path=/; SameSite=Lax`;
+  persistAccessToken(resp.access_token, resp.expires_in);
   window.location.href = 'app.html';
 }
 
@@ -195,9 +254,12 @@ function setThemeMode(mode) { toggleTheme(); } // compat shim
 function updateThemeIcon(mode) {
   const moonSvg = `<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
   const sunSvg = `<circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`;
-  ['themeIcon', 'navThemeIcon'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = mode === 'dark' ? moonSvg : sunSvg;
+  const nextTheme = mode === 'dark' ? 'light' : 'dark';
+  document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+    const icon = toggle.querySelector('.theme-toggle-icon');
+    if (icon) icon.innerHTML = mode === 'dark' ? sunSvg : moonSvg;
+    toggle.setAttribute('aria-label', `Switch to ${nextTheme} mode`);
+    toggle.setAttribute('title', `Switch to ${nextTheme} mode`);
   });
 }
 
@@ -417,71 +479,73 @@ function toggleFaq(btn) {
 // Typewriter cycling verbs
 (function () {
   const allWords = [
-    'watches 24/7',
+    'central(ed)',
     'is the GOAT',
-    'tracks it all',
-    'never sleeps',
-    'does the most',
-    'fills the gaps'
+    'misses nothing',
+    'is so tuff',
+    'makes it easy',
+    'clutches up'
   ];
   const el = document.getElementById('heroVerb');
   if (!el) return;
 
-  // Don't start typewriter if the dynamic headline is hidden (short screens)
-  const dynamicH = el.closest('.hero-h--dynamic');
-  if (dynamicH && getComputedStyle(dynamicH).display === 'none') return;
-
-  // Shuffle array
   function shuffle(arr) {
     const a = [...arr];
     for (let i = a.length - 1; i > 0; i--) {
       const j = Math.floor(cryptoRandom() * (i + 1));
-      const valI = a.at(i);
-      const valJ = a.at(j);
-      a.splice(i, 1, valJ);
-      a.splice(j, 1, valI);
+      [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
   }
 
   let words = shuffle(allWords);
   let idx = 0, charIdx = 0, deleting = false;
+  let timer = null;
   const speed = { type: 70, del: 36, pause: 2400 };
 
+  const dynamicH = el.closest('.hero-h--dynamic');
+
+  function isHidden() {
+    return dynamicH && getComputedStyle(dynamicH).display === 'none';
+  }
+
   function tick() {
-    // Stop if element becomes hidden (e.g. orientation change)
-    if (dynamicH && getComputedStyle(dynamicH).display === 'none') return;
+    timer = null;
+    // If hidden, poll every 500ms until visible again then resume
+    if (isHidden()) {
+      timer = setTimeout(tick, 500);
+      return;
+    }
     const word = words[idx];
     if (!deleting) {
       charIdx++;
       el.textContent = word.slice(0, charIdx);
-      if (charIdx === word.length) {
+      if (charIdx >= word.length) {
         deleting = true;
-        setTimeout(tick, speed.pause);
+        timer = setTimeout(tick, speed.pause);
         return;
       }
     } else {
       charIdx--;
       el.textContent = word.slice(0, charIdx);
-      if (charIdx === 0) {
+      if (charIdx <= 0) {
+        charIdx = 0;
         deleting = false;
-        idx++;
-        if (idx >= words.length) {
-          // reshuffle for next round, avoid repeating last word
-          const last = words.at(-1);
+        idx = (idx + 1) % words.length;
+        if (idx === 0) {
+          const last = words[words.length - 1];
           words = shuffle(allWords);
           if (words[0] === last) words.push(words.shift());
-          idx = 0;
         }
       }
     }
-    setTimeout(tick, deleting ? speed.del : speed.type);
+    timer = setTimeout(tick, deleting ? speed.del : speed.type);
   }
 
-  // Delete the initial "keeps the receipts" first, then start cycling
+  // Delete the initial text first, then start cycling
   charIdx = el.textContent.length;
   deleting = true;
-  setTimeout(tick, 900);
+  timer = setTimeout(tick, 900);
 })();
 
 // Float cards use independent CSS bubble animations — no parallax needed

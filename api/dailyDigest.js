@@ -1,64 +1,41 @@
-const { OAuth2Client } = require('google-auth-library');
 const crypto = require('crypto');
-const {
-  sendDigestForUser,
-  dbGet,
-  dbDelete,
-  CLIENT_SECRET,
-} = require('./lib/digestCore');
+const { dbGet, dbDelete, deliverDiscordForUser, CLIENT_SECRET } = require('./lib/digestCore');
 
 export default async function handler(req, res) {
-  const authHeader = req.headers.authorization || '';
-  const expectedAuth = `Bearer ${process.env.CRON_SECRET}`;
-
-  let authorized = false;
-  if (authHeader.length === expectedAuth.length) {
-    authorized = crypto.timingSafeEqual(Buffer.from(authHeader), Buffer.from(expectedAuth));
-  }
-
-  if (!authorized) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
-
-  if (!CLIENT_SECRET) {
-    return res.status(500).json({ error: 'GOOGLE_CLIENT_SECRET not configured' });
-  }
+  const supplied = req.headers.authorization || '';
+  const expected = `Bearer ${process.env.CRON_SECRET || ''}`;
+  const authorized = supplied.length === expected.length && crypto.timingSafeEqual(Buffer.from(supplied), Buffer.from(expected));
+  if (!authorized) return res.status(401).json({ error: 'Unauthorized' });
+  if (!CLIENT_SECRET) return res.status(500).json({ error: 'GOOGLE_CLIENT_SECRET not configured' });
 
   try {
-    const allUsers = await dbGet('users');
+    const users = await dbGet('users');
+    if (!users) return res.status(200).json({ message: 'No users registered', sent: 0, migrated: 0 });
 
-    if (!allUsers) return res.status(200).json({ message: 'No users registered', sent: 0 });
-
-    let sentCount = 0;
-    let skippedCount = 0;
-    let errorCount = 0;
-
-    for (const [userId, userData] of Object.entries(allUsers)) {
-      const digest = userData.digest;
-      if (!digest || !digest.dailyEmail || !digest.refreshToken || !digest.email) continue;
-
+    let sent = 0;
+    let errors = 0;
+    let migrated = 0;
+    for (const [userId, userData] of Object.entries(users)) {
+      if (userData.digest) {
+        await dbDelete(`users/${encodeURIComponent(userId)}/digest`);
+        migrated++;
+      }
+      if (!userData.discord) continue;
       try {
-        const result = await sendDigestForUser(userId, digest, { manual: false });
-        if (result.sent) sentCount++;
-        else skippedCount++;
-      } catch (e) {
-        errorCount++;
-        console.warn(`Failed for user ${userId}:`, e.message);
-
-        if (e.message && (e.message.includes('invalid_grant') || e.message.includes('Token has been expired or revoked'))) {
-          console.warn(`Removing stale digest entry for user ${userId}`);
-          try {
-            await dbDelete(`users/${userId}/digest`);
-          } catch (cleanupErr) {
-            console.warn('Cleanup failed:', cleanupErr.message);
-          }
+        const result = await deliverDiscordForUser(userId, userData.discord);
+        sent += result.sent || 0;
+        errors += result.errors || 0;
+      } catch (error) {
+        errors++;
+        console.warn(`Discord cron failed for ${userId}:`, error.message);
+        if (/invalid_grant|expired or revoked/i.test(error.message)) {
+          await dbDelete(`users/${encodeURIComponent(userId)}/discord`);
         }
       }
     }
-
-    res.status(200).json({ sent: sentCount, skipped: skippedCount, errors: errorCount });
-  } catch (err) {
-    console.error('Cron error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    return res.status(200).json({ sent, errors, migrated });
+  } catch (error) {
+    console.error('Discord cron error:', error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 }

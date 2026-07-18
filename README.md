@@ -1,81 +1,77 @@
 <div align="center">
-
-# 🎓 Aulert
-
-**Never miss a Google Classroom update again.**
-
-[![Web App](https://img.shields.io/badge/Web_App-Available-brightgreen?style=for-the-badge&logo=vercel)](https://aulert.vercel.app)
-[![Desktop App](https://img.shields.io/badge/Desktop_App-Coming_Soon-red?style=for-the-badge&logo=windows)](https://github.com/esrazti/Aulert-App)
-[![Issues](https://img.shields.io/github/issues/Sapfire151/Aulert?style=for-the-badge)](https://github.com/Sapfire151/Aulert/issues)
-
-Aulert is a free student dashboard that monitors your Google Classroom courses in real time — surfacing announcements, assignments, and deadlines in one clean feed with live notifications, a homework tracker and calendar sync.
-
-[Report a Bug or Feature](https://github.com/Sapfire151/Aulert/issues)
-
+  <h1>🎓 Aulert</h1>
+  <p><strong>Your Google Classroom updates, in one calm place.</strong></p>
+  <p>
+    <a href="https://aulert.vercel.app">Open Aulert</a>
+    · <a href="https://github.com/Sapfire151/Aulert/issues">Report an issue</a>
+    · <a href="privacy.html">Privacy</a>
+  </p>
 </div>
 
----
+## What Aulert does
 
-## ✨ What it does
+Aulert gives students a focused view of Google Classroom: one feed for announcements, assignments, and materials; a deadline calendar; and a personal homework tracker. Optional Discord Notifications keep selected channels updated even when the web app is closed.
 
-- **📋 Activity Feed**: See all your Google Classroom announcements, assignments, and materials in one place. The feed refreshes automatically — or hit the **Refresh** button anytime for instant updates.
-- **🚀 Submit Work Directly**: Aulert is an interactive dashboard! Track your courses and submit your work directly through the app without needing to open Classroom.
-- **✅ Homework Tracker**: Add your own tasks with deadlines, descriptions, and urgency badges. Mark them done, export your list as a PDF, or share it with a friend.
-- **📅 Visual Calendar**: A monthly calendar showing all your assignment due dates and homework deadlines as color-coded dots. Click any day to see what's due. Homework tasks show in teal, Classroom assignments in their course color.
-- **🗓️ Google Calendar Sync (Coming Soon)**: Automatically push all your deadlines and homework tasks directly to your Google Calendar. Toggle it on in Settings — events appear instantly and stay in sync as things change.
-- **🔔 Live Notifications**: Get browser push notifications when new assignments or announcements are posted. Set quiet hours so you're not disturbed at night.
-- **💬 Community Chat**: Add your classmates as friends and message them directly. Create group chats to coordinate with your whole class.
-- **📣 Built-in Feedback**: Have a suggestion or found a bug? Send feedback directly from inside the app.
-- **✨ Modern UI**: Enjoy a sleek interface with skeleton loading screens and smooth animations.
+| Feature | What it gives you |
+| --- | --- |
+| Unified activity feed | New announcements, assignments, and materials without jumping between classrooms. |
+| Deadline calendar | A monthly view of Classroom due dates and personal homework. |
+| Homework tracker | Add, prioritize, complete, and share your own tasks. |
+| Discord Notifications | Send concise Classroom updates to up to five Discord incoming webhooks. |
+| Privacy choices | Essential storage for the app, plus an explicit accept/reject choice for analytics. |
 
----
+## Get started
 
-## 🚀 Getting started
+1. Visit [aulert.vercel.app](https://aulert.vercel.app).
+2. Connect your Google Classroom account.
+3. Open Settings to tune in-app notifications or connect Discord.
 
-Getting started is as simple as 1-2-3:
+### Connect Discord
 
-1. Go to **[aulert.vercel.app](https://aulert.vercel.app)**.
-2. Click **Connect with Google Classroom**.
-3. Sign in with your Google account and allow access.
+1. In Discord, create an incoming webhook for the channel you want to receive updates.
+2. In Aulert Settings, give the destination a label and paste the webhook URL.
+3. Approve the separate offline Classroom permission when prompted. Aulert sends a test message before saving the destination.
 
-That's it! Your classes will load automatically.
+Aulert checks for new Classroom announcements, assignments, and materials about every 10 minutes. It batches nearby updates into compact Discord messages, so delivery is prompt but not guaranteed to be real-time.
 
-> **Note:** Aulert requests secure access to your Classroom data so you can track updates and submit your work directly through the app.
+## Privacy and security
 
----
+- Core Classroom viewing happens in the browser.
+- Discord Notifications are optional. Their Google refresh token and webhook URL are encrypted before storage; URLs are never returned to the browser after setup.
+- Disconnecting Discord permanently removes its stored credentials and destinations.
+- The app uses short-lived Google access cookies. It attempts a no-prompt restoration when Google permits it, then asks you to reconnect only when Google requires interaction.
+- Analytics does not load until the user explicitly accepts it.
 
-## 🔒 Privacy & Security
+Read the full [Privacy Policy](privacy.html) and [Terms of Service](terms.html).
 
-Your privacy is our priority:
+## Deployment notes
 
-- **Browser-First**: Aulert runs entirely in your browser. No sensitive Google Classroom data is stored on any Aulert server.
-- **Direct API Access**: Your credentials and OAuth tokens communicate directly with official Google servers — there is no middleman intercepting your login or school data.
-- **Zero External Servers**: Assignments, grades, and profile data are processed locally on your device. Nothing is ever stored on external databases or third-party servers.
-- **Interactive, yet secure**: Aulert securely processes your data to let you submit assignments and get timely updates without compromising your privacy.
-- **Audited by Partners**: We use industry-leading tools — [Deva Security](https://marketplace.visualstudio.com/items?itemName=nicholasdeva.deva-security) and [GitLens](https://www.gitkraken.com/gitlens) — to actively audit our codebase, detect vulnerabilities, and maintain the highest security standards.
-- **Fully Open-Source**: Every line of code is publicly available on GitHub for anyone to review and verify.
+The project is a static web app with Vercel serverless functions and Firebase Realtime Database for the optional Discord service.
 
----
+Required Vercel environment variables:
 
-## 🛠️ Reporting issues
+| Variable | Purpose |
+| --- | --- |
+| `GOOGLE_CLIENT_SECRET` | Exchanges the optional offline Google authorization. |
+| `DISCORD_WEBHOOK_ENCRYPTION_KEY` | A 32-byte base64 value or 64-character hex key used to encrypt Discord URLs and refresh tokens. |
+| `FIREBASE_SERVICE_ACCOUNT` | Firebase Admin service-account JSON. |
+| `CRON_SECRET` | Protects the scheduled Discord delivery job. |
+| `ALLOWED_ORIGIN` | Optional CORS origin override; defaults to the production app URL. |
 
-Found a bug or have a feature request? We'd love to hear from you! 
+`vercel.json` schedules the existing delivery endpoint every ten minutes. Never commit real webhook URLs, Firebase credentials, or encryption keys.
 
-Please [Open an issue](https://github.com/Sapfire151/Aulert/issues) on GitHub and we'll look into it.
+## Local checks
 
----
+```powershell
+node --check api\lib\digestCore.js
+node --check api\emailPrefs.js
+node --check api\dailyDigest.js
+node --check script-app.js
+node --check script-app-settings.js
+node --check script-landing.js
+```
 
-## 🤝 Credits
+## Built by students, for students
 
-Aulert is proudly designed and built by students, for students:
-
-| Developer | GitHub Profile |
-| :--- | :--- |
-| **esrazti** | [@esrazti](https://github.com/esrazti) |
-| **Sapfire151** | [@Sapfire151](https://github.com/Sapfire151) |
-
-<br>
-
-<div align="center">
-  <b>Free to use</b> &nbsp;·&nbsp; <a href="https://aulert.vercel.app">Web App</a>
-</div>
+- [esrazti](https://github.com/esrazti)
+- [Sapfire151](https://github.com/Sapfire151)

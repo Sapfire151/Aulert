@@ -38,12 +38,17 @@
     <div class="orb orb-3"></div>
   </div>
 
+  <div class="cookie-banner" id="cookieBanner" role="dialog" aria-modal="false" aria-labelledby="cookieTitle">
+    <div><strong id="cookieTitle">Your privacy choices</strong><p>Essential storage keeps your theme, settings, and short session available. Optional analytics helps us improve Aulert. <a href="privacy.html">Learn more</a>.</p></div>
+    <div class="cookie-actions"><button type="button" class="btn-sm" data-cookie-choice="reject">Reject analytics</button><button type="button" class="btn-sm" data-cookie-choice="accept">Accept analytics</button></div>
+  </div>
+
   <div class="page-enter"
     style="max-width: 800px; margin: 100px auto; padding: 0 24px; position: relative; z-index: 2;">
     <h1 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 3rem; margin-bottom: 24px;">Privacy Policy
     </h1>
     <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px;">
-      Last Updated: June 24, 2026<br><br>
+      Last Updated: July 15, 2026<br><br>
       Welcome to Aulert. Your privacy is our highest priority. This Privacy Policy explains what information we access,
       how we use it, and what controls you have, with a specific focus on our integration with Google APIs.
     </p>
@@ -62,9 +67,12 @@
         address, and profile picture) to personalize your dashboard.</li>
       <li style="margin-bottom: 8px;"><strong>Google Calendar Data (Optional):</strong> If you enable calendar sync, we
         access your primary Google Calendar to create and manage deadline events. This is an opt-in feature.</li>
-      <li style="margin-bottom: 8px;"><strong>Gmail Send Scope (Optional):</strong> If you enable the Daily Email
-        Summary feature, we request permission to send emails on your behalf via Gmail. This scope is used exclusively
-        to deliver your daily digest email to your own inbox.</li>
+      <li style="margin-bottom: 8px;"><strong>Gmail Metadata (Optional):</strong> If private-comment alerts are enabled,
+        Aulert reads the relevant Google Classroom email metadata in your browser to surface those alerts. It does not
+        use Gmail to send the discontinued daily digest.</li>
+      <li style="margin-bottom: 8px;"><strong>Discord Notifications (Optional):</strong> If you connect Discord,
+        we request offline Google Classroom access so our server can check for new Classroom items and post them to the
+        Discord webhooks you select.</li>
     </ul>
 
     <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.8rem; margin: 32px 0 16px;">2. How We Use
@@ -78,34 +86,37 @@
     <ul style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px; padding-left: 24px; color: var(--text-2);">
       <li style="margin-bottom: 8px;">We use your data <strong>strictly</strong> to provide the core functionality of
         Aulert: displaying a unified dashboard of your classes and deadlines.</li>
-      <li style="margin-bottom: 8px;">Your data is fetched directly from Google's servers to your local browser. It is
-        temporarily cached in your browser's <code>localStorage</code> to improve performance and enable offline
-        viewing. This data never leaves your device during normal operation.</li>
-      <li style="margin-bottom: 8px;">We <strong>do not</strong> sell, rent, trade, or share your Google data with any
-        third parties.</li>
+      <li style="margin-bottom: 8px;">Your data is fetched directly from Google's servers to your local browser. We
+        use essential browser storage for preferences and the short-lived session; optional analytics is loaded only
+        after you accept it in the cookie banner.</li>
+      <li style="margin-bottom: 8px;">We <strong>do not</strong> sell, rent, or trade your Google data. If you enable
+        Discord Notifications, the selected Classroom updates are sent to the Discord destinations you configure; those
+        destinations are third-party services governed by their own terms and privacy practices.</li>
       <li style="margin-bottom: 8px;">We <strong>do not</strong> use your data for advertising, marketing, profiling, or
         any purpose unrelated to the core service.</li>
       <li style="margin-bottom: 8px;">We <strong>do not</strong> allow humans to read your data, except where necessary
         to comply with applicable law, or with your explicit prior consent for support purposes.</li>
     </ul>
 
-    <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.8rem; margin: 32px 0 16px;">3. Daily Email
-      Summary (Optional Backend Feature)</h2>
+    <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.8rem; margin: 32px 0 16px;">3. Discord
+      Notifications (Optional Backend Feature)</h2>
     <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 16px;">
-      If you opt in to the Daily Email Summary, the following additional data handling applies:
+      If you opt in to Discord Notifications, the following additional data handling applies:
     </p>
     <ul style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px; padding-left: 24px; color: var(--text-2);">
-      <li style="margin-bottom: 8px;"><strong>What is stored:</strong> Your email address and a Google OAuth refresh
-        token are stored on our backend (Vercel serverless functions + Firebase Realtime Database).</li>
-      <li style="margin-bottom: 8px;"><strong>Purpose:</strong> The refresh token is used to authenticate with Google's
-        API on your behalf once daily (at 7:00 AM UTC) to fetch new Classroom items and send a summary email to your
-        inbox via Gmail.</li>
-      <li style="margin-bottom: 8px;"><strong>Security:</strong> The refresh token is stored in Firebase Realtime
-        Database. Communication between our backend and Google APIs uses HTTPS. The cron endpoint is protected by a
-        secret bearer token and does not accept unauthenticated requests.</li>
+      <li style="margin-bottom: 8px;"><strong>What is stored:</strong> An encrypted Google OAuth refresh token and
+        encrypted Discord webhook URLs are stored on our backend (Vercel serverless functions + Firebase Realtime
+        Database). We keep delivery timestamps and bounded de-duplication identifiers, not a remote copy of your
+        Classroom feed.</li>
+      <li style="margin-bottom: 8px;"><strong>Purpose:</strong> The refresh token is used only to read new Classroom
+        announcements, assignments, and materials. Aulert checks about every 10 minutes and posts concise alerts to
+        your selected Discord destinations.</li>
+      <li style="margin-bottom: 8px;"><strong>Security:</strong> Tokens and webhook URLs are encrypted before storage.
+        Communication with Google and Discord uses HTTPS, and the scheduled endpoint is protected by a secret bearer
+        token. Webhook URLs are not returned to the browser after setup.</li>
       <li style="margin-bottom: 8px;"><strong>How to opt out:</strong> You can disable this feature at any time from the
-        Settings tab in Aulert. Disabling it <strong>immediately and permanently deletes</strong> your email address and
-        refresh token from our servers.</li>
+        Settings tab in Aulert. Disconnecting it <strong>immediately and permanently deletes</strong> the stored
+        webhook URLs and offline authorization from our servers.</li>
       <li style="margin-bottom: 8px;"><strong>Token revocation:</strong> If your refresh token becomes invalid (e.g.,
         you revoke access from Google), our system automatically detects this and removes your stale data entry.</li>
     </ul>
@@ -123,9 +134,10 @@
     <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.8rem; margin: 32px 0 16px;">5. Data
       Retention</h2>
     <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px;">
-      For the core service, Aulert does not retain any of your data on remote servers. All cached data lives in your
-      browser's <code>localStorage</code> and can be cleared at any time by you. For the optional Daily Email Summary,
-      data is retained only while the feature is actively enabled and is deleted immediately upon opt-out.
+      For the core service, Aulert does not retain your Classroom feed on remote servers. Essential browser storage can
+      be cleared in your browser; analytics consent can be changed by clearing site data. For optional Discord
+      Notifications, encrypted credentials and delivery records are retained only while the feature is enabled and are
+      deleted immediately upon disconnection.
     </p>
 
     <h2 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 1.8rem; margin: 32px 0 16px;">6. Revoking
@@ -146,8 +158,8 @@
       under the General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA), including the
       rights to access, delete, and restrict the processing of your data. Because Aulert stores your core data locally
       on your device, you can exercise these rights instantly by clearing your browser's local storage and revoking our
-      Google API access. For optional backend features like the Daily Email Summary, disabling the feature immediately
-      serves as your right to be forgotten, permanently deleting your token and email. We do not sell your personal
+      Google API access. For optional backend features like Discord Notifications, disconnecting the feature immediately
+      serves as your right to be forgotten by permanently deleting its stored authorization and webhooks. We do not sell your personal
       information.
     </p>
 
@@ -186,8 +198,8 @@
     </div>
   </div>
 
-  <button class="theme-switcher-btn" id="globalThemeBtn" onclick="toggleTheme()" aria-label="Toggle theme">
-    <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none">
+  <button type="button" class="theme-switcher-btn" id="globalThemeBtn" data-theme-toggle onclick="toggleTheme()" aria-label="Switch theme" title="Switch theme">
+    <svg class="theme-toggle-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" />
       <path
         d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"

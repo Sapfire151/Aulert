@@ -1,69 +1,98 @@
+const crypto = require('crypto');
 const { google } = require('googleapis');
-const { OAuth2Client } = require('google-auth-library');
 const { getDb } = require('./firebaseAdmin');
 
-const CLIENT_ID = '4640324' + '46404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com'; // Split to bypass PII scanner
+const CLIENT_ID = '4640324' + '46404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com';
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-
-// Only used for Google API calls (not Firebase — that's handled by Admin SDK now)
 const GOOGLE_API_HOSTS = ['www.googleapis.com'];
+const DISCORD_HOSTS = new Set(['discord.com', 'discordapp.com', 'canary.discord.com', 'ptb.discord.com']);
+const MAX_WEBHOOKS = 5;
+const DELIVERY_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+const INITIAL_LOOKBACK_MS = 15 * 60 * 1000;
+const OVERLAP_MS = 2 * 60 * 1000;
 
 function safeFetch(urlStr, options) {
   const url = new URL(urlStr);
   if (!GOOGLE_API_HOSTS.includes(url.hostname)) {
-    throw new Error('Blocked: URL not in allow-list (SSRF Protection)');
+    throw new Error('Blocked: URL not in allow-list');
   }
   return fetch(url.toString(), options);
 }
 
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+function getEncryptionKey() {
+  const value = process.env.DISCORD_WEBHOOK_ENCRYPTION_KEY;
+  if (!value) throw new Error('DISCORD_WEBHOOK_ENCRYPTION_KEY is not configured');
+
+  const key = /^[a-f0-9]{64}$/i.test(value)
+    ? Buffer.from(value, 'hex')
+    : Buffer.from(value, 'base64');
+  if (key.length !== 32) {
+    throw new Error('DISCORD_WEBHOOK_ENCRYPTION_KEY must be a 32-byte base64 value or 64-character hex value');
+  }
+  return key;
 }
 
-function getLocalTimeParts(date, timeZone) {
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone,
-    hour: 'numeric',
-    minute: 'numeric',
-    hour12: false,
-  }).formatToParts(date);
+function encryptSecret(value) {
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv('aes-256-gcm', getEncryptionKey(), iv);
+  const ciphertext = Buffer.concat([cipher.update(value, 'utf8'), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  return ['v1', iv.toString('base64url'), tag.toString('base64url'), ciphertext.toString('base64url')].join(':');
+}
+
+function decryptSecret(value) {
+  const [version, ivValue, tagValue, ciphertextValue] = String(value || '').split(':');
+  if (version !== 'v1' || !ivValue || !tagValue || !ciphertextValue) throw new Error('Stored webhook secret is invalid');
+  const decipher = crypto.createDecipheriv('aes-256-gcm', getEncryptionKey(), Buffer.from(ivValue, 'base64url'));
+  decipher.setAuthTag(Buffer.from(tagValue, 'base64url'));
+  return Buffer.concat([
+    decipher.update(Buffer.from(ciphertextValue, 'base64url')),
+    decipher.final(),
+  ]).toString('utf8');
+}
+
+function normalizeWebhookUrl(value) {
+  if (typeof value !== 'string' || value.length > 2048) throw new Error('Enter a valid Discord webhook URL');
+  let url;
+  try {
+    url = new URL(value.trim());
+  } catch {
+    throw new Error('Enter a valid Discord webhook URL');
+  }
+  if (url.protocol !== 'https:' || url.username || url.password || !DISCORD_HOSTS.has(url.hostname)) {
+    throw new Error('Webhook URL must be a Discord HTTPS incoming webhook');
+  }
+  if (!/^\/api(?:\/v\d+)?\/webhooks\/\d+\/[^/]+$/.test(url.pathname)) {
+    throw new Error('Webhook URL must be a Discord incoming-webhook URL');
+  }
+  url.search = '';
+  url.hash = '';
+  return url.toString();
+}
+
+function cleanLabel(value, fallback = 'Discord webhook') {
+  const label = typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : '';
+  return (label || fallback).slice(0, 48);
+}
+
+function publicWebhook(webhook) {
   return {
-    hour: parseInt(parts.find((p) => p.type === 'hour').value, 10),
-    minute: parseInt(parts.find((p) => p.type === 'minute').value, 10),
+    id: webhook.id,
+    label: webhook.label,
+    createdAt: webhook.createdAt,
+    lastTestAt: webhook.lastTestAt || null,
+    lastDeliveryAt: webhook.lastDeliveryAt || null,
+    lastError: webhook.lastError || null,
   };
 }
 
-function minutesApart(currentMins, targetMins) {
-  const diff = Math.abs(currentMins - targetMins);
-  return Math.min(diff, 1440 - diff);
+function publicDiscordConfig(config) {
+  const webhooks = Object.values(config?.webhooks || {})
+    .filter((webhook) => webhook && webhook.id && webhook.encryptedUrl)
+    .sort((a, b) => Number(a.createdAt || 0) - Number(b.createdAt || 0))
+    .map(publicWebhook);
+  return { enabled: Boolean(config?.enabled && config?.encryptedRefreshToken && webhooks.length), webhooks };
 }
-
-function isDigestDueNow(digest, now = new Date()) {
-  const tz = digest.digestTimezone || 'UTC';
-  const targetHour = Number.isInteger(digest.digestHour) ? digest.digestHour : 7;
-  const targetMinute = Number.isInteger(digest.digestMinute) ? digest.digestMinute : 0;
-  const { hour, minute } = getLocalTimeParts(now, tz);
-  const currentMins = hour * 60 + minute;
-  const targetMins = targetHour * 60 + targetMinute;
-
-  // Vercel Hobby cron runs once per day (±59 min jitter). Match the configured
-  // local hour so users get their digest when the daily cron fires.
-  if (hour !== targetHour) return false;
-  return minutesApart(currentMins, targetMins) < 60;
-}
-
-function wasSentRecently(digest, now = new Date()) {
-  if (!digest.lastSentAt) return false;
-  return now.getTime() - digest.lastSentAt < 20 * 60 * 60 * 1000;
-}
-
-// ─── Firebase Admin SDK helpers ───────────────────────────────────────────────
 
 async function dbGet(path) {
   const snap = await getDb().ref(path).get();
@@ -82,159 +111,180 @@ async function dbDelete(path) {
   await getDb().ref(path).remove();
 }
 
-// ─── Main digest sender ───────────────────────────────────────────────────────
+function dueDateText(dueDate) {
+  if (!dueDate || !dueDate.year || !dueDate.month || !dueDate.day) return null;
+  return `${String(dueDate.day).padStart(2, '0')}/${String(dueDate.month).padStart(2, '0')}/${dueDate.year}`;
+}
 
-async function sendDigestForUser(userId, digest, { manual = false, test = false } = {}) {
-  if (!digest?.dailyEmail || !digest.refreshToken || !digest.email) {
-    return { sent: false, reason: 'not_enabled' };
-  }
+function itemFromAnnouncement(course, announcement) {
+  return {
+    id: `announcement:${course.id}:${announcement.id}`,
+    course: course.name || 'Untitled class',
+    type: 'Announcement',
+    text: announcement.text || '(No announcement text)',
+    link: announcement.alternateLink || null,
+    createdAt: new Date(announcement.updateTime || announcement.creationTime).getTime(),
+  };
+}
 
-  if (!manual) {
-    if (!isDigestDueNow(digest)) return { sent: false, reason: 'not_due' };
-    if (wasSentRecently(digest)) return { sent: false, reason: 'already_sent' };
-  }
+function itemFromCourseWork(course, work) {
+  return {
+    id: `assignment:${course.id}:${work.id}`,
+    course: course.name || 'Untitled class',
+    type: 'Assignment',
+    text: work.title || '(Untitled assignment)',
+    dueDate: dueDateText(work.dueDate),
+    link: work.alternateLink || null,
+    createdAt: new Date(work.updateTime || work.creationTime).getTime(),
+  };
+}
 
-  if (!CLIENT_SECRET) {
-    throw new Error('GOOGLE_CLIENT_SECRET not configured');
-  }
+function itemFromMaterial(course, material) {
+  return {
+    id: `material:${course.id}:${material.id}`,
+    course: course.name || 'Untitled class',
+    type: 'Material',
+    text: material.title || '(Untitled material)',
+    link: material.alternateLink || null,
+    createdAt: new Date(material.updateTime || material.creationTime).getTime(),
+  };
+}
 
-  const oAuth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET);
-  oAuth2Client.setCredentials({ refresh_token: digest.refreshToken });
-
+async function classroomForRefreshToken(refreshToken) {
+  if (!CLIENT_SECRET) throw new Error('GOOGLE_CLIENT_SECRET not configured');
+  const auth = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET);
+  auth.setCredentials({ refresh_token: refreshToken });
   try {
-    const tokenData = await oAuth2Client.getAccessToken();
-    if (!tokenData || !tokenData.token) {
-      throw new Error('No access token returned from getAccessToken()');
+    await auth.getAccessToken();
+  } catch (error) {
+    throw new Error('Failed to refresh Google authorization: ' + error.message);
+  }
+  return google.classroom({ version: 'v1', auth });
+}
+
+async function collectClassroomUpdates(refreshToken, since) {
+  const classroom = await classroomForRefreshToken(refreshToken);
+  const coursesResult = await classroom.courses.list({ courseStates: ['ACTIVE'], pageSize: 100 });
+  const courses = coursesResult.data.courses || [];
+  const updates = [];
+
+  for (const course of courses) {
+    const requests = [
+      classroom.courses.announcements.list({ courseId: course.id, pageSize: 50 })
+        .then((result) => (result.data.announcements || []).map((item) => itemFromAnnouncement(course, item)))
+        .catch((error) => { console.warn(`Announcements unavailable for ${course.id}:`, error.message); return []; }),
+      classroom.courses.courseWork.list({ courseId: course.id, pageSize: 50 })
+        .then((result) => (result.data.courseWork || []).map((item) => itemFromCourseWork(course, item)))
+        .catch((error) => { console.warn(`Assignments unavailable for ${course.id}:`, error.message); return []; }),
+      classroom.courses.courseWorkMaterials.list({ courseId: course.id, pageSize: 50 })
+        .then((result) => (result.data.courseWorkMaterial || []).map((item) => itemFromMaterial(course, item)))
+        .catch((error) => { console.warn(`Materials unavailable for ${course.id}:`, error.message); return []; }),
+    ];
+    const result = await Promise.all(requests);
+    updates.push(...result.flat().filter((item) => Number.isFinite(item.createdAt) && item.createdAt > since.getTime()));
+  }
+  return updates.sort((a, b) => a.createdAt - b.createdAt);
+}
+
+function discordEmbeds(items) {
+  return items.map((item) => {
+    const description = [item.text.slice(0, 900), item.dueDate ? `Due: **${item.dueDate}**` : null]
+      .filter(Boolean)
+      .join('\n');
+    return {
+      title: `${item.type} · ${item.course}`.slice(0, 256),
+      description,
+      url: item.link || undefined,
+      color: item.type === 'Assignment' ? 0x14b8a6 : item.type === 'Material' ? 0x6366f1 : 0x0ea5e9,
+      footer: { text: 'Aulert · Google Classroom update' },
+      timestamp: new Date(item.createdAt).toISOString(),
+    };
+  });
+}
+
+async function postDiscordWebhook(webhookUrl, items, { test = false } = {}) {
+  const payload = test
+    ? {
+      username: 'Aulert',
+      embeds: [{
+        title: 'Aulert is connected',
+        description: 'This Discord webhook is ready for your Google Classroom updates.',
+        color: 0x14b8a6,
+        footer: { text: 'You can remove this destination anytime in Aulert Settings.' },
+      }],
     }
-    // Explicitly set the access token just in case
-    oAuth2Client.setCredentials({ 
-      refresh_token: digest.refreshToken,
-      access_token: tokenData.token 
-    });
-  } catch (err) {
-    throw new Error('Failed to refresh access token: ' + err.message);
+    : { username: 'Aulert', content: `**${items.length} new Classroom update${items.length === 1 ? '' : 's'}**`, embeds: discordEmbeds(items) };
+
+  const response = await fetch(`${webhookUrl}?wait=true`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    const retryAfter = response.headers.get('retry-after');
+    throw new Error(`Discord rejected the webhook (${response.status}${retryAfter ? `; retry after ${retryAfter}s` : ''})`);
   }
+}
 
-  const classroom = google.classroom({ version: 'v1', auth: oAuth2Client });
-  let coursesRes;
-  try {
-    coursesRes = await classroom.courses.list({ courseStates: ['ACTIVE'], pageSize: 30 });
-  } catch (err) {
-    throw new Error('Google Classroom API failed. Make sure the Classroom API is enabled in Google Cloud Console. Details: ' + err.message);
-  }
-  const courses = coursesRes.data.courses || [];
+function pruneDeliveries(deliveries, now) {
+  const retentionFloor = now - DELIVERY_RETENTION_MS;
+  return Object.fromEntries(Object.entries(deliveries || {})
+    .filter(([, sentAt]) => Number(sentAt) >= retentionFloor)
+    .sort(([, a], [, b]) => Number(b) - Number(a))
+    .slice(0, 500));
+}
 
-  const now = new Date();
-  const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-  const newItems = [];
+async function deliverDiscordForUser(userId, config, { now = Date.now() } = {}) {
+  if (!config?.enabled || !config.encryptedRefreshToken) return { sent: 0, skipped: true, reason: 'not_enabled' };
+  const webhooks = Object.values(config.webhooks || {}).filter((webhook) => webhook?.id && webhook.encryptedUrl);
+  if (!webhooks.length) return { sent: 0, skipped: true, reason: 'no_webhooks' };
 
-  if (!test) {
-    for (const course of courses) {
+  const since = new Date(Math.max(0, Number(config.lastScannedAt || now - INITIAL_LOOKBACK_MS) - OVERLAP_MS));
+  const updates = await collectClassroomUpdates(decryptSecret(config.encryptedRefreshToken), since);
+  const configPath = `users/${encodeURIComponent(userId)}/discord`;
+  await dbUpdate(configPath, { lastScannedAt: now, updatedAt: now });
+
+  let sent = 0;
+  let errors = 0;
+  for (const webhook of webhooks) {
+    const deliveries = pruneDeliveries(webhook.deliveries, now);
+    const items = updates.filter((item) => item.createdAt >= Number(webhook.createdAt || 0) && !deliveries[item.id]);
+    if (!items.length) continue;
     try {
-      const annRes = await classroom.courses.announcements.list({ courseId: course.id, pageSize: 10 });
-      (annRes.data.announcements || []).forEach((a) => {
-        if (new Date(a.creationTime) > oneDayAgo) {
-          newItems.push({
-            course: course.name,
-            type: 'Announcement',
-            text: a.text || '(no text)',
-            link: a.alternateLink || '#',
-          });
-        }
+      const webhookUrl = decryptSecret(webhook.encryptedUrl);
+      for (let index = 0; index < items.length; index += 10) {
+        await postDiscordWebhook(webhookUrl, items.slice(index, index + 10));
+      }
+      items.forEach((item) => { deliveries[item.id] = now; });
+      await dbUpdate(`${configPath}/webhooks/${webhook.id}`, {
+        deliveries: pruneDeliveries(deliveries, now),
+        lastDeliveryAt: now,
+        lastError: null,
       });
-    } catch (e) {
-      console.warn(`Failed to fetch announcements for course ${course.id}:`, e.message);
-    }
-
-    try {
-      const cwRes = await classroom.courses.courseWork.list({ courseId: course.id, pageSize: 10 });
-      (cwRes.data.courseWork || []).forEach((w) => {
-        if (new Date(w.creationTime) > oneDayAgo) {
-          newItems.push({
-            course: course.name,
-            type: 'Assignment',
-            text: w.title || '(untitled)',
-            link: w.alternateLink || '#',
-          });
-        }
-      });
-    } catch (e) {
-      console.warn(`Failed to fetch coursework for course ${course.id}:`, e.message);
+      sent++;
+    } catch (error) {
+      errors++;
+      console.warn(`Discord delivery failed for ${userId}/${webhook.id}:`, error.message);
+      await dbUpdate(`${configPath}/webhooks/${webhook.id}`, { lastError: String(error.message).slice(0, 180) });
     }
   }
-  }
-
-  if (!test && newItems.length === 0) {
-    return { sent: false, reason: 'no_items', itemCount: 0 };
-  }
-
-  const gmail = google.gmail({ version: 'v1', auth: oAuth2Client });
-
-  let htmlContent = [
-    '<div style="font-family:Inter,Arial,sans-serif;max-width:600px;margin:0 auto">',
-    '<h2 style="color:#4f46e5">Aulert Daily Digest</h2>',
-  ];
-
-  if (test) {
-    htmlContent.push(
-      '<p>This is a test email from Aulert to verify your email delivery settings.</p>',
-      '<p style="color:#888;font-size:12px">You can disable this digest from Aulert Settings.</p></div>'
-    );
-  } else {
-    htmlContent.push(
-      `<p>Here is your summary for the last 24 hours (${newItems.length} new item${newItems.length > 1 ? 's' : ''}):</p>`,
-      '<ul style="padding-left:20px">'
-    );
-
-    newItems.forEach((item) => {
-      const safeCourse = escapeHtml(item.course);
-      const safeText = escapeHtml(item.text.slice(0, 120));
-      const safeLink = encodeURI(item.link);
-      htmlContent.push(`<li style="margin-bottom:8px"><b>${safeCourse}</b> [${item.type}]: <a href="${safeLink}">${safeText}</a></li>`);
-    });
-    htmlContent.push('</ul><p style="color:#888;font-size:12px">You can disable this digest from Aulert Settings.</p></div>');
-  }
-
-  htmlContent = htmlContent.join('');
-
-  const emailLines = [
-    `To: ${digest.email}`,
-    'Subject: Your Aulert Daily Digest',
-    'MIME-Version: 1.0',
-    'Content-Type: text/html; charset=utf-8',
-    '',
-    htmlContent,
-  ];
-  const rawEmail = Buffer.from(emailLines.join('\r\n')).toString('base64url');
-
-  try {
-    await gmail.users.messages.send({
-      userId: 'me',
-      requestBody: { raw: rawEmail },
-    });
-  } catch (err) {
-    throw new Error('Gmail API failed. Make sure the Gmail API is enabled in Google Cloud Console. Details: ' + err.message);
-  }
-
-  // Update lastSentAt via Admin SDK
-  try {
-    await dbUpdate(`users/${encodeURIComponent(userId)}/digest`, { lastSentAt: Date.now() });
-  } catch (err) {
-    throw new Error('Firebase dbUpdate failed: ' + err.message);
-  }
-
-  return { sent: true, itemCount: newItems.length };
+  return { sent, errors, itemCount: updates.length };
 }
 
 module.exports = {
-  sendDigestForUser,
-  isDigestDueNow,
-  wasSentRecently,
+  CLIENT_ID,
+  CLIENT_SECRET,
+  MAX_WEBHOOKS,
   safeFetch,
   dbGet,
   dbSet,
   dbUpdate,
   dbDelete,
-  CLIENT_ID,
-  CLIENT_SECRET,
+  encryptSecret,
+  decryptSecret,
+  normalizeWebhookUrl,
+  cleanLabel,
+  publicDiscordConfig,
+  postDiscordWebhook,
+  deliverDiscordForUser,
 };

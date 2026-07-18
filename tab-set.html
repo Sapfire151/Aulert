@@ -1,97 +1,99 @@
-    <div class="panel" id="p-set">
-      <h1 data-i18n="set_title">Settings</h1>
-      <p class="sub">Control your account, notifications, and connected classes</p>
+<div class="panel" id="p-set">
+  <h1 data-i18n="set_title">Settings</h1>
+  <p class="sub">Control your account, notifications, and connected classes</p>
 
-      <div class="sg sg-account">
-        <div class="sg-lbl" data-i18n="set_acct">Account</div>
-        <div class="prof-row">
-          <div class="prof-ava" id="profAva">S</div>
-          <div class="prof-info">
-            <div class="prof-name" id="profName">Student User</div>
-            <div class="prof-email" id="profEmail" style="display:flex;align-items:center;gap:6px;margin-top:3px;">
-              <img src="data:image/webp;base64,UklGRvYDAABXRUJQVlA4WAoAAAAQAAAALwAAMAAAQUxQSD0CAAABkCzJtmlb89q2bbP1jJ5t27Zt20bP17atZ9s+fGc+rbnW3l8QERMA3Ab+g3ZlP/ii0Wm+PsrfPyLECKR16H/2ngKpqkdXhjlL4DS9Uo382trZzoKM+pfpUKyuvJ+hCI9DP1D8970ufEnFKG1WFE/3uyj1Hn1a9ycodYoPkJPvodQpnkD2LEFOzYuqtGup5U9VrBRPIBsdQvrL04OCbYwNja0Deh9+8p8UT6D3/0H6cjBaH4ihuz8hpngC3akMqY099IGu16MlxRM4p+soeeHAH+QOnI6VSCwOABkOUBMexIMMDc4jWz0e5Bhwn5BqKYshCpayL8hyN7Kr7GkOIYJdcwnbgT737Suhb84/ZGkHcqxCwc1fWJ8SOVaKeqthPQ+Qh0LHeuwtj18a1vMAeeAX1udEeagfsLSD5PEph4U75HF3F6HKnhYzdgxx5FEdK3OwgqXsS+NcjezdAfdYmGopzKaEpRpucI6gniCsn4L1JAz6q1n4MF6QYwGyr5qAQwUBi/yFGG5Ftm4SAEzVETA3TIDRIgXhvh8AOJVSsLGHAY/LLgUSt8K/fb9T8MvhWAOK7eBSpD4O+4/hfhLiq3NDw+xMjUysvTutKFEheTH8372Ahqh9XZt1K6Pi0Q/kzHJgQHwbh+hHyUDs/FAGHwYAuVObZB/HAmdcnkTPhgC3295vUhS1A4GGvYp+iXq9wRXEOkwqVYl4eSQBxNv1PnX7J0n7JmdRhD5Iqu/bb2vanQ9KrfLzw6LjUxOtgBcAVlA4IJIBAACQCwCdASowADEAPoE0lUelIyIhN/cdUKAQCWwAnTL/+S+3fkB+QHyi1R+3fgnKL+hDlm97vqb8RrcPftN60vor82b/AdZn6AHScgQB9I/EgAtcbST+7cnXXVOLaOX0w5/uxm7vgAD+UivGRn2Kiy7nnRJ6Al1yTkg8vDQlaZQ8rXXwPvqqPiKnTTbNo6+3hAokP5WRy0UAvc8yepd+yrR01uaTikpMU2A/9vst3bmWubmaxLoEyNADe46yfzwuQTXgFuf+dhsCw6LNWYG+FOocmuudXp51oLAvTBSqb+XiIGv/p1P/+PQfVUL72hqk+ik6bEg7H+D4/wQBA8lRJ0iaiwM1IaqwtVqyWk2RiMFMbLeHPh4TAzNe0XJgUis5XwLHTQJuTO65q/6Ox8WIa0H05vfE6Ix21yKFNWWzaAX6NT9znrWbVdPOnS1TtbYnHxZ/2LqiQuyk2//Cb4jctfI9pCL/8k49QTOaRT6m1BU8Bq2uo7/h0f/8gt9Dsv0Oy/f+OB+v+TcAf/xwP1/ybgAAAAA=" width="12" height="12" style="flex-shrink:0" alt="Google">
-              <span id="profEmailText"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="82f1f6f7e6e7ecf6c2f1e1eaededeeace7e6f7">[email&#160;protected]</a></span>
-            </div>
-          </div>
-          <button class="disc-btn" onclick="disconnect()" data-i18n="set_logout">Disconnect</button>
+  <div class="sg sg-account">
+    <div class="sg-lbl" data-i18n="set_acct">Account</div>
+    <div class="prof-row">
+      <div class="prof-ava" id="profAva">S</div>
+      <div class="prof-info">
+        <div class="prof-name" id="profName">Student User</div>
+        <div class="prof-email" id="profEmail" style="display:flex;align-items:center;gap:6px;margin-top:3px;">
+          <img
+            src="data:image/webp;base64,UklGRvYDAABXRUJQVlA4WAoAAAAQAAAALwAAMAAAQUxQSD0CAAABkCzJtmlb89q2bbP1jJ5t27Zt20bP17atZ9s+fGc+rbnW3l8QERMA3Ab+g3ZlP/ii0Wm+PsrfPyLECKR16H/2ngKpqkdXhjlL4DS9Uo382trZzoKM+pfpUKyuvJ+hCI9DP1D8970ufEnFKG1WFE/3uyj1Hn1a9ycodYoPkJPvodQpnkD2LEFOzYuqtGup5U9VrBRPIBsdQvrL04OCbYwNja0Deh9+8p8UT6D3/0H6cjBaH4ihuz8hpngC3akMqY099IGu16MlxRM4p+soeeHAH+QOnI6VSCwOABkOUBMexIMMDc4jWz0e5Bhwn5BqKYshCpayL8hyN7Kr7GkOIYJdcwnbgT737Suhb84/ZGkHcqxCwc1fWJ8SOVaKeqthPQ+Qh0LHeuwtj18a1vMAeeAX1udEeagfsLSD5PEph4U75HF3F6HKnhYzdgxx5FEdK3OwgqXsS+NcjezdAfdYmGopzKaEpRpucI6gniCsn4L1JAz6q1n4MF6QYwGyr5qAQwUBi/yFGG5Ftm4SAEzVETA3TIDRIgXhvh8AOJVSsLGHAY/LLgUSt8K/fb9T8MvhWAOK7eBSpD4O+4/hfhLiq3NDw+xMjUysvTutKFEheTH8372Ahqh9XZt1K6Pi0Q/kzHJgQHwbh+hHyUDs/FAGHwYAuVObZB/HAmdcnkTPhgC3295vUhS1A4GGvYp+iXq9wRXEOkwqVYl4eSQBxNv1PnX7J0n7JmdRhD5Iqu/bb2vanQ9KrfLzw6LjUxOtgBcAVlA4IJIBAACQCwCdASowADEAPoE0lUelIyIhN/cdUKAQCWwAnTL/+S+3fkB+QHyi1R+3fgnKL+hDlm97vqb8RrcPftN60vor82b/AdZn6AHScgQB9I/EgAtcbST+7cnXXVOLaOX0w5/uxm7vgAD+UivGRn2Kiy7nnRJ6Al1yTkg8vDQlaZQ8rXXwPvqqPiKnTTbNo6+3hAokP5WRy0UAvc8yepd+yrR01uaTikpMU2A/9vst3bmWubmaxLoEyNADe46yfzwuQTXgFuf+dhsCw6LNWYG+FOocmuudXp51oLAvTBSqb+XiIGv/p1P/+PQfVUL72hqk+ik6bEg7H+D4/wQBA8lRJ0iaiwM1IaqwtVqyWk2RiMFMbLeHPh4TAzNe0XJgUis5XwLHTQJuTO65q/6Ox8WIa0H05vfE6Ix21yKFNWWzaAX6NT9znrWbVdPOnS1TtbYnHxZ/2LqiQuyk2//Cb4jctfI9pCL/8k49QTOaRT6m1BU8Bq2uo7/h0f/8gt9Dsv0Oy/f+OB+v+TcAf/xwP1/ybgAAAAA="
+            width="12" height="12" style="flex-shrink:0" alt="Google">
+          <span id="profEmailText"><a href="/cdn-cgi/l/email-protection" class="__cf_email__"
+              data-cfemail="82f1f6f7e6e7ecf6c2f1e1eaededeeace7e6f7">[email&#160;protected]</a></span>
         </div>
       </div>
+      <button class="disc-btn" onclick="disconnect()" data-i18n="set_logout">Disconnect</button>
+    </div>
+  </div>
 
-      <div class="sg sg-notify">
-        <div class="sg-lbl" data-i18n="set_notif">Notify me about</div>
-        <div class="sg-body">
-          <div class="srow"><div class="srow-info"><h4>Stream Posts</h4><p>Class stream</p></div><label class="tog"><input type="checkbox" id="set_stream" onchange="saveSetting('stream',this.checked)"><div class="tog-track"></div></label></div>
-          <div class="srow"><div class="srow-info"><h4>Announcements</h4><p>Teacher announcements</p></div><label class="tog"><input type="checkbox" id="set_announcements" onchange="saveSetting('announcements',this.checked)"><div class="tog-track"></div></label></div>
-          <div class="srow"><div class="srow-info"><h4>Assignments</h4><p>New work posted</p></div><label class="tog"><input type="checkbox" id="set_assignments" onchange="saveSetting('assignments',this.checked)"><div class="tog-track"></div></label></div>
-          <div class="srow"><div class="srow-info"><h4>Grades</h4><p>When graded</p></div><label class="tog"><input type="checkbox" id="set_grades" onchange="saveSetting('grades',this.checked)"><div class="tog-track"></div></label></div>
-          <div class="srow"><div class="srow-info"><h4>Materials</h4><p>Study resources</p></div><label class="tog"><input type="checkbox" id="set_materials" onchange="saveSetting('materials',this.checked)"><div class="tog-track"></div></label></div>
-        </div>
+  <div class="sg sg-notify">
+    <div class="sg-lbl" data-i18n="set_notif">Notify me about</div>
+    <div class="sg-body">
+      <div class="srow">
+        <div class="srow-info">
+          <h4>Stream Posts</h4>
+          <p>Class stream</p>
+        </div><label class="tog"><input type="checkbox" id="set_stream" onchange="saveSetting('stream',this.checked)">
+          <div class="tog-track"></div>
+        </label>
       </div>
-
-
-
-
-      <div class="sg sg-email">
-        <div class="sg-lbl" data-i18n="set_daily_email">Daily Email Summary</div>
-        <div class="sg-body">
-          <div class="srow">
-            <div class="srow-info">
-              <h4 data-i18n="set_daily_email_title">Send daily digest</h4>
-              <p data-i18n="set_daily_email_sub">Receive a morning email with new Classroom items from the past 24 hours</p>
-            </div>
-            <label class="tog">
-              <input type="checkbox" id="set_dailyEmail" onchange="dailyEmailToggle(this)">
-              <div class="tog-track"></div>
-            </label>
-          </div>
-          <div class="srow digest-time-row" id="digestTimeRow" style="display:none;flex-direction:column;align-items:flex-start;gap:10px;border-top:1px solid var(--border);padding-top:14px">
-            <p id="emailPrefText" style="font-size:12px;color:var(--text-3);margin:0">Disabled</p>
-            <div class="digest-time-controls">
-              <label class="digest-time-label" for="set_digestTime">Send at</label>
-              <div class="custom-select-wrapper" style="position:relative;display:inline-block;">
-                <select id="set_digestTime" class="custom-select digest-time-input" onchange="digestTimeChange(this)" style="appearance:none;-webkit-appearance:none;background:var(--surface-2);color:var(--text-1);border:1px solid var(--border);border-radius:8px;padding:8px 32px 8px 12px;font-size:14px;font-family:inherit;cursor:pointer;outline:none;transition:border-color 0.2s,box-shadow 0.2s;">
-                  <option value="00:00">12:00 AM</option>
-                  <option value="01:00">1:00 AM</option>
-                  <option value="02:00">2:00 AM</option>
-                  <option value="03:00">3:00 AM</option>
-                  <option value="04:00">4:00 AM</option>
-                  <option value="05:00">5:00 AM</option>
-                  <option value="06:00">6:00 AM</option>
-                  <option value="07:00">7:00 AM (Default)</option>
-                  <option value="08:00">8:00 AM</option>
-                  <option value="09:00">9:00 AM</option>
-                  <option value="10:00">10:00 AM</option>
-                  <option value="11:00">11:00 AM</option>
-                  <option value="12:00">12:00 PM</option>
-                  <option value="13:00">1:00 PM</option>
-                  <option value="14:00">2:00 PM</option>
-                  <option value="15:00">3:00 PM</option>
-                  <option value="16:00">4:00 PM</option>
-                  <option value="17:00">5:00 PM</option>
-                  <option value="18:00">6:00 PM</option>
-                  <option value="19:00">7:00 PM</option>
-                  <option value="20:00">8:00 PM</option>
-                  <option value="21:00">9:00 PM</option>
-                  <option value="22:00">10:00 PM</option>
-                  <option value="23:00">11:00 PM</option>
-                </select>
-                <div class="custom-select-icon" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--text-3);display:flex;align-items:center;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-                </div>
-              </div>
-            </div>
-            <button type="button" id="digestSendNowBtn" class="btn-sm" onclick="digestSendNow()" style="display:inline-flex;align-items:center;gap:6px;font-size:12px">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-              Send test
-            </button>
-          </div>
-        </div>
+      <div class="srow">
+        <div class="srow-info">
+          <h4>Announcements</h4>
+          <p>Teacher announcements</p>
+        </div><label class="tog"><input type="checkbox" id="set_announcements"
+            onchange="saveSetting('announcements',this.checked)">
+          <div class="tog-track"></div>
+        </label>
       </div>
-
-      <div class="sg sg-classes">
-        <div class="sg-lbl" data-i18n="set_classes">Connected Classes</div>
-        <div class="sg-body" id="clsBody"></div>
+      <div class="srow">
+        <div class="srow-info">
+          <h4>Assignments</h4>
+          <p>New work posted</p>
+        </div><label class="tog"><input type="checkbox" id="set_assignments"
+            onchange="saveSetting('assignments',this.checked)">
+          <div class="tog-track"></div>
+        </label>
+      </div>
+      <div class="srow">
+        <div class="srow-info">
+          <h4>Grades</h4>
+          <p>When graded</p>
+        </div><label class="tog"><input type="checkbox" id="set_grades" onchange="saveSetting('grades',this.checked)">
+          <div class="tog-track"></div>
+        </label>
+      </div>
+      <div class="srow">
+        <div class="srow-info">
+          <h4>Materials</h4>
+          <p>Study resources</p>
+        </div><label class="tog"><input type="checkbox" id="set_materials"
+            onchange="saveSetting('materials',this.checked)">
+          <div class="tog-track"></div>
+        </label>
       </div>
     </div>
+  </div>
+
+
+
+
+  <div class="sg sg-discord discord-integration">
+    <div class="sg-lbl">Discord Notifications</div>
+    <div class="sg-body">
+      <div class="discord-intro">
+        <h4>Send Classroom updates to Discord</h4>
+      </div>
+      <p class="discord-status" aria-live="polite">Loading Discord notifications…</p>
+      <div class="discord-list"></div>
+      <form class="discord-add-form" onsubmit="return false">
+        <label>Destination label<input data-discord-label maxlength="48" placeholder="Study server"
+            autocomplete="off"></label>
+        <label>Discord webhook URL<input data-discord-url type="url" placeholder="https://discord.com/api/webhooks/..."
+            autocomplete="off" required></label>
+        <button type="button" class="btn-sm discord-add-button" onclick="discordAdd(this.form)">Add destination</button>
+      </form>
+      <button type="button" class="btn-sm discord-disconnect" onclick="discordDisconnect()" hidden>Disconnect all
+        Discord destinations</button>
+    </div>
+  </div>
+
+  <div class="sg sg-classes">
+    <div class="sg-lbl" data-i18n="set_classes">Connected Classes</div>
+    <div class="sg-body" id="clsBody"></div>
+  </div>
+</div>

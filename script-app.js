@@ -40,7 +40,6 @@ const SCOPES = [
   'https://www.googleapis.com/auth/userinfo.email',
   'https://www.googleapis.com/auth/calendar.events',
   'https://www.googleapis.com/auth/drive.file',
-  'https://www.googleapis.com/auth/gmail.send',
   'https://www.googleapis.com/auth/gmail.readonly'
 ].join(' ');
 
@@ -73,10 +72,50 @@ let S = {
   seenIds: new Set(JSON.parse(localStorage.getItem('aul_seen') || '[]')),
   settings: JSON.parse(localStorage.getItem('aul_settings') || JSON.stringify({
     stream: true, announcements: true, assignments: true, grades: true, comments: true, materials: true,
-    gcalSync: false, dailyEmail: false,
-    digestHour: 7, digestMinute: 0, digestTimezone: (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { return 'UTC'; } })()
+    gcalSync: false
   })),
 };
+
+function loadAnalyticsIfAllowed() {
+  if (window.__aulertAnalyticsLoaded || !window.AULERT_ANALYTICS_ID) return;
+  let consent;
+  try { consent = JSON.parse(localStorage.getItem('aul_cookie_consent_v1') || 'null'); } catch { consent = null; }
+  if (!consent?.analytics) return;
+  window.__aulertAnalyticsLoaded = true;
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(window.AULERT_ANALYTICS_ID)}`;
+  document.head.appendChild(script);
+  window.dataLayer = window.dataLayer || [];
+  window.gtag = function gtag() { window.dataLayer.push(arguments); };
+  window.gtag('js', new Date());
+  window.gtag('config', window.AULERT_ANALYTICS_ID, { anonymize_ip: true });
+}
+
+function initCookieConsent() {
+  const banner = document.getElementById('cookieBanner');
+  if (!banner) return;
+  let consent;
+  try { consent = JSON.parse(localStorage.getItem('aul_cookie_consent_v1') || 'null'); } catch { consent = null; }
+  if (consent?.version === 1) {
+    loadAnalyticsIfAllowed();
+    return;
+  }
+  banner.classList.add('is-visible');
+  banner.querySelectorAll('[data-cookie-choice]').forEach((button) => button.addEventListener('click', () => {
+    const selection = { version: 1, essential: true, analytics: button.dataset.cookieChoice === 'accept', updatedAt: Date.now() };
+    try { localStorage.setItem('aul_cookie_consent_v1', JSON.stringify(selection)); } catch { /* functional storage may be blocked */ }
+    banner.classList.remove('is-visible');
+    loadAnalyticsIfAllowed();
+  }));
+}
+
+function persistAccessToken(accessToken, expiresIn) {
+  const maxAge = Math.max(60, Number(expiresIn) || 3600);
+  const secure = window.location.protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `aul_token=${encodeURIComponent(accessToken)}; max-age=${maxAge}; path=/; SameSite=Lax${secure}`;
+  sessionStorage.setItem('aul_token', accessToken);
+}
 
 function saveRead() { localStorage.setItem('aul_read', JSON.stringify([...S.readIds])); }
 function saveSeen() { localStorage.setItem('aul_seen', JSON.stringify([...S.seenIds])); }
@@ -104,6 +143,7 @@ async function loadTabs() {
 }
 
 window.addEventListener('load', async () => {
+  initCookieConsent();
   // 1. Check if returning from Google OAuth redirect
   const hashStr = window.location.hash.substring(1);
   const searchStr = window.location.search.substring(1);
@@ -121,15 +161,14 @@ window.addEventListener('load', async () => {
 
   if (token) {
     const expiresIn = paramsHash.get('expires_in') || paramsSearch.get('expires_in') || 3600;
-    document.cookie = `aul_token=${token}; max-age=${expiresIn}; path=/; SameSite=Lax`;
-    sessionStorage.setItem('aul_token', token); // Fallback
+    persistAccessToken(token, expiresIn);
     window.location.hash = '';
     window.history.replaceState(null, '', window.location.pathname);
   }
 
   // 2. Read token from cookie/session
   const cookieMatch = document.cookie.match('(^|;) ?aul_token=([^;]*)(;|$)');
-  const saved = (cookieMatch ? cookieMatch[2] : null) || sessionStorage.getItem('aul_token');
+  const saved = (cookieMatch ? decodeURIComponent(cookieMatch[2]) : null) || sessionStorage.getItem('aul_token');
   if (saved) {
     S.token = saved;
     await loadTabs(); // Load missing tabs before app starts
@@ -201,6 +240,8 @@ window.addEventListener('load', async () => {
 });
 
 function showLoadingState(msg) {
+  document.body.classList.add('app-loading');
+  document.body.classList.remove('app-ready');
   const feed = document.getElementById('notifFeed');
   if (feed) {
     let html = msg ? `<div style="text-align:center; padding-top:10px; padding-bottom:20px; color:var(--text-2); font-size:14px; font-weight:600; animation:pulseSkeleton 1.5s infinite;">${msg}</div>` : '';
@@ -284,7 +325,7 @@ async function onToken(resp) {
 
   if (resp.error) { console.error('OAuth error:', resp.error); return; }
   S.token = resp.access_token;
-  document.cookie = `aul_token=${S.token}; max-age=${resp.expires_in || 3600}; path=/; SameSite=Lax`;
+  persistAccessToken(S.token, resp.expires_in);
   document.getElementById('authModal').classList.remove('open');
   showLoadingApp();
   await loadEverything();
@@ -759,6 +800,9 @@ function launchApp() {
   renderCal();
   updatePip();
   renderSettings();
+  document.body.classList.remove('app-loading');
+  document.body.classList.add('app-ready');
+  document.getElementById('appShellSkeleton')?.setAttribute('aria-busy', 'false');
   startPolling();
   fetchAllContent(false);
   showToast('Connected!', `Monitoring ${S.courses.length} course${S.courses.length !== 1 ? 's' : ''}`);
@@ -784,11 +828,12 @@ function launchApp() {
 function disconnect() {
   clearInterval(S.pollTimer);
   clearInterval(S.countdownTimer);
+  const tokenToRevoke = S.token;
   S.token = null;
   document.cookie = "aul_token=; max-age=0; path=/";
   sessionStorage.removeItem('aul_token');
-  if (window.google?.accounts?.oauth2 && S.user?.id) {
-    google.accounts.oauth2.revoke(S.token, () => { });
+  if (tokenToRevoke && window.google?.accounts?.oauth2 && S.user?.id) {
+    google.accounts.oauth2.revoke(tokenToRevoke, () => { });
   }
   S.courses = []; S.notifs = []; S.deadlines = []; S.user = null;
   window.location.href = 'index.html';
@@ -812,9 +857,12 @@ function setThemeMode(mode) { toggleTheme(); }
 function updateThemeIcon(mode) {
   const moonSvg = `<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
   const sunSvg = `<circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`;
-  ['themeIcon', 'navThemeIcon'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.innerHTML = mode === 'dark' ? moonSvg : sunSvg;
+  const nextTheme = mode === 'dark' ? 'light' : 'dark';
+  document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
+    const icon = toggle.querySelector('.theme-toggle-icon');
+    if (icon) icon.innerHTML = mode === 'dark' ? sunSvg : moonSvg;
+    toggle.setAttribute('aria-label', `Switch to ${nextTheme} mode`);
+    toggle.setAttribute('title', `Switch to ${nextTheme} mode`);
   });
 }
 

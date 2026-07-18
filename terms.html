@@ -38,12 +38,17 @@
     <div class="orb orb-3"></div>
   </div>
 
+  <div class="cookie-banner" id="cookieBanner" role="dialog" aria-modal="false" aria-labelledby="cookieTitle">
+    <div><strong id="cookieTitle">Your privacy choices</strong><p>Essential storage keeps your theme, settings, and short session available. Optional analytics helps us improve Aulert. <a href="privacy.html">Learn more</a>.</p></div>
+    <div class="cookie-actions"><button type="button" class="btn-sm" data-cookie-choice="reject">Reject analytics</button><button type="button" class="btn-sm" data-cookie-choice="accept">Accept analytics</button></div>
+  </div>
+
   <div class="page-enter"
     style="max-width: 800px; margin: 100px auto; padding: 0 24px; position: relative; z-index: 2;">
     <h1 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 3rem; margin-bottom: 24px;">Terms of Service
     </h1>
     <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px;">
-      Last Updated: June 24, 2026<br><br>
+      Last Updated: July 15, 2026<br><br>
       By accessing or using Aulert, you agree to be bound by these Terms of Service. If you do not agree with any part
       of these terms, you must discontinue use of our service immediately.
     </p>
@@ -79,11 +84,12 @@
       for the core service.
     </p>
     <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px;">
-      <strong>Optional Daily Email Summary:</strong> If you choose to enable this feature, you explicitly authorize
-      Aulert to securely store your email address and an encrypted Google OAuth refresh token on our backend servers
-      (hosted on Vercel). This token is used solely to fetch your Classroom data once daily and send you a summary email
-      via Gmail. You may disable this feature at any time from Settings, which will permanently and immediately delete
-      your stored data from our servers. For full details, see our <a href="privacy.html"
+      <strong>Optional Discord Notifications:</strong> If you choose to enable this feature, you authorize Aulert to
+      store an encrypted Google OAuth refresh token and encrypted Discord webhook URLs so it can check for new
+      Classroom updates and post them to the destinations you choose. Discord delivery is typically scheduled about
+      every ten minutes, is not guaranteed to be real-time, and is subject to Discord's availability and terms. You are
+      responsible for the security and audience of your selected Discord channels. You may disconnect the feature at
+      any time from Settings, which permanently deletes its stored authorization and webhook configuration. For full details, see our <a href="privacy.html"
         style="color: var(--teal); text-decoration: underline;">Privacy Policy</a>.
     </p>
 
@@ -158,8 +164,8 @@
     </div>
   </div>
 
-  <button class="theme-switcher-btn" id="globalThemeBtn" onclick="toggleTheme()" aria-label="Toggle theme">
-    <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none">
+  <button type="button" class="theme-switcher-btn" id="globalThemeBtn" data-theme-toggle onclick="toggleTheme()" aria-label="Switch theme" title="Switch theme">
+    <svg class="theme-toggle-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" />
       <path
         d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"

@@ -2,22 +2,7 @@
 <html lang="en" data-theme="dark">
 
 <head>
-  <!-- Google tag (gtag.js) -->
-  <script>
-    window.addEventListener('load', function () {
-      setTimeout(function () {
-        var script = document.createElement('script');
-        script.async = true;
-        script.src = 'https://www.googletagmanager.com/gtag/js?id=G-75J29YEK16';
-        document.head.appendChild(script);
-
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', 'G-75J29YEK16');
-      }, 500);
-    });
-  </script>
+  <script>window.AULERT_ANALYTICS_ID = 'G-75J29YEK16';</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <meta name="google-site-verification" content="wS3ouR6PoRcE4Eds8-vvprmc_1ptOPXTsFEwX21FkLM" />
@@ -34,7 +19,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@300;400;500;600;700&family=Pridi:wght@300;400;500;600&display=swap"
     rel="stylesheet" />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="styles.css?v=2" />
   <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
@@ -59,21 +44,21 @@
         <!-- Copy -->
         <div class="hero-left">
           <h1 class="hero-h hero-h--dynamic">
-            <span class="line-dim">Classroom forgets.</span><br>
+            <span class="line-dim">Classroom scatters.</span><br>
             <span class="line-inline">
-              <span class="line-teal">Aulert</span>&nbsp;<span class="hero-verb" id="heroVerb">remembers</span>
+              <span class="line-teal">Aulert</span>&nbsp;<span class="hero-verb" id="heroVerb">centered</span>
             </span>
           </h1>
           <h1 class="hero-h hero-h--static">
-            <span class="line-dim">Classroom forgets.</span><br>
+            <span class="line-dim">Classroom scatters.</span><br>
             <span class="line-inline">
-              <span class="line-teal">Aulert</span>&nbsp;<span>remembers</span>
+              <span class="line-teal">Aulert</span>&nbsp;<span>centers it</span>
             </span>
           </h1>
 
           <p class="hero-desc">
-            Google Classroom notifications are easy to ignore but Aulert consolidates every assignment grade comment
-            deadline change and announcement into one clean feed so you never have to waste time checking for updates.
+            Google Classroom scatters your notifications, making it easy to miss important updates. Aulert acts as your
+            central dashboard, capturing everything in one smart, beautiful feed so nothing slips through the cracks.
           </p>
         </div>
 
@@ -130,74 +115,27 @@
     </section>
 
 
-    <!-- PROBLEM: COMPARE -->
-    <div class="problem-sec" style="content-visibility: auto; contain-intrinsic-size: auto 600px;">
+    <!-- FEATURE GRID -->
+    <div class="problem-sec" style="content-visibility: auto;">
       <div class="reveal">
-        <div class="sec-h">What Classroom isn't telling you</div>
-        <p class="sec-sub">Google Classroom misses important updates like comment replies and material changes but
-          Aulert catches everything to fill that gap</p>
+        <div class="sec-h">Everything in one place</div>
+        <p class="sec-sub">Aulert works quietly in the background to keep you organized.</p>
       </div>
-      <div class="compare-wrap stagger">
-        <div class="compare-col compare-col-miss">
-          <div class="compare-head">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="var(--rose)" stroke-width="2" />
-              <path d="M15 9l-6 6M9 9l6 6" stroke="var(--rose)" stroke-width="2" stroke-linecap="round" />
-            </svg>
-            Google Classroom notifies you about…
-          </div>
-          <div class="compare-item">
-            <div class="compare-dot" style="background:var(--emerald)"></div>New assignments posted
-          </div>
-          <div class="compare-item">
-            <div class="compare-dot" style="background:var(--emerald)"></div>Grades returned
-          </div>
-          <div class="compare-item">
-            <div class="compare-dot" style="background:var(--emerald)"></div>New announcements (if app installed)
-          </div>
-          <div class="compare-item">
-            <div class="compare-dot" style="background:var(--emerald)"></div>New materials &amp; PDFs uploaded
-          </div>
-          <div class="compare-item" style="opacity:.38">
-            <div class="compare-dot" style="background:var(--text-3)"></div><s>Teacher comments on your work</s>
-          </div>
-          <div class="compare-item" style="opacity:.38">
-            <div class="compare-dot" style="background:var(--text-3)"></div><s>Deadline changes &amp; extensions</s>
-          </div>
-          <div class="compare-item" style="opacity:.38">
-            <div class="compare-dot" style="background:var(--text-3)"></div><s>Edits to existing posts</s>
-          </div>
+      <div class="aulert-feats stagger">
+        <div class="aulert-feat-card">
+          <div class="aulert-feat-title">Classroom Updates</div>
+          <div class="aulert-feat-desc">Announcements, assignments, grades, and materials collected in one calm,
+            readable feed.</div>
         </div>
-        <div class="compare-col compare-col-catch">
-          <div class="compare-head">
-            <svg class="icon-teal" width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <circle cx="12" cy="12" r="10" stroke="var(--teal)" stroke-width="2" />
-              <path d="M8 12l3 3 5-5" stroke="var(--teal)" stroke-width="2" stroke-linecap="round"
-                stroke-linejoin="round" />
-            </svg>
-            Aulert notifies you about…
-          </div>
-          <div class="compare-item">
-            <div class="compare-dot" style="background:var(--teal)"></div>New assignments posted
-          </div>
-          <div class="compare-item">
-            <div class="compare-dot" style="background:var(--teal)"></div>Grades returned
-          </div>
-          <div class="compare-item">
-            <div class="compare-dot" style="background:var(--teal)"></div>New announcements &amp; stream posts
-          </div>
-          <div class="compare-item">
-            <div class="compare-dot" style="background:var(--teal)"></div>Teacher comments on your work
-          </div>
-          <div class="compare-item">
-            <div class="compare-dot" style="background:var(--teal) "></div>New materials &amp; PDFs uploaded
-          </div>
-          <div class="compare-item">
-            <div class="compare-dot" style="background:var(--teal)"></div>Deadline changes &amp; extensions
-          </div>
-          <div class="compare-item">
-            <div class="compare-dot" style="background:var(--teal)"></div>Edits to existing posts
-          </div>
+        <div class="aulert-feat-card">
+          <div class="aulert-feat-title">Visual Deadline Calendar</div>
+          <div class="aulert-feat-desc">A beautiful month-view calendar showing all your deadlines across every class at
+            a glance.</div>
+        </div>
+        <div class="aulert-feat-card">
+          <div class="aulert-feat-title">Custom Homework Tracker</div>
+          <div class="aulert-feat-desc">Add your own tasks that never appear in Google Classroom — keep everything in
+            one place.</div>
         </div>
       </div>
     </div>
@@ -216,9 +154,9 @@
                 </svg>
               </div>
               <div class="df-body">
-                <div class="df-h">Checks every 30 seconds</div>
-                <div class="df-p">Aulert monitors your Classroom around the clock, updating every 30 seconds to keep
-                  you instantly in the loop.</div>
+                <div class="df-h">Discord delivery, about every 10 minutes</div>
+                <div class="df-p">Connect a Discord webhook to receive concise Classroom batches while the app is
+                  closed. Delivery timing can vary, so Classroom remains the source of truth.</div>
               </div>
             </div>
             <div class="demo-feat">
@@ -382,9 +320,9 @@
           </div>
           <div class="step">
             <div class="step-num">3</div>
-            <div class="step-h">Notify</div>
-            <div class="step-p">You get a push notification the moment anything happens so you can tap it to see the
-              full details</div>
+            <div class="step-h">Stay informed</div>
+            <div class="step-p">Review every update in one focused dashboard, or connect Discord for scheduled
+              off-browser delivery.</div>
           </div>
         </div>
       </div>
@@ -415,10 +353,10 @@
         </div>
         <div class="step"
           style="background:var(--card-bg); padding:24px; border:1px solid var(--rim-2); border-radius:16px; text-align:left;">
-          <div class="step-h" style="color:var(--text-1); font-size:18px; margin-bottom:8px;">Zero External Servers
+          <div class="step-h" style="color:var(--text-1); font-size:18px; margin-bottom:8px;">Privacy-minded by default
           </div>
-          <div class="step-p">Aulert is built to be entirely client-side. Your assignments, grades, and profile data are
-            processed locally on your device, so nothing is ever stored on external databases or third-party servers.
+          <div class="step-p">Your core Classroom dashboard runs in your browser. If you opt into Discord, only the
+            encrypted delivery credentials and minimal delivery records needed for that service are stored.
           </div>
         </div>
         <div class="step"
@@ -502,8 +440,8 @@
               </svg></div>
           </div>
           <div class="faq-a">
-            <div class="faq-a-inner">Aulert checks your Classroom every 30 seconds and sends a notification within
-              seconds of detecting any changes so you never experience a delay longer than 30 seconds.</div>
+            <div class="faq-a-inner">The in-app dashboard refreshes while it is open. Optional Discord delivery runs
+              on a scheduled check about every 10 minutes, so verify urgent work directly in Google Classroom.</div>
           </div>
         </div>
         <div class="faq-item">
@@ -568,9 +506,14 @@
     </div>
   </div><!-- #v-land -->
 
+  <div class="cookie-banner" id="cookieBanner" role="dialog" aria-modal="false" aria-labelledby="cookieTitle">
+    <div><strong id="cookieTitle">Your privacy choices</strong><p>Essential storage keeps your theme, settings, and short session available. Optional analytics helps us improve Aulert. <a href="privacy.html">Learn more</a>.</p></div>
+    <div class="cookie-actions"><button type="button" class="btn-sm" data-cookie-choice="reject">Reject analytics</button><button type="button" class="btn-sm" data-cookie-choice="accept">Accept analytics</button></div>
+  </div>
+
   <!-- Advanced Theme Switcher -->
-  <button class="theme-switcher-btn" id="globalThemeBtn" onclick="toggleTheme()" aria-label="Toggle theme">
-    <svg id="themeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none">
+  <button type="button" class="theme-switcher-btn" id="globalThemeBtn" data-theme-toggle onclick="toggleTheme()" aria-label="Switch theme" title="Switch theme">
+    <svg class="theme-toggle-icon" width="18" height="18" viewBox="0 0 24 24" fill="none">
       <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" />
       <path
         d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"

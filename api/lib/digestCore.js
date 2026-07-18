@@ -205,7 +205,6 @@ function discordEmbeds(items) {
 async function postDiscordWebhook(webhookUrl, items, { test = false } = {}) {
   const payload = test
     ? {
-      username: 'Aulert',
       embeds: [{
         title: 'Aulert is connected',
         description: 'This Discord webhook is ready for your Google Classroom updates.',
@@ -213,7 +212,7 @@ async function postDiscordWebhook(webhookUrl, items, { test = false } = {}) {
         footer: { text: 'You can remove this destination anytime in Aulert Settings.' },
       }],
     }
-    : { username: 'Aulert', content: `**${items.length} new Classroom update${items.length === 1 ? '' : 's'}**`, embeds: discordEmbeds(items) };
+    : { content: `**${items.length} new Classroom update${items.length === 1 ? '' : 's'}**`, embeds: discordEmbeds(items) };
 
   const response = await fetch(`${webhookUrl}?wait=true`, {
     method: 'POST',

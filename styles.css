@@ -10588,3 +10588,15 @@ body:has(#appBody) .bg-fx {
   .app-shell-skeleton::before { display: none; }
   .app-ready .app-shell-skeleton { transition-duration: 120ms; }
 }
+
+/* Skeleton Loading Animation */
+@keyframes pulseSkeleton {
+  0% { opacity: 0.6; background-color: var(--bg-3); }
+  50% { opacity: 1; background-color: var(--rim); }
+  100% { opacity: 0.6; background-color: var(--bg-3); }
+}
+
+.skeleton-box {
+  background-color: var(--bg-3);
+  animation: pulseSkeleton 1.5s ease-in-out infinite;
+}

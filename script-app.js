@@ -107,6 +107,10 @@ function initCookieConsent() {
     try { localStorage.setItem('aul_cookie_consent_v1', JSON.stringify(selection)); } catch { /* functional storage may be blocked */ }
     banner.classList.remove('is-visible');
     loadAnalyticsIfAllowed();
+    if (selection.analytics && S.token) {
+      console.log('Preloading data based on cookie consent...');
+      loadEverything(false);
+    }
   }));
 }
 
@@ -172,7 +176,11 @@ window.addEventListener('load', async () => {
   if (saved) {
     S.token = saved;
     await loadTabs(); // Load missing tabs before app starts
-    showLoadingState();
+    
+    const hasCache = !!localStorage.getItem('aul_cache_courses') && !!localStorage.getItem('aul_cache_notifs');
+    if (!hasCache) {
+      showLoadingState();
+    }
 
     // Retry logic: attempt loadEverything up to 3 times with exponential backoff
     const MAX_RETRIES = 3;
@@ -245,27 +253,8 @@ function showLoadingState(msg) {
   const feed = document.getElementById('notifFeed');
   if (feed) {
     let html = msg ? `<div style="text-align:center; padding-top:10px; padding-bottom:20px; color:var(--text-2); font-size:14px; font-weight:600; animation:pulseSkeleton 1.5s infinite;">${msg}</div>` : '';
-    for (let i = 0; i < 4; i++) {
-      html += `
-<div class="ncard skeleton" style="animation-delay:${i * 0.15}s">
-  <div class="ncard-row">
-    <div class="ncard-bar"></div>
-    <div class="ncard-body">
-      <div class="ncard-top">
-        <div class="ncard-tags">
-          <span class="skeleton-tag"></span>
-          <span class="skeleton-tag" style="width: 40px;"></span>
-        </div>
-        <span class="skeleton-time"></span>
-      </div>
-      <div class="ncard-title" style="margin-bottom: 12px;"><div class="skeleton-text medium"></div></div>
-      <div class="ncard-preview">
-        <div class="skeleton-text long"></div>
-        <div class="skeleton-text short"></div>
-      </div>
-    </div>
-  </div>
-</div>`;
+    for (let i = 0; i < 6; i++) {
+      html += `<div class="skeleton-box" style="animation-delay:${i * 0.1}s; height: 120px; margin-bottom: 16px; border-radius: 12px; width: 100%;"></div>`;
     }
     feed.innerHTML = html;
   }
@@ -429,12 +418,14 @@ function relTime(iso) {
    DATA LOADING
 ════════════════════════════════════════════ */
 
-async function loadEverything() {
+async function loadEverything(forceFetch = false) {
   const cachedUser = localStorage.getItem('aul_cache_user');
   const cachedCourses = localStorage.getItem('aul_cache_courses');
   const cachedNotifs = localStorage.getItem('aul_cache_notifs');
   const cachedDeadlines = localStorage.getItem('aul_cache_deadlines');
+  const cachedTime = localStorage.getItem('aul_cache_time');
 
+  let hasValidCache = false;
   if (cachedCourses && cachedNotifs) {
     try {
       if (cachedUser) S.user = JSON.parse(cachedUser);
@@ -449,9 +440,25 @@ async function loadEverything() {
       if (typeof renderFeed === 'function') renderFeed();
       if (typeof renderCal === 'function') renderCal();
       if (typeof updatePip === 'function') updatePip();
+      
+      hasValidCache = true;
     } catch(e) {
       console.warn('Cache parse error', e);
     }
+  }
+
+  const cacheAge = cachedTime ? (Date.now() - parseInt(cachedTime, 10)) : Infinity;
+  const isFresh = cacheAge < (5 * 60 * 1000);
+
+  // If we have a fresh cache and aren't forcing a fetch, we are done immediately!
+  if (hasValidCache && isFresh && !forceFetch) {
+    console.log('Using fresh cache (age:', Math.round(cacheAge/1000), 's). API fetch skipped.');
+    return;
+  }
+
+  if (hasValidCache && !forceFetch) {
+    console.log('Cache is stale. Fetching updates silently in background...');
+    // We already rendered the cache above, so we can fetch silently.
   }
 
   const [user, courseResp] = await Promise.all([
@@ -539,6 +546,7 @@ async function fetchAllContent(initial = false) {
   
   localStorage.setItem('aul_cache_notifs', JSON.stringify(S.notifs));
   localStorage.setItem('aul_cache_deadlines', JSON.stringify(S.deadlines));
+  localStorage.setItem('aul_cache_time', Date.now().toString());
 
   renderFeed();
   renderSidebar();

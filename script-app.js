@@ -104,7 +104,7 @@ function initCookieConsent() {
   banner.classList.add('is-visible');
   banner.querySelectorAll('[data-cookie-choice]').forEach((button) => button.addEventListener('click', () => {
     const selection = { version: 1, essential: true, analytics: button.dataset.cookieChoice === 'accept', updatedAt: Date.now() };
-    try { localStorage.setItem('aul_cookie_consent_v1', JSON.stringify(selection)); } catch { /* functional storage may be blocked */ }
+    try { localStorage.setItem('aul_cookie_consent_v1', JSON.stringify(selection)); } catch (e) { console.warn('Functional storage blocked', e); }
     banner.classList.remove('is-visible');
     loadAnalyticsIfAllowed();
     if (selection.analytics && S.token) {
@@ -433,6 +433,16 @@ async function loadEverything(forceFetch = false) {
       S.notifs = JSON.parse(cachedNotifs);
       S.deadlines = cachedDeadlines ? JSON.parse(cachedDeadlines).map(d => ({...d, date: new Date(d.date)})) : [];
       
+      if (S.token && !S.token.startsWith('preview_bypass')) {
+        S.courses = S.courses.filter(c => c.id !== '1' && c.id !== '2');
+        S.notifs = S.notifs.filter(n => n.courseId !== '1' && n.courseId !== '2');
+        S.deadlines = S.deadlines.filter(d => d.courseId !== '1' && d.courseId !== '2');
+        
+        localStorage.setItem('aul_cache_courses', JSON.stringify(S.courses));
+        localStorage.setItem('aul_cache_notifs', JSON.stringify(S.notifs));
+        localStorage.setItem('aul_cache_deadlines', JSON.stringify(S.deadlines));
+      }
+
       // initial render from cache
       if (typeof renderGreeting === 'function') renderGreeting();
       if (typeof renderAccount === 'function') renderAccount();
@@ -483,75 +493,75 @@ async function loadEverything(forceFetch = false) {
 }
 
 async function fetchAllContent(initial = false) {
-  const results = [];
+  const gmailComments = await fetchGmailComments().catch(e => []);
+  let newNotifs = [...gmailComments];
+  let newDeadlines = [];
+
   for (let i = 0; i < S.courses.length; i += 2) {
     const batch = S.courses.slice(i, i + 2);
     const batchResults = await Promise.allSettled(batch.map(fetchCourse));
-    results.push(...batchResults);
+    
+    batchResults.forEach(r => {
+      if (r.status !== 'fulfilled') return;
+      newNotifs.push(...r.value.notifs);
+      newDeadlines.push(...r.value.deadlines);
+    });
+
+    newNotifs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    const now = new Date();
+    let filteredNotifs = newNotifs.filter(n => {
+      if (n.type === 'assignment') {
+        if (n.due) {
+          const diff = (now - n.due) / 86400000;
+          if (diff > 30) return false;
+        }
+        if (n.state) {
+          const st = n.state.toLowerCase();
+          if (st.includes('turned') || st.includes('returned') || st.includes('completed')) return false;
+        }
+        const low = (n.title + ' ' + n.body).toLowerCase();
+        if (low.includes('turned in') || low.includes('graded')) return false;
+      }
+      return true;
+    });
+
+    let filteredDeadlines = newDeadlines.filter(dl => {
+      const diff = (now - dl.date) / 86400000;
+      return diff <= 30;
+    });
+
+    if (!initial) {
+      filteredNotifs
+        .filter(n => !S.seenIds.has(n.id))
+        .forEach(n => {
+          const c = courseById(n.courseId);
+          if (c) showToast(`New ${TYPE_META.get(n.type)?.label}`, `${c.name} — ${n.title}`, n.type);
+          S.seenIds.add(n.id);
+        });
+      saveSeen();
+    } else {
+      filteredNotifs.forEach(n => S.seenIds.add(n.id));
+      saveSeen();
+    }
+
+    S.notifs = filteredNotifs;
+    S.deadlines = filteredDeadlines;
+    
+    localStorage.setItem('aul_cache_notifs', JSON.stringify(S.notifs));
+    localStorage.setItem('aul_cache_deadlines', JSON.stringify(S.deadlines));
+    localStorage.setItem('aul_cache_time', Date.now().toString());
+
+    if (typeof renderFeed === 'function') renderFeed();
+    if (typeof renderSidebar === 'function') renderSidebar();
+    if (typeof updatePip === 'function') updatePip();
+
     if (i + 2 < S.courses.length) {
-      await new Promise(r => setTimeout(r, 400)); // stagger to prevent 429s
+      await new Promise(r => setTimeout(r, 400));
     }
   }
 
-  const gmailComments = await fetchGmailComments();
-
-  let newNotifs = [];
-  let newDeadlines = [];
-  results.forEach(r => {
-    if (r.status !== 'fulfilled') return;
-    newNotifs.push(...r.value.notifs);
-    newDeadlines.push(...r.value.deadlines);
-  });
-  newNotifs.push(...gmailComments);
-  newNotifs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-
-  const now = new Date();
-  newNotifs = newNotifs.filter(n => {
-    if (n.type === 'assignment') {
-      if (n.due) {
-        const diff = (now - n.due) / 86400000;
-        if (diff > 30) return false;
-      }
-      if (n.state) {
-        const st = n.state.toLowerCase();
-        if (st.includes('turned') || st.includes('returned') || st.includes('completed')) return false;
-      }
-      const low = (n.title + ' ' + n.body).toLowerCase();
-      if (low.includes('turned in') || low.includes('graded')) return false;
-    }
-    return true;
-  });
-  newDeadlines = newDeadlines.filter(dl => {
-    const diff = (now - dl.date) / 86400000;
-    return diff <= 30;
-  });
-
-  if (!initial) {
-    // Only show notifications for brand new items that haven't been seen before
-    newNotifs
-      .filter(n => !S.seenIds.has(n.id))
-      .forEach(n => {
-        const c = courseById(n.courseId);
-        showToast(`New ${TYPE_META.get(n.type)?.label}`, `${c.name} — ${n.title}`, n.type);
-        S.seenIds.add(n.id);
-      });
-    saveSeen();
-  } else {
-    newNotifs.forEach(n => S.seenIds.add(n.id));
-    saveSeen();
-  }
-
-  S.notifs = newNotifs;
-  S.deadlines = newDeadlines;
-  
-  localStorage.setItem('aul_cache_notifs', JSON.stringify(S.notifs));
-  localStorage.setItem('aul_cache_deadlines', JSON.stringify(S.deadlines));
-  localStorage.setItem('aul_cache_time', Date.now().toString());
-
-  renderFeed();
-  renderSidebar();
-  updatePip();
-  if (initial) renderClasses();
+  if (initial && typeof renderClasses === 'function') renderClasses();
   if (S.settings.gcalSync) gcalSyncAll();
 }
 

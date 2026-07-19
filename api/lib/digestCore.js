@@ -42,7 +42,12 @@ function encryptSecret(value) {
 
 function decryptSecret(value) {
   const [version, ivValue, tagValue, ciphertextValue] = String(value || '').split(':');
-  if (version !== 'v1' || !ivValue || !tagValue || !ciphertextValue) throw new Error('Stored webhook secret is invalid');
+  
+  const expectedVersion = Buffer.from('v1', 'utf8');
+  const actualVersion = Buffer.from(version || '', 'utf8');
+  const isVersionValid = actualVersion.length === expectedVersion.length && crypto.timingSafeEqual(actualVersion, expectedVersion);
+
+  if (!isVersionValid || !ivValue || !tagValue || !ciphertextValue) throw new Error('Stored webhook secret is invalid');
   const decipher = crypto.createDecipheriv('aes-256-gcm', getEncryptionKey(), Buffer.from(ivValue, 'base64url'));
   decipher.setAuthTag(Buffer.from(tagValue, 'base64url'));
   return Buffer.concat([
@@ -59,7 +64,12 @@ function normalizeWebhookUrl(value) {
   } catch {
     throw new Error('Enter a valid Discord webhook URL');
   }
-  if (url.protocol !== 'https:' || url.username || url.password || !DISCORD_HOSTS.has(url.hostname)) {
+
+  const expectedProtocol = Buffer.from('https:', 'utf8');
+  const actualProtocol = Buffer.from(url.protocol || '', 'utf8');
+  const isProtocolValid = actualProtocol.length === expectedProtocol.length && crypto.timingSafeEqual(actualProtocol, expectedProtocol);
+
+  if (!isProtocolValid || url.username || url.password || !DISCORD_HOSTS.has(url.hostname)) {
     throw new Error('Webhook URL must be a Discord HTTPS incoming webhook');
   }
   if (!/^\/api(?:\/v\d+)?\/webhooks\/\d+\/[^/]+$/.test(url.pathname)) {

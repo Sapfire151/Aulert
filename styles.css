@@ -1632,6 +1632,7 @@ body::before {
   letter-spacing: -.3px;
   line-height: 1.3;
   margin-bottom: 6px;
+  word-break: break-word;
 }
 
 .ncard-preview {
@@ -1643,6 +1644,7 @@ body::before {
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  word-break: break-word;
 }
 
 .ncard-foot {
@@ -2026,7 +2028,7 @@ body::before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
+  padding: 12px 14px;
   border-bottom: 1px solid var(--rim-2);
   transition: background .15s;
 }
@@ -2101,6 +2103,22 @@ body::before {
 
 .sg-classes {
   grid-column: 1/-1;
+}
+
+@media (max-width: 768px) {
+  .sg-notify {
+    grid-column: 1/-1;
+    order: 1;
+  }
+
+  .sg-delivery, .sg-discord {
+    grid-column: 1/-1;
+    order: 2;
+  }
+
+  .sg-classes {
+    order: 3;
+  }
 }
 
 .srow-quiet {
@@ -3264,10 +3282,11 @@ body::before {
   color: var(--text);
 }
 
-@media(max-width:420px) {
+@media(max-width:600px) {
   .notif-panel {
-    width: calc(100vw - 28px);
-    right: 14px;
+    width: calc(100vw - 24px);
+    right: 12px;
+    left: 12px;
   }
 }
 
@@ -6032,6 +6051,8 @@ body::before {
   margin-top: 24px;
   font-size: 14px;
   flex-wrap: nowrap;
+  grid-column: 1/-1;
+  order: 99;
 }
 
 .sg-legal a {
@@ -9892,12 +9913,25 @@ body::before {
     padding-bottom: 0;
   }
 
-  /* ── Global Panel Padding ── */
   #p-feed,
   #p-cal,
   #p-hw,
   #p-set {
     padding: 20px 20px 90px;
+  }
+
+  #p-set {
+    grid-template-columns: 1fr;
+  }
+
+  body, html {
+    overflow-x: hidden;
+    max-width: 100vw;
+  }
+
+  #p-feed {
+    padding-left: 14px;
+    padding-right: 14px;
   }
 
   .ncard-body {
@@ -9917,8 +9951,18 @@ body::before {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    gap: 14px;
-    padding: 20px 16px;
+    flex-wrap: nowrap;
+    gap: 12px;
+    padding: 16px;
+  }
+
+  .dash-welcome h1 {
+    font-size: clamp(18px, 5vw, 24px);
+    margin-bottom: 4px;
+  }
+
+  .dub-num {
+    font-size: 28px;
   }
 
   .dstat-num {
@@ -10273,8 +10317,9 @@ button {
   }
 
   .dash-welcome {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
   }
 
   .hero-inner {
@@ -10566,10 +10611,13 @@ body:has(#appBody) .bg-fx {
     transform: none !important;
   }
   body:has(#appBody) .theme-switcher-btn {
-    top: max(12px, env(safe-area-inset-top));
+    top: max(8px, env(safe-area-inset-top));
     right: 12px;
-    width: 44px;
-    height: 44px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border-radius: 50%;
+    justify-content: center;
   }
   .app-body { padding: 12px 12px calc(86px + env(safe-area-inset-bottom)) !important; }
   .mob-nav { padding-bottom: env(safe-area-inset-bottom); min-height: calc(64px + env(safe-area-inset-bottom)); }

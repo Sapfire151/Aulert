@@ -101,7 +101,7 @@ function initCookieConsent() {
   banner.classList.add('is-visible');
   banner.querySelectorAll('[data-cookie-choice]').forEach((button) => button.addEventListener('click', () => {
     const selection = { version: 1, essential: true, analytics: button.dataset.cookieChoice === 'accept', updatedAt: Date.now() };
-    try { localStorage.setItem('aul_cookie_consent_v1', JSON.stringify(selection)); } catch { /* functional storage may be blocked */ }
+    try { localStorage.setItem('aul_cookie_consent_v1', JSON.stringify(selection)); } catch (e) { console.warn('Functional storage blocked', e); }
     banner.classList.remove('is-visible');
     loadAnalyticsIfAllowed();
   }));

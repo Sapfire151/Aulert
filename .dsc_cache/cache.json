@@ -561,19 +561,19 @@
     },
     "D:\\Aulert\\README.md": {
       "findings": [],
-      "sha256": "d687ba5fb7290cf12e07da26400347fddeb3b5fbfea5245b12e3ab1bfad51812"
+      "sha256": "255ff1b66744d3f35fc4e6d93ab0f89ccab5a020a7536453e4703fae0b437920"
     },
     "D:\\Aulert\\api\\dailyDigest.js": {
       "findings": [],
-      "sha256": "66ebf0dec8897c3c95a1736526f9c15953e5da00225bbcec93b6e06636926fc0"
+      "sha256": "e2f510159fe9ab393557b0ed69a7626dd5ae583f8939d1b3da848c345f4f2e34"
     },
     "D:\\Aulert\\api\\emailPrefs.js": {
       "findings": [],
-      "sha256": "0713b0101df447042aaf28b643ec07f96c4e1863cf369523c1bc41f38e63335d"
+      "sha256": "6dc2345856f89a5bbbdd6cd3e58d0e64e94e6520b1d928191106a3fa28973e50"
     },
     "D:\\Aulert\\api\\lib\\digestCore.js": {
       "findings": [],
-      "sha256": "f637f486a97b19fc8602a0a6277df294a1dedc492ecba76174840daffc528871"
+      "sha256": "d20221c3ceeb7fdbd6723634bd54af123e11f9544868d37e62f2df934791bcf6"
     },
     "D:\\Aulert\\api\\lib\\firebaseAdmin.js": {
       "findings": [],
@@ -591,8 +591,8 @@
           "entry_points": [],
           "file_path": "D:\\Aulert\\app.html",
           "fix_suggestion": "email exposure detected. Apply minimization (collect only what is needed under GDPR Art. 5(1)(c)) and pseudonymize before storage / transmission outside the trust boundary.",
-          "line_end": 562,
-          "line_start": 562,
+          "line_end": 574,
+          "line_start": 574,
           "message": "PII (email) detected in general context. GDPR Art. 5 / CCPA \u00a7 1798.100 require minimization and pseudonymization.",
           "metadata": {
             "confidence": 0.4,
@@ -605,7 +605,7 @@
               "is_test_fixture": false,
               "severity_tier": "info"
             },
-            "fix_template": "email appears in D:\\Aulert\\app.html:562. Under GDPR Art. 5 / CCPA \u00a7 1798.100,\nthis counts as personal data and must follow data-minimization,\npurpose-limitation, and storage-limitation principles.\n\nRefactor `<span id=\"profEmailText\">student@example.com</span>` to:\n\n1. Verify the data subject's purpose for processing this email. If the\n   value is not strictly required for the general action, remove\n   it entirely.\n2. Apply pseudonymization (Art. 4(5)) before the value crosses the\n   process / network / storage boundary. Use a per-field salt and HMAC\n   so the mapping table stays inside the designated controller scope.\n3. Add an entry to the Record of Processing Activities (Art. 30) for\n   this field if it is not already covered.\n4. If the field is a real production identifier, prefer hashing or\n   tokenization over plaintext logging. Set the data-retention policy\n   so the row is purged once its purpose ends.\n\nShow the refactored snippet plus the change to the data-flow diagram or\nROPA entry.\n",
+            "fix_template": "email appears in D:\\Aulert\\app.html:574. Under GDPR Art. 5 / CCPA \u00a7 1798.100,\nthis counts as personal data and must follow data-minimization,\npurpose-limitation, and storage-limitation principles.\n\nRefactor `<span id=\"profEmailText\">student@example.com</span>` to:\n\n1. Verify the data subject's purpose for processing this email. If the\n   value is not strictly required for the general action, remove\n   it entirely.\n2. Apply pseudonymization (Art. 4(5)) before the value crosses the\n   process / network / storage boundary. Use a per-field salt and HMAC\n   so the mapping table stays inside the designated controller scope.\n3. Add an entry to the Record of Processing Activities (Art. 30) for\n   this field if it is not already covered.\n4. If the field is a real production identifier, prefer hashing or\n   tokenization over plaintext logging. Set the data-retention policy\n   so the row is purged once its purpose ends.\n\nShow the refactored snippet plus the change to the data-flow diagram or\nROPA entry.\n",
             "pii_is_fixture": true,
             "pii_kind": "email",
             "post_processor": "pii_classifier"
@@ -619,7 +619,11 @@
           "triage_reasoning": null
         }
       ],
-      "sha256": "bb907be5ba16b22634fa488117be74699e3f4f4830ccac0eb738843426ddb42c"
+      "sha256": "05aa61ac6d32b44b63556b44e3ea7cbbbd67110e954d12d8a27e77337d94a810"
+    },
+    "D:\\Aulert\\fix.js": {
+      "findings": [],
+      "sha256": "45fc083c9d9108829ad63cc9402558d12e0bec70b2af342e8c482a6a4c402315"
     },
     "D:\\Aulert\\google788c75ae59fad316.html": {
       "findings": [],
@@ -669,7 +673,7 @@
     },
     "D:\\Aulert\\privacy.html": {
       "findings": [],
-      "sha256": "3745fc44e2d755f7bb3051b3bb942d82a73fde6f30928a75f2f27a00a58a64a2"
+      "sha256": "c20ff0370db05f77f0089dc171f17d6eb3fb733c193d461e57af5e2f5c93eb0c"
     },
     "D:\\Aulert\\script-app-calendar.js": {
       "findings": [],
@@ -677,7 +681,7 @@
     },
     "D:\\Aulert\\script-app-feed.js": {
       "findings": [],
-      "sha256": "a9ad671721f7d5291c7f55ccd964848b296ec4c9eb19c3dc46932850da502511"
+      "sha256": "e2ac33175f4b989025fb8461dce663ea1d93cc894dd37d91d746dae8fe78f9fd"
     },
     "D:\\Aulert\\script-app-feedback.js": {
       "findings": [],
@@ -689,7 +693,7 @@
     },
     "D:\\Aulert\\script-app-settings.js": {
       "findings": [],
-      "sha256": "f3e46e5a721bbd421d9d440c6e77cad09ab7a88ec78168594674b02342e745a5"
+      "sha256": "f2f264bae6ed9621f3ab91d1f967914fce4149c946d3ca93bf9a2e6a4384bf8c"
     },
     "D:\\Aulert\\script-app.js": {
       "findings": [
@@ -699,8 +703,8 @@
           "entry_points": [],
           "file_path": "D:\\Aulert\\script-app.js",
           "fix_suggestion": "email exposure detected. Apply minimization (collect only what is needed under GDPR Art. 5(1)(c)) and pseudonymize before storage / transmission outside the trust boundary.",
-          "line_end": 364,
-          "line_start": 364,
+          "line_end": 394,
+          "line_start": 394,
           "message": "PII (email) detected in general context. GDPR Art. 5 / CCPA \u00a7 1798.100 require minimization and pseudonymization.",
           "metadata": {
             "confidence": 0.4,
@@ -713,7 +717,7 @@
               "is_test_fixture": false,
               "severity_tier": "info"
             },
-            "fix_template": "email appears in D:\\Aulert\\script-app.js:364. Under GDPR Art. 5 / CCPA \u00a7 1798.100,\nthis counts as personal data and must follow data-minimization,\npurpose-limitation, and storage-limitation principles.\n\nRefactor `return { id: 'preview-id', name: 'Preview User', email: 'preview@example.com' };` to:\n\n1. Verify the data subject's purpose for processing this email. If the\n   value is not strictly required for the general action, remove\n   it entirely.\n2. Apply pseudonymization (Art. 4(5)) before the value crosses the\n   process / network / storage boundary. Use a per-field salt and HMAC\n   so the mapping table stays inside the designated controller scope.\n3. Add an entry to the Record of Processing Activities (Art. 30) for\n   this field if it is not already covered.\n4. If the field is a real production identifier, prefer hashing or\n   tokenization over plaintext logging. Set the data-retention policy\n   so the row is purged once its purpose ends.\n\nShow the refactored snippet plus the change to the data-flow diagram or\nROPA entry.\n",
+            "fix_template": "email appears in D:\\Aulert\\script-app.js:394. Under GDPR Art. 5 / CCPA \u00a7 1798.100,\nthis counts as personal data and must follow data-minimization,\npurpose-limitation, and storage-limitation principles.\n\nRefactor `return { id: 'preview-id', name: 'Preview User', email: 'preview@example.com' };` to:\n\n1. Verify the data subject's purpose for processing this email. If the\n   value is not strictly required for the general action, remove\n   it entirely.\n2. Apply pseudonymization (Art. 4(5)) before the value crosses the\n   process / network / storage boundary. Use a per-field salt and HMAC\n   so the mapping table stays inside the designated controller scope.\n3. Add an entry to the Record of Processing Activities (Art. 30) for\n   this field if it is not already covered.\n4. If the field is a real production identifier, prefer hashing or\n   tokenization over plaintext logging. Set the data-retention policy\n   so the row is purged once its purpose ends.\n\nShow the refactored snippet plus the change to the data-flow diagram or\nROPA entry.\n",
             "pii_is_fixture": true,
             "pii_kind": "email",
             "post_processor": "pii_classifier"
@@ -727,7 +731,7 @@
           "triage_reasoning": null
         }
       ],
-      "sha256": "25aebbf935dbba0e7aca5d208c656d44997b6be56d4ec9f421acb6ccce0233d2"
+      "sha256": "36c181da582a9f327fb09a2b119de8b4a18c566eb437c34a5b870966345a3449"
     },
     "D:\\Aulert\\script-landing.js": {
       "findings": [
@@ -765,11 +769,11 @@
           "triage_reasoning": null
         }
       ],
-      "sha256": "4f3ffcf6c2329060aa6317d4a5d910f9898dfa7b7a399d5e1c03b603b0b33794"
+      "sha256": "e5b9296ed723fb92b3fbbbf117564ccc868813d78147860207b22cfccd92b389"
     },
     "D:\\Aulert\\styles.css": {
       "findings": [],
-      "sha256": "0979c870afa75e5598b571bbd34cade5aaeb8a596cc21d74e9308184906222b5"
+      "sha256": "e7c3f6a41b0579178700e711f120a894943f99aea93a11c9190fbe9ef67e2684"
     },
     "D:\\Aulert\\tab-cal.html": {
       "findings": [],
@@ -789,15 +793,15 @@
     },
     "D:\\Aulert\\tab-set.html": {
       "findings": [],
-      "sha256": "1887da8b9b0c56483338d70921ab773ba256cdb7649a337ed0f41c60363b934e"
+      "sha256": "9fe0ae4a4cf5ee7d4047cd868e5492437af01015cedf8aa693cfc9190114a7a1"
     },
     "D:\\Aulert\\terms.html": {
       "findings": [],
-      "sha256": "d8e4cdf6e473df94b4d01429483b04306cf1179be4c1264586d90e480e5da778"
+      "sha256": "c9a2c07d36855889c88125368d9a9293242c7e60c7e9dd786930f390a3c205db"
     },
     "D:\\Aulert\\vercel.json": {
       "findings": [],
-      "sha256": "c8fd218fb155a9baa89acf07008de03b7a08cda40690f91720cae480549a02eb"
+      "sha256": "e7bdd782982a1e657af91b160fae625524e451ff3c81f9a522d99a8be1ceb1a7"
     }
   },
   "rulepack_fingerprint": "v3:a0c1fdd1d956ea17cb164ad7ef8be1ed34551cb88f79c2c9004cc5a6b3c82d3a",

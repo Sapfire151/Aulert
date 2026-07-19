@@ -1,4 +1,5 @@
 const { OAuth2Client } = require('google-auth-library');
+const crypto = require('crypto');
 const {
   CLIENT_ID,
   CLIENT_SECRET,
@@ -103,7 +104,7 @@ export default async function handler(req, res) {
 
     let encryptedRefreshToken = config?.encryptedRefreshToken;
     if (!encryptedRefreshToken) encryptedRefreshToken = encryptSecret(await exchangeRefreshToken(body.authCode));
-    const id = `wh_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+    const id = `wh_${Date.now().toString(36)}_${crypto.randomBytes(4).toString('hex')}`;
     const now = Date.now();
     const newWebhook = {
       id,

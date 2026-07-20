@@ -5,7 +5,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <script>
-    window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+    window.siq = window.siq || [];
+    window.si = window.si || function () { window.siq.push(arguments); };
   </script>
   <script defer src="/_vercel/speed-insights/script.js"></script>
   <title>Terms of Service</title>
@@ -42,17 +43,17 @@
     <div class="orb orb-3"></div>
   </div>
 
-  <div class="cookie-banner" id="cookieBanner" role="dialog" aria-modal="false" aria-labelledby="cookieTitle">
-    <div><strong id="cookieTitle">Your privacy choices</strong><p>Essential storage keeps your theme, settings, and short session available. Optional analytics helps us improve Aulert. <a href="privacy.html">Learn more</a>.</p></div>
+  <dialog class="cookie-banner" id="cookieBanner" aria-labelledby="cookieTitle">
+    <div><strong id="cookieTitle">Your privacy choices</strong><p>Essential storage keeps your theme, settings, and short session available. Optional analytics helps us improve Aulert. <a href="privacy.html" target="_blank" rel="noopener noreferrer">Learn more</a>.</p></div>
     <div class="cookie-actions"><button type="button" class="btn-sm" data-cookie-choice="reject">Reject analytics</button><button type="button" class="btn-sm" data-cookie-choice="accept">Accept analytics</button></div>
-  </div>
+  </dialog>
 
   <div class="page-enter"
     style="max-width: 800px; margin: 100px auto; padding: 0 24px; position: relative; z-index: 2;">
     <h1 style="font-family: 'Bricolage Grotesque', sans-serif; font-size: 3rem; margin-bottom: 24px;">Terms of Service
     </h1>
     <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px;">
-      Last Updated: July 15, 2026<br><br>
+      Last Updated: July 20, 2026<br><br>
       By accessing or using Aulert, you agree to be bound by these Terms of Service. If you do not agree with any part
       of these terms, you must discontinue use of our service immediately.
     </p>
@@ -85,7 +86,7 @@
     <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px;">
       Aulert is primarily a client-side application. Your Google Classroom data is fetched directly from Google's
       servers to your browser and cached locally on your device. Aulert does not operate its own data-collection servers
-      for the core service.
+      for the core service. We use third-party tools (such as Vercel Analytics and Vercel Speed Insights) to monitor performance and analytics.
     </p>
     <p style="font-size: 1.1rem; line-height: 1.6; margin-bottom: 24px;">
       <strong>Optional Discord Notifications:</strong> If you choose to enable this feature, you authorize Aulert to
@@ -93,7 +94,7 @@
       Classroom updates and post them to the destinations you choose. Discord delivery is typically scheduled about
       every ten minutes, is not guaranteed to be real-time, and is subject to Discord's availability and terms. You are
       responsible for the security and audience of your selected Discord channels. You may disconnect the feature at
-      any time from Settings, which permanently deletes its stored authorization and webhook configuration. For full details, see our <a href="privacy.html"
+      any time from Settings, which permanently deletes its stored authorization and webhook configuration. For full details, see our <a href="privacy.html" target="_blank" rel="noopener noreferrer"
         style="color: var(--teal); text-decoration: underline;">Privacy Policy</a>.
     </p>
 
@@ -166,11 +167,11 @@
     </script>
       
     <div style="margin-top: 100px; padding-top: 24px; border-top: 1px solid var(--border); display: flex; gap: 16px; font-size: 0.9rem; justify-content: center;">
-      <a href="privacy.html" style="color: var(--text-2); text-decoration: none;">Privacy Policy</a>
+      <a href="privacy.html" target="_blank" rel="noopener noreferrer" style="color: var(--text-2); text-decoration: none;">Privacy Policy</a>
       <span style="color: var(--text-3)">·</span>
-      <a href="terms.html" style="color: var(--text-2); text-decoration: none;">Terms of Service</a>
+      <a href="terms.html" target="_blank" rel="noopener noreferrer" style="color: var(--text-2); text-decoration: none;">Terms of Service</a>
       <span style="color: var(--text-3)">·</span>
-      <a href="https://docs.google.com/forms/d/e/1FAIpQLSfAMPxrACJjnqb68kdvO_bSTBmY9otYxZiNqrri_uRNBFzIMQ/formResponse" style="color: var(--text-2); text-decoration: none;">Feedback</a>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSfAMPxrACJjnqb68kdvO_bSTBmY9otYxZiNqrri_uRNBFzIMQ/formResponse" target="_blank" rel="noopener noreferrer" style="color: var(--text-2); text-decoration: none;">Feedback</a>
     </div>
   </div>
 

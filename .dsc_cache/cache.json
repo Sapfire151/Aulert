@@ -591,8 +591,8 @@
           "entry_points": [],
           "file_path": "D:\\Aulert\\app.html",
           "fix_suggestion": "email exposure detected. Apply minimization (collect only what is needed under GDPR Art. 5(1)(c)) and pseudonymize before storage / transmission outside the trust boundary.",
-          "line_end": 574,
-          "line_start": 574,
+          "line_end": 582,
+          "line_start": 582,
           "message": "PII (email) detected in general context. GDPR Art. 5 / CCPA \u00a7 1798.100 require minimization and pseudonymization.",
           "metadata": {
             "confidence": 0.4,
@@ -605,7 +605,7 @@
               "is_test_fixture": false,
               "severity_tier": "info"
             },
-            "fix_template": "email appears in D:\\Aulert\\app.html:574. Under GDPR Art. 5 / CCPA \u00a7 1798.100,\nthis counts as personal data and must follow data-minimization,\npurpose-limitation, and storage-limitation principles.\n\nRefactor `<span id=\"profEmailText\">student@example.com</span>` to:\n\n1. Verify the data subject's purpose for processing this email. If the\n   value is not strictly required for the general action, remove\n   it entirely.\n2. Apply pseudonymization (Art. 4(5)) before the value crosses the\n   process / network / storage boundary. Use a per-field salt and HMAC\n   so the mapping table stays inside the designated controller scope.\n3. Add an entry to the Record of Processing Activities (Art. 30) for\n   this field if it is not already covered.\n4. If the field is a real production identifier, prefer hashing or\n   tokenization over plaintext logging. Set the data-retention policy\n   so the row is purged once its purpose ends.\n\nShow the refactored snippet plus the change to the data-flow diagram or\nROPA entry.\n",
+            "fix_template": "email appears in D:\\Aulert\\app.html:582. Under GDPR Art. 5 / CCPA \u00a7 1798.100,\nthis counts as personal data and must follow data-minimization,\npurpose-limitation, and storage-limitation principles.\n\nRefactor `<span id=\"profEmailText\">student@example.com</span>` to:\n\n1. Verify the data subject's purpose for processing this email. If the\n   value is not strictly required for the general action, remove\n   it entirely.\n2. Apply pseudonymization (Art. 4(5)) before the value crosses the\n   process / network / storage boundary. Use a per-field salt and HMAC\n   so the mapping table stays inside the designated controller scope.\n3. Add an entry to the Record of Processing Activities (Art. 30) for\n   this field if it is not already covered.\n4. If the field is a real production identifier, prefer hashing or\n   tokenization over plaintext logging. Set the data-retention policy\n   so the row is purged once its purpose ends.\n\nShow the refactored snippet plus the change to the data-flow diagram or\nROPA entry.\n",
             "pii_is_fixture": true,
             "pii_kind": "email",
             "post_processor": "pii_classifier"
@@ -619,7 +619,7 @@
           "triage_reasoning": null
         }
       ],
-      "sha256": "05aa61ac6d32b44b63556b44e3ea7cbbbd67110e954d12d8a27e77337d94a810"
+      "sha256": "a819cb3a038e72ee1572a363cf2d84e29870c00239b98a6ecb47072a48bb49ce"
     },
     "D:\\Aulert\\fix.js": {
       "findings": [],
@@ -637,8 +637,8 @@
           "entry_points": [],
           "file_path": "D:\\Aulert\\package-lock.json",
           "fix_suggestion": "email exposure detected. Apply minimization (collect only what is needed under GDPR Art. 5(1)(c)) and pseudonymize before storage / transmission outside the trust boundary.",
-          "line_end": 1224,
-          "line_start": 1224,
+          "line_end": 1306,
+          "line_start": 1306,
           "message": "PII (email) detected in general context. GDPR Art. 5 / CCPA \u00a7 1798.100 require minimization and pseudonymization.",
           "metadata": {
             "confidence": 0.7,
@@ -651,7 +651,7 @@
               "is_test_fixture": false,
               "severity_tier": "medium"
             },
-            "fix_template": "email appears in D:\\Aulert\\package-lock.json:1224. Under GDPR Art. 5 / CCPA \u00a7 1798.100,\nthis counts as personal data and must follow data-minimization,\npurpose-limitation, and storage-limitation principles.\n\nRefactor `\"deprecated\": \"Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me\",` to:\n\n1. Verify the data subject's purpose for processing this email. If the\n   value is not strictly required for the general action, remove\n   it entirely.\n2. Apply pseudonymization (Art. 4(5)) before the value crosses the\n   process / network / storage boundary. Use a per-field salt and HMAC\n   so the mapping table stays inside the designated controller scope.\n3. Add an entry to the Record of Processing Activities (Art. 30) for\n   this field if it is not already covered.\n4. If the field is a real production identifier, prefer hashing or\n   tokenization over plaintext logging. Set the data-retention policy\n   so the row is purged once its purpose ends.\n\nShow the refactored snippet plus the change to the data-flow diagram or\nROPA entry.\n",
+            "fix_template": "email appears in D:\\Aulert\\package-lock.json:1306. Under GDPR Art. 5 / CCPA \u00a7 1798.100,\nthis counts as personal data and must follow data-minimization,\npurpose-limitation, and storage-limitation principles.\n\nRefactor `\"deprecated\": \"Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me\",` to:\n\n1. Verify the data subject's purpose for processing this email. If the\n   value is not strictly required for the general action, remove\n   it entirely.\n2. Apply pseudonymization (Art. 4(5)) before the value crosses the\n   process / network / storage boundary. Use a per-field salt and HMAC\n   so the mapping table stays inside the designated controller scope.\n3. Add an entry to the Record of Processing Activities (Art. 30) for\n   this field if it is not already covered.\n4. If the field is a real production identifier, prefer hashing or\n   tokenization over plaintext logging. Set the data-retention policy\n   so the row is purged once its purpose ends.\n\nShow the refactored snippet plus the change to the data-flow diagram or\nROPA entry.\n",
             "pii_is_fixture": false,
             "pii_kind": "email",
             "post_processor": "pii_classifier"
@@ -665,15 +665,15 @@
           "triage_reasoning": null
         }
       ],
-      "sha256": "f31b665a9e80c5ba3e34194f916fc6a1bcce734a345d0141a3032f56f3129b95"
+      "sha256": "9c7d58bb9ceea5351f1acb6318d0245e45cbf1b8ea0f5cd8a527c51d24dd41ad"
     },
     "D:\\Aulert\\package.json": {
       "findings": [],
-      "sha256": "8acf4681eb85929c13a272a663b3620eacd4f5dbcfadadcf26d42ce6e775715c"
+      "sha256": "c19c9d33792ac944594ad5914dff2cc175e7fdb38b2b2e7cb563713b08a4536f"
     },
     "D:\\Aulert\\privacy.html": {
       "findings": [],
-      "sha256": "c20ff0370db05f77f0089dc171f17d6eb3fb733c193d461e57af5e2f5c93eb0c"
+      "sha256": "1fd533cbe08e058cbec819dae44401634f3ab38c3adbd6f3996e5bd1b045e678"
     },
     "D:\\Aulert\\script-app-calendar.js": {
       "findings": [],
@@ -731,7 +731,7 @@
           "triage_reasoning": null
         }
       ],
-      "sha256": "36c181da582a9f327fb09a2b119de8b4a18c566eb437c34a5b870966345a3449"
+      "sha256": "8d73b1821760a9eda0059a6c86f66d0e9849a81b5846fd6a7ac390a46ff4fd15"
     },
     "D:\\Aulert\\script-landing.js": {
       "findings": [
@@ -769,11 +769,11 @@
           "triage_reasoning": null
         }
       ],
-      "sha256": "e5b9296ed723fb92b3fbbbf117564ccc868813d78147860207b22cfccd92b389"
+      "sha256": "9d90eff8c93d7b69dab597a212cb21e6b6876ce395bededab4a73644bdaa9c88"
     },
     "D:\\Aulert\\styles.css": {
       "findings": [],
-      "sha256": "e7c3f6a41b0579178700e711f120a894943f99aea93a11c9190fbe9ef67e2684"
+      "sha256": "5f0db29865f42f7b9bee2c65a827434d09c283f0a310f45b67fd3ce589c9bde7"
     },
     "D:\\Aulert\\tab-cal.html": {
       "findings": [],
@@ -797,7 +797,7 @@
     },
     "D:\\Aulert\\terms.html": {
       "findings": [],
-      "sha256": "c9a2c07d36855889c88125368d9a9293242c7e60c7e9dd786930f390a3c205db"
+      "sha256": "9490f0cb6ee7ab2e9f9fae7ea19d054e14494ecbd5256572c46d6ab2ee80e390"
     },
     "D:\\Aulert\\vercel.json": {
       "findings": [],

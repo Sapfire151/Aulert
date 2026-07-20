@@ -275,9 +275,16 @@ function updateThemeIcon(mode) {
 (function () {
   const bar = document.getElementById('scrollBar');
   if (!bar) return;
+  let ticking = false;
   window.addEventListener('scroll', () => {
-    const total = document.documentElement.scrollHeight - window.innerHeight;
-    bar.style.width = (window.scrollY / total * 100) + '%';
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        const total = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.transform = 'scaleX(' + (window.scrollY / total) + ')';
+        ticking = false;
+      });
+      ticking = true;
+    }
   }, { passive: true });
 })();
 
@@ -286,10 +293,18 @@ function updateThemeIcon(mode) {
   const el = document.getElementById('auroraFollower');
   if (!el) return;
   let tx = window.innerWidth / 2, ty = window.innerHeight / 2;
+  let cx = tx, cy = ty;
   document.addEventListener('mousemove', e => {
-    el.style.left = e.clientX + 'px';
-    el.style.top = e.clientY + 'px';
+    tx = e.clientX;
+    ty = e.clientY;
   }, { passive: true });
+  function update() {
+    cx += (tx - cx) * 0.15;
+    cy += (ty - cy) * 0.15;
+    el.style.transform = `translate3d(${cx - 250}px, ${cy - 250}px, 0)`;
+    requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
 })();
 
 // ── Cursor sparkle on click ──
@@ -415,8 +430,15 @@ function updateThemeIcon(mode) {
 (function () {
   const btn = document.getElementById('btt');
   if (!btn) return;
+  let ticking = false;
   window.addEventListener('scroll', () => {
-    btn.classList.toggle('visible', window.scrollY > 400);
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        btn.classList.toggle('visible', window.scrollY > 400);
+        ticking = false;
+      });
+      ticking = true;
+    }
   }, { passive: true });
 })();
 

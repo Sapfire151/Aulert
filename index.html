@@ -4,11 +4,13 @@
 <head>
   <script>window.AULERT_ANALYTICS_ID = 'G-75J29YEK16';</script>
   <script>
-    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    window.vaq = window.vaq || [];
+    window.va = window.va || function () { window.vaq.push(arguments); };
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
   <script>
-    window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+    window.siq = window.siq || [];
+    window.si = window.si || function () { window.siq.push(arguments); };
   </script>
   <script defer src="/_vercel/speed-insights/script.js"></script>
   <meta charset="UTF-8" />
@@ -142,8 +144,8 @@
         </div>
         <div class="aulert-feat-card">
           <div class="aulert-feat-title">Custom Homework Tracker</div>
-          <div class="aulert-feat-desc">Add your own tasks that never appear in Google Classroom — keep everything in
-            one place.</div>
+          <div class="aulert-feat-desc">You can add your own tasks too, making it easy to check everything off in one
+            place!</div>
         </div>
       </div>
     </div>
@@ -372,19 +374,8 @@
           <div class="step-h" style="color:var(--text-1); font-size:18px; margin-bottom:12px;">Secured by Partners
           </div>
           <div class="step-p" style="margin-bottom:16px;">We proudly use industry-leading extensions like Deva Security
-            to actively audit our codebase, detect vulnerabilities, and maintain the highest security
+            and SonarQube to actively audit our codebase, detect vulnerabilities, and maintain the highest security
             standards.
-          </div>
-          <div style="display:flex; gap:16px; align-items:center;">
-            <!-- Deva Security Logo -->
-            <div
-              style="display:flex; align-items:center; gap:6px; color:var(--text-1); font-size:14px; font-weight:700;">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--emerald)" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-              Deva Security
-            </div>
           </div>
         </div>
       </div>
@@ -397,7 +388,8 @@
       </div>
       <div class="faq-list reveal stagger" style="margin-top:48px">
         <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
+          <div class="faq-q" role="button" tabindex="0" onclick="toggleFaq(this)"
+            onkeydown="if(event.key==='Enter'||event.key===' '){toggleFaq(this)}">
             What does Aulert mean?
             <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
@@ -409,7 +401,8 @@
           </div>
         </div>
         <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
+          <div class="faq-q" role="button" tabindex="0" onclick="toggleFaq(this)"
+            onkeydown="if(event.key==='Enter'||event.key===' '){toggleFaq(this)}">
             Is Aulert free to use?
             <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
@@ -421,7 +414,8 @@
           </div>
         </div>
         <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
+          <div class="faq-q" role="button" tabindex="0" onclick="toggleFaq(this)"
+            onkeydown="if(event.key==='Enter'||event.key===' '){toggleFaq(this)}">
             Can Aulert submit work to my Classroom?
             <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
@@ -433,7 +427,8 @@
           </div>
         </div>
         <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
+          <div class="faq-q" role="button" tabindex="0" onclick="toggleFaq(this)"
+            onkeydown="if(event.key==='Enter'||event.key===' '){toggleFaq(this)}">
             How fast are the notifications?
             <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
@@ -445,7 +440,8 @@
           </div>
         </div>
         <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
+          <div class="faq-q" role="button" tabindex="0" onclick="toggleFaq(this)"
+            onkeydown="if(event.key==='Enter'||event.key===' '){toggleFaq(this)}">
             Does it work for all my classes at once?
             <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
@@ -457,7 +453,8 @@
           </div>
         </div>
         <div class="faq-item">
-          <div class="faq-q" onclick="toggleFaq(this)">
+          <div class="faq-q" role="button" tabindex="0" onclick="toggleFaq(this)"
+            onkeydown="if(event.key==='Enter'||event.key===' '){toggleFaq(this)}">
             What types of activity does Aulert detect?
             <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
@@ -496,25 +493,27 @@
     <div class="land-footer">
       <div class="land-footer-logo">Aulert</div>
       <div class="land-footer-copy">
-        <a href="privacy.html" style="color: rgba(238, 240, 255, 0.8); text-decoration: none;">Privacy Policy</a>
-        &nbsp;&bull;&nbsp;
-        <a href="terms.html" style="color: rgba(238, 240, 255, 0.8); text-decoration: none;">Terms of Service</a>
-        <span style="opacity: 0.5;">·</span>
+        <a href="privacy.html" target="_blank" rel="noopener noreferrer"
+          style="color: var(--text-2); text-decoration: none;">Privacy Policy</a>
+        <span style="color: var(--text-3); margin: 0 8px;">&bull;</span>
+        <a href="terms.html" target="_blank" rel="noopener noreferrer"
+          style="color: var(--text-2); text-decoration: none;">Terms of Service</a>
+        <span style="color: var(--text-3); margin: 0 8px;">&bull;</span>
         <a href="https://docs.google.com/forms/d/e/1FAIpQLSfAMPxrACJjnqb68kdvO_bSTBmY9otYxZiNqrri_uRNBFzIMQ/viewform"
-          style="color: rgba(238, 240, 255, 0.8); text-decoration: none;">Feedback</a>
+          target="_blank" rel="noopener noreferrer" style="color: var(--text-2); text-decoration: none;">Feedback</a>
       </div>
     </div>
   </main><!-- #v-land -->
 
-  <div class="cookie-banner" id="cookieBanner" role="dialog" aria-modal="false" aria-labelledby="cookieTitle">
+  <dialog class="cookie-banner" id="cookieBanner" aria-labelledby="cookieTitle">
     <div><strong id="cookieTitle">Your privacy choices</strong>
       <p>Essential storage keeps your theme, settings, and short session available. Optional analytics helps us improve
-        Aulert. <a href="privacy.html">Learn more</a>.</p>
+        Aulert. <a href="privacy.html" target="_blank" rel="noopener noreferrer">Learn more</a>.</p>
     </div>
     <div class="cookie-actions"><button type="button" class="btn-sm" data-cookie-choice="reject">Reject
         analytics</button><button type="button" class="btn-sm" data-cookie-choice="accept">Accept analytics</button>
     </div>
-  </div>
+  </dialog>
 
   <!-- Advanced Theme Switcher -->
   <button type="button" class="theme-switcher-btn" id="globalThemeBtn" data-theme-toggle onclick="toggleTheme()"

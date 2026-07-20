@@ -4,11 +4,13 @@
 <head>
   <script>window.AULERT_ANALYTICS_ID = 'G-75J29YEK16';</script>
   <script>
-    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+    window.vaq = window.vaq || [];
+    window.va = window.va || function () { window.vaq.push(arguments); };
   </script>
   <script defer src="/_vercel/insights/script.js"></script>
   <script>
-    window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
+    window.siq = window.siq || [];
+    window.si = window.si || function () { window.siq.push(arguments); };
   </script>
   <script defer src="/_vercel/speed-insights/script.js"></script>
   <meta charset="UTF-8" />
@@ -55,7 +57,7 @@
   <!-- APP -->
 
   <!-- Top Nav -->
-  <nav class="app-nav">
+  <nav class="app-nav" aria-label="Main navigation">
     <div class="nav-logo">Aulert</div>
     <div class="nav-tabs">
       <button class="nav-tab on" id="tb-feed" onclick="bellRingAnim(this);goTab('feed',this)">
@@ -133,25 +135,28 @@
             stroke="currentColor" stroke-width="2" stroke-linecap="round" />
         </svg>
       </button>
-      <div class="icon-btn icon-btn-animate" id="bellBtn"
-        onclick="iconPop(this);bellRingAnim(this);toggleNotifPanel(event)" title="Notifications">
+      <button class="icon-btn icon-btn-animate" id="bellBtn" type="button"
+        onclick="iconPop(this);bellRingAnim(this);toggleNotifPanel(event)"
+        aria-label="Notifications" title="Notifications">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
           <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round" />
           <path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
         </svg>
         <div class="notif-pip" id="pip" style="display:none"></div>
-      </div>
+      </button>
       <!-- User -->
-      <div class="user-pill icon-btn-animate" onclick="iconPop(this);goTab('set',document.getElementById('tb-set'))">
+      <button class="user-pill icon-btn-animate" type="button"
+        onclick="iconPop(this);goTab('set',document.getElementById('tb-set'))"
+        aria-label="User settings">
         <div class="ava">S</div>
         <span class="user-pill-name" data-i18n="nav_student">Student</span>
-      </div>
+      </button>
     </div>
   </nav>
 
   <!-- Mobile Bottom Nav -->
-  <nav class="mob-nav">
+  <nav class="mob-nav" aria-label="Mobile navigation">
     <button class="mob-tab on" id="mtb-feed" onclick="bellRingAnim(this);goTab('feed',this)" title="Notifications">
       <svg class="nav-icon" width="22" height="22" viewBox="0 0 24 24" fill="none">
         <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" stroke-width="2"
@@ -187,16 +192,19 @@
 
   <!-- Mobile Top Bar (theme toggle at top-right on mobile) -->
   <div class="mob-top-bar">
-    <div class="icon-btn icon-btn-animate" onclick="iconPop(this);toggleTheme()" title="Toggle theme" style="background:var(--surface-2);border:1px solid var(--rim);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,0.2);">
+    <button class="icon-btn icon-btn-animate" type="button"
+      onclick="iconPop(this);toggleTheme()" title="Toggle theme"
+      aria-label="Toggle theme"
+      style="background:var(--surface-2);border:1px solid var(--rim);border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 12px rgba(0,0,0,0.2);">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
         <circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2" />
         <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
       </svg>
-    </div>
+    </button>
   </div>
 
   <!-- ── NOTIFICATION PANEL ── -->
-  <div class="notif-panel-overlay" id="notifPanelOverlay" onclick="closeNotifPanel()"></div>
+  <div class="notif-panel-overlay" id="notifPanelOverlay" onclick="closeNotifPanel()" aria-hidden="true"></div>
   <div class="notif-panel" id="notifPanel">
     <div class="np-header">
       <div class="np-title">
@@ -205,12 +213,13 @@
       </div>
       <div class="np-actions">
         <button class="np-mark-all" onclick="markAllRead()">Mark all read</button>
-        <div class="np-close-btn" onclick="closeNotifPanel()">
+        <button class="np-close-btn" type="button" aria-label="Close notifications panel"
+          onclick="closeNotifPanel()">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
             <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
             <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
           </svg>
-        </div>
+        </button>
       </div>
     </div>
     <div class="np-list" id="npList"></div>
@@ -333,21 +342,25 @@
 
           <!-- search box -->
           <div class="search-wrap">
+          <label for="searchInp" class="sr-only">Search work</label>
             <input style="font-family:var(--ff-body)" type="text" id="searchInp" placeholder="Search work..."
               oninput="onSearch(this.value)">
           </div>
 
           <div class="chips">
-            <div class="chip active" onclick="setChip('all',this)">All <span class="chip-badge" id="cnt-all">0</span>
+            <div class="chip active" role="button" tabindex="0" onclick="setChip('all',this)"
+              onkeydown="if(event.key==='Enter'){setChip('all',this)}" aria-label="Show all">All <span class="chip-badge" id="cnt-all">0</span>
             </div>
-            <div class="chip" onclick="setChip('announcement',this)">
+            <div class="chip" role="button" tabindex="0" onclick="setChip('announcement',this)"
+              onkeydown="if(event.key==='Enter'){setChip('announcement',this)}" aria-label="Filter announcements">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
                 <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor"
                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
               Announcements
             </div>
-            <div class="chip" onclick="setChip('assignment',this)">
+            <div class="chip" role="button" tabindex="0" onclick="setChip('assignment',this)"
+              onkeydown="if(event.key==='Enter'){setChip('assignment',this)}" aria-label="Filter assignments">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
                 <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" stroke="currentColor" stroke-width="2"
                   stroke-linecap="round" stroke-linejoin="round" />
@@ -356,7 +369,8 @@
               </svg>
               Assignments
             </div>
-            <div class="chip" onclick="setChip('material',this)">
+            <div class="chip" role="button" tabindex="0" onclick="setChip('material',this)"
+              onkeydown="if(event.key==='Enter'){setChip('material',this)}" aria-label="Filter materials">
               <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
                 <path d="M4 19.5A2.5 2.5 0 016.5 17H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                   stroke-linejoin="round" />
@@ -400,14 +414,16 @@
         </div>
         <div class="mnav-wrap">
           <div class="mnav">
-            <div class="mnav-btn" onclick="navMo(-1)">
+            <div class="mnav-btn" role="button" tabindex="0" aria-label="Previous month"
+              onclick="navMo(-1)" onkeydown="if(event.key==='Enter'){navMo(-1)}">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
                 <polyline points="15,18 9,12 15,6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
                   stroke-linejoin="round" />
               </svg>
             </div>
             <div class="mnav-label" id="moLabel">June</div>
-            <div class="mnav-btn" onclick="navMo(1)">
+            <div class="mnav-btn" role="button" tabindex="0" aria-label="Next month"
+              onclick="navMo(1)" onkeydown="if(event.key==='Enter'){navMo(1)}">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
                 <polyline points="9,18 15,12 9,6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
                   stroke-linejoin="round" />
@@ -458,6 +474,7 @@
         <!-- Add task form -->
         <div class="hw-form">
           <div class="hw-form-row">
+          <label for="hwSubject" class="sr-only">Subject</label>
             <input class="hw-input" id="hwSubject" placeholder="Subject" maxlength="80" />
             <!-- Custom Date+Time Picker Trigger -->
             <div class="hwdtp-wrap" id="hwDtpWrap">
@@ -467,7 +484,8 @@
                   <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
                 </svg>
                 <span id="hwDtpLabel">Optional</span>
-                <svg id="hwDtpClear" width="13" height="13" viewBox="0 0 24 24" fill="none" onclick="hwDtpClear(event)"
+                <svg id="hwDtpClear" role="button" tabindex="0" aria-label="Clear date" width="13" height="13" viewBox="0 0 24 24" fill="none" onclick="hwDtpClear(event)"
+                  onkeydown="if(event.key==='Enter'){hwDtpClear(event)}"
                   style="display:none;margin-left:auto;flex-shrink:0;opacity:.5;cursor:pointer" class="hwdtp-x">
                   <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
                   <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" />
@@ -515,6 +533,7 @@
                     <div class="hwdtp-time-col">
                       <button type="button" class="hwdtp-arr" onclick="hwDtpShiftHour(1)"
                         aria-label="Increase hour">▲</button>
+                      <label for="hwDtpHourVal" class="sr-only">Hour</label>
                       <input class="hwdtp-time-val" id="hwDtpHourVal" type="text" inputmode="numeric" maxlength="2"
                         value="23" onfocus="this.select()" oninput="hwDtpHourInput(this)" onblur="hwDtpHourBlur(this)"
                         onkeydown="hwDtpTimeKey(event,'hour')" />
@@ -525,6 +544,7 @@
                     <div class="hwdtp-time-col">
                       <button type="button" class="hwdtp-arr" onclick="hwDtpShiftMin(5)"
                         aria-label="Increase minutes">▲</button>
+                      <label for="hwDtpMinVal" class="sr-only">Minutes</label>
                       <input class="hwdtp-time-val" id="hwDtpMinVal" type="text" inputmode="numeric" maxlength="2"
                         value="59" onfocus="this.select()" oninput="hwDtpMinInput(this)" onblur="hwDtpMinBlur(this)"
                         onkeydown="hwDtpTimeKey(event,'min')" />
@@ -542,6 +562,7 @@
               </div>
             </div>
           </div>
+          <label for="hwDesc" class="sr-only">Task description</label>
           <textarea class="hw-textarea" id="hwDesc" placeholder="What needs to be done?" rows="3"></textarea>
           <div class="hw-form-footer">
             <button class="hw-btn hw-btn-add" onclick="hwAdd()">
@@ -592,7 +613,7 @@
           <div class="srow">
             <div class="srow-info">
               <h4>Stream Posts</h4>
-            </div><label class="tog"><input type="checkbox" id="set_stream"
+            </div><label class="tog" for="set_stream" aria-label="Toggle stream posts notifications"><input type="checkbox" id="set_stream"
                 onchange="saveSetting('stream',this.checked)">
               <div class="tog-track"></div>
             </label>
@@ -600,7 +621,7 @@
           <div class="srow">
             <div class="srow-info">
               <h4>Announcements</h4>
-            </div><label class="tog"><input type="checkbox" id="set_announcements"
+            </div><label class="tog" for="set_announcements" aria-label="Toggle announcements notifications"><input type="checkbox" id="set_announcements"
                 onchange="saveSetting('announcements',this.checked)">
               <div class="tog-track"></div>
             </label>
@@ -608,7 +629,7 @@
           <div class="srow">
             <div class="srow-info">
               <h4>Assignments</h4>
-            </div><label class="tog"><input type="checkbox" id="set_assignments"
+            </div><label class="tog" for="set_assignments" aria-label="Toggle assignments notifications"><input type="checkbox" id="set_assignments"
                 onchange="saveSetting('assignments',this.checked)">
               <div class="tog-track"></div>
             </label>
@@ -616,7 +637,7 @@
           <div class="srow">
             <div class="srow-info">
               <h4>Grades</h4>
-            </div><label class="tog"><input type="checkbox" id="set_grades"
+            </div><label class="tog" for="set_grades" aria-label="Toggle grades notifications"><input type="checkbox" id="set_grades"
                 onchange="saveSetting('grades',this.checked)">
               <div class="tog-track"></div>
             </label>
@@ -624,7 +645,7 @@
           <div class="srow">
             <div class="srow-info">
               <h4>Materials</h4>
-            </div><label class="tog"><input type="checkbox" id="set_materials"
+            </div><label class="tog" for="set_materials" aria-label="Toggle materials notifications"><input type="checkbox" id="set_materials"
                 onchange="saveSetting('materials',this.checked)">
               <div class="tog-track"></div>
             </label>
@@ -658,9 +679,9 @@
         <div class="sg-body" id="clsBody"></div>
       </div>
       <div class="sg-legal">
-        <a href="privacy.html">Privacy Policy</a>
+        <a href="privacy.html" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
         <span class="sg-legal-sep" aria-hidden="true">·</span>
-        <a href="terms.html">Terms of Service</a>
+        <a href="terms.html" target="_blank" rel="noopener noreferrer">Terms of Service</a>
         <span class="sg-legal-sep" aria-hidden="true">·</span>
         <a
           href="https://docs.google.com/forms/d/e/1FAIpQLSfAMPxrACJjnqb68kdvO_bSTBmY9otYxZiNqrri_uRNBFzIMQ/formResponse"
@@ -673,7 +694,8 @@
   </main>
 
   <!-- Sheet (detail) -->
-  <div class="sheet-veil" id="sheetVeil" onclick="closeSheet(event)">
+  <div class="sheet-veil" id="sheetVeil" role="button" tabindex="0" aria-label="Close detail panel"
+    onclick="closeSheet(event)" onkeydown="if(event.key==='Escape'){closeSheet(event)}">
     <div class="sheet" style="position:relative;">
       <div class="sheet-grip"></div>
       <button class="sheet-close" onclick="closeSheet()" aria-label="Close"
@@ -692,6 +714,7 @@
         <div class="sheet-body-text" id="shText"></div>
         <div class="sheet-actions" style="flex-wrap: nowrap; gap: 6px; justify-content: flex-start;">
           <!-- Hidden file input for submission -->
+          <label for="assignmentFileInput" class="sr-only">Upload assignment file</label>
           <input type="file" id="assignmentFileInput" style="display:none" multiple
             onchange="handleSubmissionUpload(event)">
 
@@ -734,10 +757,10 @@
 
   <div class="snack" id="snack">Settings locked in 🔒</div>
 
-  <div class="cookie-banner" id="cookieBanner" role="dialog" aria-modal="false" aria-labelledby="cookieTitle">
-    <div><strong id="cookieTitle">Your privacy choices</strong><p>Essential storage keeps your theme, settings, and short session available. Optional analytics helps us improve Aulert. <a href="privacy.html">Learn more</a>.</p></div>
+  <dialog class="cookie-banner" id="cookieBanner" aria-labelledby="cookieTitle">
+    <div><strong id="cookieTitle">Your privacy choices</strong><p>Essential storage keeps your theme, settings, and short session available. Optional analytics helps us improve Aulert. <a href="privacy.html" target="_blank" rel="noopener noreferrer">Learn more</a>.</p></div>
     <div class="cookie-actions"><button type="button" class="btn-sm" data-cookie-choice="reject">Reject analytics</button><button type="button" class="btn-sm" data-cookie-choice="accept">Accept analytics</button></div>
-  </div>
+  </dialog>
 
 
   <!-- Advanced Theme Switcher -->
@@ -778,7 +801,9 @@
         Submit Work</h3>
 
       <!-- Drag & Drop Zone -->
-      <div id="dropZone" onclick="document.getElementById('assignmentFileInput').click()"
+      <div id="dropZone" role="button" tabindex="0" aria-label="Upload file: click to browse or drag file here"
+        onclick="document.getElementById('assignmentFileInput').click()"
+        onkeydown="if(event.key==='Enter'||event.key===' '){document.getElementById('assignmentFileInput').click()}"
         style="border: 2px dashed var(--rim); border-radius: 12px; padding: 32px 16px; cursor: pointer; transition: all 0.2s ease; background: rgba(0,0,0,0.02); margin-bottom: 20px;"
         onmouseover="if(!this.style.background.includes('rgba(0, 255, 217')) { this.style.borderColor='var(--text-3)'; }"
         onmouseout="if(!this.style.background.includes('rgba(0, 255, 217')) { this.style.borderColor='var(--rim)'; }">
@@ -807,7 +832,7 @@
 
       <!-- Link Input -->
       <div style="text-align: left; margin-bottom: 24px;">
-        <label
+        <label for="submitLinkInput"
           style="display: block; font-size: 13px; color: var(--text-2); font-weight: 600; margin-bottom: 8px;">Attach
           Link</label>
         <input type="url" id="submitLinkInput" placeholder="https://..."

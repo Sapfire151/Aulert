@@ -2,8 +2,12 @@
   "name": "aulert-api",
   "version": "1.0.0",
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "firebase-admin": "^14.1.0",
     "google-auth-library": "^9.0.0",
     "googleapis": "^173.0.0"
+  },
+  "allowScripts": {
+    "@vercel/analytics@2.0.1": true
   }
 }

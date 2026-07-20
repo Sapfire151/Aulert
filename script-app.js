@@ -1541,3 +1541,18 @@ async function processUnifiedSubmit() {
   }
 }
 
+// Handle Back-Forward Cache (bfcache) reconnection for WebSockets/Firebase
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) {
+    console.log('Page restored from bfcache. Re-establishing connection...');
+    if (window.firebase && firebase.apps.length > 0) {
+      // Force Firebase to reconnect
+      firebase.database().goOnline();
+    }
+    // Also re-fetch data if needed since the cache might be stale after a long background suspension
+    if (typeof fetchAllContent === 'function' && window.S && S.token) {
+      fetchAllContent(false);
+    }
+  }
+});
+

@@ -22,10 +22,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <!-- Firebase SDK (Community) -->
-  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-  <!-- EmailJS SDK -->
-  <script defer src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" crossorigin="anonymous"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js" crossorigin="anonymous"></script>
   <link
     href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,300;12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Inter:wght@300;400;500;600;700&family=Pridi:wght@300;400;500;600&display=swap"
     rel="stylesheet" />
@@ -78,7 +76,6 @@
 
           <div class="float-card fc-1">
             <div class="fc-accent">
-              <div class="fc-dot" style="background:var(--teal)"></div>
               <span class="fc-class" style="color:var(--teal)">Chemistry</span>
               <span class="fc-type">Announcement</span>
             </div>
@@ -89,7 +86,6 @@
 
           <div class="float-card fc-2">
             <div class="fc-accent">
-              <div class="fc-dot" style="background:var(--purple)"></div>
               <span class="fc-class" style="color:var(--purple)">Advanced Mathematics</span>
               <span class="fc-type">Assignment</span>
             </div>
@@ -100,7 +96,6 @@
 
           <div class="float-card fc-3">
             <div class="fc-accent">
-              <div class="fc-dot" style="background:var(--amber)"></div>
               <span class="fc-class" style="color:var(--amber)">Innovation project</span>
               <span class="fc-type">Comment</span>
             </div>
@@ -111,7 +106,6 @@
 
           <div class="float-card fc-4">
             <div class="fc-accent">
-              <div class="fc-dot" style="background:var(--rose)"></div>
               <span class="fc-class" style="color:var(--rose)">iELTS</span>
               <span class="fc-type">Material Added</span>
             </div>
@@ -388,78 +382,72 @@
       </div>
       <div class="faq-list reveal stagger" style="margin-top:48px">
         <div class="faq-item">
-          <div class="faq-q" role="button" tabindex="0" onclick="toggleFaq(this)"
-            onkeydown="if(event.key==='Enter'||event.key===' '){toggleFaq(this)}">
+          <button type="button" class="faq-q" onclick="toggleFaq(this)">
             What does Aulert mean?
             <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
               </svg></div>
-          </div>
+          </button>
           <div class="faq-a">
             <div class="faq-a-inner">Aulert is a mashup of 'Aula', the Spanish word for classroom, and 'alert' designed
               to give you a better way to stay on top of your assignments.</div>
           </div>
         </div>
         <div class="faq-item">
-          <div class="faq-q" role="button" tabindex="0" onclick="toggleFaq(this)"
-            onkeydown="if(event.key==='Enter'||event.key===' '){toggleFaq(this)}">
+          <button type="button" class="faq-q" onclick="toggleFaq(this)">
             Is Aulert free to use?
             <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
               </svg></div>
-          </div>
+          </button>
           <div class="faq-a">
             <div class="faq-a-inner">It is completely free to use with no credit cards or subscriptions required so just
               connect your Google account and start getting notified right away.</div>
           </div>
         </div>
         <div class="faq-item">
-          <div class="faq-q" role="button" tabindex="0" onclick="toggleFaq(this)"
-            onkeydown="if(event.key==='Enter'||event.key===' '){toggleFaq(this)}">
+          <button type="button" class="faq-q" onclick="toggleFaq(this)">
             Can Aulert submit work to my Classroom?
             <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
               </svg></div>
-          </div>
+          </button>
           <div class="faq-a">
             <div class="faq-a-inner">Yes! Aulert is an interactive dashboard that lets you not only receive instant
               notifications but also submit your work directly through the app without needing to open Classroom.</div>
           </div>
         </div>
         <div class="faq-item">
-          <div class="faq-q" role="button" tabindex="0" onclick="toggleFaq(this)"
-            onkeydown="if(event.key==='Enter'||event.key===' '){toggleFaq(this)}">
+          <button type="button" class="faq-q" onclick="toggleFaq(this)">
             How fast are the notifications?
             <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
               </svg></div>
-          </div>
+          </button>
           <div class="faq-a">
             <div class="faq-a-inner">The in-app dashboard refreshes while it is open. Optional Discord delivery runs
               on a scheduled check about every 10 minutes, so verify urgent work directly in Google Classroom.</div>
           </div>
         </div>
         <div class="faq-item">
-          <div class="faq-q" role="button" tabindex="0" onclick="toggleFaq(this)"
-            onkeydown="if(event.key==='Enter'||event.key===' '){toggleFaq(this)}">
+          <button type="button" class="faq-q" onclick="toggleFaq(this)">
             Does it work for all my classes at once?
             <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
               </svg></div>
-          </div>
+          </button>
           <div class="faq-a">
             <div class="faq-a-inner">Aulert monitors every active course in your Google Classroom account simultaneously
               once you connect but you can toggle individual classes off from the settings page.</div>
           </div>
         </div>
         <div class="faq-item">
-          <div class="faq-q" role="button" tabindex="0" onclick="toggleFaq(this)"
-            onkeydown="if(event.key==='Enter'||event.key===' '){toggleFaq(this)}">
+          <button type="button" class="faq-q" onclick="toggleFaq(this)">
             What types of activity does Aulert detect?
             <div class="faq-icon"><svg width="12" height="12" viewBox="0 0 24 24" fill="none">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
               </svg></div>
-          </div>
+          </button>
           <div class="faq-a">
             <div class="faq-a-inner">Aulert catches every stream post teacher announcement comment on your submitted
               work new assignment grade release material upload and deadline change the moment it appears in your

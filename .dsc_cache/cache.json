@@ -591,8 +591,8 @@
           "entry_points": [],
           "file_path": "D:\\Aulert\\app.html",
           "fix_suggestion": "email exposure detected. Apply minimization (collect only what is needed under GDPR Art. 5(1)(c)) and pseudonymize before storage / transmission outside the trust boundary.",
-          "line_end": 582,
-          "line_start": 582,
+          "line_end": 601,
+          "line_start": 601,
           "message": "PII (email) detected in general context. GDPR Art. 5 / CCPA \u00a7 1798.100 require minimization and pseudonymization.",
           "metadata": {
             "confidence": 0.4,
@@ -605,7 +605,7 @@
               "is_test_fixture": false,
               "severity_tier": "info"
             },
-            "fix_template": "email appears in D:\\Aulert\\app.html:582. Under GDPR Art. 5 / CCPA \u00a7 1798.100,\nthis counts as personal data and must follow data-minimization,\npurpose-limitation, and storage-limitation principles.\n\nRefactor `<span id=\"profEmailText\">student@example.com</span>` to:\n\n1. Verify the data subject's purpose for processing this email. If the\n   value is not strictly required for the general action, remove\n   it entirely.\n2. Apply pseudonymization (Art. 4(5)) before the value crosses the\n   process / network / storage boundary. Use a per-field salt and HMAC\n   so the mapping table stays inside the designated controller scope.\n3. Add an entry to the Record of Processing Activities (Art. 30) for\n   this field if it is not already covered.\n4. If the field is a real production identifier, prefer hashing or\n   tokenization over plaintext logging. Set the data-retention policy\n   so the row is purged once its purpose ends.\n\nShow the refactored snippet plus the change to the data-flow diagram or\nROPA entry.\n",
+            "fix_template": "email appears in D:\\Aulert\\app.html:601. Under GDPR Art. 5 / CCPA \u00a7 1798.100,\nthis counts as personal data and must follow data-minimization,\npurpose-limitation, and storage-limitation principles.\n\nRefactor `<span id=\"profEmailText\">student@example.com</span>` to:\n\n1. Verify the data subject's purpose for processing this email. If the\n   value is not strictly required for the general action, remove\n   it entirely.\n2. Apply pseudonymization (Art. 4(5)) before the value crosses the\n   process / network / storage boundary. Use a per-field salt and HMAC\n   so the mapping table stays inside the designated controller scope.\n3. Add an entry to the Record of Processing Activities (Art. 30) for\n   this field if it is not already covered.\n4. If the field is a real production identifier, prefer hashing or\n   tokenization over plaintext logging. Set the data-retention policy\n   so the row is purged once its purpose ends.\n\nShow the refactored snippet plus the change to the data-flow diagram or\nROPA entry.\n",
             "pii_is_fixture": true,
             "pii_kind": "email",
             "post_processor": "pii_classifier"
@@ -619,7 +619,7 @@
           "triage_reasoning": null
         }
       ],
-      "sha256": "a819cb3a038e72ee1572a363cf2d84e29870c00239b98a6ecb47072a48bb49ce"
+      "sha256": "d808a0fcbbdafc2979401555abee23722cbeeb693091dfd4c6a1c576e98485ca"
     },
     "D:\\Aulert\\fix.js": {
       "findings": [],
@@ -673,7 +673,7 @@
     },
     "D:\\Aulert\\privacy.html": {
       "findings": [],
-      "sha256": "1fd533cbe08e058cbec819dae44401634f3ab38c3adbd6f3996e5bd1b045e678"
+      "sha256": "3c8f25706e6154f47078d41c7f1dee7762f7e7811c276055b14f1395c0f4d230"
     },
     "D:\\Aulert\\script-app-calendar.js": {
       "findings": [],
@@ -729,9 +729,34 @@
           "triage_confidence": 0.0,
           "triage_label": "untriaged",
           "triage_reasoning": null
+        },
+        {
+          "column": 9,
+          "cwe": "CWE-208",
+          "entry_points": [],
+          "file_path": "D:\\Aulert\\script-app.js",
+          "fix_suggestion": null,
+          "line_end": 1553,
+          "line_start": 1553,
+          "message": "Equality comparison on potentially timing-sensitive data. Use a constant-time comparison (e.g., hmac.compare_digest, MessageDigest.isEqual, crypto_memcmp).",
+          "metadata": {
+            "confidence": 0.7,
+            "confidence_label": "medium",
+            "left_token_hit": false,
+            "line_token_hit": true,
+            "post_processor": "comparison_context_analyzer",
+            "right_token_hit": false
+          },
+          "reachability": "unknown",
+          "rule_id": "deva.cwe-208.javascript-timing-comparison",
+          "severity": "MEDIUM",
+          "snippet": "    if (typeof fetchAllContent === 'function' && window.S && S.token) {",
+          "triage_confidence": 0.0,
+          "triage_label": "untriaged",
+          "triage_reasoning": null
         }
       ],
-      "sha256": "8d73b1821760a9eda0059a6c86f66d0e9849a81b5846fd6a7ac390a46ff4fd15"
+      "sha256": "c46d49f1eadc3785894a313b74e3e789bab46667dbbc4e7c962b3930a97801e7"
     },
     "D:\\Aulert\\script-landing.js": {
       "findings": [
@@ -773,7 +798,7 @@
     },
     "D:\\Aulert\\styles.css": {
       "findings": [],
-      "sha256": "5f0db29865f42f7b9bee2c65a827434d09c283f0a310f45b67fd3ce589c9bde7"
+      "sha256": "62c06afb8e3a317915225b0440b87e7969e620cfcf68dd4efc1feac3284dd7ef"
     },
     "D:\\Aulert\\tab-cal.html": {
       "findings": [],
@@ -797,7 +822,7 @@
     },
     "D:\\Aulert\\terms.html": {
       "findings": [],
-      "sha256": "9490f0cb6ee7ab2e9f9fae7ea19d054e14494ecbd5256572c46d6ab2ee80e390"
+      "sha256": "bf0c1949d9118a4daa61f75bc9164f4cb6ec22b7392a89c72024dac40837e4ee"
     },
     "D:\\Aulert\\vercel.json": {
       "findings": [],

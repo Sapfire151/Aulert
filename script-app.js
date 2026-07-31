@@ -125,6 +125,16 @@ function saveRead() { localStorage.setItem('aul_read', JSON.stringify([...S.read
 function saveSeen() { localStorage.setItem('aul_seen', JSON.stringify([...S.seenIds])); }
 function saveSettings() { localStorage.setItem('aul_settings', JSON.stringify(S.settings)); }
 
+// Per-course, per-content-type last-seen timestamps for incremental fetching.
+// Keys are "courseId_type" (e.g. "abc123_announcements"). Values are ISO strings.
+function loadLastSeen() {
+  try { return JSON.parse(localStorage.getItem('aul_lastseen') || '{}'); }
+  catch { return {}; }
+}
+function saveLastSeen(map) {
+  localStorage.setItem('aul_lastseen', JSON.stringify(map));
+}
+
 const courseById = id => S.courses.find(c => c.id === id) || { color: 'var(--violet)', name: 'Unknown', abbr: '?', section: '' };
 
 /* ════════════════════════════════════════════
@@ -460,17 +470,19 @@ async function loadEverything(forceFetch = false) {
   const cacheAge = cachedTime ? (Date.now() - parseInt(cachedTime, 10)) : Infinity;
   const isFresh = cacheAge < (5 * 60 * 1000);
 
-  // If we have a fresh cache and aren't forcing a fetch, we are done immediately!
   if (hasValidCache && isFresh && !forceFetch) {
-    console.log('Using fresh cache (age:', Math.round(cacheAge/1000), 's). API fetch skipped.');
+    console.log('[Aulert] Using fresh cache (age:', Math.round(cacheAge/1000), 's). API fetch skipped.');
     return;
   }
 
+  // Stale but valid cache + no force: run incremental fetch only (skip user/course re-fetch).
   if (hasValidCache && !forceFetch) {
-    console.log('Cache is stale. Fetching updates silently in background...');
-    // We already rendered the cache above, so we can fetch silently.
+    console.log('[Aulert] Cache is stale. Running incremental fetch in background...');
+    await fetchAllContent(false, true); // incremental = true
+    return;
   }
 
+  // No cache or forceFetch: full re-fetch of user, courses, and all content.
   const [user, courseResp] = await Promise.all([
     fetchUserInfo(),
     classroomApi('courses?courseStates=ACTIVE&pageSize=30'),
@@ -489,28 +501,88 @@ async function loadEverything(forceFetch = false) {
   }));
   localStorage.setItem('aul_cache_courses', JSON.stringify(S.courses));
 
-  await fetchAllContent(true);
+  // Full fetch (not incremental) — we just rebuilt the course list from scratch.
+  await fetchAllContent(true, false);
 }
 
-async function fetchAllContent(initial = false) {
-  const gmailComments = await fetchGmailComments().catch(e => []);
-  let newNotifs = [...gmailComments];
-  let newDeadlines = [];
+
+/**
+ * fetchAllContent — fetches course data and updates the feed.
+ *
+ * @param {boolean} initial   true on first load; suppresses per-item toast notifications.
+ * @param {boolean} isIncremental  when true, only items newer than lastSeen timestamps are
+ *                                  merged into the cache. Skips re-render if nothing changed.
+ *                                  Set to false for a forced full re-fetch.
+ */
+async function fetchAllContent(initial = false, isIncremental = false) {
+  const lastSeen = isIncremental ? loadLastSeen() : {}; // empty map = treat all as new
+
+  const gmailComments = await fetchGmailComments().catch(() => []);
+
+  // For incremental mode, gmail comments are always merged (no updateTime to compare).
+  let incomingNotifs = [...gmailComments];
+  let incomingDeadlines = [];
+  let anyNewData = gmailComments.length > 0 && !isIncremental;
 
   for (let i = 0; i < S.courses.length; i += 2) {
     const batch = S.courses.slice(i, i + 2);
-    const batchResults = await Promise.allSettled(batch.map(fetchCourse));
-    
+    const batchResults = await Promise.allSettled(
+      batch.map(c => fetchCourse(c, lastSeen, isIncremental))
+    );
+
     batchResults.forEach(r => {
       if (r.status !== 'fulfilled') return;
-      newNotifs.push(...r.value.notifs);
-      newDeadlines.push(...r.value.deadlines);
+      const { notifs, deadlines, hasNew } = r.value;
+      incomingNotifs.push(...notifs);
+      incomingDeadlines.push(...deadlines);
+      if (hasNew) anyNewData = true;
     });
 
-    newNotifs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    // Save the updated lastSeen map after each batch so progress isn't lost.
+    if (isIncremental) saveLastSeen(lastSeen);
 
+    // Skip remaining work for this batch iteration if nothing changed.
+    if (isIncremental && !anyNewData) {
+      if (i + 2 < S.courses.length) await new Promise(r => setTimeout(r, 400));
+      continue;
+    }
+
+    // ── Merge incoming items into the existing cache ──────────────────────
+    // In incremental mode, incoming items are only the changed/new ones; merge
+    // them into S.notifs by id. In full-fetch mode, incomingNotifs is the
+    // complete replacement set.
+    let mergedNotifs;
+    if (isIncremental) {
+      mergedNotifs = [...S.notifs]; // start from cached items
+      incomingNotifs.forEach(incoming => {
+        const idx = mergedNotifs.findIndex(n => n.id === incoming.id);
+        if (idx >= 0) {
+          mergedNotifs[idx] = incoming; // update in-place
+        } else {
+          mergedNotifs.unshift(incoming); // prepend new item
+        }
+      });
+    } else {
+      mergedNotifs = incomingNotifs; // full replacement
+    }
+
+    mergedNotifs.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    let mergedDeadlines;
+    if (isIncremental) {
+      mergedDeadlines = [...S.deadlines];
+      incomingDeadlines.forEach(incoming => {
+        const idx = mergedDeadlines.findIndex(d => d.notifId === incoming.notifId);
+        if (idx >= 0) mergedDeadlines[idx] = incoming;
+        else mergedDeadlines.push(incoming);
+      });
+    } else {
+      mergedDeadlines = incomingDeadlines;
+    }
+
+    // ── Apply feed filters ────────────────────────────────────────────────
     const now = new Date();
-    let filteredNotifs = newNotifs.filter(n => {
+    const filteredNotifs = mergedNotifs.filter(n => {
       if (n.type === 'assignment') {
         if (n.due) {
           const diff = (now - n.due) / 86400000;
@@ -526,11 +598,12 @@ async function fetchAllContent(initial = false) {
       return true;
     });
 
-    let filteredDeadlines = newDeadlines.filter(dl => {
+    const filteredDeadlines = mergedDeadlines.filter(dl => {
       const diff = (now - dl.date) / 86400000;
       return diff <= 30;
     });
 
+    // ── Toast notifications for brand-new unseen items ────────────────────
     if (!initial) {
       filteredNotifs
         .filter(n => !S.seenIds.has(n.id))
@@ -547,7 +620,7 @@ async function fetchAllContent(initial = false) {
 
     S.notifs = filteredNotifs;
     S.deadlines = filteredDeadlines;
-    
+
     localStorage.setItem('aul_cache_notifs', JSON.stringify(S.notifs));
     localStorage.setItem('aul_cache_deadlines', JSON.stringify(S.deadlines));
     localStorage.setItem('aul_cache_time', Date.now().toString());
@@ -556,18 +629,45 @@ async function fetchAllContent(initial = false) {
     if (typeof renderSidebar === 'function') renderSidebar();
     if (typeof updatePip === 'function') updatePip();
 
-    if (i + 2 < S.courses.length) {
-      await new Promise(r => setTimeout(r, 400));
-    }
+    if (i + 2 < S.courses.length) await new Promise(r => setTimeout(r, 400));
+  }
+
+  if (isIncremental && !anyNewData) {
+    console.log('[Aulert] Incremental fetch complete — no changes detected, cache unchanged.');
   }
 
   if (initial && typeof renderClasses === 'function') renderClasses();
   if (S.settings.gcalSync) gcalSyncAll();
 }
 
-async function fetchCourse(course) {
+/**
+ * fetchCourse — fetches all content for a single course and returns notifs + deadlines.
+ *
+ * @param {object}  course          Course object from S.courses.
+ * @param {object}  lastSeen        Map of "courseId_type" → ISO timestamp (mutated in place).
+ * @param {boolean} isIncremental   When true, only items newer than lastSeen are returned.
+ *                                   lastSeen timestamps are updated to the newest item seen.
+ * @returns {{ notifs, deadlines, hasNew }}
+ */
+async function fetchCourse(course, lastSeen = {}, isIncremental = false) {
   const notifs = [];
   const deadlines = [];
+
+  // Helper: returns true if the item's effective timestamp is newer than lastSeen.
+  const isNewer = (isoTime, typeKey) => {
+    if (!isIncremental || !isoTime) return true;
+    const prev = lastSeen[typeKey];
+    return !prev || new Date(isoTime) > new Date(prev);
+  };
+
+  // Helper: advance the stored lastSeen for this typeKey if isoTime is newer.
+  const advanceLastSeen = (isoTime, typeKey) => {
+    if (!isoTime) return;
+    const prev = lastSeen[typeKey];
+    if (!prev || new Date(isoTime) > new Date(prev)) {
+      lastSeen[typeKey] = isoTime;
+    }
+  };
 
   const [ann, cw, mat, subs] = await Promise.allSettled([
     classroomApi(`courses/${course.id}/announcements?pageSize=30&orderBy=updateTime+desc`),
@@ -585,8 +685,16 @@ async function fetchCourse(course) {
     });
   }
 
+  const annKey = `${course.id}_announcements`;
   if (ann.status === 'fulfilled') {
     (ann.value.announcements || []).forEach(a => {
+      // Always advance lastSeen to track the newest item we've seen from the API.
+      const effectiveTime = (a.updateTime && a.updateTime !== a.creationTime) ? a.updateTime : a.creationTime;
+      advanceLastSeen(effectiveTime, annKey);
+
+      // In incremental mode, skip items we've already processed.
+      if (!isNewer(effectiveTime, annKey) && isIncremental) return;
+
       const firstLine = (a.text || '').split('\r\n').find(l => l.trim()) || 'New Announcement';
       notifs.push({
         id: `ann-${a.id}`,
@@ -615,9 +723,15 @@ async function fetchCourse(course) {
     });
   }
 
+  const cwKey = `${course.id}_coursework`;
   if (cw.status === 'fulfilled') {
     (cw.value.courseWork || []).forEach(w => {
       if (turnedInIds.has(w.id)) return;
+      const effectiveTime = w.updateTime || w.creationTime;
+      advanceLastSeen(effectiveTime, cwKey);
+
+      if (!isNewer(effectiveTime, cwKey) && isIncremental) return;
+
       const obj = {
         id: `cw-${w.id}`,
         type: 'assignment',
@@ -669,8 +783,14 @@ async function fetchCourse(course) {
     });
   }
 
+  const matKey = `${course.id}_materials`;
   if (mat.status === 'fulfilled') {
     (mat.value.courseWorkMaterial || []).forEach(m => {
+      const effectiveTime = (m.updateTime && m.updateTime !== m.creationTime) ? m.updateTime : m.creationTime;
+      advanceLastSeen(effectiveTime, matKey);
+
+      if (!isNewer(effectiveTime, matKey) && isIncremental) return;
+
       notifs.push({
         id: `mat-${m.id}`,
         type: 'material',
@@ -699,7 +819,12 @@ async function fetchCourse(course) {
     });
   }
 
-  return { notifs, deadlines };
+  const hasNew = notifs.length > 0 || deadlines.length > 0;
+  if (isIncremental) {
+    console.log(`[Aulert] Incremental fetch for ${course.name}: ${hasNew ? notifs.length + ' new/updated item(s)' : 'no changes'}`);
+  }
+
+  return { notifs, deadlines, hasNew };
 }
 
 async function fetchGmailComments() {

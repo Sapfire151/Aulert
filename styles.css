@@ -107,11 +107,11 @@
   --r-sm: 12px;
   --r-pill: 999px;
   --ease: cubic-bezier(.23, 1, .32, 1);
-  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
-  --ease-drawer: cubic-bezier(.16, 1, .3, 1);
-  --motion-press: 160ms;
-  --motion-ui: 220ms;
-  --motion-panel: 260ms;
+  --ease-in-out: cubic-bezier(.77, 0, .175, 1);
+  --ease-drawer: cubic-bezier(.32, .72, 0, 1);
+  --motion-press: 220ms;
+  --motion-ui: 280ms;
+  --motion-panel: 360ms;
   --spring: cubic-bezier(.23, 1, .32, 1);
   --ff-head: 'Bricolage Grotesque', sans-serif;
   --ff-body: 'Inter', sans-serif;
@@ -301,7 +301,7 @@ body::before {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all .2s var(--ease);
+  transition: color .2s var(--ease), background-color .2s var(--ease), border-color .2s var(--ease), opacity .2s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease);
   border: none;
 }
 
@@ -557,7 +557,7 @@ body::before {
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  transition: all .25s var(--spring);
+  transition: transform .25s var(--spring), box-shadow .25s var(--spring), background .25s, color .25s, border-color .25s;
   border: none;
   letter-spacing: -.2px;
 }
@@ -849,7 +849,7 @@ body::before {
   background: var(--surface);
   border: 1px solid var(--rim-2);
   backdrop-filter: var(--blur);
-  transition: all .25s var(--ease);
+  transition: color .25s var(--ease), background-color .25s var(--ease), border-color .25s var(--ease), opacity .25s var(--ease), transform .25s var(--ease), box-shadow .25s var(--ease);
 }
 
 .feat-card:hover {
@@ -1139,7 +1139,7 @@ body::before {
   font-weight: 600;
   border: none;
   cursor: pointer;
-  transition: all .2s var(--ease);
+  transition: color .2s var(--ease), background-color .2s var(--ease), border-color .2s var(--ease), opacity .2s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease);
   box-shadow: 0 2px 8px rgba(0, 0, 0, .15);
 }
 
@@ -1221,7 +1221,7 @@ body::before {
   cursor: pointer;
   border: none;
   background: transparent;
-  transition: all .32s var(--spring);
+  transition: color .32s var(--spring), background-color .32s var(--spring), border-color .32s var(--spring), opacity .32s var(--spring), transform .32s var(--spring), box-shadow .32s var(--spring);
   white-space: nowrap;
 }
 
@@ -1253,6 +1253,21 @@ body::before {
   100% {
     transform: scale(1);
   }
+}
+
+/* Generic rotation used by loading spinners (e.g. "Connecting…", refresh icon) */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin {
+  animation: spin .8s linear infinite;
 }
 
 .icon-btn svg {
@@ -1289,7 +1304,7 @@ body::before {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all .2s var(--ease);
+  transition: color .2s var(--ease), background-color .2s var(--ease), border-color .2s var(--ease), opacity .2s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease);
   position: relative;
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
@@ -1323,7 +1338,7 @@ body::before {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all .2s var(--ease);
+  transition: color .2s var(--ease), background-color .2s var(--ease), border-color .2s var(--ease), opacity .2s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease);
   font-size: 17px;
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
@@ -1344,7 +1359,7 @@ body::before {
   background: var(--surface);
   border: 1px solid var(--rim-2);
   cursor: pointer;
-  transition: all .2s;
+  transition: color .2s, background-color .2s, border-color .2s, opacity .2s, transform .2s, box-shadow .2s;
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
 }
@@ -1479,7 +1494,7 @@ body::before {
   border: 1px solid var(--rim-2);
   cursor: pointer;
   font-size: 13px;
-  transition: all .15s var(--ease);
+  transition: color .15s var(--ease), background-color .15s var(--ease), border-color .15s var(--ease), opacity .15s var(--ease), transform .15s var(--ease), box-shadow .15s var(--ease);
 }
 
 .page-btn:hover {
@@ -1526,7 +1541,7 @@ body::before {
   font-family: inherit;
   color: var(--text-2);
   cursor: pointer;
-  transition: all .18s var(--ease);
+  transition: color .18s var(--ease), background-color .18s var(--ease), border-color .18s var(--ease), opacity .18s var(--ease), transform .18s var(--ease), box-shadow .18s var(--ease);
   white-space: nowrap;
   flex-shrink: 0;
   backdrop-filter: var(--blur);
@@ -1760,7 +1775,7 @@ body::before {
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all .2s var(--ease);
+  transition: color .2s var(--ease), background-color .2s var(--ease), border-color .2s var(--ease), opacity .2s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease);
 }
 
 .mnav-add-cal:hover {
@@ -1783,7 +1798,7 @@ body::before {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all .2s var(--ease);
+  transition: color .2s var(--ease), background-color .2s var(--ease), border-color .2s var(--ease), opacity .2s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease);
   font-family: inherit;
   color: inherit;
   padding: 0;
@@ -1844,7 +1859,7 @@ body::before {
   padding: 4px 2px 3px;
   cursor: pointer;
   min-height: 36px;
-  transition: all .15s var(--ease);
+  transition: color .15s var(--ease), background-color .15s var(--ease), border-color .15s var(--ease), opacity .15s var(--ease), transform .15s var(--ease), box-shadow .15s var(--ease);
 }
 
 .cday:hover {
@@ -1915,7 +1930,7 @@ body::before {
   border: 1px solid var(--rim-2);
   backdrop-filter: var(--blur);
   cursor: pointer;
-  transition: all .2s var(--ease);
+  transition: color .2s var(--ease), background-color .2s var(--ease), border-color .2s var(--ease), opacity .2s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease);
 }
 
 .dl-row:hover {
@@ -2323,7 +2338,7 @@ body::before {
 
 /* No transition during drag - applied only when idle */
 .qtr-fill.qtr-animate {
-  transition: left .15s var(--ease), width .15s var(--ease);
+  transition: none;
 }
 
 .qtr-thumb {
@@ -2430,7 +2445,7 @@ body::before {
   inset: 0;
   border-radius: 25px;
   background: rgba(255, 255, 255, .12);
-  transition: all .22s var(--ease);
+  transition: color .22s var(--ease), background-color .22s var(--ease), border-color .22s var(--ease), opacity .22s var(--ease), transform .22s var(--ease), box-shadow .22s var(--ease);
 }
 
 [data-theme="light"] .tog-track {
@@ -2559,7 +2574,7 @@ body::before {
   font-size: 12px;
   font-weight: 700;
   cursor: pointer;
-  transition: all .2s;
+  transition: color .2s, background-color .2s, border-color .2s, opacity .2s, transform .2s, box-shadow .2s;
 }
 
 .disc-btn:hover {
@@ -2753,7 +2768,7 @@ body::before {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all .2s;
+  transition: color .2s, background-color .2s, border-color .2s, opacity .2s, transform .2s, box-shadow .2s;
 }
 
 .sa-ghost:hover {
@@ -2790,7 +2805,8 @@ body::before {
   box-shadow: 0 16px 50px rgba(0, 0, 0, .45);
   transform: translateX(370px);
   opacity: 0;
-  transition: transform .38s var(--spring), opacity .25s, margin .3s ease;
+  transition: transform .38s var(--spring), opacity .25s ease;
+  will-change: transform, opacity;
   pointer-events: auto;
 }
 
@@ -2878,11 +2894,15 @@ body::before {
 /* ─── EMPTY STATE ─── */
 .empty-s {
   text-align: center;
-  padding: 64px 20px;
+  padding: 48px 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  margin: 18px 0;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: color-mix(in srgb, var(--bg-2) 76%, transparent);
 }
 
 .empty-s h3 {
@@ -2896,7 +2916,10 @@ body::before {
   font-size: 13px;
   color: var(--text-3);
   line-height: 1.6;
+  max-width: 42ch;
 }
+
+.empty-s-compact { padding: 26px 20px; margin: 10px 0; }
 
 /* ─── SIMULATE INCOMING BADGE ─── */
 
@@ -3154,7 +3177,7 @@ body::before {
   padding: 4px 11px;
   border-radius: var(--r-pill);
   cursor: pointer;
-  transition: all .15s;
+  transition: color .15s, background-color .15s, border-color .15s, opacity .15s, transform .15s, box-shadow .15s;
 }
 
 .np-mark-all:hover {
@@ -3172,7 +3195,7 @@ body::before {
   justify-content: center;
   cursor: pointer;
   color: var(--text-3);
-  transition: all .15s;
+  transition: color .15s, background-color .15s, border-color .15s, opacity .15s, transform .15s, box-shadow .15s;
 }
 
 .np-close-btn:hover {
@@ -3296,7 +3319,7 @@ body::before {
   font-weight: 700;
   color: var(--text-2);
   cursor: pointer;
-  transition: all .15s;
+  transition: color .15s, background-color .15s, border-color .15s, opacity .15s, transform .15s, box-shadow .15s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3450,7 +3473,7 @@ body::before {
   display: flex;
   align-items: center;
   gap: 12px;
-  transition: all .2s var(--ease);
+  transition: color .2s var(--ease), background-color .2s var(--ease), border-color .2s var(--ease), opacity .2s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease);
 }
 
 .dstat:hover {
@@ -4312,7 +4335,7 @@ body::before {
 .faq-a {
   max-height: 0;
   overflow: hidden;
-  transition: max-height .45s cubic-bezier(.25, .1, .25, 1);
+  transition: max-height 260ms var(--ease), opacity 180ms var(--ease);
   font-size: 14px;
   color: var(--text-2);
   line-height: 1.75;
@@ -4608,15 +4631,6 @@ body::before {
 .ripple-host {
   position: relative;
   overflow: hidden;
-}
-
-.ripple-wave {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, .25);
-  transform: scale(0);
-  animation: ripple-anim .55s linear;
-  pointer-events: none;
 }
 
 @keyframes ripple-anim {
@@ -4939,7 +4953,7 @@ body::before {
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: all .2s;
+  transition: color .2s, background-color .2s, border-color .2s, opacity .2s, transform .2s, box-shadow .2s;
   text-decoration: none;
 }
 
@@ -5033,7 +5047,7 @@ body::before {
   }
 
   100% {
-    transform: scale(0) translate(var(--sx), var(--sy));
+    transform: scale(.95) translate(var(--sx), var(--sy));
     opacity: 0;
   }
 }
@@ -5144,7 +5158,7 @@ body::before {
 
 @keyframes particleFloat {
   0% {
-    transform: translateY(100vh) scale(0);
+    transform: translateY(100vh) scale(.95);
     opacity: 0;
   }
 
@@ -6464,8 +6478,13 @@ body::before {
 }
 
 .ripple-wave {
+  position: absolute;
+  border-radius: 50%;
   background: rgba(255, 255, 255, .15);
+  transform: scale(.95);
   animation: ripple-anim .65s cubic-bezier(.25, .1, .25, 1);
+  will-change: transform, opacity;
+  pointer-events: none;
 }
 
 /* Tab active line — smoother */
@@ -6519,7 +6538,7 @@ body::before {
   }
 
   100% {
-    transform: scale(0) translate(var(--sx), var(--sy));
+    transform: scale(.95) translate(var(--sx), var(--sy));
     opacity: 0;
   }
 }
@@ -6550,7 +6569,7 @@ body::before {
 /* Particle float — very subtle */
 @keyframes particleFloat {
   0% {
-    transform: translateY(100vh) scale(0);
+    transform: translateY(100vh) scale(.95);
     opacity: 0;
   }
 
@@ -7025,7 +7044,7 @@ body::before {
 .fbk-quality-fill {
   height: 100%;
   border-radius: 99px;
-  transition: width .4s cubic-bezier(.34, 1.56, .64, 1), background .4s;
+  transition: background-color var(--motion-ui) var(--ease);
 }
 
 .fbk-quality-hint {
@@ -7102,7 +7121,7 @@ body::before {
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  transition: all .25s var(--spring);
+  transition: color .25s var(--spring), background-color .25s var(--spring), border-color .25s var(--spring), opacity .25s var(--spring), transform .25s var(--spring), box-shadow .25s var(--spring);
   background: #2563EB;
   color: #fff;
   box-shadow: 0 4px 20px rgba(37, 99, 235, .35);
@@ -7265,7 +7284,7 @@ body::before {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all .2s;
+  transition: color .2s, background-color .2s, border-color .2s, opacity .2s, transform .2s, box-shadow .2s;
 }
 
 .fbk-again-btn:hover {
@@ -7454,7 +7473,7 @@ body::before {
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
-  transition: all .2s;
+  transition: color .2s, background-color .2s, border-color .2s, opacity .2s, transform .2s, box-shadow .2s;
 }
 
 .com-add-btn:hover {
@@ -7592,7 +7611,7 @@ body::before {
   border-radius: var(--r-pill);
   cursor: pointer;
   border: none;
-  transition: all .15s;
+  transition: color .15s, background-color .15s, border-color .15s, opacity .15s, transform .15s, box-shadow .15s;
 }
 
 .com-req-btn.accept {
@@ -7636,7 +7655,7 @@ body::before {
   gap: 10px;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: all .18s;
+  transition: color .18s, background-color .18s, border-color .18s, opacity .18s, transform .18s, box-shadow .18s;
 }
 
 .com-friend-row:hover {
@@ -7926,7 +7945,7 @@ body::before {
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all .2s;
+  transition: color .2s, background-color .2s, border-color .2s, opacity .2s, transform .2s, box-shadow .2s;
 }
 
 .com-unfriend-btn:hover {
@@ -7946,7 +7965,7 @@ body::before {
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all .2s;
+  transition: color .2s, background-color .2s, border-color .2s, opacity .2s, transform .2s, box-shadow .2s;
   font-family: var(--ff-body);
 }
 
@@ -8264,7 +8283,7 @@ body::before {
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: all .15s;
+  transition: color .15s, background-color .15s, border-color .15s, opacity .15s, transform .15s, box-shadow .15s;
   text-align: left;
   display: flex;
   align-items: center;
@@ -8303,7 +8322,7 @@ body::before {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all .2s;
+  transition: color .2s, background-color .2s, border-color .2s, opacity .2s, transform .2s, box-shadow .2s;
   font-family: var(--ff-body);
 }
 
@@ -8321,7 +8340,7 @@ body::before {
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: all .2s;
+  transition: color .2s, background-color .2s, border-color .2s, opacity .2s, transform .2s, box-shadow .2s;
   font-family: var(--ff-body);
 }
 
@@ -8588,7 +8607,7 @@ body::before {
   justify-content: center;
   color: #fff;
   flex-shrink: 0;
-  transition: all .2s var(--spring);
+  transition: color .2s var(--spring), background-color .2s var(--spring), border-color .2s var(--spring), opacity .2s var(--spring), transform .2s var(--spring), box-shadow .2s var(--spring);
 }
 
 .com-send-btn:hover {
@@ -8613,7 +8632,7 @@ body::before {
   justify-content: center;
   color: var(--text-3);
   flex-shrink: 0;
-  transition: all .2s var(--spring);
+  transition: color .2s var(--spring), background-color .2s var(--spring), border-color .2s var(--spring), opacity .2s var(--spring), transform .2s var(--spring), box-shadow .2s var(--spring);
 }
 
 .com-attach-btn:hover {
@@ -8737,7 +8756,7 @@ body::before {
 
 @keyframes badgePop {
   from {
-    transform: scale(0) rotate(-12deg);
+    transform: scale(.95) rotate(-12deg);
     opacity: 0;
   }
 
@@ -8778,7 +8797,7 @@ body::before {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all .2s var(--spring);
+  transition: color .2s var(--spring), background-color .2s var(--spring), border-color .2s var(--spring), opacity .2s var(--spring), transform .2s var(--spring), box-shadow .2s var(--spring);
   line-height: 1;
   flex-shrink: 0;
 }
@@ -8798,7 +8817,7 @@ body::before {
   gap: 10px;
   cursor: pointer;
   border: 1px solid transparent;
-  transition: all .18s;
+  transition: color .18s, background-color .18s, border-color .18s, opacity .18s, transform .18s, box-shadow .18s;
 }
 
 .com-group-row:hover {
@@ -8988,7 +9007,7 @@ body::before {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all .2s;
+  transition: color .2s, background-color .2s, border-color .2s, opacity .2s, transform .2s, box-shadow .2s;
 }
 
 .com-modal-cancel:hover {
@@ -9004,7 +9023,7 @@ body::before {
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: all .2s var(--spring);
+  transition: color .2s var(--spring), background-color .2s var(--spring), border-color .2s var(--spring), opacity .2s var(--spring), transform .2s var(--spring), box-shadow .2s var(--spring);
   display: flex;
   align-items: center;
   gap: 7px;
@@ -9072,7 +9091,7 @@ body::before {
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all .2s;
+  transition: color .2s, background-color .2s, border-color .2s, opacity .2s, transform .2s, box-shadow .2s;
 }
 
 .com-invite-copy-btn:hover {
@@ -9136,7 +9155,7 @@ body::before {
   font-size: 11px;
   font-weight: 700;
   cursor: pointer;
-  transition: all .2s;
+  transition: color .2s, background-color .2s, border-color .2s, opacity .2s, transform .2s, box-shadow .2s;
   border: 1px solid;
   white-space: nowrap;
 }
@@ -9247,7 +9266,7 @@ body::before {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all .2s;
+  transition: color .2s, background-color .2s, border-color .2s, opacity .2s, transform .2s, box-shadow .2s;
   color: var(--text-2);
 }
 
@@ -9408,7 +9427,7 @@ body::before {
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
-  transition: all .2s var(--spring);
+  transition: color .2s var(--spring), background-color .2s var(--spring), border-color .2s var(--spring), opacity .2s var(--spring), transform .2s var(--spring), box-shadow .2s var(--spring);
 }
 
 .com-join-accept:hover {
@@ -9425,7 +9444,7 @@ body::before {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all .2s;
+  transition: color .2s, background-color .2s, border-color .2s, opacity .2s, transform .2s, box-shadow .2s;
 }
 
 .com-join-decline:hover {
@@ -9833,7 +9852,7 @@ body::before {
   }
 
   100% {
-    transform: translate(-5px, -6px) scale(0);
+    transform: translate(-5px, -6px) scale(.95);
     opacity: 0;
   }
 }
@@ -9845,7 +9864,7 @@ body::before {
   }
 
   100% {
-    transform: translate(5px, -6px) scale(0);
+    transform: translate(5px, -6px) scale(.95);
     opacity: 0;
   }
 }
@@ -9857,7 +9876,7 @@ body::before {
   }
 
   100% {
-    transform: translate(-6px, -5px) scale(0);
+    transform: translate(-6px, -5px) scale(.95);
     opacity: 0;
   }
 }
@@ -10853,23 +10872,33 @@ body:has(#appBody) .bg-fx {
   }
 }
 
+/* Tab-icon morph/animation wiring: the calFlipAnim/hwCheckAnim/comWaveAnim/fbkPopAnim
+   helpers add these classes to the tab button, but their CSS targets sub-elements
+   (.cal-body, .hw-board, .com-*, .fbk-*) that don't exist inside a tab. Animate the
+   tab's own icon svg instead so the toggle actually shows motion. */
+/* Mobile tabs use MorphIcon glyphs (no bespoke sub-elements), so animate the
+   whole icon on tab interaction. Desktop tabs keep their richer sub-element
+   animations (.cal-body/.cal-num/.hw-check-draw), so they are intentionally
+   excluded here to avoid a double animation. */
+.mob-tab.cal-flipping svg {
+  animation: calNumFlip .9s cubic-bezier(.25, 1, .5, 1) both !important;
+}
+.mob-tab.hw-checking svg {
+  animation: iconBounce .65s var(--spring) both !important;
+}
+.mob-tab.com-waving svg {
+  animation: comPersonPop .8s cubic-bezier(.34, 1.56, .64, 1) both !important;
+}
+.mob-tab.fbk-popping svg {
+  animation: fbkBodyPop .9s var(--spring) both !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: .01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-  }
-
-  .app-shell-skeleton::before {
-    display: none;
-  }
-
-  .app-ready .app-shell-skeleton {
-    transition-duration: 120ms;
-  }
+  html { scroll-behavior: auto; }
+  .auroraFollower, #auroraFollower, .particle, .ping-ring, .ripple-wave, .ticker-track, .bubble, .hero-orb { animation: none !important; }
+  .sheet, .modal-card, .confirm-card, .notif-panel, .push-toast, .snack, .hwdtp-panel, .reveal, .reveal-left, .reveal-right, .reveal-scale, .stagger > * { transform: none !important; }
+  .sheet-veil, .modal-veil, .confirm-veil, .sheet, .modal-card, .confirm-card, .notif-panel, .push-toast, .snack, .hwdtp-panel, .reveal, .reveal-left, .reveal-right, .reveal-scale, .stagger > * { transition: opacity 180ms var(--ease) !important; animation: none !important; }
+  .app-shell-skeleton::before { display: none; }
 }
 
 /* Skeleton Loading Animation */
@@ -10893,4 +10922,96 @@ body:has(#appBody) .bg-fx {
 .skeleton-box {
   background-color: var(--bg-3);
   animation: pulseSkeleton 1.5s ease-in-out infinite;
+}
+
+/* MorphIcon placeholder: hosts the React-rendered <svg> from morphicon-icons.js */
+.morph-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+  vertical-align: middle;
+}
+
+.morph-icon svg {
+  display: block;
+}
+
+/* ── Purposeful motion system ── */
+:root {
+  --ease: cubic-bezier(.23, 1, .32, 1);
+  --ease-in-out: cubic-bezier(.77, 0, .175, 1);
+  --ease-drawer: cubic-bezier(.32, .72, 0, 1);
+  --motion-press: 260ms;
+  --motion-ui: 360ms;
+  --motion-panel: 520ms;
+}
+
+.nav-tab, .mob-tab {
+  transition: color var(--motion-press) var(--ease), background-color var(--motion-press) var(--ease), border-color var(--motion-press) var(--ease), box-shadow var(--motion-press) var(--ease);
+}
+
+.sheet-veil, .modal-veil, .confirm-veil { transition: opacity 280ms var(--ease); }
+.sheet, .modal-card, .confirm-card { transition: transform 420ms var(--ease), opacity 320ms var(--ease); }
+.notif-panel { transform-origin: top right; transition: transform 320ms var(--ease), opacity 280ms var(--ease); }
+.push-toast { transition: transform 420ms var(--ease), opacity 320ms var(--ease); }
+.snack { transition: transform 380ms var(--ease), opacity 300ms var(--ease); }
+.hwdtp-panel { transform-origin: top right; animation-duration: 320ms; }
+.faq-icon { transition: transform var(--motion-ui) var(--ease), background-color var(--motion-ui) var(--ease); }
+.faq-a { transition: max-height 420ms var(--ease), opacity 300ms var(--ease); }
+.fbk-quality-fill, .qtr-fill { transition: background-color var(--motion-ui) var(--ease); }
+.tab-badge { animation: none; }
+.theme-switcher-btn svg, #navThemeBtn svg { transition: transform var(--motion-ui) var(--ease); }
+.mob-tab.cal-flipping svg, .mob-tab.hw-checking svg, .mob-tab.com-waving svg, .mob-tab.fbk-popping svg { animation: none !important; }
+.cal-flipping svg, .hw-checking svg, .com-waving svg, .fbk-popping svg { animation: none !important; }
+.reveal, .reveal-left, .reveal-right, .reveal-scale, .stagger > * { transition: opacity 480ms var(--ease), transform 480ms var(--ease); }
+@media (hover: none), (pointer: coarse) {
+  button:hover, .btn:hover, .btn-sm:hover, .icon-btn:hover, .nav-tab:hover, .mob-tab:hover, .chip:hover, .ncard:hover, .theme-switcher-btn:hover, .faq-q:hover { transform: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tab-badge { transform: none !important; }
+}
+
+/* ── Enhanced interactive motion ── */
+@media (hover: hover) and (pointer: fine) {
+  button, .btn, .btn-sm, .icon-btn, .nav-tab, .mob-tab, .chip, .ncard, .faq-q, .theme-switcher-btn { transition: transform var(--motion-ui) var(--ease), color var(--motion-ui) var(--ease), background-color var(--motion-ui) var(--ease), border-color var(--motion-ui) var(--ease), box-shadow var(--motion-ui) var(--ease); }
+}
+button:active, .btn:active, .btn-sm:active, .icon-btn:active, .nav-tab:active, .mob-tab:active, .chip:active, .ncard:active, .faq-q:active, .theme-switcher-btn:active { transform: scale(.97); }
+.feat-card, .compare-col, .demo-feat, .faq-item { transform-style: preserve-3d; transition: transform 520ms var(--ease), box-shadow 520ms var(--ease); }
+.btn-hero-primary, .btt { transition: transform 440ms var(--ease), box-shadow 440ms var(--ease); }
+@media (prefers-reduced-motion: reduce) { .feat-card, .compare-col, .demo-feat, .faq-item, .btn-hero-primary, .btt { transform: none !important; } }
+
+
+/* ── Settings notification status and fixed notification card ── */
+#p-set .sg-notify {
+  height: 300px;
+  min-height: 300px;
+  max-height: 300px;
+}
+
+#p-set .sg-notify .sg-body { flex: 1 1 auto; }
+#p-set .sg-notify .srow { flex: 1 1 0; }
+
+.snack.is-enabled {
+  background: rgba(34, 197, 94, .16);
+  border-color: rgba(34, 197, 94, .42);
+  color: #4ade80;
+}
+
+.snack.is-disabled {
+  background: rgba(239, 68, 68, .16);
+  border-color: rgba(239, 68, 68, .42);
+  color: #f87171;
+}
+
+[data-theme="light"] .snack.is-enabled {
+  background: rgba(22, 163, 74, .12);
+  border-color: rgba(22, 163, 74, .32);
+  color: #15803d;
+}
+
+[data-theme="light"] .snack.is-disabled {
+  background: rgba(220, 38, 38, .10);
+  border-color: rgba(220, 38, 38, .30);
+  color: #b91c1c;
 }

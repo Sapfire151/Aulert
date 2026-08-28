@@ -252,12 +252,14 @@ function toggleTheme() {
 function setThemeMode(mode) { toggleTheme(); } // compat shim
 
 function updateThemeIcon(mode) {
-  const moonSvg = `<path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
-  const sunSvg = `<circle cx="12" cy="12" r="5" stroke="currentColor" stroke-width="2"/><path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>`;
   const nextTheme = mode === 'dark' ? 'light' : 'dark';
-  document.querySelectorAll('[data-theme-toggle]').forEach((toggle) => {
-    const icon = toggle.querySelector('.theme-toggle-icon');
-    if (icon) icon.innerHTML = mode === 'dark' ? sunSvg : moonSvg;
+  const iconName = mode === 'dark' ? 'sun' : 'moon';
+  document.querySelectorAll('#globalThemeBtn, [data-theme-toggle]').forEach((toggle) => {
+    const el = toggle.querySelector('[data-morph-icon]');
+    if (el) {
+      el.dataset.icon = iconName;
+      if (window.MorphIcons) window.MorphIcons.set(el, iconName);
+    }
     toggle.setAttribute('aria-label', `Switch to ${nextTheme} mode`);
     toggle.setAttribute('title', `Switch to ${nextTheme} mode`);
   });
@@ -288,111 +290,34 @@ function updateThemeIcon(mode) {
   }, { passive: true });
 })();
 
-// ── Aurora cursor follower ──
+// ── Cursor follower, tilt, and magnetism (landing page; fine pointers only) ──
 (function () {
-  const el = document.getElementById('auroraFollower');
+  if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const el = document.getElementById("auroraFollower");
   if (!el) return;
-  let tx = window.innerWidth / 2, ty = window.innerHeight / 2;
-  let cx = tx, cy = ty;
-  document.addEventListener('mousemove', e => {
-    tx = e.clientX;
-    ty = e.clientY;
-  }, { passive: true });
-  function update() {
-    cx += (tx - cx) * 0.15;
-    cy += (ty - cy) * 0.15;
-    el.style.transform = `translate3d(${cx - 250}px, ${cy - 250}px, 0)`;
-    requestAnimationFrame(update);
-  }
-  requestAnimationFrame(update);
+  let tx = innerWidth / 2, ty = innerHeight / 2, cx = tx, cy = ty, raf = 0;
+  const update = () => { cx += (tx - cx) * .09; cy += (ty - cy) * .09; el.style.transform = `translate3d(${cx - 250}px, ${cy - 250}px, 0)`; raf = requestAnimationFrame(update); };
+  document.addEventListener("pointermove", (event) => { tx = event.clientX; ty = event.clientY; }, { passive: true });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) { cancelAnimationFrame(raf); raf = 0; } else if (!raf) raf = requestAnimationFrame(update); });
+  raf = requestAnimationFrame(update);
+})();
+
+(function () {
+  if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  document.querySelectorAll(".feat-card, .compare-col, .demo-feat, .faq-item").forEach((card) => {
+    let raf = 0, x = 0, y = 0;
+    card.addEventListener("pointermove", (event) => { const rect = card.getBoundingClientRect(); x = (event.clientX - rect.left) / rect.width - .5; y = (event.clientY - rect.top) / rect.height - .5; if (!raf) raf = requestAnimationFrame(() => { card.style.transform = `perspective(900px) rotateY(${x * 2.5}deg) rotateX(${-y * 2}deg) translateY(-2px)`; raf = 0; }); });
+    card.addEventListener("pointerleave", () => { card.style.transform = ""; });
+  });
+  document.querySelectorAll(".btn-hero-primary, .btt").forEach((button) => {
+    button.addEventListener("pointermove", (event) => { const rect = button.getBoundingClientRect(); button.style.transform = `translate(${(event.clientX - (rect.left + rect.width / 2)) * .06}px, ${(event.clientY - (rect.top + rect.height / 2)) * .06}px)`; });
+    button.addEventListener("pointerleave", () => { button.style.transform = ""; });
+  });
 })();
 
 // ── Cursor sparkle on click ──
 (function () {
 
-})();
-
-// ── Floating particles on landing ──
-(function () {
-  const land = document.getElementById('v-land');
-  if (!land) return;
-  function spawn() {
-    if (!land.classList.contains('show')) return;
-    const p = document.createElement('div');
-    p.classList.add('particle');
-    const size = 4 + cryptoRandom() * 10;
-    p.style.cssText = `
-      width:${size}px; height:${size}px;
-      left:${cryptoRandom() * 100}vw;
-      animation-duration:${8 + cryptoRandom() * 12}s;
-      animation-delay:${-cryptoRandom() * 8}s;
-      opacity:${0.15 + cryptoRandom() * .4};
-    `;
-    land.appendChild(p);
-    setTimeout(() => p.remove(), 22000);
-  }
-  for (let i = 0; i < 12; i++) spawn();
-  setInterval(() => { if (land.classList.contains('show')) spawn(); }, 2000);
-})();
-
-// ── Card 3D tilt on hover ──
-(function () {
-  function applyTilt(cards) {
-    cards.forEach(card => {
-      card.addEventListener('mousemove', e => {
-        const r = card.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width - .5;
-        const y = (e.clientY - r.top) / r.height - .5;
-        card.style.transform = `perspective(800px) rotateY(${x * 4}deg) rotateX(${-y * 3}deg) translateY(-3px)`;
-      });
-      card.addEventListener('mouseleave', () => {
-        card.style.transform = '';
-      });
-    });
-  }
-  // apply to feature cards, compare cols, demo feats, ncard
-  function initTilts() {
-    applyTilt(document.querySelectorAll('.feat-card, .compare-col, .demo-feat, .faq-item'));
-  }
-  initTilts();
-  // re-init after app launch
-  document.addEventListener('appLaunched', initTilts);
-})();
-
-// ── Magnetic effect on primary buttons ──
-(function () {
-  function magnetize(btns) {
-    btns.forEach(btn => {
-      btn.addEventListener('mousemove', e => {
-        const r = btn.getBoundingClientRect();
-        const dx = (e.clientX - (r.left + r.width / 2)) * .12;
-        const dy = (e.clientY - (r.top + r.height / 2)) * .12;
-        btn.style.transform = `translate(${dx}px, ${dy}px)`;
-      });
-      btn.addEventListener('mouseleave', () => {
-        btn.style.transform = '';
-      });
-    });
-  }
-  function initMagnets() {
-    magnetize(document.querySelectorAll('.btn-hero-primary, .btt'));
-  }
-  initMagnets();
-  document.addEventListener('appLaunched', initMagnets);
-})();
-
-// ── Ping ring on notif pip ──
-(function () {
-  function addPing() {
-    const pip = document.getElementById('pip');
-    if (!pip || pip.style.display === 'none') return;
-    pip.querySelectorAll('.ping-ring').forEach(r => r.remove());
-    const ring = document.createElement('div');
-    ring.classList.add('ping-ring');
-    pip.appendChild(ring);
-    ring.addEventListener('animationend', () => ring.remove());
-  }
-  setInterval(addPing, 2800);
 })();
 
 // ── Count-up animation for stat numbers ──
@@ -442,22 +367,6 @@ function updateThemeIcon(mode) {
   }, { passive: true });
 })();
 
-// ── Ripple effect on buttons ──
-(function () {
-  document.addEventListener('click', function (e) {
-    const btn = e.target.closest('button, .btn-hero, .btn-sm, .icon-btn, .chip, .nav-tab');
-    if (!btn) return;
-    btn.classList.add('ripple-host');
-    const r = document.createElement('span');
-    r.classList.add('ripple-wave');
-    const rect = btn.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height) * 2;
-    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX - rect.left - size / 2}px;top:${e.clientY - rect.top - size / 2}px`;
-    btn.appendChild(r);
-    r.addEventListener('animationend', () => r.remove());
-  });
-})();
-
 // ── IntersectionObserver scroll reveals ──
 (function () {
   const io = new IntersectionObserver((entries) => {
@@ -465,7 +374,6 @@ function updateThemeIcon(mode) {
       if (e.isIntersecting) {
         e.target.classList.add('visible');
       } else {
-        // Remove so elements re-animate when scrolled back into view
         e.target.classList.remove('visible');
       }
     });

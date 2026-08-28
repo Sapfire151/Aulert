@@ -209,11 +209,19 @@
     <a href="app.html#set" id="backBtn" class="btn-hero btn-hero-primary"
       style="display: inline-block; margin-top: 32px; text-decoration: none;">Back to Settings</a>
     <script>
-      const btn = document.getElementById('backBtn');
-      if (!document.referrer || !document.referrer.includes('app.html')) {
-        btn.href = 'index.html';
-        btn.textContent = 'Back to Home';
+      const btn = document.getElementById("backBtn");
+      const returnTo = new URLSearchParams(window.location.search).get("return") || sessionStorage.getItem("aulert_legal_return");
+      sessionStorage.removeItem("aulert_legal_return");
+      if (returnTo === "settings") btn.href = "app.html?tab=set#p-set";
+      if (returnTo !== "settings") {
+        btn.href = "index.html";
+        btn.textContent = "Back to Home";
       }
+      document.querySelectorAll("a[href=\"privacy.html\"], a[href=\"terms.html\"]").forEach((link) => {
+        link.href += returnTo === "settings" ? "?return=settings" : "?return=home";
+        link.removeAttribute("target");
+        link.removeAttribute("rel");
+      });
     </script>
 
     <div

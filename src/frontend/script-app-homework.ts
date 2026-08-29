@@ -677,7 +677,7 @@ function hwExportPDF() {
     <tbody>${rows}</tbody>
   </table>
   <div class="footer">Exported from Aulert</div>
-  <script>window.onload=()=>window.print();<\/script>
+  <script>window.onload=()=>window.print();</script>
   </body></html>`);
   win.document.close();
 }

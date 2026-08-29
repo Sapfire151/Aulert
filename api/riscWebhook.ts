@@ -69,4 +69,4 @@ export default createGatewayHandler(
     logger.error('Error processing RISC webhook', { message: error instanceof Error ? error.message : String(error) });
     res.status(500).send('Internal Server Error');
   }
-}
+});

@@ -186,4 +186,4 @@ export default createGatewayHandler(
     logger.error('Discord integration error', { message: error instanceof Error ? error.message : String(error) });
     res.status(400).json({ error: 'Unable to update Discord notifications' });
   }
-}
+});

@@ -16,5 +16,24 @@
     "security/detect-non-literal-fs-filename": "off",
     "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }]
   },
-  "ignorePatterns": ["node_modules/", "dist/", ".next/"]
+  "overrides": [
+    {
+      "files": ["script-*.js"],
+      "parserOptions": {
+        "sourceType": "script"
+      },
+      "globals": {
+        "firebase": "readonly",
+        "google": "readonly",
+        "lucide": "readonly",
+        "morphicons": "readonly",
+        "bootstrap": "readonly"
+      },
+      "rules": {
+        "no-undef": "off"
+      }
+    }
+  ],
+  "ignorePatterns": ["node_modules/", "dist/", ".next/", ".tsfrontend/"]
 }
+

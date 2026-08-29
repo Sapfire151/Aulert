@@ -17,7 +17,7 @@ export function getDb(): unknown {
     if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
       throw new Error('FIREBASE_SERVICE_ACCOUNT env var is required');
     }
-    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
     initializeApp({
       credential: cert(serviceAccount as Parameters<typeof cert>[0]),

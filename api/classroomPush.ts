@@ -1,6 +1,6 @@
 import crypto from 'crypto';
 import { dbSet } from './lib/digestCore';
-import { logger } from './lib/security';
+import { createGatewayHandler, logger } from './lib/security';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 /**
@@ -63,4 +63,4 @@ export default createGatewayHandler(
     logger.error('classroomPush failed', { message: e instanceof Error ? e.message : String(e) });
     res.status(500).json({ error: 'Internal server error' });
   }
-}
+});

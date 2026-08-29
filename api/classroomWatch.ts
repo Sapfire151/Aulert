@@ -3,7 +3,7 @@ import { OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
 import { CLIENT_ID } from './lib/digestCore';
 import { dbSet } from './lib/digestCore';
-import { logger } from './lib/security';
+import { createGatewayHandler, logger } from './lib/security';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 /**
@@ -43,57 +43,85 @@ export default createGatewayHandler(
     return;
   }
 
-  const expected = `Bearer ${process.env.PUSH_SECRET || ''}`;
-  const supplied = req.headers.authorization || '';
-  if (
-    supplied.length !== expected.length ||
-    !crypto.timingSafeEqual(Buffer.from(supplied), Buffer.from(expected))
-  ) {
-    res.status(401).json({ error: 'Unauthorized' });
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    res.status(401).json({ error: 'Missing or invalid authorization header' });
     return;
   }
+  const accessToken = authHeader.slice(7);
 
-  const body = (req.body ?? {}) as { accessToken?: unknown; userId?: unknown };
-  const accessToken = typeof body.accessToken === 'string' ? body.accessToken : null;
+  const body = (req.body ?? {}) as { userId?: unknown; courses?: unknown };
   const userId = typeof body.userId === 'string' && /^[0-9]{1,30}$/.test(body.userId) ? body.userId : null;
-  if (!accessToken || !userId) {
-    res.status(400).json({ error: 'accessToken and userId are required' });
+  const courses = Array.isArray(body.courses) ? (body.courses as Array<{ id: string; name?: string }>) : [];
+
+  if (!userId) {
+    res.status(400).json({ error: 'Invalid or missing userId' });
     return;
   }
 
-  const auth = new google.auth.OAuth2(CLIENT_ID, process.env.GOOGLE_CLIENT_SECRET);
-  auth.setCredentials({ access_token: accessToken });
-  const classroom: any = google.classroom({ version: 'v1', auth });
+  if (courses.length === 0) {
+    res.status(400).json({ error: 'No courses provided to watch' });
+    return;
+  }
 
   try {
-    const coursesRes = await classroom.courses.list({ courseStates: ['ACTIVE'], pageSize: 100 });
-    const courses = (coursesRes.data.courses as Array<{ id: string }>) || [];
-    const channels: WatchChannel[] = [];
-    const address = process.env.CLASSROOM_PUSH_ADDRESS;
-    const token = makeChannelToken(userId);
+    const auth = new OAuth2Client(CLIENT_ID);
+    auth.setCredentials({ access_token: accessToken });
+    const classroom = google.classroom({ version: 'v1', auth: auth as unknown as undefined }) as unknown as {
+      registrations?: {
+        create: (args: unknown) => Promise<{ data: { id?: string; expiration?: string } }>;
+      };
+      courses: {
+        announcements?: {
+          registerRegistration?: (args: unknown) => Promise<{ data: { id?: string; expiration?: string } }>;
+        };
+        courseWorkChanges?: {
+          registerRegistration?: (args: unknown) => Promise<{ data: { id?: string; expiration?: string } }>;
+        };
+      };
+    };
 
-    for (const course of courses) {
-      const resourceKinds = ['courseWork', 'announcements', 'courseWorkMaterials', 'studentSubmissions'];
-      for (const kind of resourceKinds) {
-        const channelId = `aulert-${kind}-${course.id}-${Date.now().toString(36)}`;
+    const token = makeChannelToken(userId);
+    const channels: WatchChannel[] = [];
+
+    // Register a watch for announcements and coursework on each active course
+    for (const course of courses.slice(0, 30)) {
+      if (!course.id) continue;
+      for (const kind of ['announcements', 'courseWorkChanges']) {
+        const channelId = `aul_${userId}_${course.id}_${kind}_${Date.now()}`;
         try {
-          const resp: any = await classroom.courses[kind].watch({
-            courseId: course.id,
-            requestBody: {
-              id: channelId,
-              type: 'web_hook',
-              address,
-              token,
-              expiration: Date.now() + 60 * 60 * 1000, // 1h; renew before expiry
-            },
-          });
-          channels.push({
-            kind,
-            courseId: course.id,
-            channelId,
-            resourceId: resp.data.resourceId,
-            expiration: resp.data.expiration,
-          });
+          const resp =
+            kind === 'announcements'
+              ? await classroom.courses.announcements?.registerRegistration?.({
+                  courseId: course.id,
+                  requestBody: {
+                    feed: {
+                      feedType: 'COURSE_ANNOUNCEMENTS_CHANGE',
+                      courseId: course.id,
+                    },
+                    cloudPubsubTopic: undefined,
+                  },
+                })
+              : await classroom.courses.courseWorkChanges?.registerRegistration?.({
+                  courseId: course.id,
+                  requestBody: {
+                    feed: {
+                      feedType: 'COURSE_WORK_CHANGES',
+                      courseId: course.id,
+                    },
+                    cloudPubsubTopic: undefined,
+                  },
+                });
+
+          if (resp?.data) {
+            channels.push({
+              kind,
+              courseId: course.id,
+              channelId,
+              resourceId: (resp.data.id as string) || '',
+              expiration: (resp.data.expiration as string) || '',
+            });
+          }
         } catch (e) {
           logger.warn(`watch(${kind}) failed for ${course.id}`, { message: e instanceof Error ? e.message : String(e) });
         }
@@ -110,4 +138,4 @@ export default createGatewayHandler(
     logger.error('classroomWatch failed', { message: e instanceof Error ? e.message : String(e) });
     res.status(500).json({ error: 'Failed to register watch' });
   }
-}
+});

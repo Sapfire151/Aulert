@@ -195,7 +195,7 @@ window.addEventListener('load', async () => {
     // Retry logic: attempt loadEverything up to 3 times with exponential backoff
     const MAX_RETRIES = 3;
     let attempt = 0;
-    async function tryLoad() {
+    const tryLoad = async () => {
       attempt++;
       try {
         await loadEverything();

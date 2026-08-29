@@ -31,7 +31,7 @@ export function applySecurityHeaders(res: ResponseLike): void {
   res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; img-src 'self' data: https:; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://accounts.google.com https://www.gstatic.com; connect-src 'self' https://*.googleapis.com https://www.googleapis.com https://securetoken.googleapis.com https://*.firebasedatabase.app https://discord.com https://discordapp.com; frame-src 'self' https://accounts.google.com;"
+    "default-src 'self'; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-inline' https://accounts.google.com https://www.gstatic.com; connect-src 'self' https://*.googleapis.com https://www.googleapis.com https://securetoken.googleapis.com https://*.firebasedatabase.app https://discord.com https://discordapp.com; frame-src 'self' https://accounts.google.com;"
   );
   res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
 }
@@ -153,38 +153,39 @@ export function validateInput(
   return errors.length ? { ok: false, errors } : { ok: true };
 }
 
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
 interface GatewayOptions {
   rateLimit?: { windowMs?: number; maxRequests?: number; name?: string };
   methods?: string[];
 }
 
-type HandlerFn = (req: unknown, res: unknown) => Promise<void> | void;
+export type HandlerFn = (req: VercelRequest, res: VercelResponse) => Promise<void> | void;
 
-/**
- * Gateway wrapper — the single seam every API handler should pass through.
- * Provides security headers, optional rate limiting, and uniform error handling.
- */
-export function createGatewayHandler(fn: HandlerFn, opts?: GatewayOptions): HandlerFn {
+export function createGatewayHandler(
+  arg1: HandlerFn | GatewayOptions,
+  arg2?: HandlerFn | GatewayOptions
+): (req: VercelRequest, res: VercelResponse) => Promise<void> {
+  const fn: HandlerFn = typeof arg1 === 'function' ? arg1 : (arg2 as HandlerFn);
+  const opts: GatewayOptions | undefined = typeof arg1 === 'function' ? (arg2 as GatewayOptions) : arg1;
   const methods = opts?.methods ?? ['GET', 'POST'];
   const limiter = opts?.rateLimit
     ? createRateLimiter({ name: opts.rateLimit.name ?? 'gateway', ...opts.rateLimit })
     : null;
 
-  return async function wrapped(req: unknown, res: unknown): Promise<void> {
-    const response = res as ResponseLike;
-    applySecurityHeaders(response);
+  return async function wrapped(req: VercelRequest, res: VercelResponse): Promise<void> {
+    applySecurityHeaders(res);
 
-    const request = req as { method?: string; ip?: string; headers?: Record<string, unknown> };
-    if (!methods.includes(request.method ?? '')) {
-      response.status(405).json({ error: 'Method Not Allowed' });
+    if (!methods.includes(req.method ?? '')) {
+      res.status(405).json({ error: 'Method Not Allowed' });
       return;
     }
 
     if (limiter) {
-      const key = String(request.ip ?? request.headers?.['x-forwarded-for'] ?? 'unknown');
+      const key = String((req as unknown as { ip?: string }).ip ?? req.headers?.['x-forwarded-for'] ?? 'unknown');
       const result = limiter(key);
       if (!result.allowed) {
-        response.status(429).json({ error: 'Too many requests', retryAfter: result.retryAfter });
+        res.status(429).json({ error: 'Too many requests', retryAfter: result.retryAfter });
         return;
       }
     }

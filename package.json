@@ -17,6 +17,9 @@
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vercel/node": "^9.0.1",
+    "overrides": {
+      "undici": "^7.29.0"
+    }
     "esbuild": "^0.28.2",
     "eslint": "^8.57.0",
     "eslint-plugin-security": "^1.7.1",

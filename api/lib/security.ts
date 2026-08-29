@@ -176,7 +176,7 @@ export function createGatewayHandler(fn: HandlerFn, opts?: GatewayOptions): Hand
 
     const request = req as { method?: string; ip?: string; headers?: Record<string, unknown> };
     if (!methods.includes(request.method ?? '')) {
-      response.setHeader('Allow', methods.join(', '));
+      response.status(405).json({ error: 'Method Not Allowed' });
       return;
     }
 
@@ -184,6 +184,7 @@ export function createGatewayHandler(fn: HandlerFn, opts?: GatewayOptions): Hand
       const key = String(request.ip ?? request.headers?.['x-forwarded-for'] ?? 'unknown');
       const result = limiter(key);
       if (!result.allowed) {
+        response.status(429).json({ error: 'Too many requests', retryAfter: result.retryAfter });
         return;
       }
     }

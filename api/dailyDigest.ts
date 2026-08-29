@@ -1,29 +1,18 @@
 import crypto from 'crypto';
 import { dbGet, dbDelete, dbSet, deliverDiscordForUser, CLIENT_SECRET } from './lib/digestCore';
-import { createRateLimiter, logger, applySecurityHeaders } from './lib/security';
+import { createGatewayHandler, logger } from './lib/security';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
-// Shared sliding-window rate limiter to prevent cron abuse.
-const checkRateLimit = createRateLimiter({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  maxRequests: 30,
-  name: 'dailyDigest',
-});
-
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
-  applySecurityHeaders(res);
-
-  // Apply rate limiting
+export default createGatewayHandler(
+  {
+    rateLimit: {
+      windowMs: 60 * 60 * 1000,
+      maxRequests: 30,
+      name: 'dailyDigest',
+    },
+  },
+  async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   const clientId = String(req.headers['x-forwarded-for'] || 'unknown');
-  const rateResult = checkRateLimit(clientId);
-  if (!rateResult.allowed) {
-    logger.warn('dailyDigest rate limited', { clientId });
-    res.status(429).json({
-      error: 'Too many requests',
-      retryAfter: rateResult.retryAfter,
-    });
-    return;
-  }
 
   const supplied = req.headers.authorization || '';
   const expected = `Bearer ${process.env.CRON_SECRET || ''}`;
@@ -34,7 +23,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     return;
   }
   if (!CLIENT_SECRET) {
-    res.status(500).json({ error: 'GOOGLE_CLIENT_SECRET not configured' });
+    res.status(500).json({ error: 'Server configuration error' });
     return;
   }
 
@@ -75,4 +64,4 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
     logger.error('Discord cron error', { message: error instanceof Error ? error.message : String(error) });
     res.status(500).json({ error: 'Internal server error' });
   }
-}
+});

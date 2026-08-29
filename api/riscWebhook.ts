@@ -1,6 +1,6 @@
 import { OAuth2Client } from 'google-auth-library';
 import { CLIENT_ID, dbSet } from './lib/digestCore';
-import { applySecurityHeaders, logger } from './lib/security';
+import { createGatewayHandler, logger } from './lib/security';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 /**
@@ -13,14 +13,8 @@ async function writeSecurityFlag(userId: string, data: unknown): Promise<void> {
 }
 
 // Vercel Serverless Function
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
-  applySecurityHeaders(res);
-
-  if (req.method !== 'POST') {
-    res.status(405).send('Method Not Allowed');
-    return;
-  }
-
+export default createGatewayHandler(
+  async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   try {
     const body = req.body;
     let token: string | undefined;

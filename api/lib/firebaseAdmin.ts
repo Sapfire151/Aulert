@@ -14,35 +14,10 @@ export function getDb(): unknown {
   if (_db) return _db;
 
   if (getApps().length === 0) {
-    let serviceAccount: unknown;
-
-    if (process.env.FIREBASE_SERVICE_ACCOUNT) {
-      // Production / Vercel: full JSON stored as a single-line env var
-      try {
-        serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-      } catch (e) {
-        throw new Error(
-          'FIREBASE_SERVICE_ACCOUNT env var is not valid JSON: ' + (e instanceof Error ? e.message : String(e))
-        );
-      }
-    } else {
-      // Local dev: load from the service account JSON file in the repo root
-      let keyPath = path.resolve(__dirname, '../../tcasx-48020-firebase-adminsdk-fbsvc-a8b8b295e4.json');
-      if (!fs.existsSync(keyPath)) {
-        keyPath = path.resolve(process.cwd(), 'tcasx-48020-firebase-adminsdk-fbsvc-a8b8b295e4.json');
-      }
-
-      if (!fs.existsSync(keyPath)) {
-        throw new Error(
-          'Firebase Admin: FIREBASE_SERVICE_ACCOUNT env var not set and no local key file found at ' + keyPath
-        );
-      }
-      try {
-        serviceAccount = JSON.parse(fs.readFileSync(keyPath, 'utf8'));
-      } catch (e) {
-        throw new Error('Firebase Admin: failed to parse local key file: ' + (e instanceof Error ? e.message : String(e)));
-      }
+    if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
+      throw new Error('FIREBASE_SERVICE_ACCOUNT env var is required');
     }
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 
     initializeApp({
       credential: cert(serviceAccount as Parameters<typeof cert>[0]),

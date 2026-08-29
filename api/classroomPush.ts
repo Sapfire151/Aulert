@@ -1,5 +1,6 @@
+import crypto from 'crypto';
 import { dbSet } from './lib/digestCore';
-import { applySecurityHeaders, logger } from './lib/security';
+import { logger } from './lib/security';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 /**
@@ -35,16 +36,15 @@ function parseUserIdFromRequest(req: VercelRequest): string | null {
   return null;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
-  applySecurityHeaders(res);
-  if (req.method !== 'POST') {
-    res.status(405).send('Method Not Allowed');
-    return;
-  }
-
+export default createGatewayHandler(
+  async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   const expected = `Bearer ${process.env.PUSH_SECRET || ''}`;
   const supplied = req.headers.authorization || '';
-  if (!process.env.PUSH_SECRET || supplied !== expected) {
+  if (
+    !process.env.PUSH_SECRET ||
+    supplied.length !== expected.length ||
+    !crypto.timingSafeEqual(Buffer.from(supplied), Buffer.from(expected))
+  ) {
     res.status(401).json({ error: 'Unauthorized' });
     return;
   }

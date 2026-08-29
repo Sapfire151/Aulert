@@ -3,8 +3,8 @@ import { google } from 'googleapis';
 import { getDb } from './firebaseAdmin';
 import { withCache } from './cache';
 
-const CLIENT_ID =
-  process.env.CLIENT_ID || '4640324' + '46404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com';
+const CLIENT_ID = process.env.CLIENT_ID;
+if (!CLIENT_ID) throw new Error('CLIENT_ID env var is required');
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
 const GOOGLE_API_HOSTS = ['www.googleapis.com'];
 const DISCORD_HOSTS = new Set(['discord.com', 'discordapp.com', 'canary.discord.com', 'ptb.discord.com']);

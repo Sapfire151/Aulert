@@ -16,7 +16,7 @@ import {
   publicDiscordConfig,
   postDiscordWebhook,
 } from './lib/digestCore';
-import { applySecurityHeaders, logger } from './lib/security';
+import { createGatewayHandler, logger } from './lib/security';
 import { withCache, invalidate } from './lib/cache';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
@@ -69,17 +69,21 @@ async function exchangeRefreshToken(authCode: string): Promise<string> {
   return tokens.refresh_token;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
-  applySecurityHeaders(res);
+export default createGatewayHandler(
+  {
+    methods: ['POST', 'OPTIONS'],
+    rateLimit: {
+      windowMs: 60 * 1000,
+      maxRequests: 30,
+      name: 'emailPrefs',
+    },
+  },
+  async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   res.setHeader('Access-Control-Allow-Origin', process.env.ALLOWED_ORIGIN || 'https://aulert.vercel.app');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Authorization, Content-Type');
   if (req.method === 'OPTIONS') {
     res.status(200).end();
-    return;
-  }
-  if (req.method !== 'POST') {
-    res.status(405).json({ error: 'Method Not Allowed' });
     return;
   }
 
@@ -180,6 +184,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
       .json({ success: true, ...publicDiscordConfig({ enabled: true, encryptedRefreshToken, webhooks: { ...webhooks, [id]: newWebhook } }) });
   } catch (error) {
     logger.error('Discord integration error', { message: error instanceof Error ? error.message : String(error) });
-    res.status(400).json({ error: (error as Error)?.message || 'Unable to update Discord notifications' });
+    res.status(400).json({ error: 'Unable to update Discord notifications' });
   }
 }

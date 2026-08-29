@@ -1,8 +1,9 @@
+import crypto from 'crypto';
 import { OAuth2Client } from 'google-auth-library';
 import { google } from 'googleapis';
 import { CLIENT_ID } from './lib/digestCore';
 import { dbSet } from './lib/digestCore';
-import { applySecurityHeaders, logger } from './lib/security';
+import { logger } from './lib/security';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
 /**
@@ -35,19 +36,19 @@ interface WatchChannel {
   expiration: string;
 }
 
-export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
-  applySecurityHeaders(res);
-  if (req.method !== 'POST') {
-    res.status(405).send('Method Not Allowed');
-    return;
-  }
+export default createGatewayHandler(
+  async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
   if (!process.env.PUSH_SECRET || !process.env.CLASSROOM_PUSH_ADDRESS) {
     res.status(501).json({ error: 'Classroom push notifications are not configured' });
     return;
   }
 
+  const expected = `Bearer ${process.env.PUSH_SECRET || ''}`;
   const supplied = req.headers.authorization || '';
-  if (supplied !== `Bearer ${process.env.PUSH_SECRET}`) {
+  if (
+    supplied.length !== expected.length ||
+    !crypto.timingSafeEqual(Buffer.from(supplied), Buffer.from(expected))
+  ) {
     res.status(401).json({ error: 'Unauthorized' });
     return;
   }

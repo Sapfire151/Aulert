@@ -30,8 +30,8 @@
   <link rel="stylesheet" href="styles.css?v=2" />
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer crossorigin="anonymous"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js" defer crossorigin="anonymous"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js" defer integrity="sha384-ViccRjS0k/lvYsrtaKXk+ES61/4PAZlFI/mPHmLC1YWzK0AIbXbI5ZXDzcm3F8gH" crossorigin="anonymous"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js" defer integrity="sha384-f6/UpzjTjIXASlp20cArQsaRh1EvHVJd5kegy/gYR9W2D0a32TnEqUEiW4Zm/5O0" crossorigin="anonymous"></script>
 </head>
 
 <body class="app-loading">
@@ -641,8 +641,7 @@
   </main>
 
   <!-- Sheet (detail) -->
-  <div class="sheet-veil" id="sheetVeil" aria-label="Close detail panel"
-    onclick="closeSheet(event)" onkeydown="if(event.key==='Escape'){closeSheet(event)}">
+  <div class="sheet-veil" id="sheetVeil" aria-label="Close detail panel">
     <div class="sheet" style="position:relative;">
       <div class="sheet-grip"></div>
       <button class="sheet-close" onclick="closeSheet()" aria-label="Close"
@@ -667,9 +666,9 @@
 
           <!-- Submit work button (hidden by default, shown by JS when appropriate) -->
           <button class="sa-primary" id="submitWorkBtn"
-            style="display:none; background: linear-gradient(135deg, #3B82F6, #2563EB); border: none; color: #fff; padding: 8px 12px; border-radius: var(--r-pill); font-weight: 600; font-size: 13px; letter-spacing: 0.3px; box-shadow: 0 4px 14px rgba(37,99,235,0.35); transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; white-space: nowrap; flex-shrink: 1;"
-            onclick="showSubmitConfirm()" onmouseover="this.style.boxShadow='0 6px 20px rgba(37,99,235,0.5)';"
-            onmouseout="this.style.boxShadow='0 4px 14px rgba(37,99,235,0.35)';">
+            style="display:none; background: linear-gradient(135deg, #1d4ed8, #1e40af); border: none; color: #ffffff; padding: 8px 12px; border-radius: var(--r-pill); font-weight: 600; font-size: 13px; letter-spacing: 0.3px; box-shadow: 0 4px 14px rgba(30,64,175,0.35); transition: color 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, opacity 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; cursor: pointer; white-space: nowrap; flex-shrink: 1;"
+            onclick="showSubmitConfirm()" onmouseover="this.style.boxShadow='0 6px 20px rgba(30,64,175,0.5)';"
+            onmouseout="this.style.boxShadow='0 4px 14px rgba(30,64,175,0.35)';">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style="margin-right: 5px;">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round"></path>
@@ -702,7 +701,7 @@
   <!-- Push toast container -->
   <div class="toast-container" id="toastContainer"></div>
 
-  <div class="snack" id="snack" role="status" aria-live="polite"></div>
+  <output class="snack" id="snack" aria-live="polite"></output>
 
   <dialog class="cookie-banner" id="cookieBanner" aria-labelledby="cookieTitle">
     <div><strong id="cookieTitle">Your privacy choices</strong><p>Essential storage keeps your theme, settings, and short session available. Optional analytics helps us improve Aulert. <a href="privacy.html?return=settings" data-legal-return="settings">Learn more</a>.</p></div>
@@ -791,9 +790,9 @@
 
       <!-- Submit Button -->
       <button id="unifiedSubmitBtn" onclick="processUnifiedSubmit()"
-        style="width: 100%; padding: 12px; border-radius: 12px; border: none; background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.35); transition: color 0.15s, background-color 0.15s, border-color 0.15s, opacity 0.15s, transform 0.15s, box-shadow 0.15s; opacity: 0.5; pointer-events: none;"
-        onmouseover="this.style.boxShadow='0 6px 20px rgba(37,99,235,0.5)'"
-        onmouseout="this.style.boxShadow='0 4px 14px rgba(37,99,235,0.35)'">Submit Assignment</button>
+        style="width: 100%; padding: 12px; border-radius: 12px; border: none; background: linear-gradient(135deg, #1d4ed8, #1e40af); color: #ffffff; font-size: 15px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(30,64,175,0.35); transition: color 0.15s, background-color 0.15s, border-color 0.15s, opacity 0.15s, transform 0.15s, box-shadow 0.15s; opacity: 0.5; pointer-events: none;"
+        onmouseover="this.style.boxShadow='0 6px 20px rgba(30,64,175,0.5)'"
+        onmouseout="this.style.boxShadow='0 4px 14px rgba(30,64,175,0.35)'">Submit Assignment</button>
     </div>
   </div>
 

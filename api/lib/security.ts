@@ -122,6 +122,25 @@ interface SchemaRule {
 
 type ValidationSchema = Record<string, SchemaRule>;
 
+function validateFieldRule(field: string, rule: SchemaRule, val: unknown, errors: string[]): void {
+  if (val === undefined || val === null || val === '') {
+    if (rule.required) errors.push(`Missing required field: ${field}`);
+    return;
+  }
+  if (rule.type && typeof val !== rule.type) {
+    errors.push(`Field ${field} must be of type ${rule.type}`);
+    return;
+  }
+  if (rule.type === 'string' && typeof val === 'string') {
+    if (rule.maxLen && val.length > rule.maxLen) {
+      errors.push(`Field ${field} exceeds max length ${rule.maxLen}`);
+    }
+    if (rule.pattern && !rule.pattern.test(val)) {
+      errors.push(`Field ${field} has invalid format`);
+    }
+  }
+}
+
 /**
  * Validate that a value matches a simple schema descriptor.
  * Returns { ok:true } or { ok:false, errors:[...] }.
@@ -130,25 +149,11 @@ export function validateInput(
   schema: ValidationSchema,
   data: unknown
 ): { ok: true } | { ok: false; errors: string[] } {
-  const errors: string[] = [];
   if (!data || typeof data !== 'object') return { ok: false, errors: ['body must be an object'] };
+  const errors: string[] = [];
   const record = data as Record<string, unknown>;
   for (const [field, rule] of Object.entries(schema)) {
-    const val = record[field];
-    if (val === undefined || val === null || val === '') {
-      if (rule.required) errors.push(`Missing required field: ${field}`);
-      continue;
-    }
-    if (rule.type && typeof val !== rule.type) {
-      errors.push(`Field ${field} must be of type ${rule.type}`);
-      continue;
-    }
-    if (rule.type === 'string' && rule.maxLen && (val as string).length > rule.maxLen) {
-      errors.push(`Field ${field} exceeds max length ${rule.maxLen}`);
-    }
-    if (rule.pattern && rule.type === 'string' && !(rule.pattern as RegExp).test(val as string)) {
-      errors.push(`Field ${field} has invalid format`);
-    }
+    validateFieldRule(field, rule, record[field], errors);
   }
   return errors.length ? { ok: false, errors } : { ok: true };
 }

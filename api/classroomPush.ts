@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import crypto from 'node:crypto';
 import { dbSet } from './lib/digestCore';
 import { createGatewayHandler, logger } from './lib/security';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
@@ -19,14 +19,14 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  */
 function parseUserIdFromRequest(req: VercelRequest): string | null {
   const body = (req.body ?? {}) as { userId?: unknown };
-  if (typeof body.userId === 'string' && /^[0-9]{1,30}$/.test(body.userId)) {
+  if (typeof body.userId === 'string' && /^\d{1,30}$/.test(body.userId)) {
     return body.userId;
   }
   const token = req.headers['x-goog-channel-token'];
   if (typeof token === 'string') {
     try {
       const decoded = JSON.parse(Buffer.from(token, 'base64url').toString('utf8')) as { userId?: unknown };
-      if (typeof decoded.userId === 'string' && /^[0-9]{1,30}$/.test(decoded.userId)) {
+      if (typeof decoded.userId === 'string' && /^\d{1,30}$/.test(decoded.userId)) {
         return decoded.userId;
       }
     } catch {

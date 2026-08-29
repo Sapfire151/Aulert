@@ -8,9 +8,26 @@ function renderGreeting() {
   const h = new Date().getHours();
   const el = document.getElementById('dashGreeting');
   const navEl = document.getElementById('navGreeting');
-  const msg = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+  let msg = 'Good evening';
+  if (h < 12) msg = 'Good morning';
+  else if (h < 17) msg = 'Good afternoon';
   if (el) el.textContent = msg;
   if (navEl) navEl.textContent = msg;
+}
+
+function updateAvatarElement(container: HTMLElement | null, picture?: string, name?: string, initials = '?') {
+  if (!container) return;
+  container.innerHTML = '';
+  if (picture) {
+    const img = document.createElement('img');
+    img.src = picture;
+    img.alt = name ? `${name}'s avatar` : 'User profile';
+    img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover';
+    img.referrerPolicy = 'no-referrer';
+    container.appendChild(img);
+  } else {
+    container.textContent = initials;
+  }
 }
 
 function renderAccount() {
@@ -18,39 +35,16 @@ function renderAccount() {
   const { name, email, picture } = S.user;
   const initials = name ? name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase() : '?';
   // Nav user pill
-  const ava = document.querySelector('.user-pill .ava');
+  const ava = document.querySelector('.user-pill .ava') as HTMLElement | null;
   const pillName = document.querySelector('.user-pill-name');
-  if (ava) {
-    ava.innerHTML = '';
-    if (picture) {
-      const img = document.createElement('img');
-      img.src = picture;
-      img.alt = name ? `${name}'s avatar` : 'User profile';
-      img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover';
-      img.referrerPolicy = 'no-referrer';
-      ava.appendChild(img);
-    } else {
-      ava.textContent = initials;
-    }
-  }
+  updateAvatarElement(ava, picture, name, initials);
   if (pillName) pillName.textContent = name ? name.split(' ')[0] : email;
+
   // Settings profile section
   const profAva   = document.getElementById('profAva');
   const profName  = document.getElementById('profName');
   const profEmail = document.getElementById('profEmailText');
-  if (profAva) {
-    profAva.innerHTML = '';
-    if (picture) {
-      const img = document.createElement('img');
-      img.src = picture;
-      img.alt = name ? `${name}'s avatar` : 'User profile';
-      img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover';
-      img.referrerPolicy = 'no-referrer';
-      profAva.appendChild(img);
-    } else {
-      profAva.textContent = initials;
-    }
-  }
+  updateAvatarElement(profAva, picture, name, initials);
   if (profName)  profName.textContent  = name  || 'Student User';
   if (profEmail) profEmail.textContent = email || '';
 }
@@ -62,42 +56,49 @@ function renderSidebar() {
   const dlEl  = document.getElementById('sidebarDlList');
   const cntEl = document.getElementById('sc-dl-count');
   if (cntEl) cntEl.textContent = String(upcoming.length);
-  if (dlEl) {
-    dlEl.innerHTML = '';
-    if (upcoming.length) {
-      upcoming.forEach(dl => {
-        const c = courseById(dl.courseId);
-        const diff = Math.ceil((dl.date.getTime() - nowDay.getTime()) / 86400000);
-        const when = diff === 0 ? 'Today' : diff === 1 ? 'Tomorrow' : `${diff}d`;
-        const cls2 = dl.urg === 'urg' ? 'when-urg' : dl.urg === 'soo' ? 'when-soo' : 'when-ok';
-        const div = document.createElement('div');
-        div.className = 'mini-dl';
-        div.onclick = () => openSheet(dl.notifId);
-        const bar = document.createElement('div');
-        bar.className = 'mini-dl-bar';
-        bar.style.background = c.color;
-        const info = document.createElement('div');
-        info.className = 'mini-dl-info';
-        const title = document.createElement('div');
-        title.className = 'mini-dl-title';
-        title.textContent = dl.title;
-        const clsName = document.createElement('div');
-        clsName.className = 'mini-dl-class';
-        clsName.textContent = c.name;
-        info.appendChild(title);
-        info.appendChild(clsName);
-        const whenEl = document.createElement('div');
-        whenEl.className = 'mini-dl-when ' + cls2;
-        whenEl.textContent = when;
-        div.appendChild(bar);
-        div.appendChild(info);
-        div.appendChild(whenEl);
-        dlEl.appendChild(div);
-      });
-    } else {
-      dlEl.innerHTML = '<div class="empty-s empty-s-compact"><h3>No upcoming deadlines</h3><p>Your schedule is clear. New classroom due dates will appear here.</p></div>';
-    }
+  if (!dlEl) return;
+
+  dlEl.innerHTML = '';
+  if (!upcoming.length) {
+    dlEl.innerHTML = '<div class="empty-s empty-s-compact"><h3>No upcoming deadlines</h3><p>Your schedule is clear. New classroom due dates will appear here.</p></div>';
+    return;
   }
+
+  upcoming.forEach(dl => {
+    const c = courseById(dl.courseId);
+    const diff = Math.ceil((dl.date.getTime() - nowDay.getTime()) / 86400000);
+    let when = `${diff}d`;
+    if (diff === 0) when = 'Today';
+    else if (diff === 1) when = 'Tomorrow';
+
+    let cls2 = 'when-ok';
+    if (dl.urg === 'urg') cls2 = 'when-urg';
+    else if (dl.urg === 'soo') cls2 = 'when-soo';
+
+    const div = document.createElement('div');
+    div.className = 'mini-dl';
+    div.onclick = () => openSheet(dl.notifId);
+    const bar = document.createElement('div');
+    bar.className = 'mini-dl-bar';
+    bar.style.background = c.color;
+    const info = document.createElement('div');
+    info.className = 'mini-dl-info';
+    const title = document.createElement('div');
+    title.className = 'mini-dl-title';
+    title.textContent = dl.title;
+    const clsName = document.createElement('div');
+    clsName.className = 'mini-dl-class';
+    clsName.textContent = c.name;
+    info.appendChild(title);
+    info.appendChild(clsName);
+    const whenEl = document.createElement('div');
+    whenEl.className = 'mini-dl-when ' + cls2;
+    whenEl.textContent = when;
+    div.appendChild(bar);
+    div.appendChild(info);
+    div.appendChild(whenEl);
+    dlEl.appendChild(div);
+  });
 
   const clsEl = document.getElementById('sidebarClsList');
   if (clsEl) {
@@ -185,11 +186,16 @@ const SETTING_LABELS: Record<string, string> = {
 };
 
 function saved(label: string | Event = 'Settings', value?: boolean) {
-  if (typeof label !== 'string') label = 'Settings';
+  const labelText = typeof label === 'string' ? label : 'Settings';
   clearTimeout(S.snackTimer);
   const s = document.getElementById('snack');
   if (!s) return;
-  s.textContent = typeof value === 'boolean' ? label + ' ' + (value ? 'enabled' : 'disabled') : label + ' saved';
+
+  let text = `${labelText} saved`;
+  if (typeof value === 'boolean') {
+    text = `${labelText} ${value ? 'enabled' : 'disabled'}`;
+  }
+  s.textContent = text;
   s.classList.toggle('is-enabled', value === true);
   s.classList.toggle('is-disabled', value === false);
   s.classList.add('show');
@@ -207,7 +213,7 @@ function saveSetting(key, val) {
   } catch(e) {
     // Revert on storage failure
     S.settings[key] = prev;
-    const el = document.getElementById('set_' + key);
+    const el = document.getElementById('set_' + key) as HTMLInputElement | null;
     if (el) el.checked = !!prev;
     console.error('saveSetting failed:', e);
     showToast('Save failed', 'Could not save setting — storage error');
@@ -244,7 +250,7 @@ async function gcalRequest(method, path, body?) {
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
-    throw new Error((err.error && err.error.message) || ('Calendar API ' + res.status));
+    throw new Error(err?.error?.message || ('Calendar API ' + res.status));
   }
   return method === 'DELETE' ? null : res.json();
 }
@@ -283,6 +289,45 @@ function gcalBuildHwEvent(task) {
   };
 }
 
+async function removeStaleGcalEvents(map: Record<string, string>, activeIds: Set<string>): Promise<number> {
+  let removed = 0;
+  for (const notifId of Object.keys(map)) {
+    if (!activeIds.has(notifId)) {
+      try {
+        await gcalRequest('DELETE', '/calendars/primary/events/' + map[notifId]);
+        removed++;
+      } catch(e) {
+        console.warn('Failed to delete gcal event:', e);
+      }
+      delete map[notifId];
+    }
+  }
+  return removed;
+}
+
+async function syncGcalItems(map: Record<string, string>, allItems: Array<{ id: string; event: any }>) {
+  let created = 0;
+  let updated = 0;
+  let errors = 0;
+
+  for (const item of allItems) {
+    try {
+      if (map[item.id]) {
+        await gcalRequest('PUT', '/calendars/primary/events/' + map[item.id], item.event);
+        updated++;
+      } else {
+        const res = await gcalRequest('POST', '/calendars/primary/events', item.event);
+        map[item.id] = res.id;
+        created++;
+      }
+    } catch(e: any) {
+      console.warn('gcal sync error:', item.id, e?.message);
+      errors++;
+    }
+  }
+  return { created, updated, errors };
+}
+
 async function gcalSyncAll() {
   if (!S.token) throw new Error('Not signed in');
   const map = gcalLoadMap();
@@ -307,33 +352,8 @@ async function gcalSyncAll() {
   const allItems = [...classroomItems, ...hwItems];
   const activeIds = new Set(allItems.map(x => x.id));
 
-  let created = 0, updated = 0, removed = 0, errors = 0;
-
-  // Remove stale events
-  for (const notifId of Object.keys(map)) {
-    if (!activeIds.has(notifId)) {
-      try { await gcalRequest('DELETE', '/calendars/primary/events/' + map[notifId]); removed++; }
-      catch(e) { console.warn('Failed to delete gcal event:', e); }
-      delete map[notifId];
-    }
-  }
-
-  // Create or update
-  for (const item of allItems) {
-    try {
-      if (map[item.id]) {
-        await gcalRequest('PUT', '/calendars/primary/events/' + map[item.id], item.event);
-        updated++;
-      } else {
-        const res = await gcalRequest('POST', '/calendars/primary/events', item.event);
-        map[item.id] = res.id;
-        created++;
-      }
-    } catch(e) {
-      console.warn('gcal sync error:', item.id, e.message);
-      errors++;
-    }
-  }
+  const removed = await removeStaleGcalEvents(map, activeIds);
+  const { created, updated, errors } = await syncGcalItems(map, allItems);
 
   gcalSaveMap(map);
 
@@ -362,7 +382,8 @@ async function gcalUnsyncAll() {
     catch(e) { console.warn('Failed to delete gcal event:', e); }
   }
   localStorage.removeItem(GCAL_STORE_KEY);
-  showToast('Google Calendar unsynced', removed + ' event' + (removed !== 1 ? 's' : '') + ' removed');
+  const eventLabel = removed === 1 ? '1 event' : `${removed} events`;
+  showToast('Google Calendar unsynced', `${eventLabel} removed`);
   gcalRenderStatus();
 }
 
@@ -370,9 +391,12 @@ function gcalRenderStatus() {
   const map   = gcalLoadMap();
   const count = Object.keys(map).length;
   const el    = document.getElementById('gcalStatusText');
-  if (el) el.textContent = S.settings.gcalSync
-    ? count + ' item' + (count !== 1 ? 's' : '') + ' synced to Google Calendar'
-    : 'Sync disabled';
+  const itemsText = count === 1 ? '1 item' : `${count} items`;
+  if (el) {
+    el.textContent = S.settings.gcalSync
+      ? `${itemsText} synced to Google Calendar`
+      : 'Sync disabled';
+  }
   const syncBtn   = document.getElementById('gcalSyncBtn');
   const unsyncBtn = document.getElementById('gcalUnsyncBtn');
   if (syncBtn)   syncBtn.style.display   = S.settings.gcalSync ? 'inline-flex' : 'none';
@@ -397,7 +421,7 @@ function gcalToggle(el) {
   el.closest('label')?.classList.add('tog-loading');
 
   gcalSyncAll()
-    .then(result => {
+    .then(() => {
       // Only mark as enabled if sync didn't fully fail
       S.settings.gcalSync = true;
       saveSettings();
@@ -421,7 +445,7 @@ function gcalToggle(el) {
 
 function renderSettings() {
   const m = S.settings;
-  const set = (id, val) => { const e = document.getElementById(id); if (e) e.checked = !!val; };
+  const set = (id, val) => { const e = document.getElementById(id) as HTMLInputElement | null; if (e) e.checked = !!val; };
   set('set_stream', m.stream);
   set('set_announcements', m.announcements);
   set('set_assignments', m.assignments);
@@ -434,19 +458,31 @@ function renderSettings() {
   loadDiscordConfiguration();
 }
 
-const DISCORD_OFFLINE_SCOPES = [
+// eslint-disable-next-line no-var
+var DISCORD_OFFLINE_SCOPES = [
   'https://www.googleapis.com/auth/classroom.courses.readonly',
   'https://www.googleapis.com/auth/classroom.announcements.readonly',
   'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
   'https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly',
 ].join(' ');
 
-let discordConfig = { enabled: false, webhooks: [] };
+// eslint-disable-next-line no-var
+var discordConfig: any = { enabled: false, webhooks: [] };
 
 function escapeDiscordText(value) {
   const node = document.createElement('span');
   node.textContent = String(value || '');
   return node.innerHTML;
+}
+
+function formatWebhookDeliveryStatus(webhook: any): string {
+  if (webhook.lastError) {
+    return `Needs attention: ${escapeDiscordText(webhook.lastError)}`;
+  }
+  if (webhook.lastDeliveryAt) {
+    return 'Last delivery successful';
+  }
+  return 'Ready for delivery';
 }
 
 function renderDiscordIntegration() {
@@ -455,20 +491,21 @@ function renderDiscordIntegration() {
     const status = section.querySelector('.discord-status');
     const list = section.querySelector('.discord-list');
     if (status) {
+      const destWord = webhooks.length === 1 ? 'destination' : 'destinations';
       status.textContent = webhooks.length
-        ? `${webhooks.length} destination${webhooks.length === 1 ? '' : 's'} connected · checks every 10 minutes`
+        ? `${webhooks.length} ${destWord} connected · checks every 10 minutes`
         : 'Add a Discord incoming webhook to receive new Classroom updates, even while Aulert is closed.';
     }
     if (list) {
       list.innerHTML = webhooks.length
         ? webhooks.map((webhook) => `<div class="discord-destination">
-            <div><strong>${escapeDiscordText(webhook.label)}</strong><span>${webhook.lastError ? `Needs attention: ${escapeDiscordText(webhook.lastError)}` : webhook.lastDeliveryAt ? 'Last delivery successful' : 'Ready for delivery'}</span></div>
+            <div><strong>${escapeDiscordText(webhook.label)}</strong><span>${formatWebhookDeliveryStatus(webhook)}</span></div>
             <div class="discord-destination-actions"><button type="button" class="btn-sm" data-webhook-id="${webhook.id}" onclick="discordTest(this.dataset.webhookId)">Test</button><button type="button" class="btn-sm discord-remove" data-webhook-id="${webhook.id}" onclick="discordRemove(this.dataset.webhookId)">Remove</button></div>
           </div>`).join('')
         : '<div class="empty-s empty-s-compact discord-empty"><h3>No Discord destinations</h3><p>Add a destination above to receive Classroom updates in Discord.</p></div>';
     }
-    section.querySelectorAll('.discord-add-button').forEach((button) => { button.disabled = webhooks.length >= 5; });
-    section.querySelectorAll('.discord-disconnect').forEach((button) => { button.hidden = !webhooks.length; });
+    section.querySelectorAll<HTMLButtonElement>('.discord-add-button').forEach((button) => { button.disabled = webhooks.length >= 5; });
+    section.querySelectorAll<HTMLElement>('.discord-disconnect').forEach((button) => { button.hidden = !webhooks.length; });
   });
 }
 
@@ -485,7 +522,7 @@ async function discordApi(payload) {
 
 async function loadDiscordConfiguration() {
   if (S.token?.startsWith('preview_bypass')) {
-    discordConfig = S.settings.discordConfig || { enabled: false, webhooks: [] };
+    discordConfig = S.settings?.discordConfig || { enabled: false, webhooks: [] };
     renderDiscordIntegration();
     return;
   }
@@ -494,6 +531,7 @@ async function loadDiscordConfiguration() {
     discordConfig = await discordApi({ action: 'list' });
   } catch (error) {
     console.warn('Failed to load Discord configuration:', error);
+    discordConfig = { enabled: false, webhooks: [] };
   }
   renderDiscordIntegration();
 }
@@ -506,16 +544,16 @@ function requestDiscordAuthorization() {
       scope: DISCORD_OFFLINE_SCOPES,
       access_type: 'offline',
       prompt: 'consent',
-      callback: (response) => response.error ? reject(new Error('Google authorization was cancelled')) : resolve(response.code),
+      callback: (response: any) => response.error ? reject(new Error('Google authorization was cancelled')) : resolve(response.code),
     });
     client.requestCode();
   });
 }
 
-async function discordAdd(form) {
-  const labelInput = form.querySelector('[data-discord-label]');
-  const webhookInput = form.querySelector('[data-discord-url]');
-  const button = form.querySelector('.discord-add-button');
+async function discordAdd(form: HTMLFormElement) {
+  const labelInput = form.querySelector('[data-discord-label]') as HTMLInputElement | null;
+  const webhookInput = form.querySelector('[data-discord-url]') as HTMLInputElement | null;
+  const button = form.querySelector('.discord-add-button') as HTMLButtonElement | null;
   const webhookUrl = webhookInput?.value.trim();
   if (!webhookUrl) {
     showToast('Webhook URL required', 'Paste a Discord incoming webhook URL to continue');
@@ -536,14 +574,14 @@ async function discordAdd(form) {
     form.reset();
     renderDiscordIntegration();
     showToast('Discord connected', 'Aulert sent a test message and will check for updates every 10 minutes.');
-  } catch (error) {
+  } catch (error: any) {
     showToast('Could not connect Discord', error.message || 'Please try again');
   } finally {
     if (button) { button.disabled = false; button.textContent = 'Add destination'; }
   }
 }
 
-async function discordTest(webhookId) {
+async function discordTest(webhookId: string) {
   try {
     if (S.token?.startsWith('preview_bypass')) {
       showToast('Test message sent', 'Preview Mode — no Discord message was delivered.');
@@ -552,16 +590,16 @@ async function discordTest(webhookId) {
     await discordApi({ action: 'test', webhookId });
     await loadDiscordConfiguration();
     showToast('Test message sent', 'Check the selected Discord channel.');
-  } catch (error) {
+  } catch (error: any) {
     showToast('Discord test failed', error.message || 'Please try again');
   }
 }
 
-async function discordRemove(webhookId) {
+async function discordRemove(webhookId: string) {
   if (!await showConfirmDialog('Remove destination?', 'This Discord webhook will stop receiving Classroom updates.', 'Remove')) return;
   try {
     if (S.token?.startsWith('preview_bypass')) {
-      discordConfig.webhooks = discordConfig.webhooks.filter((webhook) => webhook.id !== webhookId);
+      discordConfig.webhooks = discordConfig.webhooks.filter((webhook: any) => webhook.id !== webhookId);
       discordConfig.enabled = Boolean(discordConfig.webhooks.length);
       S.settings.discordConfig = discordConfig;
       saveSettings();
@@ -570,7 +608,7 @@ async function discordRemove(webhookId) {
     }
     renderDiscordIntegration();
     showToast('Destination removed', 'It will no longer receive Aulert updates.');
-  } catch (error) {
+  } catch (error: any) {
     showToast('Could not remove destination', error.message || 'Please try again');
   }
 }
@@ -587,15 +625,15 @@ async function discordDisconnect() {
     }
     renderDiscordIntegration();
     showToast('Discord disconnected', 'All stored Discord destinations and offline access were removed.');
-  } catch (error) {
+  } catch (error: any) {
     showToast('Could not disconnect Discord', error.message || 'Please try again');
   }
 }
 
 /* ════════════════════════════════════════════
-   CUSTOM CONFIRM DIALOG — centered card
+   CUSTOM CONFIRM DIALOG — centered modal card
 ════════════════════════════════════════════ */
-function showConfirmDialog(title, message, confirmLabel = 'Confirm') {
+function showConfirmDialog(title: string, message: string, confirmLabel = 'Confirm'): Promise<boolean> {
   return new Promise((resolve) => {
     const veil = document.createElement('div');
     veil.className = 'confirm-veil';
@@ -607,6 +645,9 @@ function showConfirmDialog(title, message, confirmLabel = 'Confirm') {
     card.setAttribute('aria-labelledby', 'confirm-title');
 
     card.innerHTML = `
+      <button class="confirm-close-btn" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text-2); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: color 0.2s;" aria-label="Close dialog">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
       <div class="confirm-card-title" id="confirm-title">${title}</div>
       <div class="confirm-card-msg">${message}</div>
       <div class="confirm-card-divider"></div>
@@ -625,7 +666,7 @@ function showConfirmDialog(title, message, confirmLabel = 'Confirm') {
       document.removeEventListener('keydown', onKey);
     };
 
-    const onKey = (e) => {
+    const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') { cleanup(); resolve(false); }
     };
 
@@ -633,8 +674,13 @@ function showConfirmDialog(title, message, confirmLabel = 'Confirm') {
       if (e.target === veil) { cleanup(); resolve(false); }
     });
 
-    card.querySelector('.confirm-btn-cancel').onclick = () => { cleanup(); resolve(false); };
-    card.querySelector('.confirm-btn-ok').onclick    = () => { cleanup(); resolve(true);  };
+    const closeBtn = card.querySelector('.confirm-close-btn') as HTMLElement | null;
+    const cancelBtn = card.querySelector('.confirm-btn-cancel') as HTMLElement | null;
+    const okBtn = card.querySelector('.confirm-btn-ok') as HTMLElement | null;
+
+    if (closeBtn) closeBtn.onclick = () => { cleanup(); resolve(false); };
+    if (cancelBtn) cancelBtn.onclick = () => { cleanup(); resolve(false); };
+    if (okBtn) okBtn.onclick = () => { cleanup(); resolve(true); };
 
     document.addEventListener('keydown', onKey);
 

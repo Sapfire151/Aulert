@@ -7,11 +7,31 @@ function renderGreeting() {
     const h = new Date().getHours();
     const el = document.getElementById('dashGreeting');
     const navEl = document.getElementById('navGreeting');
-    const msg = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+    let msg = 'Good evening';
+    if (h < 12)
+        msg = 'Good morning';
+    else if (h < 17)
+        msg = 'Good afternoon';
     if (el)
         el.textContent = msg;
     if (navEl)
         navEl.textContent = msg;
+}
+function updateAvatarElement(container, picture, name, initials = '?') {
+    if (!container)
+        return;
+    container.innerHTML = '';
+    if (picture) {
+        const img = document.createElement('img');
+        img.src = picture;
+        img.alt = name ? `${name}'s avatar` : 'User profile';
+        img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover';
+        img.referrerPolicy = 'no-referrer';
+        container.appendChild(img);
+    }
+    else {
+        container.textContent = initials;
+    }
 }
 function renderAccount() {
     if (!S.user)
@@ -21,40 +41,14 @@ function renderAccount() {
     // Nav user pill
     const ava = document.querySelector('.user-pill .ava');
     const pillName = document.querySelector('.user-pill-name');
-    if (ava) {
-        ava.innerHTML = '';
-        if (picture) {
-            const img = document.createElement('img');
-            img.src = picture;
-            img.alt = name ? `${name}'s avatar` : 'User profile';
-            img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover';
-            img.referrerPolicy = 'no-referrer';
-            ava.appendChild(img);
-        }
-        else {
-            ava.textContent = initials;
-        }
-    }
+    updateAvatarElement(ava, picture, name, initials);
     if (pillName)
         pillName.textContent = name ? name.split(' ')[0] : email;
     // Settings profile section
     const profAva = document.getElementById('profAva');
     const profName = document.getElementById('profName');
     const profEmail = document.getElementById('profEmailText');
-    if (profAva) {
-        profAva.innerHTML = '';
-        if (picture) {
-            const img = document.createElement('img');
-            img.src = picture;
-            img.alt = name ? `${name}'s avatar` : 'User profile';
-            img.style.cssText = 'width:100%;height:100%;border-radius:50%;object-fit:cover';
-            img.referrerPolicy = 'no-referrer';
-            profAva.appendChild(img);
-        }
-        else {
-            profAva.textContent = initials;
-        }
-    }
+    updateAvatarElement(profAva, picture, name, initials);
     if (profName)
         profName.textContent = name || 'Student User';
     if (profEmail)
@@ -68,43 +62,50 @@ function renderSidebar() {
     const cntEl = document.getElementById('sc-dl-count');
     if (cntEl)
         cntEl.textContent = String(upcoming.length);
-    if (dlEl) {
-        dlEl.innerHTML = '';
-        if (upcoming.length) {
-            upcoming.forEach(dl => {
-                const c = courseById(dl.courseId);
-                const diff = Math.ceil((dl.date.getTime() - nowDay.getTime()) / 86400000);
-                const when = diff === 0 ? 'Today' : diff === 1 ? 'Tomorrow' : `${diff}d`;
-                const cls2 = dl.urg === 'urg' ? 'when-urg' : dl.urg === 'soo' ? 'when-soo' : 'when-ok';
-                const div = document.createElement('div');
-                div.className = 'mini-dl';
-                div.onclick = () => openSheet(dl.notifId);
-                const bar = document.createElement('div');
-                bar.className = 'mini-dl-bar';
-                bar.style.background = c.color;
-                const info = document.createElement('div');
-                info.className = 'mini-dl-info';
-                const title = document.createElement('div');
-                title.className = 'mini-dl-title';
-                title.textContent = dl.title;
-                const clsName = document.createElement('div');
-                clsName.className = 'mini-dl-class';
-                clsName.textContent = c.name;
-                info.appendChild(title);
-                info.appendChild(clsName);
-                const whenEl = document.createElement('div');
-                whenEl.className = 'mini-dl-when ' + cls2;
-                whenEl.textContent = when;
-                div.appendChild(bar);
-                div.appendChild(info);
-                div.appendChild(whenEl);
-                dlEl.appendChild(div);
-            });
-        }
-        else {
-            dlEl.innerHTML = '<div class="empty-s empty-s-compact"><h3>No upcoming deadlines</h3><p>Your schedule is clear. New classroom due dates will appear here.</p></div>';
-        }
+    if (!dlEl)
+        return;
+    dlEl.innerHTML = '';
+    if (!upcoming.length) {
+        dlEl.innerHTML = '<div class="empty-s empty-s-compact"><h3>No upcoming deadlines</h3><p>Your schedule is clear. New classroom due dates will appear here.</p></div>';
+        return;
     }
+    upcoming.forEach(dl => {
+        const c = courseById(dl.courseId);
+        const diff = Math.ceil((dl.date.getTime() - nowDay.getTime()) / 86400000);
+        let when = `${diff}d`;
+        if (diff === 0)
+            when = 'Today';
+        else if (diff === 1)
+            when = 'Tomorrow';
+        let cls2 = 'when-ok';
+        if (dl.urg === 'urg')
+            cls2 = 'when-urg';
+        else if (dl.urg === 'soo')
+            cls2 = 'when-soo';
+        const div = document.createElement('div');
+        div.className = 'mini-dl';
+        div.onclick = () => openSheet(dl.notifId);
+        const bar = document.createElement('div');
+        bar.className = 'mini-dl-bar';
+        bar.style.background = c.color;
+        const info = document.createElement('div');
+        info.className = 'mini-dl-info';
+        const title = document.createElement('div');
+        title.className = 'mini-dl-title';
+        title.textContent = dl.title;
+        const clsName = document.createElement('div');
+        clsName.className = 'mini-dl-class';
+        clsName.textContent = c.name;
+        info.appendChild(title);
+        info.appendChild(clsName);
+        const whenEl = document.createElement('div');
+        whenEl.className = 'mini-dl-when ' + cls2;
+        whenEl.textContent = when;
+        div.appendChild(bar);
+        div.appendChild(info);
+        div.appendChild(whenEl);
+        dlEl.appendChild(div);
+    });
     const clsEl = document.getElementById('sidebarClsList');
     if (clsEl) {
         clsEl.innerHTML = '';
@@ -191,13 +192,16 @@ const SETTING_LABELS = {
     grades: 'Grades', comments: 'Comments', materials: 'Materials', gcalSync: 'Calendar sync'
 };
 function saved(label = 'Settings', value) {
-    if (typeof label !== 'string')
-        label = 'Settings';
+    const labelText = typeof label === 'string' ? label : 'Settings';
     clearTimeout(S.snackTimer);
     const s = document.getElementById('snack');
     if (!s)
         return;
-    s.textContent = typeof value === 'boolean' ? label + ' ' + (value ? 'enabled' : 'disabled') : label + ' saved';
+    let text = `${labelText} saved`;
+    if (typeof value === 'boolean') {
+        text = `${labelText} ${value ? 'enabled' : 'disabled'}`;
+    }
+    s.textContent = text;
     s.classList.toggle('is-enabled', value === true);
     s.classList.toggle('is-disabled', value === false);
     s.classList.add('show');
@@ -248,7 +252,7 @@ async function gcalRequest(method, path, body) {
     });
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error((err.error && err.error.message) || ('Calendar API ' + res.status));
+        throw new Error(err?.error?.message || ('Calendar API ' + res.status));
     }
     return method === 'DELETE' ? null : res.json();
 }
@@ -285,6 +289,45 @@ function gcalBuildHwEvent(task) {
         extendedProperties: { private: { aulertId: 'hw-' + task.id, aulertType: 'homework' } },
     };
 }
+async function removeStaleGcalEvents(map, activeIds) {
+    let removed = 0;
+    for (const notifId of Object.keys(map)) {
+        if (!activeIds.has(notifId)) {
+            try {
+                await gcalRequest('DELETE', '/calendars/primary/events/' + map[notifId]);
+                removed++;
+            }
+            catch (e) {
+                console.warn('Failed to delete gcal event:', e);
+            }
+            delete map[notifId];
+        }
+    }
+    return removed;
+}
+async function syncGcalItems(map, allItems) {
+    let created = 0;
+    let updated = 0;
+    let errors = 0;
+    for (const item of allItems) {
+        try {
+            if (map[item.id]) {
+                await gcalRequest('PUT', '/calendars/primary/events/' + map[item.id], item.event);
+                updated++;
+            }
+            else {
+                const res = await gcalRequest('POST', '/calendars/primary/events', item.event);
+                map[item.id] = res.id;
+                created++;
+            }
+        }
+        catch (e) {
+            console.warn('gcal sync error:', item.id, e?.message);
+            errors++;
+        }
+    }
+    return { created, updated, errors };
+}
 async function gcalSyncAll() {
     if (!S.token)
         throw new Error('Not signed in');
@@ -308,38 +351,8 @@ async function gcalSyncAll() {
         .filter(Boolean);
     const allItems = [...classroomItems, ...hwItems];
     const activeIds = new Set(allItems.map(x => x.id));
-    let created = 0, updated = 0, removed = 0, errors = 0;
-    // Remove stale events
-    for (const notifId of Object.keys(map)) {
-        if (!activeIds.has(notifId)) {
-            try {
-                await gcalRequest('DELETE', '/calendars/primary/events/' + map[notifId]);
-                removed++;
-            }
-            catch (e) {
-                console.warn('Failed to delete gcal event:', e);
-            }
-            delete map[notifId];
-        }
-    }
-    // Create or update
-    for (const item of allItems) {
-        try {
-            if (map[item.id]) {
-                await gcalRequest('PUT', '/calendars/primary/events/' + map[item.id], item.event);
-                updated++;
-            }
-            else {
-                const res = await gcalRequest('POST', '/calendars/primary/events', item.event);
-                map[item.id] = res.id;
-                created++;
-            }
-        }
-        catch (e) {
-            console.warn('gcal sync error:', item.id, e.message);
-            errors++;
-        }
-    }
+    const removed = await removeStaleGcalEvents(map, activeIds);
+    const { created, updated, errors } = await syncGcalItems(map, allItems);
     gcalSaveMap(map);
     // If every single operation failed (and there were items), treat as a hard failure
     const totalOps = allItems.length + removed;
@@ -375,17 +388,20 @@ async function gcalUnsyncAll() {
         }
     }
     localStorage.removeItem(GCAL_STORE_KEY);
-    showToast('Google Calendar unsynced', removed + ' event' + (removed !== 1 ? 's' : '') + ' removed');
+    const eventLabel = removed === 1 ? '1 event' : `${removed} events`;
+    showToast('Google Calendar unsynced', `${eventLabel} removed`);
     gcalRenderStatus();
 }
 function gcalRenderStatus() {
     const map = gcalLoadMap();
     const count = Object.keys(map).length;
     const el = document.getElementById('gcalStatusText');
-    if (el)
+    const itemsText = count === 1 ? '1 item' : `${count} items`;
+    if (el) {
         el.textContent = S.settings.gcalSync
-            ? count + ' item' + (count !== 1 ? 's' : '') + ' synced to Google Calendar'
+            ? `${itemsText} synced to Google Calendar`
             : 'Sync disabled';
+    }
     const syncBtn = document.getElementById('gcalSyncBtn');
     const unsyncBtn = document.getElementById('gcalUnsyncBtn');
     if (syncBtn)
@@ -408,7 +424,7 @@ function gcalToggle(el) {
     el.disabled = true;
     el.closest('label')?.classList.add('tog-loading');
     gcalSyncAll()
-        .then(result => {
+        .then(() => {
         // Only mark as enabled if sync didn't fully fail
         S.settings.gcalSync = true;
         saveSettings();
@@ -443,17 +459,28 @@ function renderSettings() {
     renderDiscordIntegration();
     loadDiscordConfiguration();
 }
-const DISCORD_OFFLINE_SCOPES = [
+// eslint-disable-next-line no-var
+var DISCORD_OFFLINE_SCOPES = [
     'https://www.googleapis.com/auth/classroom.courses.readonly',
     'https://www.googleapis.com/auth/classroom.announcements.readonly',
     'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
     'https://www.googleapis.com/auth/classroom.courseworkmaterials.readonly',
 ].join(' ');
-let discordConfig = { enabled: false, webhooks: [] };
+// eslint-disable-next-line no-var
+var discordConfig = { enabled: false, webhooks: [] };
 function escapeDiscordText(value) {
     const node = document.createElement('span');
     node.textContent = String(value || '');
     return node.innerHTML;
+}
+function formatWebhookDeliveryStatus(webhook) {
+    if (webhook.lastError) {
+        return `Needs attention: ${escapeDiscordText(webhook.lastError)}`;
+    }
+    if (webhook.lastDeliveryAt) {
+        return 'Last delivery successful';
+    }
+    return 'Ready for delivery';
 }
 function renderDiscordIntegration() {
     const webhooks = Array.isArray(discordConfig.webhooks) ? discordConfig.webhooks : [];
@@ -461,14 +488,15 @@ function renderDiscordIntegration() {
         const status = section.querySelector('.discord-status');
         const list = section.querySelector('.discord-list');
         if (status) {
+            const destWord = webhooks.length === 1 ? 'destination' : 'destinations';
             status.textContent = webhooks.length
-                ? `${webhooks.length} destination${webhooks.length === 1 ? '' : 's'} connected · checks every 10 minutes`
+                ? `${webhooks.length} ${destWord} connected · checks every 10 minutes`
                 : 'Add a Discord incoming webhook to receive new Classroom updates, even while Aulert is closed.';
         }
         if (list) {
             list.innerHTML = webhooks.length
                 ? webhooks.map((webhook) => `<div class="discord-destination">
-            <div><strong>${escapeDiscordText(webhook.label)}</strong><span>${webhook.lastError ? `Needs attention: ${escapeDiscordText(webhook.lastError)}` : webhook.lastDeliveryAt ? 'Last delivery successful' : 'Ready for delivery'}</span></div>
+            <div><strong>${escapeDiscordText(webhook.label)}</strong><span>${formatWebhookDeliveryStatus(webhook)}</span></div>
             <div class="discord-destination-actions"><button type="button" class="btn-sm" data-webhook-id="${webhook.id}" onclick="discordTest(this.dataset.webhookId)">Test</button><button type="button" class="btn-sm discord-remove" data-webhook-id="${webhook.id}" onclick="discordRemove(this.dataset.webhookId)">Remove</button></div>
           </div>`).join('')
                 : '<div class="empty-s empty-s-compact discord-empty"><h3>No Discord destinations</h3><p>Add a destination above to receive Classroom updates in Discord.</p></div>';
@@ -490,7 +518,7 @@ async function discordApi(payload) {
 }
 async function loadDiscordConfiguration() {
     if (S.token?.startsWith('preview_bypass')) {
-        discordConfig = S.settings.discordConfig || { enabled: false, webhooks: [] };
+        discordConfig = S.settings?.discordConfig || { enabled: false, webhooks: [] };
         renderDiscordIntegration();
         return;
     }
@@ -501,6 +529,7 @@ async function loadDiscordConfiguration() {
     }
     catch (error) {
         console.warn('Failed to load Discord configuration:', error);
+        discordConfig = { enabled: false, webhooks: [] };
     }
     renderDiscordIntegration();
 }
@@ -611,7 +640,7 @@ async function discordDisconnect() {
     }
 }
 /* ════════════════════════════════════════════
-   CUSTOM CONFIRM DIALOG — centered card
+   CUSTOM CONFIRM DIALOG — centered modal card
 ════════════════════════════════════════════ */
 function showConfirmDialog(title, message, confirmLabel = 'Confirm') {
     return new Promise((resolve) => {
@@ -623,6 +652,9 @@ function showConfirmDialog(title, message, confirmLabel = 'Confirm') {
         card.setAttribute('aria-modal', 'true');
         card.setAttribute('aria-labelledby', 'confirm-title');
         card.innerHTML = `
+      <button class="confirm-close-btn" style="position: absolute; top: 16px; right: 16px; background: none; border: none; color: var(--text-2); cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; border-radius: 50%; transition: color 0.2s;" aria-label="Close dialog">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
       <div class="confirm-card-title" id="confirm-title">${title}</div>
       <div class="confirm-card-msg">${message}</div>
       <div class="confirm-card-divider"></div>
@@ -650,8 +682,15 @@ function showConfirmDialog(title, message, confirmLabel = 'Confirm') {
                 resolve(false);
             }
         });
-        card.querySelector('.confirm-btn-cancel').onclick = () => { cleanup(); resolve(false); };
-        card.querySelector('.confirm-btn-ok').onclick = () => { cleanup(); resolve(true); };
+        const closeBtn = card.querySelector('.confirm-close-btn');
+        const cancelBtn = card.querySelector('.confirm-btn-cancel');
+        const okBtn = card.querySelector('.confirm-btn-ok');
+        if (closeBtn)
+            closeBtn.onclick = () => { cleanup(); resolve(false); };
+        if (cancelBtn)
+            cancelBtn.onclick = () => { cleanup(); resolve(false); };
+        if (okBtn)
+            okBtn.onclick = () => { cleanup(); resolve(true); };
         document.addEventListener('keydown', onKey);
         // Trigger open animation on next frame
         requestAnimationFrame(() => {

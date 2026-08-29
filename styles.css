@@ -2985,6 +2985,8 @@ body::before {
   inset: 0;
   z-index: 9999;
   background: rgba(0, 0, 0, .55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2998,17 +3000,18 @@ body::before {
 }
 
 .confirm-card {
+  position: relative;
   width: 100%;
-  max-width: 360px;
-  background: var(--dd-frost-bg);
-  border: 1px solid var(--dd-frost-rim);
-  border-radius: var(--r-lg);
+  max-width: 400px;
+  background: var(--bg-2);
+  border: 1px solid var(--rim);
+  border-radius: 20px;
   padding: 28px 24px 20px;
-  box-shadow: var(--shadow), 0 0 0 1px var(--rim);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px var(--rim);
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  transform: scale(.93) translateY(8px);
+  gap: 8px;
+  transform: scale(.92) translateY(12px);
   opacity: 0;
   transition: transform .28s var(--spring), opacity .22s var(--ease);
 }
@@ -10995,23 +10998,23 @@ button:active, .btn:active, .btn-sm:active, .icon-btn:active, .nav-tab:active, .
 .snack.is-enabled {
   background: rgba(34, 197, 94, .16);
   border-color: rgba(34, 197, 94, .42);
-  color: #4ade80;
+  color: #86efac;
 }
 
 .snack.is-disabled {
   background: rgba(239, 68, 68, .16);
   border-color: rgba(239, 68, 68, .42);
-  color: #f87171;
+  color: #fca5a5;
 }
 
 [data-theme="light"] .snack.is-enabled {
   background: rgba(22, 163, 74, .12);
   border-color: rgba(22, 163, 74, .32);
-  color: #15803d;
+  color: #14532d;
 }
 
 [data-theme="light"] .snack.is-disabled {
   background: rgba(220, 38, 38, .10);
   border-color: rgba(220, 38, 38, .30);
-  color: #b91c1c;
+  color: #7f1d1d;
 }

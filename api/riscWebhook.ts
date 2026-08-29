@@ -8,7 +8,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
  * Uses Firebase Admin SDK — bypasses security rules with full admin access.
  */
 async function writeSecurityFlag(userId: string, data: unknown): Promise<void> {
-  if (!/^[0-9]+$/.test(userId)) throw new Error('Invalid userId');
+  if (!/^\d+$/.test(userId)) throw new Error('Invalid userId');
   await dbSet(`users/${userId}/securityStatus`, data);
 }
 
@@ -52,7 +52,7 @@ export default createGatewayHandler(
     );
 
     if (hasRevocation) {
-      if (!sub || !/^[0-9]+$/.test(sub)) {
+      if (!sub || !/^\d+$/.test(sub)) {
         res.status(400).send('Invalid subject identifier');
         return;
       }

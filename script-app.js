@@ -51,6 +51,7 @@ const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 
    GLOBAL STATE
 ════════════════════════════════════════════ */
 const _now = new Date();
+// eslint-disable-next-line no-var
 var S = {
     filter: 'all',
     courseFilter: 'all',
@@ -187,8 +188,8 @@ window.addEventListener('load', async () => {
         window.history.replaceState(null, '', window.location.pathname);
     }
     // 2. Read token from cookie/session
-    const cookieMatch = document.cookie.match('(^|;) ?aul_token=([^;]*)(;|$)');
-    const saved = (cookieMatch ? decodeURIComponent(cookieMatch[2]) : null) || sessionStorage.getItem('aul_token');
+    const cookieMatch = /(?:^|;) ?aul_token=([^;]*)(?:;|$)/.exec(document.cookie);
+    const saved = (cookieMatch ? decodeURIComponent(cookieMatch[1]) : null) || sessionStorage.getItem('aul_token');
     if (saved) {
         S.token = saved;
         await loadTabs(); // Load missing tabs before app starts
@@ -208,7 +209,7 @@ window.addEventListener('load', async () => {
             catch (err) {
                 console.error(`loadEverything failed (attempt ${attempt}/${MAX_RETRIES}):`, err);
                 // Auth errors — clear token and redirect to login immediately
-                if (!err || !err.message || err.message.includes('401') || err.message.includes('Token')) {
+                if (!err?.message || err.message.includes('401') || err.message.includes('Token')) {
                     document.cookie = "aul_token=; max-age=0; path=/";
                     sessionStorage.removeItem('aul_token');
                     window.location.href = 'index.html';
@@ -345,41 +346,44 @@ function hideLoadingApp() { window.location.href = 'index.html'; }
 /* ════════════════════════════════════════════
    API & DATA HELPERS
 ════════════════════════════════════════════ */
+function getMockClassroomResponse(path) {
+    if (path.startsWith('courses?')) {
+        return {
+            courses: [
+                { id: '1', name: 'Preview Course 1', section: 'Morning', alternateLink: '#' },
+                { id: '2', name: 'Preview Course 2', section: 'Afternoon', alternateLink: '#' }
+            ]
+        };
+    }
+    if (path.includes('/announcements?')) {
+        return {
+            announcements: [
+                { id: 'a1', text: 'Welcome to Preview Mode!', creationTime: new Date().toISOString(), alternateLink: '#' }
+            ]
+        };
+    }
+    if (path.includes('/courseWork?')) {
+        return {
+            courseWork: [
+                { id: 'cw1', title: 'Preview Assignment', description: 'This is a mock assignment.', creationTime: new Date().toISOString(), updateTime: new Date().toISOString(), alternateLink: '#', state: 'PUBLISHED' }
+            ]
+        };
+    }
+    if (path.includes('/courseWorkMaterials?')) {
+        return { courseWorkMaterial: [] };
+    }
+    if (path.includes('/studentSubmissions?')) {
+        return {
+            studentSubmissions: [
+                { id: 'sub1', courseWorkId: 'cw1', state: 'CREATED' }
+            ]
+        };
+    }
+    return {};
+}
 async function classroomApi(path, retries = 3) {
     if (S.token.startsWith('preview_bypass')) {
-        if (path.startsWith('courses?')) {
-            return {
-                courses: [
-                    { id: '1', name: 'Preview Course 1', section: 'Morning', alternateLink: '#' },
-                    { id: '2', name: 'Preview Course 2', section: 'Afternoon', alternateLink: '#' }
-                ]
-            };
-        }
-        else if (path.includes('/announcements?')) {
-            return {
-                announcements: [
-                    { id: 'a1', text: 'Welcome to Preview Mode!', creationTime: new Date().toISOString(), alternateLink: '#' }
-                ]
-            };
-        }
-        else if (path.includes('/courseWork?')) {
-            return {
-                courseWork: [
-                    { id: 'cw1', title: 'Preview Assignment', description: 'This is a mock assignment.', creationTime: new Date().toISOString(), updateTime: new Date().toISOString(), alternateLink: '#', state: 'PUBLISHED' }
-                ]
-            };
-        }
-        else if (path.includes('/courseWorkMaterials?')) {
-            return { courseWorkMaterial: [] };
-        }
-        else if (path.includes('/studentSubmissions?')) {
-            return {
-                studentSubmissions: [
-                    { id: 'sub1', courseWorkId: 'cw1', state: 'CREATED' }
-                ]
-            };
-        }
-        return {};
+        return getMockClassroomResponse(path);
     }
     for (let attempt = 0; attempt <= retries; attempt++) {
         const res = await fetch(`https://classroom.googleapis.com/v1/${path}`, {
@@ -396,7 +400,7 @@ async function classroomApi(path, retries = 3) {
         }
         if (res.status === 429 && attempt < retries) {
             const retryAfter = res.headers.get('Retry-After');
-            const delay = retryAfter ? parseInt(retryAfter) * 1000 : 2000 * Math.pow(2, attempt);
+            const delay = retryAfter ? Number.parseInt(retryAfter, 10) * 1000 : 2000 * Math.pow(2, attempt);
             console.warn(`API 429 on ${path}. Retrying in ${delay}ms...`);
             await new Promise(r => setTimeout(r, delay));
             continue;
@@ -439,48 +443,50 @@ function relTime(iso) {
 /* ════════════════════════════════════════════
    DATA LOADING
 ════════════════════════════════════════════ */
-async function loadEverything(forceFetch = false) {
+function applyCachedData() {
     const cachedUser = localStorage.getItem('aul_cache_user');
     const cachedCourses = localStorage.getItem('aul_cache_courses');
     const cachedNotifs = localStorage.getItem('aul_cache_notifs');
     const cachedDeadlines = localStorage.getItem('aul_cache_deadlines');
-    const cachedTime = localStorage.getItem('aul_cache_time');
-    let hasValidCache = false;
-    if (cachedCourses && cachedNotifs) {
-        try {
-            if (cachedUser)
-                S.user = JSON.parse(cachedUser);
-            S.courses = JSON.parse(cachedCourses);
-            S.notifs = JSON.parse(cachedNotifs);
-            S.deadlines = cachedDeadlines ? JSON.parse(cachedDeadlines).map(d => ({ ...d, date: new Date(d.date) })) : [];
-            if (S.token && !S.token.startsWith('preview_bypass')) {
-                S.courses = S.courses.filter(c => c.id !== '1' && c.id !== '2');
-                S.notifs = S.notifs.filter(n => n.courseId !== '1' && n.courseId !== '2');
-                S.deadlines = S.deadlines.filter(d => d.courseId !== '1' && d.courseId !== '2');
-                localStorage.setItem('aul_cache_courses', JSON.stringify(S.courses));
-                localStorage.setItem('aul_cache_notifs', JSON.stringify(S.notifs));
-                localStorage.setItem('aul_cache_deadlines', JSON.stringify(S.deadlines));
-            }
-            // initial render from cache
-            if (typeof renderGreeting === 'function')
-                renderGreeting();
-            if (typeof renderAccount === 'function')
-                renderAccount();
-            if (typeof renderClasses === 'function')
-                renderClasses();
-            if (typeof renderFeed === 'function')
-                renderFeed();
-            if (typeof renderCal === 'function')
-                renderCal();
-            if (typeof updatePip === 'function')
-                updatePip();
-            hasValidCache = true;
+    if (!cachedCourses || !cachedNotifs)
+        return false;
+    try {
+        if (cachedUser)
+            S.user = JSON.parse(cachedUser);
+        S.courses = JSON.parse(cachedCourses);
+        S.notifs = JSON.parse(cachedNotifs);
+        S.deadlines = cachedDeadlines ? JSON.parse(cachedDeadlines).map(d => ({ ...d, date: new Date(d.date) })) : [];
+        if (S.token && !S.token.startsWith('preview_bypass')) {
+            S.courses = S.courses.filter(c => c.id !== '1' && c.id !== '2');
+            S.notifs = S.notifs.filter(n => n.courseId !== '1' && n.courseId !== '2');
+            S.deadlines = S.deadlines.filter(d => d.courseId !== '1' && d.courseId !== '2');
+            localStorage.setItem('aul_cache_courses', JSON.stringify(S.courses));
+            localStorage.setItem('aul_cache_notifs', JSON.stringify(S.notifs));
+            localStorage.setItem('aul_cache_deadlines', JSON.stringify(S.deadlines));
         }
-        catch (e) {
-            console.warn('Cache parse error', e);
-        }
+        if (typeof renderGreeting === 'function')
+            renderGreeting();
+        if (typeof renderAccount === 'function')
+            renderAccount();
+        if (typeof renderClasses === 'function')
+            renderClasses();
+        if (typeof renderFeed === 'function')
+            renderFeed();
+        if (typeof renderCal === 'function')
+            renderCal();
+        if (typeof updatePip === 'function')
+            updatePip();
+        return true;
     }
-    const cacheAge = cachedTime ? (Date.now() - parseInt(cachedTime, 10)) : Infinity;
+    catch (e) {
+        console.warn('Cache parse error', e);
+        return false;
+    }
+}
+async function loadEverything(forceFetch = false) {
+    const hasValidCache = applyCachedData();
+    const cachedTime = localStorage.getItem('aul_cache_time');
+    const cacheAge = cachedTime ? (Date.now() - Number.parseInt(cachedTime, 10)) : Infinity;
     const isFresh = cacheAge < (5 * 60 * 1000);
     if (hasValidCache && isFresh && !forceFetch) {
         console.log('[Aulert] Using fresh cache (age:', Math.round(cacheAge / 1000), 's). API fetch skipped.');
@@ -503,13 +509,137 @@ async function loadEverything(forceFetch = false) {
         id: c.id,
         name: c.name,
         section: c.section || '',
-        color: COURSE_COLORS.at(Number(i) % COURSE_COLORS.length),
-        abbr: c.name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase(),
+        color: COURSE_COLORS[i % COURSE_COLORS.length],
+        abbr: c.name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase(),
         link: c.alternateLink || 'https://classroom.google.com',
     }));
     localStorage.setItem('aul_cache_courses', JSON.stringify(S.courses));
     // Full fetch (not incremental) — we just rebuilt the course list from scratch.
     await fetchAllContent(true, false);
+}
+function mergeNotifsList(isIncremental, incomingNotifs) {
+    let mergedNotifs;
+    if (isIncremental) {
+        mergedNotifs = [...S.notifs];
+        incomingNotifs.forEach(incoming => {
+            const idx = mergedNotifs.findIndex(n => n.id === incoming.id);
+            if (idx >= 0)
+                mergedNotifs[idx] = incoming;
+            else
+                mergedNotifs.unshift(incoming);
+        });
+    }
+    else {
+        mergedNotifs = incomingNotifs;
+    }
+    mergedNotifs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return mergedNotifs;
+}
+function mergeDeadlinesList(isIncremental, incomingDeadlines) {
+    if (!isIncremental)
+        return incomingDeadlines;
+    const mergedDeadlines = [...S.deadlines];
+    incomingDeadlines.forEach(incoming => {
+        const idx = mergedDeadlines.findIndex(d => d.notifId === incoming.notifId);
+        if (idx >= 0)
+            mergedDeadlines[idx] = incoming;
+        else
+            mergedDeadlines.push(incoming);
+    });
+    return mergedDeadlines;
+}
+function isAssignmentVisible(n, now) {
+    if (n.type !== 'assignment')
+        return true;
+    if (n.due) {
+        const diff = (now.getTime() - new Date(n.due).getTime()) / 86400000;
+        if (diff > 30)
+            return false;
+    }
+    if (n.state) {
+        const st = n.state.toLowerCase();
+        if (st.includes('turned') || st.includes('returned') || st.includes('completed'))
+            return false;
+    }
+    const low = (n.title + ' ' + n.body).toLowerCase();
+    return !low.includes('turned in') && !low.includes('graded');
+}
+async function processCourseBatch(batch, lastSeen, isIncremental) {
+    const batchResults = await Promise.allSettled(batch.map(c => fetchCourse(c, lastSeen, isIncremental)));
+    const notifs = [];
+    const deadlines = [];
+    let hasNewData = false;
+    batchResults.forEach(r => {
+        if (r.status === 'fulfilled') {
+            const { notifs: nList, deadlines: dList, hasNew } = r.value;
+            notifs.push(...nList);
+            deadlines.push(...dList);
+            if (hasNew)
+                hasNewData = true;
+        }
+    });
+    return { notifs, deadlines, hasNewData };
+}
+function handleNewNotifToasts(filteredNotifs, initial) {
+    if (!initial) {
+        filteredNotifs
+            .filter(n => !S.seenIds.has(n.id))
+            .forEach(n => {
+            const c = courseById(n.courseId);
+            if (c)
+                showToast(`New ${TYPE_META.get(n.type)?.label}`, `${c.name} — ${n.title}`, n.type);
+            S.seenIds.add(n.id);
+        });
+    }
+    else {
+        filteredNotifs.forEach(n => S.seenIds.add(n.id));
+    }
+    saveSeen();
+}
+function persistAndRenderContent(filteredNotifs, filteredDeadlines) {
+    S.notifs = filteredNotifs;
+    S.deadlines = filteredDeadlines;
+    localStorage.setItem('aul_cache_notifs', JSON.stringify(S.notifs));
+    localStorage.setItem('aul_cache_deadlines', JSON.stringify(S.deadlines));
+    localStorage.setItem('aul_cache_time', Date.now().toString());
+    if (typeof renderFeed === 'function')
+        renderFeed();
+    if (typeof renderSidebar === 'function')
+        renderSidebar();
+    if (typeof updatePip === 'function')
+        updatePip();
+}
+function applyAndRenderBatch(isIncremental, incomingNotifs, incomingDeadlines, initial) {
+    const mergedNotifs = mergeNotifsList(isIncremental, incomingNotifs);
+    const mergedDeadlines = mergeDeadlinesList(isIncremental, incomingDeadlines);
+    const now = new Date();
+    const filteredNotifs = mergedNotifs.filter(n => isAssignmentVisible(n, now));
+    const filteredDeadlines = mergedDeadlines.filter(dl => {
+        const diff = (now.getTime() - new Date(dl.date).getTime()) / 86400000;
+        return diff <= 30;
+    });
+    handleNewNotifToasts(filteredNotifs, initial);
+    persistAndRenderContent(filteredNotifs, filteredDeadlines);
+}
+async function processCoursesBatched(initial, isIncremental, lastSeen, incomingNotifs, incomingDeadlines) {
+    let anyNewData = false;
+    for (let i = 0; i < S.courses.length; i += 2) {
+        const batch = S.courses.slice(i, i + 2);
+        const { notifs, deadlines, hasNewData } = await processCourseBatch(batch, lastSeen, isIncremental);
+        incomingNotifs.push(...notifs);
+        incomingDeadlines.push(...deadlines);
+        if (hasNewData)
+            anyNewData = true;
+        if (isIncremental)
+            saveLastSeen(lastSeen);
+        if (anyNewData || !isIncremental) {
+            applyAndRenderBatch(isIncremental, incomingNotifs, incomingDeadlines, initial);
+        }
+        if (i + 2 < S.courses.length) {
+            await new Promise(r => setTimeout(r, 400));
+        }
+    }
+    return anyNewData;
 }
 /**
  * fetchAllContent — fetches course data and updates the feed.
@@ -522,120 +652,11 @@ async function loadEverything(forceFetch = false) {
 async function fetchAllContent(initial = false, isIncremental = false) {
     const lastSeen = isIncremental ? loadLastSeen() : {}; // empty map = treat all as new
     const gmailComments = await fetchGmailComments().catch(() => []);
-    // For incremental mode, gmail comments are always merged (no updateTime to compare).
-    let incomingNotifs = [...gmailComments];
-    let incomingDeadlines = [];
-    let anyNewData = gmailComments.length > 0 && !isIncremental;
-    for (let i = 0; i < S.courses.length; i += 2) {
-        const batch = S.courses.slice(i, i + 2);
-        const batchResults = await Promise.allSettled(batch.map(c => fetchCourse(c, lastSeen, isIncremental)));
-        batchResults.forEach(r => {
-            if (r.status !== 'fulfilled')
-                return;
-            const { notifs, deadlines, hasNew } = r.value;
-            incomingNotifs.push(...notifs);
-            incomingDeadlines.push(...deadlines);
-            if (hasNew)
-                anyNewData = true;
-        });
-        // Save the updated lastSeen map after each batch so progress isn't lost.
-        if (isIncremental)
-            saveLastSeen(lastSeen);
-        // Skip remaining work for this batch iteration if nothing changed.
-        if (isIncremental && !anyNewData) {
-            if (i + 2 < S.courses.length)
-                await new Promise(r => setTimeout(r, 400));
-            continue;
-        }
-        // ── Merge incoming items into the existing cache ──────────────────────
-        // In incremental mode, incoming items are only the changed/new ones; merge
-        // them into S.notifs by id. In full-fetch mode, incomingNotifs is the
-        // complete replacement set.
-        let mergedNotifs;
-        if (isIncremental) {
-            mergedNotifs = [...S.notifs]; // start from cached items
-            incomingNotifs.forEach(incoming => {
-                const idx = mergedNotifs.findIndex(n => n.id === incoming.id);
-                if (idx >= 0) {
-                    mergedNotifs[idx] = incoming; // update in-place
-                }
-                else {
-                    mergedNotifs.unshift(incoming); // prepend new item
-                }
-            });
-        }
-        else {
-            mergedNotifs = incomingNotifs; // full replacement
-        }
-        mergedNotifs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-        let mergedDeadlines;
-        if (isIncremental) {
-            mergedDeadlines = [...S.deadlines];
-            incomingDeadlines.forEach(incoming => {
-                const idx = mergedDeadlines.findIndex(d => d.notifId === incoming.notifId);
-                if (idx >= 0)
-                    mergedDeadlines[idx] = incoming;
-                else
-                    mergedDeadlines.push(incoming);
-            });
-        }
-        else {
-            mergedDeadlines = incomingDeadlines;
-        }
-        // ── Apply feed filters ────────────────────────────────────────────────
-        const now = new Date();
-        const filteredNotifs = mergedNotifs.filter(n => {
-            if (n.type === 'assignment') {
-                if (n.due) {
-                    const diff = (now.getTime() - new Date(n.due).getTime()) / 86400000;
-                    if (diff > 30)
-                        return false;
-                }
-                if (n.state) {
-                    const st = n.state.toLowerCase();
-                    if (st.includes('turned') || st.includes('returned') || st.includes('completed'))
-                        return false;
-                }
-                const low = (n.title + ' ' + n.body).toLowerCase();
-                if (low.includes('turned in') || low.includes('graded'))
-                    return false;
-            }
-            return true;
-        });
-        const filteredDeadlines = mergedDeadlines.filter(dl => {
-            const diff = (now.getTime() - new Date(dl.date).getTime()) / 86400000;
-            return diff <= 30;
-        });
-        // ── Toast notifications for brand-new unseen items ────────────────────
-        if (!initial) {
-            filteredNotifs
-                .filter(n => !S.seenIds.has(n.id))
-                .forEach(n => {
-                const c = courseById(n.courseId);
-                if (c)
-                    showToast(`New ${TYPE_META.get(n.type)?.label}`, `${c.name} — ${n.title}`, n.type);
-                S.seenIds.add(n.id);
-            });
-            saveSeen();
-        }
-        else {
-            filteredNotifs.forEach(n => S.seenIds.add(n.id));
-            saveSeen();
-        }
-        S.notifs = filteredNotifs;
-        S.deadlines = filteredDeadlines;
-        localStorage.setItem('aul_cache_notifs', JSON.stringify(S.notifs));
-        localStorage.setItem('aul_cache_deadlines', JSON.stringify(S.deadlines));
-        localStorage.setItem('aul_cache_time', Date.now().toString());
-        if (typeof renderFeed === 'function')
-            renderFeed();
-        if (typeof renderSidebar === 'function')
-            renderSidebar();
-        if (typeof updatePip === 'function')
-            updatePip();
-        if (i + 2 < S.courses.length)
-            await new Promise(r => setTimeout(r, 400));
-    }
+    const incomingNotifs = [...gmailComments];
+    const incomingDeadlines = [];
+    const gmailHasNew = gmailComments.length > 0 && !isIncremental;
+    const batchHasNew = await processCoursesBatched(initial, isIncremental, lastSeen, incomingNotifs, incomingDeadlines);
+    const anyNewData = gmailHasNew || batchHasNew;
     if (isIncremental && !anyNewData) {
         console.log('[Aulert] Incremental fetch complete — no changes detected, cache unchanged.');
     }
@@ -754,11 +775,16 @@ async function fetchCourse(course, lastSeen = {}, isIncremental = false) {
                 const nowDay = new Date();
                 nowDay.setHours(0, 0, 0, 0);
                 const diff = Math.ceil((d.getTime() - nowDay.getTime()) / 86400000);
+                let urg = 'ok';
+                if (diff <= 1)
+                    urg = 'urg';
+                else if (diff <= 5)
+                    urg = 'soo';
                 deadlines.push({
                     title: w.title,
                     courseId: course.id,
                     date: d,
-                    urg: diff <= 1 ? 'urg' : diff <= 5 ? 'soo' : 'ok',
+                    urg,
                     notifId: `cw-${w.id}`,
                 });
             }
@@ -962,13 +988,18 @@ if (_authModal)
         if (e.target === _authModal)
             _authModal.classList.remove('open');
     });
+const VALID_TABS = new Set(['feed', 'cal', 'hw', 'set', 'fbk', 'com']);
 function launchApp() {
     // A query tab takes precedence so legal-page returns can target Settings.
     const queryTab = new URLSearchParams(window.location.search).get('tab');
     const hash = window.location.hash.replace('#', '');
-    const initialTab = ['feed', 'cal', 'hw', 'set', 'fbk', 'com'].includes(queryTab || '')
-        ? queryTab
-        : ['feed', 'cal', 'hw', 'set', 'fbk', 'com'].includes(hash) ? hash : 'feed';
+    let initialTab = 'feed';
+    if (queryTab && VALID_TABS.has(queryTab)) {
+        initialTab = queryTab;
+    }
+    else if (VALID_TABS.has(hash)) {
+        initialTab = hash;
+    }
     goTab(initialTab);
     renderGreeting();
     renderAccount();
@@ -992,7 +1023,7 @@ function launchApp() {
         const securityRef = db.ref(`users/${S.user.id}/securityStatus`);
         securityRef.on('value', (snapshot) => {
             const status = snapshot.val();
-            if (status && status.compromised) {
+            if (status?.compromised) {
                 console.warn('Cross-Account Protection: Account compromised flag detected.');
                 alert('Security Alert: Google has reported a potential security event with your account. You have been securely logged out.');
                 disconnect();
@@ -1001,14 +1032,44 @@ function launchApp() {
     }
 }
 function disconnect() {
-    clearInterval(S.pollTimer);
-    clearInterval(S.countdownTimer);
+    if (S.pollTimer)
+        clearInterval(S.pollTimer);
+    if (S.countdownTimer)
+        clearInterval(S.countdownTimer);
+    if (S.toastTimer)
+        clearTimeout(S.toastTimer);
+    if (S.snackTimer)
+        clearTimeout(S.snackTimer);
     const tokenToRevoke = S.token;
     S.token = null;
     document.cookie = "aul_token=; max-age=0; path=/";
     sessionStorage.removeItem('aul_token');
+    sessionStorage.removeItem('oauth_state');
+    // Purge all user-specific caches from localStorage
+    const keysToRemove = [
+        'aul_cache_courses',
+        'aul_cache_notifs',
+        'aul_cache_deadlines',
+        'aul_cache_user',
+        'aul_cache_time',
+        'aul_user',
+        'aul_read',
+        'aul_seen',
+        'aul_settings',
+        'aul_hw',
+        'aul_lastseen'
+    ];
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+    if (typeof discordConfig !== 'undefined') {
+        discordConfig = { enabled: false, webhooks: [] };
+    }
     if (tokenToRevoke && window.google?.accounts?.oauth2 && S.user?.id) {
-        google.accounts.oauth2.revoke(tokenToRevoke, () => { });
+        try {
+            google.accounts.oauth2.revoke(tokenToRevoke, () => { });
+        }
+        catch {
+            /* ignore */
+        }
     }
     S.courses = [];
     S.notifs = [];
@@ -1021,9 +1082,9 @@ function disconnect() {
 ════════════════════════════════════════════ */
 function toggleTheme() {
     const root = document.documentElement;
-    const isDark = root.getAttribute('data-theme') === 'dark';
+    const isDark = root.dataset.theme === 'dark';
     const next = isDark ? 'light' : 'dark';
-    root.setAttribute('data-theme', next);
+    root.dataset.theme = next;
     localStorage.setItem('aul_theme', next);
     updateThemeIcon(next);
 }
@@ -1045,7 +1106,7 @@ function updateThemeIcon(mode) {
 (function () {
     const saved = localStorage.getItem('aul_theme') || 'dark';
     const mode = (saved === 'custom') ? 'dark' : saved;
-    document.documentElement.setAttribute('data-theme', mode);
+    document.documentElement.dataset.theme = mode;
     updateThemeIcon(mode);
 })();
 /* ════════════════════════════════════════════
@@ -1055,7 +1116,7 @@ function iconPop(el) {
     if (!el)
         return;
     el.classList.remove('icon-pop');
-    void el.offsetWidth;
+    el.getBoundingClientRect();
     el.classList.add('icon-pop');
     clearTimeout(el._iconPopTimer);
     el._iconPopTimer = setTimeout(() => el.classList.remove('icon-pop'), 700);
@@ -1064,7 +1125,7 @@ function bellRingAnim(el) {
     if (!el)
         return;
     el.classList.remove('bell-ringing');
-    void el.offsetWidth;
+    el.getBoundingClientRect();
     el.classList.add('bell-ringing');
     el.addEventListener('animationend', () => el.classList.remove('bell-ringing'), { once: true });
 }
@@ -1072,7 +1133,7 @@ function gearSpinAnim(el) {
     if (!el)
         return;
     el.classList.remove('gear-spinning');
-    void el.offsetWidth;
+    el.getBoundingClientRect();
     el.classList.add('gear-spinning');
     el.addEventListener('animationend', () => el.classList.remove('gear-spinning'), { once: true });
 }
@@ -1083,7 +1144,7 @@ function calFlipAnim(el) {
     if (dateEl)
         dateEl.textContent = new Date().getDate();
     el.classList.remove('cal-flipping');
-    void el.offsetWidth;
+    el.getBoundingClientRect();
     el.classList.add('cal-flipping');
     clearTimeout(el._calTimer);
     el._calTimer = setTimeout(() => el.classList.remove('cal-flipping'), 900);
@@ -1092,7 +1153,7 @@ function hwCheckAnim(el) {
     if (!el)
         return;
     el.classList.remove('hw-checking');
-    void el.offsetWidth;
+    el.getBoundingClientRect();
     el.classList.add('hw-checking');
     clearTimeout(el._hwTimer);
     el._hwTimer = setTimeout(() => el.classList.remove('hw-checking'), 1050);
@@ -1101,7 +1162,7 @@ function comWaveAnim(el) {
     if (!el)
         return;
     el.classList.remove('com-waving');
-    void el.offsetWidth;
+    el.getBoundingClientRect();
     el.classList.add('com-waving');
     el.addEventListener('animationend', () => el.classList.remove('com-waving'), { once: true });
 }
@@ -1109,7 +1170,7 @@ function fbkPopAnim(el) {
     if (!el)
         return;
     el.classList.remove('fbk-popping');
-    void el.offsetWidth;
+    el.getBoundingClientRect();
     el.classList.add('fbk-popping');
     clearTimeout(el._fbkTimer);
     el._fbkTimer = setTimeout(() => el.classList.remove('fbk-popping'), 900);
@@ -1117,9 +1178,7 @@ function fbkPopAnim(el) {
 /* ════════════════════════════════════════════
    TAB SYSTEM
 ════════════════════════════════════════════ */
-const _tabBadgeCounts = new Map([['feed', 0], ['cal', 0], ['hw', 0], ['com', 0], ['set', 0], ['fbk', 0]]);
 function updateTabBadge(tabId, count) {
-    _tabBadgeCounts.set(tabId, count || 0);
     const el = document.getElementById('badge-' + tabId);
     if (!el)
         return;
@@ -1157,8 +1216,8 @@ function goTab(name) {
         renderSettings();
     if (name === 'hw')
         hwRender();
-    if (name === 'com')
-        comRender();
+    if (name === 'com' && typeof window.comRender === 'function')
+        window.comRender();
 }
 /* ════════════════════════════════════════════
    SHEET (item detail)
@@ -1238,10 +1297,13 @@ function toggleRead() {
     updatePip();
 }
 function closeSheet(e) {
-    if (e && e.target.closest('.sheet'))
+    if (e?.target?.closest('.sheet'))
         return;
-    document.getElementById('sheetVeil').classList.remove('open');
+    document.getElementById('sheetVeil')?.classList.remove('open');
 }
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('sheetVeil')?.addEventListener('click', closeSheet);
+});
 /* ════════════════════════════════════════════
    TOAST
 ════════════════════════════════════════════ */
@@ -1290,7 +1352,7 @@ function showToast(title, msg, type = 'default') {
         cancelDismiss();
         dismissTimer = setTimeout(removeToast, 5500);
     };
-    closeBtn.addEventListener('click', removeToast);
+    closeBtn?.addEventListener('click', removeToast);
     t.addEventListener('pointerenter', cancelDismiss);
     t.addEventListener('pointerleave', scheduleDismiss);
     t.addEventListener('focusin', cancelDismiss);
@@ -1305,8 +1367,6 @@ function showToast(title, msg, type = 'default') {
     });
     scheduleDismiss();
 }
-// Keep closeToast for backwards compatibility if needed, but it does nothing now
-function closeToast() { }
 /* ════════════════════════════════════════════
    UI EFFECTS
 ════════════════════════════════════════════ */
@@ -1315,7 +1375,6 @@ function closeToast() { }
     if (!bar)
         return;
     let ticking = false;
-    let lastScrollY = window.scrollY;
     window.addEventListener('scroll', () => {
         if (!ticking) {
             ticking = true;
@@ -1539,7 +1598,7 @@ function renderFileList() {
             if (modal && modal.style.display !== 'none' && e.clipboardData) {
                 const items = e.clipboardData.items;
                 Array.from(items).forEach(item => {
-                    if (item.type.indexOf('image') !== -1) {
+                    if (item.type.includes('image')) {
                         const blob = item.getAsFile();
                         if (blob) {
                             const d = new Date();
@@ -1575,83 +1634,122 @@ function renderFileList() {
         });
     });
 })();
+async function uploadDriveFiles(files) {
+    const attachments = [];
+    for (const file of files) {
+        const metadata = { name: file.name };
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+        form.append('file', file);
+        const driveRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
+            method: 'POST',
+            headers: { Authorization: 'Bearer ' + S.token },
+            body: form,
+        });
+        const driveData = await driveRes.json();
+        if (driveData.error)
+            throw new Error(driveData.error.message);
+        attachments.push({ driveFile: { id: driveData.id } });
+    }
+    return attachments;
+}
+async function attachAndTurnIn(n, attachments) {
+    if (attachments.length > 0) {
+        const attachRes = await fetch(`https://classroom.googleapis.com/v1/courses/${n.courseId}/courseWork/${n.courseWorkId}/studentSubmissions/${n.submissionId}:modifyAttachments`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${S.token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ addAttachments: attachments }),
+        });
+        if (!attachRes.ok) {
+            const errData = await attachRes.json().catch(() => ({}));
+            throw new Error(errData?.error?.message || 'Failed to attach items');
+        }
+    }
+    const turnInRes = await fetch(`https://classroom.googleapis.com/v1/courses/${n.courseId}/courseWork/${n.courseWorkId}/studentSubmissions/${n.submissionId}:turnIn`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${S.token}` },
+    });
+    if (!turnInRes.ok) {
+        const errData = await turnInRes.json().catch(() => ({}));
+        throw new Error(errData?.error?.message || 'Failed to turn in assignment');
+    }
+}
+function showApiRestrictionModal(n) {
+    const content = document.querySelector('.submit-modal-content');
+    if (!content || !n.link)
+        return false;
+    content.innerHTML = '';
+    const h3 = document.createElement('h3');
+    h3.style.cssText = 'font-size: 18px; font-weight: 650; color: var(--rose); margin-bottom: 16px;';
+    h3.textContent = 'API Restriction';
+    const p = document.createElement('p');
+    p.style.cssText = 'font-size: 14px; color: var(--text-2); margin-bottom: 24px; line-height: 1.5;';
+    p.innerHTML = 'Google Classroom prohibits third-party apps from turning in assignments created by teachers. <br><br>Your files were uploaded to your Google Drive! Please open the assignment in Classroom to attach them from your "Recent" files and turn it in.';
+    const div = document.createElement('div');
+    div.style.cssText = 'display: flex; gap: 12px; justify-content: center;';
+    const btnC = document.createElement('button');
+    btnC.onclick = () => { closeSubmitUnifiedModal(); setTimeout(() => loadEverything(), 300); };
+    btnC.style.cssText = 'padding: 10px 16px; border-radius: 10px; border: 1px solid var(--rim); background: transparent; color: var(--text); font-weight: 600; cursor: pointer;';
+    btnC.textContent = 'Cancel';
+    const a = document.createElement('a');
+    a.href = n.link;
+    a.target = '_blank';
+    a.onclick = btnC.onclick;
+    a.style.cssText = 'text-decoration: none; padding: 10px 16px; border-radius: 10px; border: none; background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.35);';
+    a.textContent = 'Open in Classroom';
+    div.appendChild(btnC);
+    div.appendChild(a);
+    content.appendChild(h3);
+    content.appendChild(p);
+    content.appendChild(div);
+    return true;
+}
+function setSubmittingState(isSubmitting) {
+    const modalBtn = document.getElementById('unifiedSubmitBtn');
+    if (modalBtn) {
+        modalBtn.textContent = isSubmitting ? 'Submitting\u2026' : 'Turn in';
+        modalBtn.disabled = isSubmitting;
+        modalBtn.style.opacity = isSubmitting ? '0.7' : '1';
+        modalBtn.style.pointerEvents = isSubmitting ? 'none' : 'auto';
+    }
+    const btn = document.getElementById('submitWorkBtn');
+    if (btn) {
+        btn.textContent = isSubmitting ? 'Submitting\u2026' : 'Submit';
+        btn.disabled = isSubmitting;
+        btn.style.opacity = isSubmitting ? '0.7' : '1';
+    }
+}
+function formatSubmitSuccessMessage(filesCount, hasLink, isPreview = false) {
+    const prefix = isPreview ? 'Attached' : 'Turned in';
+    if (filesCount > 0) {
+        const fileWord = filesCount > 1 ? 'files' : 'file';
+        const linkPart = hasLink && !isPreview ? ' + link' : '';
+        return `${prefix} ${filesCount} ${fileWord}${linkPart} successfully.`;
+    }
+    return `${prefix} link successfully.`;
+}
 async function processUnifiedSubmit() {
     const n = S.notifs.find(x => x.id === S.openId);
-    if (!n || n.type !== 'assignment' || !n.courseWorkId || !n.submissionId)
+    if (n?.type !== 'assignment' || !n?.courseWorkId || !n?.submissionId)
         return;
     const linkInput = document.getElementById('submitLinkInput');
     const linkUrl = linkInput ? linkInput.value.trim() : '';
     const files = [..._pendingFiles];
     if (files.length === 0 && !linkUrl)
         return;
-    const modalBtn = document.getElementById('unifiedSubmitBtn');
-    if (modalBtn) {
-        modalBtn.textContent = 'Submitting\u2026';
-        modalBtn.disabled = true;
-        modalBtn.style.opacity = '0.7';
-        modalBtn.style.pointerEvents = 'none';
-    }
-    const btn = document.getElementById('submitWorkBtn');
-    if (btn) {
-        btn.textContent = 'Submitting\u2026';
-        btn.disabled = true;
-        btn.style.opacity = '0.7';
-    }
+    setSubmittingState(true);
     try {
         if (S.token.startsWith('preview_bypass')) {
             await new Promise(r => setTimeout(r, 1500));
-            const msg = files.length > 0
-                ? 'Attached ' + files.length + ' file' + (files.length > 1 ? 's' : '') + ' successfully.'
-                : 'Link attached successfully.';
-            showToast('Assignment Submitted!', msg);
+            showToast('Assignment Submitted!', formatSubmitSuccessMessage(files.length, Boolean(linkUrl), true));
         }
         else {
-            const attachments = [];
-            // Upload all files to Drive
-            for (const file of files) {
-                const metadata = { name: file.name };
-                const form = new FormData();
-                form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-                form.append('file', file);
-                const driveRes = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart', {
-                    method: 'POST',
-                    headers: { Authorization: 'Bearer ' + S.token },
-                    body: form
-                });
-                const driveData = await driveRes.json();
-                if (driveData.error)
-                    throw new Error(driveData.error.message);
-                attachments.push({ driveFile: { id: driveData.id } });
-            }
-            // Add link if provided
+            const attachments = await uploadDriveFiles(files);
             if (linkUrl) {
                 attachments.push({ link: { url: linkUrl } });
             }
-            // Attach all at once
-            if (attachments.length > 0) {
-                const attachRes = await fetch('https://classroom.googleapis.com/v1/courses/' + n.courseId + '/courseWork/' + n.courseWorkId + '/studentSubmissions/' + n.submissionId + ':modifyAttachments', {
-                    method: 'POST',
-                    headers: { Authorization: 'Bearer ' + S.token, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ addAttachments: attachments })
-                });
-                if (!attachRes.ok) {
-                    const errData = await attachRes.json().catch(() => ({}));
-                    throw new Error((errData.error && errData.error.message) || 'Failed to attach items');
-                }
-            }
-            // Turn in
-            const turnInRes = await fetch('https://classroom.googleapis.com/v1/courses/' + n.courseId + '/courseWork/' + n.courseWorkId + '/studentSubmissions/' + n.submissionId + ':turnIn', {
-                method: 'POST',
-                headers: { Authorization: 'Bearer ' + S.token }
-            });
-            if (!turnInRes.ok) {
-                const errData = await turnInRes.json().catch(() => ({}));
-                throw new Error((errData.error && errData.error.message) || 'Failed to turn in assignment');
-            }
-            const msg = files.length > 0
-                ? 'Turned in ' + files.length + ' file' + (files.length > 1 ? 's' : '') + (linkUrl ? ' + link' : '') + ' successfully.'
-                : 'Turned in link successfully.';
-            showToast('Assignment Submitted!', msg);
+            await attachAndTurnIn(n, attachments);
+            showToast('Assignment Submitted!', formatSubmitSuccessMessage(files.length, Boolean(linkUrl), false));
         }
         _pendingFiles = [];
         closeSubmitUnifiedModal();
@@ -1660,48 +1758,11 @@ async function processUnifiedSubmit() {
     }
     catch (err) {
         console.error('Submission failed:', err);
-        if (err.message && err.message.includes('@ProjectPermissionDenied')) {
-            const content = document.querySelector('.submit-modal-content');
-            if (content && n.link) {
-                content.innerHTML = '';
-                const h3 = document.createElement('h3');
-                h3.style.cssText = 'font-size: 18px; font-weight: 650; color: var(--rose); margin-bottom: 16px;';
-                h3.textContent = 'API Restriction';
-                const p = document.createElement('p');
-                p.style.cssText = 'font-size: 14px; color: var(--text-2); margin-bottom: 24px; line-height: 1.5;';
-                p.innerHTML = 'Google Classroom prohibits third-party apps from turning in assignments created by teachers. <br><br>Your files were uploaded to your Google Drive! Please open the assignment in Classroom to attach them from your "Recent" files and turn it in.';
-                const div = document.createElement('div');
-                div.style.cssText = 'display: flex; gap: 12px; justify-content: center;';
-                const btnC = document.createElement('button');
-                btnC.onclick = () => { closeSubmitUnifiedModal(); setTimeout(() => loadEverything(), 300); };
-                btnC.style.cssText = 'padding: 10px 16px; border-radius: 10px; border: 1px solid var(--rim); background: transparent; color: var(--text); font-weight: 600; cursor: pointer;';
-                btnC.textContent = 'Cancel';
-                const a = document.createElement('a');
-                a.href = n.link;
-                a.target = '_blank';
-                a.onclick = btnC.onclick;
-                a.style.cssText = 'text-decoration: none; padding: 10px 16px; border-radius: 10px; border: none; background: linear-gradient(135deg, #3B82F6, #2563EB); color: #fff; font-weight: 600; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.35);';
-                a.textContent = 'Open in Classroom';
-                div.appendChild(btnC);
-                div.appendChild(a);
-                content.appendChild(h3);
-                content.appendChild(p);
-                content.appendChild(div);
-                return; // Leave modal open with the new content
-            }
+        if (err?.message?.includes('@ProjectPermissionDenied') && showApiRestrictionModal(n)) {
+            return;
         }
-        showToast('Submission Failed', err.message);
-        if (modalBtn) {
-            modalBtn.textContent = 'Submit';
-            modalBtn.disabled = false;
-            modalBtn.style.opacity = '1';
-            modalBtn.style.pointerEvents = 'auto';
-        }
-        if (btn) {
-            btn.textContent = 'Submit';
-            btn.disabled = false;
-            btn.style.opacity = '1';
-        }
+        setSubmittingState(false);
+        showToast('Submission error', err?.message || 'Failed to submit assignment');
     }
 }
 // Handle Back-Forward Cache (bfcache) reconnection for WebSockets/Firebase

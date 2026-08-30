@@ -153,6 +153,8 @@ function renderSidebar() {
 }
 function renderClasses() {
     const body = document.getElementById('clsBody');
+    if (!body)
+        return;
     body.innerHTML = '';
     S.courses.forEach(c => {
         const row = document.createElement('div');
@@ -177,8 +179,25 @@ function renderClasses() {
         lbl.className = 'tog';
         const chk = document.createElement('input');
         chk.type = 'checkbox';
-        chk.checked = true;
-        chk.onchange = saved;
+        chk.checked = S.courseFilter === 'all' || S.courseFilter === c.id;
+        chk.onchange = (e) => {
+            const target = e.target;
+            if (target.checked) {
+                S.courseFilter = c.id;
+            }
+            else {
+                // If unchecked and it was the active filter, reset to 'all'
+                if (S.courseFilter === c.id) {
+                    S.courseFilter = 'all';
+                }
+            }
+            localStorage.setItem('aul_course_filter', S.courseFilter);
+            renderClasses();
+            renderSidebar();
+            if (typeof renderFeed === 'function')
+                renderFeed();
+            saved(c.name, target.checked);
+        };
         const trk = document.createElement('div');
         trk.className = 'tog-track';
         lbl.appendChild(chk);

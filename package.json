@@ -33,7 +33,7 @@
     "typecheck:api": "tsc --noEmit -p tsconfig.json",
     "typecheck:frontend": "tsc --noEmit -p tsconfig.frontend.json",
     "typecheck:icons": "tsc --noEmit -p tsconfig.icons.json",
-    "build:frontend": "tsc -p tsconfig.frontend.build.json && node -e \"const fs=require('fs');['script-app','script-app-feedback','script-app-homework','script-app-settings','script-app-feed','script-app-calendar'].forEach(f=>{if(fs.existsSync('.tsfrontend/'+f+'.js'))fs.copyFileSync('.tsfrontend/'+f+'.js', f+'.js')})\"",
+    "build:frontend": "tsc -p tsconfig.frontend.build.json && node -e \"const fs=require('fs');['script-app','script-app-homework','script-app-settings','script-app-feed','script-app-calendar'].forEach(f=>{if(fs.existsSync('.tsfrontend/'+f+'.js'))fs.copyFileSync('.tsfrontend/'+f+'.js', f+'.js')})\"",
     "build:icons": "node scripts/build-icons.mjs",
     "build": "npm run build:frontend && npm run build:icons"
   },

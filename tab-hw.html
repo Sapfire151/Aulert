@@ -17,7 +17,11 @@
         <!-- Add task form -->
         <div class="hw-form">
           <div class="hw-form-row">
-            <input class="hw-input" id="hwSubject" placeholder="Subject (e.g. Math, Biology)" data-i18n="hw_subject" maxlength="80"/>
+            <label for="hwSubject" class="sr-only">Subject</label>
+            <input class="hw-input hw-input-subject" id="hwSubject"
+              placeholder="Subject (e.g. Math, Biology)"
+              data-i18n="hw_subject" maxlength="80"
+              oninput="hwAutoSuggestPriority(this.value)" />
             <!-- Custom Date+Time Picker Trigger -->
             <div class="hwdtp-wrap" id="hwDtpWrap">
               <button type="button" class="hwdtp-trigger hw-input" id="hwDtpTrigger" onclick="hwDtpToggle()">
@@ -26,9 +30,11 @@
                   <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
                 </svg>
                 <span id="hwDtpLabel" data-i18n="hw_pick_dl">Pick deadline…</span>
-                <svg id="hwDtpClear" width="13" height="13" viewBox="0 0 24 24" fill="none" onclick="hwDtpClear(event)" style="display:none;margin-left:auto;flex-shrink:0;opacity:.5;cursor:pointer" class="hwdtp-x">
-                  <line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-                  <line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+              </button>
+              <button type="button" id="hwDtpClear" class="hwdtp-clear-btn" onclick="hwDtpClear(event)" aria-label="Clear deadline" title="Clear deadline" style="display:none;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/>
+                  <line x1="6" y1="6" x2="18" y2="18"/>
                 </svg>
               </button>
               <!-- Hidden value holder -->
@@ -41,7 +47,10 @@
                     <button type="button" class="hwdtp-nav-btn" onclick="hwDtpShiftMonth(-1)" aria-label="Previous month">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="15 18 9 12 15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
-                    <span class="hwdtp-month-lbl" id="hwDtpMonthLbl"></span>
+                    <div style="display:flex;align-items:center;gap:6px;">
+                      <span class="hwdtp-month-lbl" id="hwDtpMonthLbl"></span>
+                      <button type="button" class="hwdtp-today-btn" id="hwDtpTodayBtn" onclick="hwDtpGoToday()" style="display:none;">Today</button>
+                    </div>
                     <button type="button" class="hwdtp-nav-btn" onclick="hwDtpShiftMonth(1)" aria-label="Next month">
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polyline points="9 18 15 12 9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
@@ -88,6 +97,24 @@
               </div>
             </div>
           </div>
+
+          <!-- Priority + Tags row -->
+          <div class="hw-form-row hw-meta-row">
+            <!-- Custom priority pill group -->
+            <div class="hw-priority-group" role="group" aria-label="Task priority">
+              <span class="hw-priority-label">Priority:</span>
+              <button type="button" class="hw-priority-btn priority-normal active" data-priority="normal" onclick="hwSelectPriority('normal',this)" aria-pressed="true">Normal</button>
+              <button type="button" class="hw-priority-btn priority-low" data-priority="low" onclick="hwSelectPriority('low',this)" aria-pressed="false">Low</button>
+              <button type="button" class="hw-priority-btn priority-high" data-priority="high" onclick="hwSelectPriority('high',this)" aria-pressed="false">High</button>
+              <button type="button" class="hw-priority-btn priority-urgent" data-priority="urgent" onclick="hwSelectPriority('urgent',this)" aria-pressed="false">🚨 Urgent</button>
+              <input type="hidden" id="hwPriority" value="normal" />
+            </div>
+            <!-- Tags -->
+            <label for="hwTags" class="sr-only">Tags</label>
+            <input class="hw-input hw-tags-input" id="hwTags" placeholder="Tags (comma separated)" maxlength="60" aria-label="Tags" />
+          </div>
+
+          <label for="hwDesc" class="sr-only">Description</label>
           <textarea class="hw-textarea" id="hwDesc" placeholder="Description — what needs to be done?" data-i18n="hw_desc" rows="3"></textarea>
           <div class="hw-form-footer">
             <span class="hw-form-hint">Date &amp; time optional — pick your exact deadline</span>
@@ -95,6 +122,35 @@
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
               <span data-i18n="hw_add_btn">Add Task</span>
             </button>
+          </div>
+        </div>
+
+        <!-- Filter and Sort Controls -->
+        <div class="hw-controls-row">
+          <div class="hw-filter-bar" id="hwFilterBar"></div>
+          <div class="hw-dropdown-wrap" id="hwSortDropdown">
+            <button type="button" class="hw-dropdown-trigger" id="hwSortTrigger" onclick="hwToggleSortDropdown(event)" aria-haspopup="listbox" aria-expanded="false">
+              <svg class="hw-dropdown-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="4" y1="6" x2="20" y2="6"/>
+                <line x1="7" y1="12" x2="17" y2="12"/>
+                <line x1="10" y1="18" x2="14" y2="18"/>
+              </svg>
+              <span id="hwSortLabel">Priority → Due Date</span>
+              <svg class="hw-dropdown-chevron" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"/>
+              </svg>
+            </button>
+            <div class="hw-dropdown-menu" id="hwSortMenu" role="listbox" aria-labelledby="hwSortTrigger">
+              <button type="button" class="hw-dropdown-item active" data-value="priority-due" onclick="hwSelectSortMode('priority-due', 'Priority → Due Date')" role="option" aria-selected="true">
+                <span class="hw-dropdown-item-text">Priority → Due Date</span>
+                <svg class="hw-dropdown-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </button>
+              <button type="button" class="hw-dropdown-item" data-value="due-priority" onclick="hwSelectSortMode('due-priority', 'Due Date → Priority')" role="option" aria-selected="false">
+                <span class="hw-dropdown-item-text">Due Date → Priority</span>
+                <svg class="hw-dropdown-check" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </button>
+            </div>
+            <input type="hidden" id="hwSortSelect" value="priority-due" />
           </div>
         </div>
 

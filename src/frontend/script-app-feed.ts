@@ -17,15 +17,15 @@ function toggleNotifPanel(e) {
 function openNotifPanel() {
   notifPanelOpen = true;
   renderNotifPanel();
-  document.getElementById('notifPanel').classList.add('open');
-  document.getElementById('notifPanelOverlay').classList.add('open');
+  document.getElementById('notifPanelOverlay')?.classList.add('open');
+  ModalManager.open('notifPanel');
   document.addEventListener('click', onOutsideNotifClick);
 }
 
 function closeNotifPanel() {
   notifPanelOpen = false;
-  document.getElementById('notifPanel').classList.remove('open');
-  document.getElementById('notifPanelOverlay').classList.remove('open');
+  document.getElementById('notifPanelOverlay')?.classList.remove('open');
+  ModalManager.close('notifPanel');
   document.removeEventListener('click', onOutsideNotifClick);
 }
 

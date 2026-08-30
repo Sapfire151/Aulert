@@ -77,6 +77,33 @@ var S: any = {
   })),
 };
 
+function escHtml(s?: string | null): string {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function pruneLocalStorage() {
+  try {
+    const read = Array.from(S.readIds);
+    if (read.length > 500) {
+      S.readIds = new Set(read.slice(-500));
+      localStorage.setItem('aul_read', JSON.stringify(Array.from(S.readIds)));
+    }
+    const seen = Array.from(S.seenIds);
+    if (seen.length > 500) {
+      S.seenIds = new Set(seen.slice(-500));
+      localStorage.setItem('aul_seen', JSON.stringify(Array.from(S.seenIds)));
+    }
+  } catch (e) {
+    console.warn('LocalStorage pruning failed', e);
+  }
+}
+
 function loadAnalyticsIfAllowed() {
   if (window.__aulertAnalyticsLoaded || !window.AULERT_ANALYTICS_ID) return;
   let consent;
@@ -952,6 +979,8 @@ function startPolling() {
   clearInterval(S.pollTimer);
   clearInterval(S.countdownTimer);
 
+  pruneLocalStorage();
+
   // Event-driven refresh: when the server (cron, Classroom push receiver) writes a
   // new `syncTick` for this user, pull fresh data immediately instead of waiting
   // for the next poll. This is the primary update path; the interval below is only
@@ -961,6 +990,7 @@ function startPolling() {
   S.nextPoll = Date.now() + POLL_MS;
   S.pollTimer = setInterval(() => {
     if (document.hidden) return; // don't burn Classroom API quota in background tabs
+    pruneLocalStorage();
     fetchAllContent(false);
     S.nextPoll = Date.now() + POLL_MS;
   }, POLL_MS);
@@ -968,6 +998,7 @@ function startPolling() {
   // Pause/resume cleanly with tab visibility (saves battery + API quota).
   document.addEventListener('visibilitychange', () => {
     if (!document.hidden) {
+      pruneLocalStorage();
       fetchAllContent(false);
       S.nextPoll = Date.now() + POLL_MS;
     }
@@ -1025,7 +1056,7 @@ if (_authModal) _authModal.addEventListener('click', e => {
   if (e.target === _authModal) _authModal.classList.remove('open');
 });
 
-const VALID_TABS = new Set(['feed', 'cal', 'hw', 'set', 'fbk', 'com']);
+const VALID_TABS = new Set(['feed', 'cal', 'hw', 'set', 'com']);
 
 function launchApp() {
   // A query tab takes precedence so legal-page returns can target Settings.
@@ -1064,14 +1095,23 @@ function launchApp() {
       const status = snapshot.val();
       if (status?.compromised) {
         console.warn('Cross-Account Protection: Account compromised flag detected.');
-        alert('Security Alert: Google has reported a potential security event with your account. You have been securely logged out.');
-        disconnect();
+        showToast('Security Alert', 'Google has reported a potential security event with your account. You have been securely logged out.');
+        doDisconnect();
       }
     });
   }
 }
 
-function disconnect() {
+async function disconnect() {
+  const confirmed = typeof showConfirmDialog === 'function'
+    ? await showConfirmDialog('Disconnect Google Account?', 'This will clear your locally cached data and sign you out of Aulert.', 'Disconnect')
+    : confirm('Are you sure you want to disconnect?');
+  if (confirmed) {
+    doDisconnect();
+  }
+}
+
+function doDisconnect() {
   if (S.pollTimer) clearInterval(S.pollTimer);
   if (S.countdownTimer) clearInterval(S.countdownTimer);
   if (S.toastTimer) clearTimeout(S.toastTimer);
@@ -1144,11 +1184,149 @@ function updateThemeIcon(mode) {
 }
 
 (function () {
-  const saved = localStorage.getItem('aul_theme') || 'dark';
-  const mode = (saved === 'custom') ? 'dark' : saved;
+  const saved = localStorage.getItem('aul_theme');
+  let mode: string;
+  if (!saved) {
+    mode = window.matchMedia?.('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  } else {
+    mode = (saved === 'custom') ? 'dark' : saved;
+  }
   document.documentElement.dataset.theme = mode;
   updateThemeIcon(mode);
+
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      if (!localStorage.getItem('aul_theme')) {
+        const newMode = e.matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = newMode;
+        updateThemeIcon(newMode);
+      }
+    });
+  }
 })();
+
+/* ════════════════════════════════════════════
+   CENTRALIZED MODAL & FOCUS MANAGER
+════════════════════════════════════════════ */
+
+// eslint-disable-next-line no-var
+var ModalManager = {
+  stack: [] as { id: string; el: HTMLElement; previousActiveEl: HTMLElement | null }[],
+
+  open(modalElOrId: string | HTMLElement, focusTarget?: HTMLElement) {
+    const el = typeof modalElOrId === 'string' ? document.getElementById(modalElOrId) : modalElOrId;
+    if (!el) return;
+    const prevActive = document.activeElement as HTMLElement | null;
+    this.stack.push({ id: el.id || '', el, previousActiveEl: prevActive });
+    el.classList.add('open');
+    el.setAttribute('aria-modal', 'true');
+    const appContainer = document.getElementById('appBody') || document.querySelector('main');
+    if (appContainer && this.stack.length === 1) {
+      appContainer.setAttribute('aria-hidden', 'true');
+    }
+    const target = focusTarget || (el.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])') as HTMLElement);
+    if (target) setTimeout(() => target.focus(), 50);
+  },
+
+  close(modalElOrId?: string | HTMLElement) {
+    let item;
+    if (modalElOrId) {
+      const el = typeof modalElOrId === 'string' ? document.getElementById(modalElOrId) : modalElOrId;
+      const idx = this.stack.findIndex(entry => entry.el === el);
+      if (idx !== -1) item = this.stack.splice(idx, 1)[0];
+    } else {
+      item = this.stack.pop();
+    }
+    if (!item) return;
+    item.el.classList.remove('open');
+    if (this.stack.length === 0) {
+      const appContainer = document.getElementById('appBody') || document.querySelector('main');
+      if (appContainer) appContainer.removeAttribute('aria-hidden');
+    }
+    if (item.previousActiveEl && typeof item.previousActiveEl.focus === 'function') {
+      item.previousActiveEl.focus();
+    }
+  },
+
+  getTop() {
+    return this.stack.length ? this.stack[this.stack.length - 1] : null;
+  },
+
+  trapFocus(e: KeyboardEvent) {
+    const top = this.getTop();
+    if (!top || e.key !== 'Tab') return;
+    const nodeList = top.el.querySelectorAll(
+      'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    );
+    const focusables: HTMLElement[] = [];
+    for (let i = 0; i < nodeList.length; i++) {
+      const node = nodeList[i] as HTMLElement;
+      if (node.offsetParent !== null || node.offsetWidth > 0 || node.offsetHeight > 0) {
+        focusables.push(node);
+      }
+    }
+    if (!focusables.length) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+};
+
+document.addEventListener('keydown', (e: KeyboardEvent) => {
+  if (ModalManager.stack.length > 0) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      const top = ModalManager.getTop();
+      if (top) {
+        if (top.id === 'sheetVeil') closeSheet();
+        else if (top.id === 'notifPanelOverlay' || top.id === 'notifPanel') closeNotifPanel();
+        else ModalManager.close(top.el);
+      }
+      return;
+    }
+    if (e.key === 'Tab') {
+      ModalManager.trapFocus(e);
+      return;
+    }
+  }
+
+  const tag = (e.target as HTMLElement)?.tagName;
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || (e.target as HTMLElement)?.isContentEditable) {
+    return;
+  }
+
+  if (e.key === '1') { goTab('feed'); }
+  else if (e.key === '2') { goTab('cal'); }
+  else if (e.key === '3') { goTab('hw'); }
+  else if (e.key === '4') { goTab('set'); }
+});
+
+/* ════════════════════════════════════════════
+   SKELETON HELPERS (Phase 3)
+════════════════════════════════════════════ */
+
+function showSectionSkeleton(sectionId: string, type: 'feed' | 'cal' | 'hw' | 'set') {
+  const container = document.getElementById(sectionId);
+  if (!container) return;
+  const count = type === 'cal' ? 7 : 3;
+  let html = `<div class="section-skeleton-wrap" aria-busy="true">`;
+  for (let i = 0; i < count; i++) {
+    html += `<div class="skeleton-block" style="height:${type === 'cal' ? '40px' : '68px'};margin-bottom:8px;"></div>`;
+  }
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+function clearSectionSkeleton(sectionId: string) {
+  const container = document.getElementById(sectionId);
+  container?.querySelector('.section-skeleton-wrap')?.remove();
+}
 
 /* ════════════════════════════════════════════
    ANIMATIONS & UI
@@ -1207,15 +1385,6 @@ function comWaveAnim(el) {
   el.addEventListener('animationend', () => el.classList.remove('com-waving'), { once: true });
 }
 
-function fbkPopAnim(el) {
-  if (!el) return;
-  el.classList.remove('fbk-popping');
-  el.getBoundingClientRect();
-  el.classList.add('fbk-popping');
-  clearTimeout(el._fbkTimer);
-  el._fbkTimer = setTimeout(() => el.classList.remove('fbk-popping'), 900);
-}
-
 /* ════════════════════════════════════════════
    TAB SYSTEM
 ════════════════════════════════════════════ */
@@ -1234,12 +1403,12 @@ function updateTabBadge(tabId, count) {
 }
 
 function goTab(name) {
-  const validTabs = ['feed', 'cal', 'hw', 'set', 'fbk', 'com'];
+  const validTabs = ['feed', 'cal', 'hw', 'set', 'com'];
   if (!validTabs.includes(name)) name = 'feed';
   // Update URL hash for persistence
   window.location.hash = name;
 
-  ['feed', 'cal', 'hw', 'set', 'fbk', 'com'].forEach(t => {
+  ['feed', 'cal', 'hw', 'set', 'com'].forEach(t => {
     const panel = document.getElementById('p-' + t);
     const tab = document.getElementById('tb-' + t);
     const mobTab = document.getElementById('mtb-' + t);
@@ -1285,9 +1454,6 @@ function openSheet(id) {
 
   const submitBtn = document.getElementById('submitWorkBtn');
   if (submitBtn) {
-    /* Settings alignment tweaks */
-    /* Ensure settings sections are properly aligned */
-    /* Add CSS rule via JS if not present */
     if (!document.getElementById('settingsAlignmentStyle')) {
       const style = document.createElement('style');
       style.id = 'settingsAlignmentStyle';
@@ -1315,7 +1481,7 @@ function openSheet(id) {
     saveRead();
     renderFeed(); updatePip();
   }
-  document.getElementById('sheetVeil').classList.add('open');
+  ModalManager.open('sheetVeil');
 }
 
 function toggleRead() {
@@ -1329,7 +1495,7 @@ function toggleRead() {
 
 function closeSheet(e?) {
   if (e?.target?.closest('.sheet')) return;
-  document.getElementById('sheetVeil')?.classList.remove('open');
+  ModalManager.close('sheetVeil');
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -1341,8 +1507,6 @@ document.addEventListener('DOMContentLoaded', () => {
 ════════════════════════════════════════════ */
 
 function showToast(title, msg, type = 'default') {
-  if (type === 'assignment' || type === 'announcement' || type === 'material') return;
-
   const container = document.getElementById('toastContainer');
   if (!container) return;
 

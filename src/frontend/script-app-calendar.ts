@@ -11,9 +11,28 @@ function navMo(d) {
   renderCal(d);
 }
 
+function goToday() {
+  const now = new Date();
+  const dir = (now.getFullYear() > S.calYear || (now.getFullYear() === S.calYear && now.getMonth() > S.calMonth)) ? 1 : -1;
+  S.calYear = now.getFullYear();
+  S.calMonth = now.getMonth();
+  renderCal(dir);
+}
+
+function calDayKeydown(e: KeyboardEvent, d: number, el: HTMLElement) {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    pickDay(d, el);
+  }
+}
+
 function renderCal(direction = 0) {
   document.getElementById('moLabel').textContent = `${MONTHS[S.calMonth]} ${S.calYear}`;
   const today = new Date();
+  const isCurrentMonth = today.getFullYear() === S.calYear && today.getMonth() === S.calMonth;
+  document.querySelectorAll('.mnav-today-btn').forEach((btn: any) => {
+    btn.style.display = isCurrentMonth ? 'none' : 'inline-flex';
+  });
   const first = new Date(S.calYear, S.calMonth, 1).getDay();
   const days  = new Date(S.calYear, S.calMonth + 1, 0).getDate();
   const prev  = new Date(S.calYear, S.calMonth, 0).getDate();
@@ -40,20 +59,22 @@ function renderCal(direction = 0) {
 
   let h = '';
   for (let i = first - 1; i >= 0; i--)
-    h += `<div class="cday other"><div class="cday-n">${prev - i}</div></div>`;
+    h += `<div class="cday other" role="gridcell" aria-disabled="true"><div class="cday-n">${prev - i}</div></div>`;
   for (let d = 1; d <= days; d++) {
     const isT = today.getDate()===d && today.getMonth()===S.calMonth && today.getFullYear()===S.calYear;
     const dots = (dmap[d]||[]).map(dl => {
       const color = dl._hwTask ? 'var(--gamemaster)' : courseById(dl.courseId).color;
       return `<div class="cdot" style="background:${color}"></div>`;
     }).join('');
-    h += `<div class="cday${isT?' today':''}" onclick="pickDay(${d},this)"><div class="cday-n">${d}</div><div class="cday-dots">${dots}</div></div>`;
+    h += `<div class="cday${isT?' today':''}" role="gridcell" tabindex="0" aria-label="${MONTHS[S.calMonth]} ${d}, ${S.calYear}" onclick="pickDay(${d},this)" onkeydown="calDayKeydown(event,${d},this)"><div class="cday-n">${d}</div><div class="cday-dots">${dots}</div></div>`;
   }
   for (let i = 1; i <= 42 - (first + days); i++)
-    h += `<div class="cday other"><div class="cday-n">${i}</div></div>`;
+    h += `<div class="cday other" role="gridcell" aria-disabled="true"><div class="cday-n">${i}</div></div>`;
 
   const grid = document.getElementById('calGrid');
   grid.innerHTML = h;
+  grid.setAttribute('role', 'grid');
+  grid.setAttribute('aria-label', 'Calendar');
   
   if (direction !== 0) {
     grid.classList.remove('slide-left', 'slide-right');

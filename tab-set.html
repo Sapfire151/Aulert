@@ -1,6 +1,6 @@
 <div class="panel" id="p-set">
   <h1 data-i18n="set_title">Settings</h1>
-  <p class="sub">Control your account, notifications, and connected classes</p>
+  <p class="sub">Control your account, notifications, and preferences</p>
 
   <div class="sg sg-account">
     <div class="sg-lbl" data-i18n="set_acct">Account</div>
@@ -69,8 +69,28 @@
     </div>
   </div>
 
-
-
+  <div class="sg sg-gcal">
+    <div class="sg-lbl">Google Calendar Sync</div>
+    <div class="sg-body">
+      <div class="srow">
+        <div class="srow-info">
+          <h4>Sync Assignments to Google Calendar</h4>
+          <p id="gcalStatus" style="font-size:12px;color:var(--text-2);margin-top:2px;">Sync assignments directly to
+            your Google Calendar</p>
+        </div>
+        <label class="tog" for="set_gcalSync" aria-label="Toggle Google Calendar sync">
+          <input type="checkbox" id="set_gcalSync" onchange="gcalToggle(this)">
+          <div class="tog-track"></div>
+        </label>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button type="button" class="btn-sm" id="gcalSyncBtn" onclick="gcalSyncAll()" style="display:none;">Sync
+          Now</button>
+        <button type="button" class="btn-sm discord-remove" id="gcalUnsyncBtn" onclick="gcalUnsyncAll()"
+          style="display:none;">Remove All from Calendar</button>
+      </div>
+    </div>
+  </div>
 
   <div class="sg sg-discord discord-integration">
     <div class="sg-lbl">Discord Notifications</div>
@@ -78,7 +98,6 @@
       <div class="discord-intro">
         <h4>Send Classroom updates to Discord</h4>
       </div>
-      <p class="discord-status" aria-live="polite">Loading Discord notifications…</p>
       <div class="discord-list"></div>
       <form class="discord-add-form" onsubmit="return false">
         <label>Destination label<input data-discord-label maxlength="48" placeholder="Study server"
@@ -92,8 +111,4 @@
     </div>
   </div>
 
-  <div class="sg sg-classes">
-    <div class="sg-lbl" data-i18n="set_classes">Connected Classes</div>
-    <div class="sg-body" id="clsBody"></div>
-  </div>
 </div>

@@ -145,6 +145,7 @@ function renderSidebar() {
 
 function renderClasses() {
   const body = document.getElementById('clsBody');
+  if (!body) return;
   body.innerHTML = '';
   S.courses.forEach(c => {
     const row = document.createElement('div');
@@ -180,8 +181,10 @@ function renderClasses() {
           S.courseFilter = 'all';
         }
       }
+      localStorage.setItem('aul_course_filter', S.courseFilter);
       renderClasses();
       renderSidebar();
+      if (typeof renderFeed === 'function') renderFeed();
       saved(c.name, target.checked);
     };
     const trk = document.createElement('div');

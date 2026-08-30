@@ -80,3 +80,4 @@ test-results/
 .pnpm-store/
 .turbo/
 update.txt
+IMPLEMENTATION_PLAN.md

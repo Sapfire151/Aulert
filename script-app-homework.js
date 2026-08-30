@@ -15,8 +15,9 @@ const hwDtp = {
 };
 function hwDtpInit() {
     const now = new Date();
-    hwDtp.viewYear = now.getFullYear();
-    hwDtp.viewMonth = now.getMonth();
+    // If user already picked a date, open to that year/month, otherwise current
+    hwDtp.viewYear = hwDtp.year !== null ? hwDtp.year : now.getFullYear();
+    hwDtp.viewMonth = hwDtp.month !== null ? hwDtp.month : now.getMonth();
     hwDtpBuildCalendar();
     hwDtpSyncTime();
 }
@@ -29,8 +30,7 @@ function hwDtpToggle() {
         hwDtpClose();
     }
     else {
-        if (hwDtp.viewYear === null)
-            hwDtpInit();
+        hwDtpInit();
         panel.classList.add('open');
     }
 }
@@ -66,6 +66,12 @@ function hwDtpAutoSave() {
         hwDtpCommit();
     }
 }
+function hwDtpGoToday() {
+    const now = new Date();
+    hwDtp.viewYear = now.getFullYear();
+    hwDtp.viewMonth = now.getMonth();
+    hwDtpBuildCalendar();
+}
 function hwDtpShiftMonth(delta) {
     hwDtp.viewMonth += delta;
     if (hwDtp.viewMonth < 0) {
@@ -95,11 +101,17 @@ function hwDtpBuildCalendar() {
     const months = ['January', 'February', 'March', 'April', 'May', 'June',
         'July', 'August', 'September', 'October', 'November', 'December'];
     lbl.textContent = months[hwDtp.viewMonth] + ' ' + hwDtp.viewYear;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    // Today button visibility rule — only visible when viewing a different month
+    const isCurrentMonth = today.getFullYear() === hwDtp.viewYear && today.getMonth() === hwDtp.viewMonth;
+    const todayBtn = document.getElementById('hwDtpTodayBtn');
+    if (todayBtn) {
+        todayBtn.style.display = isCurrentMonth ? 'none' : 'inline-flex';
+    }
     const firstDay = new Date(hwDtp.viewYear, hwDtp.viewMonth, 1).getDay();
     const daysInMonth = new Date(hwDtp.viewYear, hwDtp.viewMonth + 1, 0).getDate();
     const daysInPrev = new Date(hwDtp.viewYear, hwDtp.viewMonth, 0).getDate();
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
     grid.innerHTML = '';
     // Leading grey days (prev month)
     for (let i = 0; i < firstDay; i++) {
@@ -251,7 +263,7 @@ function hwDtpUpdateTriggerLabel(persist) {
     if (trigger)
         trigger.classList.add('has-val');
     if (clearBtn)
-        clearBtn.style.display = 'block';
+        clearBtn.style.display = 'flex';
     if (persist) {
         const hwDate = document.getElementById('hwDate');
         if (hwDate)
@@ -319,9 +331,16 @@ function hwAdd() {
     const subjectEl = document.getElementById('hwSubject');
     const descEl = document.getElementById('hwDesc');
     const dateEl = document.getElementById('hwDate');
+    const priorityEl = document.getElementById('hwPriority'); // hidden input
+    const tagsEl = document.getElementById('hwTags');
     const subject = subjectEl?.value.trim() || '';
     const desc = descEl?.value.trim() || '';
     const date = dateEl?.value || '';
+    const priority = priorityEl?.value || 'normal';
+    const tags = (tagsEl?.value || '')
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean);
     if (!subject) {
         if (subjectEl) {
             subjectEl.focus();
@@ -330,16 +349,21 @@ function hwAdd() {
         }
         return;
     }
-    _hwTasks.unshift({
+    const newTask = {
         id: Date.now(),
         subject,
         desc,
         date,
+        priority,
+        tags,
         done: false,
-        created: new Date().toISOString()
-    });
+        created: new Date().toISOString(),
+        updatedAt: Date.now()
+    };
+    _hwTasks.unshift(newTask);
     try {
         hwSave();
+        hwSyncTask(newTask);
         hwRender();
         if (document.getElementById('tb-cal')?.classList.contains('on') && typeof renderCal === 'function')
             renderCal();
@@ -347,6 +371,11 @@ function hwAdd() {
             subjectEl.value = '';
         if (descEl)
             descEl.value = '';
+        if (tagsEl)
+            tagsEl.value = '';
+        // Reset priority pills back to Normal and re-enable auto-suggest
+        _hwPriorityAutoSet = true;
+        hwSelectPriority('normal');
         hwDtpReset();
         showHwSnack('✓ Task added successfully');
     }
@@ -364,6 +393,7 @@ function hwDelete(id) {
             try {
                 _hwTasks = _hwTasks.filter(t => t.id !== id);
                 hwSave();
+                hwDeleteSyncTask(id);
                 hwRender();
                 showHwSnack('✓ Task deleted');
             }
@@ -378,8 +408,10 @@ function hwToggleDone(id) {
     const task = _hwTasks.find(t => t.id === id);
     if (task) {
         task.done = !task.done;
+        task.updatedAt = Date.now();
         try {
             hwSave();
+            hwSyncTask(task);
             hwRender();
             showHwSnack(task.done ? '✓ Marked as done' : '✓ Marked as to-do');
         }
@@ -408,7 +440,6 @@ function hwFormatDate(date) {
 }
 /**
  * Generates the pill HTML for a task's urgency state.
- * Used by hwRender() card rendering and was previously inline in the forEach callback.
  */
 function hwPillHtml(task, today, nowMs) {
     if (task.done) {
@@ -441,7 +472,6 @@ function hwPillHtml(task, today, nowMs) {
 }
 /**
  * Finds the most urgent non-done task within the task list.
- * Used by hwRender() to find the due-soon banner task.
  */
 function findUrgentTask(tasks, today) {
     let urgentTask = null;
@@ -464,13 +494,152 @@ function calculateDiffDays(dateStr, today) {
     const dueMidnight = dateStr.includes('T') ? new Date(dateStr) : new Date(y, m - 1, d);
     return Math.ceil((dueMidnight.getTime() - today.getTime()) / 86400000);
 }
+// ── Priority & Filter State ──
+// eslint-disable-next-line no-var
+var hwActiveFilter = 'all';
+// eslint-disable-next-line no-var
+var hwSortMode = 'priority-due';
+function hwSetFilter(filter) {
+    hwActiveFilter = filter;
+    hwRender();
+}
+function hwToggleSortDropdown(e) {
+    if (e)
+        e.stopPropagation();
+    const wrap = document.getElementById('hwSortDropdown');
+    if (!wrap)
+        return;
+    const isOpen = wrap.classList.toggle('open');
+    const trigger = document.getElementById('hwSortTrigger');
+    if (trigger)
+        trigger.setAttribute('aria-expanded', String(isOpen));
+}
+function hwCloseSortDropdown() {
+    const wrap = document.getElementById('hwSortDropdown');
+    if (wrap && wrap.classList.contains('open')) {
+        wrap.classList.remove('open');
+        const trigger = document.getElementById('hwSortTrigger');
+        if (trigger)
+            trigger.setAttribute('aria-expanded', 'false');
+    }
+}
+// Global click listener to close sort dropdown on click-outside
+document.addEventListener('click', (e) => {
+    const wrap = document.getElementById('hwSortDropdown');
+    if (wrap && !wrap.contains(e.target)) {
+        hwCloseSortDropdown();
+    }
+});
+const HW_SORT_LABELS = {
+    'priority-due': 'Priority → Due Date',
+    'due-priority': 'Due Date → Priority',
+};
+function hwSelectSortMode(mode, label) {
+    hwSortMode = mode;
+    const text = label || HW_SORT_LABELS[mode] || mode;
+    const labelEl = document.getElementById('hwSortLabel');
+    if (labelEl)
+        labelEl.textContent = text;
+    const hidden = document.getElementById('hwSortSelect');
+    if (hidden)
+        hidden.value = mode;
+    const menu = document.getElementById('hwSortMenu');
+    if (menu) {
+        menu.querySelectorAll('.hw-dropdown-item').forEach(item => {
+            const match = item.dataset.value === mode;
+            item.classList.toggle('active', match);
+            item.setAttribute('aria-selected', String(match));
+        });
+    }
+    hwCloseSortDropdown();
+    hwRender();
+}
+function hwSetSortMode(mode) {
+    hwSelectSortMode(mode);
+}
+/* ── Priority pill-group helpers ── */
+/**
+ * Activates a priority pill button and writes the value to the hidden input.
+ * Pass btn as HTMLElement (from onclick) or null to programmatically set.
+ */
+function hwSelectPriority(priority, btn) {
+    // If triggered by a user click (btn passed), lock out auto-suggest
+    if (btn)
+        _hwPriorityAutoSet = false;
+    // Deactivate all pills
+    const group = document.querySelector('.hw-priority-group');
+    if (group) {
+        group.querySelectorAll('.hw-priority-btn').forEach(b => {
+            b.classList.remove('active');
+            b.setAttribute('aria-pressed', 'false');
+        });
+        // Activate the matching pill
+        const target = btn || group.querySelector(`[data-priority="${priority}"]`);
+        if (target) {
+            target.classList.add('active');
+            target.setAttribute('aria-pressed', 'true');
+        }
+    }
+    const hidden = document.getElementById('hwPriority');
+    if (hidden)
+        hidden.value = priority;
+}
+/** Keyword → priority auto-suggest map */
+const HW_PRIORITY_KEYWORDS = {
+    exam: 'urgent',
+    test: 'urgent',
+    midterm: 'urgent',
+    final: 'urgent',
+    finals: 'urgent',
+    quiz: 'high',
+    assignment: 'high',
+    project: 'high',
+    report: 'high',
+    essay: 'high',
+    presentation: 'high',
+    homework: 'normal',
+    hw: 'normal',
+    reading: 'low',
+    review: 'low',
+    practice: 'low',
+    optional: 'low',
+};
+/**
+ * Called on every keystroke in the Subject input.
+ * Suggests a priority based on keyword matching — only auto-sets if user
+ * hasn't manually overridden the pill selection since last reset.
+ */
+let _hwPriorityAutoSet = true; // true = suggestion is welcome
+function hwAutoSuggestPriority(value) {
+    if (!_hwPriorityAutoSet)
+        return; // user already chose manually
+    const lower = value.toLowerCase();
+    let suggested = 'normal';
+    for (const [kw, pri] of Object.entries(HW_PRIORITY_KEYWORDS)) {
+        if (lower.includes(kw)) {
+            suggested = pri;
+            break;
+        }
+    }
+    const hidden = document.getElementById('hwPriority');
+    if (hidden && hidden.value !== suggested) {
+        hwSelectPriority(suggested);
+    }
+}
 function createHwCardElement(task, today, nowMs) {
     const card = document.createElement('div');
-    card.className = 'hw-card' + (task.done ? ' done' : '');
+    const priorityClass = `priority-${task.priority || 'normal'}`;
+    card.className = `hw-card ${priorityClass}` + (task.done ? ' done' : '');
     card.id = 'hwcard-' + task.id;
     const pillHtml = hwPillHtml(task, today, nowMs);
     const dateHtml = task.date
         ? `<span class="hw-date"><svg width="11" height="11" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>${hwFormatDate(task.date)}</span>`
+        : '';
+    const priorityLabel = task.priority && task.priority !== 'normal'
+        ? `<span class="priority-badge ${task.priority}">${task.priority}</span>`
+        : '';
+    const tagsHtml = Array.isArray(task.tags) && task.tags.length
+        ? task.tags.map((t) => `<span class="hw-tag">${escHtml(t)}</span>`).join('')
         : '';
     card.innerHTML = `
     <button class="hw-check ${task.done ? 'checked' : ''}" type="button" aria-label="${task.done ? 'Mark undone' : 'Mark done'}" onclick="hwToggleDone(${task.id})">
@@ -480,8 +649,10 @@ function createHwCardElement(task, today, nowMs) {
       <div class="hw-subj">${escHtml(task.subject)}</div>
       ${task.desc ? `<div class="hw-desc">${escHtml(task.desc)}</div>` : ''}
       <div class="hw-meta">
+        ${priorityLabel}
         ${dateHtml}
         ${pillHtml}
+        ${tagsHtml}
       </div>
     </div>
     <button class="hw-del" type="button" aria-label="Delete task" onclick="hwDelete(${task.id})">
@@ -517,11 +688,132 @@ function createDueSoonBannerElement(urgentTask, urgentDiffDays) {
     </div>`;
     return banner;
 }
+function hwRenderFilterBar() {
+    const bar = document.getElementById('hwFilterBar');
+    if (!bar)
+        return;
+    const totalCount = _hwTasks.length;
+    const priorityCounts = { urgent: 0, high: 0, low: 0 };
+    const tagCounts = {};
+    _hwTasks.forEach(t => {
+        if (t.priority && priorityCounts[t.priority] !== undefined) {
+            priorityCounts[t.priority]++;
+        }
+        if (Array.isArray(t.tags)) {
+            t.tags.forEach((tag) => {
+                tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+            });
+        }
+    });
+    let pillsHtml = `
+    <button type="button" class="hw-filter-pill ${hwActiveFilter === 'all' ? 'active' : ''}" onclick="hwSetFilter('all')">
+      All <span class="pill-count">${totalCount}</span>
+    </button>
+  `;
+    if (priorityCounts.urgent > 0) {
+        pillsHtml += `<button type="button" class="hw-filter-pill ${hwActiveFilter === 'priority:urgent' ? 'active' : ''}" onclick="hwSetFilter('priority:urgent')">🚨 Urgent <span class="pill-count">${priorityCounts.urgent}</span></button>`;
+    }
+    if (priorityCounts.high > 0) {
+        pillsHtml += `<button type="button" class="hw-filter-pill ${hwActiveFilter === 'priority:high' ? 'active' : ''}" onclick="hwSetFilter('priority:high')">⚡ High <span class="pill-count">${priorityCounts.high}</span></button>`;
+    }
+    if (priorityCounts.low > 0) {
+        pillsHtml += `<button type="button" class="hw-filter-pill ${hwActiveFilter === 'priority:low' ? 'active' : ''}" onclick="hwSetFilter('priority:low')">🔹 Low <span class="pill-count">${priorityCounts.low}</span></button>`;
+    }
+    Object.entries(tagCounts).forEach(([tag, count]) => {
+        const key = `tag:${tag}`;
+        pillsHtml += `<button type="button" class="hw-filter-pill ${hwActiveFilter === key ? 'active' : ''}" onclick="hwSetFilter('${escHtml(key)}')">#${escHtml(tag)} <span class="pill-count">${count}</span></button>`;
+    });
+    bar.innerHTML = pillsHtml;
+}
+// ── Firebase Realtime Database Sync ──
+let _hwFirebaseDb = null;
+let _hwSyncInitialized = false;
+async function hwInitSync() {
+    if (_hwSyncInitialized || !window.firebase || !S.token)
+        return;
+    if (!firebase.apps.length) {
+        if (typeof FIREBASE_CONFIG !== 'undefined')
+            firebase.initializeApp(FIREBASE_CONFIG);
+    }
+    _hwSyncInitialized = true;
+    try {
+        const res = await fetch('/api/firebaseToken', {
+            headers: { Authorization: `Bearer ${S.token}` }
+        });
+        if (!res.ok)
+            return;
+        const { token: customToken, userId } = await res.json();
+        if (!customToken || !userId)
+            return;
+        if (firebase.auth) {
+            await firebase.auth().signInWithCustomToken(customToken);
+        }
+        _hwFirebaseDb = firebase.database();
+        const tasksRef = _hwFirebaseDb.ref(`users/${userId}/tasks`);
+        tasksRef.on('value', (snapshot) => {
+            const remoteData = snapshot.val();
+            if (!remoteData)
+                return;
+            const remoteTasks = Array.isArray(remoteData)
+                ? remoteData
+                : Object.values(remoteData);
+            let modified = false;
+            const localMap = new Map(_hwTasks.map(t => [String(t.id), t]));
+            remoteTasks.forEach(rt => {
+                if (!rt || !rt.id)
+                    return;
+                const lt = localMap.get(String(rt.id));
+                if (!lt) {
+                    _hwTasks.push(rt);
+                    modified = true;
+                }
+                else {
+                    const rTime = rt.updatedAt || 0;
+                    const lTime = lt.updatedAt || 0;
+                    if (rTime > lTime) {
+                        Object.assign(lt, rt);
+                        modified = true;
+                    }
+                }
+            });
+            if (modified) {
+                hwSave();
+                hwRender();
+            }
+        });
+    }
+    catch (err) {
+        console.warn('Firebase RTDB Homework sync init failed (using offline localStorage):', err);
+    }
+}
+function hwSyncTask(task) {
+    task.updatedAt = Date.now();
+    if (_hwFirebaseDb && S.user?.id) {
+        try {
+            _hwFirebaseDb.ref(`users/${S.user.id}/tasks/${task.id}`).set(task);
+        }
+        catch (e) {
+            console.warn('Failed to sync task to Firebase RTDB:', e);
+        }
+    }
+}
+function hwDeleteSyncTask(id) {
+    if (_hwFirebaseDb && S.user?.id) {
+        try {
+            _hwFirebaseDb.ref(`users/${S.user.id}/tasks/${id}`).remove();
+        }
+        catch (e) {
+            console.warn('Failed to delete task from Firebase RTDB:', e);
+        }
+    }
+}
 function hwRender() {
     const list = document.getElementById('hwList');
     const empty = document.getElementById('hwEmpty');
     if (!list)
         return;
+    hwRenderFilterBar();
+    hwInitSync();
     list.querySelectorAll('.hw-card, .hw-due-banner').forEach(c => c.remove());
     if (!_hwTasks.length) {
         if (empty)
@@ -541,10 +833,50 @@ function hwRender() {
     const nowMs = Date.now();
     const urgentTask = findUrgentTask(_hwTasks, today);
     const urgentDiffDays = urgentTask ? calculateDiffDays(urgentTask.date, today) : Infinity;
-    _hwTasks.forEach(task => {
+    // Filter tasks based on hwActiveFilter
+    let filtered = _hwTasks.slice();
+    if (hwActiveFilter.startsWith('priority:')) {
+        const p = hwActiveFilter.split(':')[1];
+        filtered = filtered.filter(t => t.priority === p);
+    }
+    else if (hwActiveFilter.startsWith('tag:')) {
+        const tag = hwActiveFilter.slice(4);
+        filtered = filtered.filter(t => Array.isArray(t.tags) && t.tags.includes(tag));
+    }
+    // Priority weight map
+    const priorityWeight = { urgent: 4, high: 3, normal: 2, low: 1 };
+    // Sort tasks
+    filtered.sort((a, b) => {
+        if (a.done !== b.done)
+            return a.done ? 1 : -1;
+        if (hwSortMode === 'priority-due') {
+            const pwA = priorityWeight[a.priority || 'normal'] || 2;
+            const pwB = priorityWeight[b.priority || 'normal'] || 2;
+            if (pwA !== pwB)
+                return pwB - pwA;
+            if (a.date && b.date)
+                return new Date(a.date).getTime() - new Date(b.date).getTime();
+            return a.date ? -1 : 1;
+        }
+        else {
+            if (a.date && b.date) {
+                const diff = new Date(a.date).getTime() - new Date(b.date).getTime();
+                if (diff !== 0)
+                    return diff;
+            }
+            else if (a.date)
+                return -1;
+            else if (b.date)
+                return 1;
+            const pwA = priorityWeight[a.priority || 'normal'] || 2;
+            const pwB = priorityWeight[b.priority || 'normal'] || 2;
+            return pwB - pwA;
+        }
+    });
+    filtered.forEach(task => {
         list.appendChild(createHwCardElement(task, today, nowMs));
     });
-    if (urgentTask && urgentDiffDays <= 3) {
+    if (urgentTask && urgentDiffDays <= 3 && hwActiveFilter === 'all') {
         list.insertBefore(createDueSoonBannerElement(urgentTask, urgentDiffDays), list.firstChild);
     }
 }
@@ -580,7 +912,12 @@ function hwRowClass(task, overdue) {
 function escHtml(s) {
     if (s == null)
         return '';
-    return String(s).replaceAll('&', '&').replaceAll('<', '<').replaceAll('>', '>').replaceAll('"', '"');
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
 }
 function hwExportPDF() {
     if (!_hwTasks.length) {

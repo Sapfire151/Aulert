@@ -1,13 +1,13 @@
 <div align="center">
 
-# 🎓 Aulert
+# Aulert
 
 **Your Google Classroom updates, in one calm place.**
 
 [Open Aulert](https://aulert.vercel.app)
-· [Report an issue](https://github.com/Sapfire151/Aulert/issues)
-· [Privacy](privacy.html)
-· [Terms](terms.html)
+· [Report an issue](https://docs.google.com/forms/d/e/1FAIpQLSfAMPxrACJjnqb68kdvO_bSTBmY9otYxZiNqrri_uRNBFzIMQ/viewform)
+· [Privacy](https://aulert.vercel.app/privacy.html)
+· [Terms](https://aulert.vercel.app/terms.html)
 
 </div>
 

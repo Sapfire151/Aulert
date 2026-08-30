@@ -169,8 +169,21 @@ function renderClasses() {
     lbl.className = 'tog';
     const chk = document.createElement('input');
     chk.type = 'checkbox';
-    chk.checked = true;
-    chk.onchange = saved;
+    chk.checked = S.courseFilter === 'all' || S.courseFilter === c.id;
+    chk.onchange = (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      if (target.checked) {
+        S.courseFilter = c.id;
+      } else {
+        // If unchecked and it was the active filter, reset to 'all'
+        if (S.courseFilter === c.id) {
+          S.courseFilter = 'all';
+        }
+      }
+      renderClasses();
+      renderSidebar();
+      saved(c.name, target.checked);
+    };
     const trk = document.createElement('div');
     trk.className = 'tog-track';
     lbl.appendChild(chk);

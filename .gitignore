@@ -79,3 +79,4 @@ test-results/
 *.local
 .pnpm-store/
 .turbo/
+update.txt

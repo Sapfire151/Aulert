@@ -59,7 +59,7 @@ const _now = new Date();
 // eslint-disable-next-line no-var
 var S: any = {
   filter: 'all',
-  courseFilter: 'all',
+  courseFilter: localStorage.getItem('aul_course_filter') || 'all',
   searchTerm: '',
   page: 1,
   calYear: _now.getFullYear(), calMonth: _now.getMonth(),
@@ -124,7 +124,10 @@ function persistAccessToken(accessToken, expiresIn) {
 
 function saveRead() { localStorage.setItem('aul_read', JSON.stringify([...S.readIds])); }
 function saveSeen() { localStorage.setItem('aul_seen', JSON.stringify([...S.seenIds])); }
-function saveSettings() { localStorage.setItem('aul_settings', JSON.stringify(S.settings)); }
+function saveSettings() {
+  localStorage.setItem('aul_settings', JSON.stringify(S.settings));
+  localStorage.setItem('aul_course_filter', S.courseFilter || 'all');
+}
 
 // Per-course, per-content-type last-seen timestamps for incremental fetching.
 // Keys are "courseId_type" (e.g. "abc123_announcements"). Values are ISO strings.
@@ -169,7 +172,7 @@ window.addEventListener('load', async () => {
   const error = paramsHash.get('error') || paramsSearch.get('error');
 
   if (error) {
-    alert('Google Auth Error: ' + error);
+    showToast('Google Auth Error', error);
     window.location.hash = '';
     window.history.replaceState(null, '', window.location.pathname);
   }
@@ -293,7 +296,7 @@ function doAuth() {
     if (p) { p.style.color = 'var(--rose)'; p.textContent = 'Please set your Google OAuth Client ID in the CONFIG at the top of the script.'; }
     return;
   }
-  if (!window.google?.accounts?.oauth2) { alert('Google Sign-In is still loading. Please try again in a moment.'); return; }
+  if (!window.google?.accounts?.oauth2) { showToast('Google Sign-In not ready', 'Please try again in a moment.'); return; }
   
   const stateToken = (window.crypto.getRandomValues(new Uint32Array(1))[0] / (2 ** 32)).toString(36).substring(2) + Date.now().toString(36);
   sessionStorage.setItem('oauth_state', stateToken);
@@ -318,7 +321,7 @@ async function onToken(resp) {
   const savedState = sessionStorage.getItem('oauth_state');
   if (resp.state !== savedState) {
     console.error('State mismatch', resp.state, savedState);
-    alert('Security Error: OAuth state mismatch (possible CSRF attack).');
+    showToast('Security Error', 'OAuth state mismatch (possible CSRF attack).');
     return;
   }
   sessionStorage.removeItem('oauth_state');

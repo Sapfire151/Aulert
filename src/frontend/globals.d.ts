@@ -6,7 +6,6 @@
 // ── External SDKs loaded via <script> tags ──────────────────────────────
 declare var google: any;
 declare var firebase: any;
-declare var _tokenClient: any;
 declare var lucide: any;
 
 // ── Cross-script global state ────────────────────────────────────────────

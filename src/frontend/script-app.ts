@@ -7,7 +7,6 @@
    - script-app-calendar.js
    - script-app-homework.js
    - script-app-settings.js
-   - script-app-feedback.js
 ════════════════════════════════════════════ */
 
 /* ════════════════════════════════════════════
@@ -80,11 +79,11 @@ var S: any = {
 function escHtml(s?: string | null): string {
   if (s == null) return '';
   return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
 }
 
 function pruneLocalStorage() {
@@ -173,7 +172,7 @@ const courseById = id => S.courses.find(c => c.id === id) || { color: 'var(--vio
 ════════════════════════════════════════════ */
 
 async function loadTabs() {
-  const tabs = ['cal', 'hw', 'set', 'fbk']; // 'feed' is already in app.html
+  const tabs = ['cal', 'hw', 'set']; // 'feed' is already in app.html
   const appBody = document.getElementById('appBody');
   if (!appBody) return;
   for (const tab of tabs) {
@@ -300,6 +299,8 @@ function showLoadingState(msg?) {
     feed.innerHTML = html;
   }
 }
+
+let _tokenClient: any;
 
 function waitForGSI(attempts = 0) {
   if (window.google?.accounts?.oauth2) {
@@ -1259,15 +1260,14 @@ var ModalManager = {
       'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
     );
     const focusables: HTMLElement[] = [];
-    for (let i = 0; i < nodeList.length; i++) {
-      const node = nodeList[i] as HTMLElement;
+    for (const node of nodeList) {
       if (node.offsetParent !== null || node.offsetWidth > 0 || node.offsetHeight > 0) {
-        focusables.push(node);
+        focusables.push(node as HTMLElement);
       }
     }
     if (!focusables.length) return;
     const first = focusables[0];
-    const last = focusables[focusables.length - 1];
+    const last = focusables.at(-1)!;
     if (e.shiftKey && document.activeElement === first) {
       e.preventDefault();
       last.focus();
@@ -1526,8 +1526,8 @@ function showToast(title, msg, type = 'default') {
     </div>
     <div class="toast-body" style="z-index: 1;">
       <div class="toast-app">Aulert · Google Classroom</div>
-      <div class="toast-t">${title}</div>
-      <div class="toast-m">${msg}</div>
+      <div class="toast-t">${escHtml(title)}</div>
+      <div class="toast-m">${escHtml(msg)}</div>
     </div>
     <button class="toast-close" style="z-index: 1; background:none; border:none; color:var(--text-2); cursor:pointer;">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>

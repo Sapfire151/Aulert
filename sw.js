@@ -13,6 +13,10 @@ const STATIC_ASSETS = [
   '/script-app-calendar.js',
   '/script-app-homework.js',
   '/script-app-settings.js',
+  '/tab-feed.html',
+  '/tab-cal.html',
+  '/tab-hw.html',
+  '/tab-set.html',
   '/manifest.json'
 ];
 
@@ -53,7 +57,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(req)
         .then((res) => {
-          if (res && res.status === 200) {
+          if (res?.status === 200) {
             const clone = res.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
           }
@@ -69,7 +73,7 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(req)
         .then((res) => {
-          if (res && res.status === 200) {
+          if (res?.status === 200) {
             const clone = res.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
           }
@@ -84,7 +88,7 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(req).then((cachedResponse) => {
       const fetchPromise = fetch(req).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
+        if (networkResponse?.status === 200) {
           const clone = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
         }
@@ -97,7 +101,7 @@ self.addEventListener('fetch', (event) => {
 });
 
 self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
+  if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }
 });

@@ -6307,7 +6307,7 @@ body::before {
 .hw-dropdown-trigger:hover,
 .hw-dropdown-wrap.open .hw-dropdown-trigger {
   border-color: var(--teal, #00ffd9);
-  background: var(--surface-1, #ffffff);
+  background: var(--surface);
 }
 
 .hw-dropdown-icon {
@@ -6340,7 +6340,7 @@ body::before {
   z-index: 250;
   min-width: 200px;
   padding: 6px;
-  background: var(--surface-1, #ffffff);
+  background: var(--surface);
   border: 1px solid var(--rim);
   border-radius: 14px;
   box-shadow: 0 12px 36px rgba(0,0,0,.18), 0 2px 8px rgba(0,0,0,.08);

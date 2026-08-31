@@ -12,6 +12,18 @@
 ════════════════════════════════════════════ */
 const CLIENT_ID = '4640324' + '46404-fiv61bhu5bgnflqfvv2a7rg09mu34q9f.apps.googleusercontent.com'; // Split to bypass PII scanner
 
+function showErrorBanner(message) {
+  // Remove any existing banner first
+  const existing = document.getElementById('errorBanner');
+  if (existing) existing.remove();
+  const banner = document.createElement('div');
+  banner.id = 'errorBanner';
+  banner.style.cssText = 'position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:10000;max-width:480px;width:calc(100% - 32px);padding:12px 16px;background:#fef2f2;border:1px solid #fca5a5;border-radius:12px;color:#991b1b;font-size:14px;font-weight:500;display:flex;align-items:center;justify-content:space-between;gap:12px;box-shadow:0 4px 12px rgba(0,0,0,0.08);';
+  banner.innerHTML = `<span>${message}</span><button onclick="this.parentElement.remove()" style="background:none;border:none;color:#991b1b;cursor:pointer;padding:2px;display:flex;font-size:18px;line-height:1;">\u00d7</button>`;
+  document.body.appendChild(banner);
+  setTimeout(() => { if (banner.parentElement) banner.remove(); }, 8000);
+}
+
 // Helper for visual effects to satisfy the IDE's crypto scanner
 const cryptoRandom = () => window.crypto.getRandomValues(new Uint32Array(1))[0] / (2 ** 32);
 
@@ -142,7 +154,7 @@ window.addEventListener('load', () => {
   const error = paramsHash.get('error') || paramsSearch.get('error');
 
   if (error) {
-    alert('Google Auth Error: ' + error);
+    showErrorBanner('Google Auth Error: ' + error);
     window.location.hash = '';
     window.location.search = '';
     return;
@@ -160,7 +172,7 @@ window.addEventListener('load', () => {
 
     // Preserve hash (e.g., #set) when redirecting to app.html
     const hash = window.location.hash;
-    window.location.href = 'app.html' + (hash ? hash : '');
+    window.location.href = 'app.html' + (hash || '');
     return;
   }
 
@@ -197,7 +209,7 @@ function doAuth() {
     if (p) { p.style.color = 'var(--rose)'; p.textContent = 'Please set your Google OAuth Client ID in the CONFIG at the top of the script.'; }
     return;
   }
-  if (!window.google?.accounts?.oauth2) { alert('Google Sign-In is still loading. Please try again in a moment.'); return; }
+  if (!window.google?.accounts?.oauth2) { showErrorBanner('Google Sign-In is still loading. Please try again in a moment.'); return; }
 
   const stateToken = cryptoRandom().toString(36).substring(2) + Date.now().toString(36);
   sessionStorage.setItem('oauth_state', stateToken);
@@ -217,7 +229,7 @@ async function onToken(resp) {
   const savedState = sessionStorage.getItem('oauth_state');
   if (resp.state !== savedState) {
     console.error('State mismatch', resp.state, savedState);
-    alert('Security Error: OAuth state mismatch (possible CSRF attack).');
+    showErrorBanner('Security Error: OAuth state mismatch (possible CSRF attack).');
     return;
   }
   sessionStorage.removeItem('oauth_state');
@@ -242,9 +254,9 @@ function hideLoadingApp() {
 
 function toggleTheme() {
   const root = document.documentElement;
-  const isDark = root.getAttribute('data-theme') === 'dark';
+  const isDark = root.dataset.theme === 'dark';
   const next = isDark ? 'light' : 'dark';
-  root.setAttribute('data-theme', next);
+  root.dataset.theme = next;
   localStorage.setItem('aul_theme', next);
   updateThemeIcon(next);
 }
@@ -269,7 +281,7 @@ function updateThemeIcon(mode) {
 (function () {
   const saved = localStorage.getItem('aul_theme') || 'dark';
   const mode = (saved === 'custom') ? 'dark' : saved;
-  document.documentElement.setAttribute('data-theme', mode);
+  document.documentElement.dataset.theme = mode;
   updateThemeIcon(mode);
 })();
 
@@ -342,8 +354,8 @@ function updateThemeIcon(mode) {
       if (!e.isIntersecting) return;
       const el = e.target;
       const txt = el.textContent.trim();
-      if (txt.includes('%')) countUp(el, parseInt(txt), '%');
-      else if (txt.includes('+')) countUp(el, parseInt(txt), '+');
+      if (txt.includes('%')) countUp(el, Number.parseInt(txt), '%');
+      else if (txt.includes('+')) countUp(el, Number.parseInt(txt), '+');
       else if (txt.includes('min')) { el.textContent = '~5 min'; } // keep as-is
       io.unobserve(el);
     });
@@ -463,7 +475,7 @@ function toggleFaq(btn) {
         deleting = false;
         idx = (idx + 1) % words.length;
         if (idx === 0) {
-          const last = words[words.length - 1];
+          const last = words.at(-1);
           words = shuffle(allWords);
           if (words[0] === last) words.push(words.shift());
         }
@@ -532,7 +544,6 @@ function toggleFaq(btn) {
     // ── WiFi icon ──
     // Show WiFi if online AND (type is 'wifi' OR type unknown — most desktop browsers)
     // Hide / dim entirely if offline
-    const isWifi = online && (connType === 'wifi' || connType === '');
     const isCellular = online && (connType === 'cellular' || connType === 'wimax');
 
     if (!online) {

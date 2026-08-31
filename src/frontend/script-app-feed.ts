@@ -10,7 +10,7 @@
 let notifPanelOpen = false;
 
 function toggleNotifPanel(e) {
-  e && e.stopPropagation();
+  e?.stopPropagation();
   notifPanelOpen ? closeNotifPanel() : openNotifPanel();
 }
 
@@ -55,9 +55,9 @@ function renderNotifPanel() {
         <div class="np-type-icon" style="background:${c.color}18;color:${c.color}">${typeIcon(n.type, c.color)}</div>
       </div>
       <div class="np-content">
-        <div class="np-item-class" style="color:${c.color}">${c.name}</div>
-        <div class="np-item-title">${n.title}</div>
-        <div class="np-item-preview">${n.body}</div>
+        <div class="np-item-class" style="color:${c.color}">${escHtml(c.name)}</div>
+        <div class="np-item-title">${escHtml(n.title)}</div>
+        <div class="np-item-preview">${escHtml(n.body)}</div>
         <div class="np-item-time">${n.time} · ${t.label||''}</div>
       </div>
     </div>`;
@@ -180,7 +180,7 @@ function renderFeed() {
     let updatedLabel = '';
     if (isUpdated) {
       const updDate = n.updatedAt ? new Date(n.updatedAt) : (n.createdAt ? new Date(n.createdAt) : null);
-      if (updDate && !isNaN(updDate.getTime())) {
+      if (updDate && !Number.isNaN(updDate.getTime())) {
         updatedLabel = updDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       }
     }
@@ -190,14 +190,14 @@ function renderFeed() {
     <div class="ncard-body">
       <div class="ncard-top">
         <div class="ncard-tags">
-          <span class="cls-tag" style="background:${c.color}18;color:${c.color};border:1px solid ${c.color}30">${c.name}</span>
+          <span class="cls-tag" style="background:${c.color}18;color:${c.color};border:1px solid ${c.color}30">${escHtml(c.name)}</span>
           <span class="type-tag">${t.label||''}</span>
           ${isUpdated ? `<span class="updated-badge">✦ Updated${updatedLabel ? ' ' + updatedLabel : ''}</span>` : ''}
         </div>
         <span class="ncard-time">${n.time}</span>
       </div>
-      <div class="ncard-title">${displayTitle}</div>
-      <div class="ncard-preview">${n.body}</div>
+      <div class="ncard-title">${escHtml(displayTitle)}</div>
+      <div class="ncard-preview">${escHtml(n.body)}</div>
       <div class="ncard-foot">
         <div class="unread-mark">
           ${!n.read ? `<div class="u-pip" style="background:${c.color}"></div><span>Unread</span>` : `<span>Read</span>`}

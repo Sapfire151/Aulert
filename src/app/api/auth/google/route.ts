@@ -8,8 +8,10 @@ export async function GET(request: Request) {
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const url = new URL(request.url);
+    // Use env var if set (allows custom domain overrides).
+    // Otherwise derive from the request origin so it works on localhost AND Vercel.
     const redirectUri =
-      process.env.GOOGLE_REDIRECT_URI || `${url.origin}/`;
+      process.env.GOOGLE_REDIRECT_URI || `${url.origin}/auth/callback`;
 
     if (!clientId || !clientSecret) {
       console.warn('[Google Auth] Warning: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET not configured. Redirecting to dashboard demo.');

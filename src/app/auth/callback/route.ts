@@ -29,8 +29,9 @@ export async function GET(request: Request) {
 
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  // Use env var if set, otherwise derive from request origin (works on localhost + Vercel)
   const redirectUri =
-    process.env.GOOGLE_REDIRECT_URI || `${url.origin}/`;
+    process.env.GOOGLE_REDIRECT_URI || `${url.origin}/auth/callback`;
 
   try {
     const oauth2Client = new google.auth.OAuth2(
@@ -70,6 +71,17 @@ export async function GET(request: Request) {
             needs_reauth: false,
             updated_at: new Date().toISOString(),
           }).eq('id', existingUser.id);
+        } else {
+          // First-time login: insert the user
+          await supabase.from('users').insert({
+            google_id: googleUserId,
+            email,
+            name,
+            avatar,
+            needs_reauth: false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          });
         }
       }
     } catch (dbErr) {

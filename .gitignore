@@ -55,3 +55,4 @@ skills-lock.json
 # Internal planning
 /mdplan
 .env.example
+.vercel

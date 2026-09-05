@@ -5,7 +5,7 @@ import { GhostPill } from '@/components/ui/ghost-pill';
 import { CustomDropdown, DropdownOption } from '@/components/ui/custom-dropdown';
 import { DetailPanel } from '@/components/items/detail-panel';
 import { ItemRow } from '@/components/items/item-row';
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Columns } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Columns, Search, X } from 'lucide-react';
 import { UnifiedItem } from '@/types/aulert';
 import { useClassroomData } from '@/lib/hooks/use-classroom-data';
 import { getCourseColorClass } from '@/lib/course-colors';
@@ -18,11 +18,13 @@ gsap.registerPlugin(useGSAP);
 type CalendarView = 'month' | 'week' | 'agenda';
 
 export default function CalendarPage() {
-  const { items, toggleComplete } = useClassroomData();
+  const { items, courses, toggleComplete, timeZone: hookTz } = useClassroomData();
   const [view, setView] = useState<CalendarView>('month');
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [timeZone, setTimeZone] = useState<string>('UTC');
   const [selectedItem, setSelectedItem] = useState<UnifiedItem | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<string>('all');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const viewContainerRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
@@ -119,8 +121,33 @@ export default function CalendarPage() {
     return days;
   };
 
+  const courseOptions: DropdownOption[] = [
+    { value: 'all', label: 'All Courses' },
+    ...courses.map((c) => ({
+      value: c.classroom_course_id || c.id,
+      label: c.name,
+      color: `var(--${c.color})`,
+    })),
+  ];
+
+  const filteredItems = items.filter((item) => {
+    if (selectedCourse !== 'all') {
+      if (item.courseId !== selectedCourse && (item as any).classroom_course_id !== selectedCourse) {
+        return false;
+      }
+    }
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      const matchTitle = item.title?.toLowerCase().includes(q);
+      const matchDesc = item.description?.toLowerCase().includes(q);
+      const matchCourse = item.courseName?.toLowerCase().includes(q);
+      if (!matchTitle && !matchDesc && !matchCourse) return false;
+    }
+    return true;
+  });
+
   const getItemsForDate = (date: Date) => {
-    return items.filter((item) => {
+    return filteredItems.filter((item) => {
       if (!item.dueAt) return false;
       const d = new Date(item.dueAt);
       return (
@@ -183,18 +210,84 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        {/* View Switcher: Custom Dropdown */}
-        <CustomDropdown
-          options={[
-            { value: 'month', label: 'Month View', icon: <CalendarIcon size={14} /> },
-            { value: 'week', label: 'Week View', icon: <Columns size={14} /> },
-            { value: 'agenda', label: 'Agenda View', icon: <List size={14} /> },
-          ]}
-          value={view}
-          onChange={(val) => setView(val as CalendarView)}
-          menuWidth={160}
-          align="right"
-        />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          {/* Quick Search */}
+          <div style={{ position: 'relative', width: '180px' }}>
+            <Search
+              size={13}
+              color="var(--color-text-muted)"
+              style={{
+                position: 'absolute',
+                left: '10px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                pointerEvents: 'none',
+              }}
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search..."
+              style={{
+                width: '100%',
+                padding: '7px 26px 7px 28px',
+                fontSize: '12px',
+                backgroundColor: 'var(--color-bg)',
+                border: '1px solid var(--color-hairline)',
+                borderRadius: 'var(--radius-panel)',
+                color: 'var(--color-text-primary)',
+                outline: 'none',
+                fontFamily: 'inherit',
+              }}
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                aria-label="Clear search"
+                style={{
+                  position: 'absolute',
+                  right: '8px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--color-text-muted)',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                }}
+              >
+                <X size={12} />
+              </button>
+            )}
+          </div>
+
+          {/* Course Filter */}
+          <CustomDropdown
+            options={courseOptions}
+            value={selectedCourse}
+            onChange={setSelectedCourse}
+            placeholder="All Courses"
+            buttonStyle={{ padding: '7px 12px', fontSize: '12px' }}
+            menuWidth={190}
+            align="right"
+          />
+
+          {/* View Switcher: Custom Dropdown */}
+          <CustomDropdown
+            options={[
+              { value: 'month', label: 'Month View', icon: <CalendarIcon size={14} /> },
+              { value: 'week', label: 'Week View', icon: <Columns size={14} /> },
+              { value: 'agenda', label: 'Agenda View', icon: <List size={14} /> },
+            ]}
+            value={view}
+            onChange={(val) => setView(val as CalendarView)}
+            menuWidth={160}
+            align="right"
+          />
+        </div>
       </div>
 
       <div ref={viewContainerRef}>
@@ -320,12 +413,14 @@ export default function CalendarPage() {
       {/* Agenda (List) View */}
       {view === 'agenda' && (
         <div style={{ borderTop: '1px solid var(--color-hairline)' }}>
-          {items.length === 0 ? (
+          {filteredItems.length === 0 ? (
             <p className="body-ui text-muted" style={{ padding: '32px 0', textAlign: 'center' }}>
-              No items scheduled.
+              {searchQuery.trim() || selectedCourse !== 'all'
+                ? 'No scheduled items match your search or course filter.'
+                : 'No items scheduled.'}
             </p>
           ) : (
-            items
+            filteredItems
               .slice()
               .sort((a, b) => (a.dueAt || '').localeCompare(b.dueAt || ''))
               .map((item) => (

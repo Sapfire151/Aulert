@@ -9,7 +9,7 @@ export async function GET(request: Request) {
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const url = new URL(request.url);
     const redirectUri =
-      process.env.GOOGLE_REDIRECT_URI || `${url.origin}/auth/callback`;
+      process.env.GOOGLE_REDIRECT_URI || `${url.origin}/`;
 
     if (!clientId || !clientSecret) {
       console.warn('[Google Auth] Warning: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET not configured. Redirecting to dashboard demo.');

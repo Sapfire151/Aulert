@@ -63,10 +63,15 @@ export function getDemoItems(): UnifiedItem[] {
   const lastWeek = new Date(now);
   lastWeek.setDate(now.getDate() - 6);
 
+  // 3 days ago
+  const threeDaysAgo = new Date(now);
+  threeDaysAgo.setDate(now.getDate() - 3);
+
   return [
     {
       id: 'item-1',
       source: 'classroom',
+      itemType: 'assignment',
       title: 'Problem Set 4: Integration by Parts & Partial Fractions',
       description: 'Complete problems 1 through 18 in section 7.2. Submit PDF scan to Google Classroom.',
       dueAt: yesterday.toISOString(),
@@ -85,6 +90,7 @@ export function getDemoItems(): UnifiedItem[] {
     {
       id: 'item-2',
       source: 'classroom',
+      itemType: 'assignment',
       title: 'DBQ Essay Outline: Industrialization in the Americas',
       description: 'Draft the thesis statement and outline primary evidence documents 1–5.',
       dueAt: todayNight.toISOString(),
@@ -103,6 +109,7 @@ export function getDemoItems(): UnifiedItem[] {
     {
       id: 'item-3',
       source: 'homework',
+      itemType: 'homework',
       title: 'Review Physics Rotational Dynamics formula sheet',
       description: 'Double check moment of inertia derivations before lab quiz.',
       dueAt: inTwoDays.toISOString(),
@@ -121,6 +128,7 @@ export function getDemoItems(): UnifiedItem[] {
     {
       id: 'item-4',
       source: 'classroom',
+      itemType: 'assignment',
       title: 'Poetry Analysis: Close Reading of Sonnet 116',
       description: 'Write a 500-word critical reflection on the volta and tone.',
       dueAt: inFourDays.toISOString(),
@@ -139,6 +147,7 @@ export function getDemoItems(): UnifiedItem[] {
     {
       id: 'item-5',
       source: 'classroom',
+      itemType: 'assignment',
       title: 'Lab 2: Conservation of Linear Momentum',
       description: 'Calculations and collision graphs submitted.',
       dueAt: lastWeek.toISOString(),
@@ -153,6 +162,69 @@ export function getDemoItems(): UnifiedItem[] {
       rawStatus: 'turned_in',
       createdAt: lastWeek.toISOString(),
       updatedAt: lastWeek.toISOString(),
+    },
+    // Demo announcement
+    {
+      id: 'ann-demo-1',
+      source: 'classroom',
+      itemType: 'announcement',
+      title: 'Reminder: Office hours this Friday 3–5 PM in Room 204',
+      description: 'Reminder: Office hours this Friday 3–5 PM in Room 204. Bring your problem sets for review!',
+      text: 'Reminder: Office hours this Friday 3–5 PM in Room 204. Bring your problem sets for review!',
+      dueAt: null,
+      isOverdue: false,
+      isDueToday: false,
+      isDueThisWeek: false,
+      completed: false,
+      courseId: 'course-calc',
+      courseName: 'AP Calculus BC',
+      courseColor: 'course-1',
+      link: 'https://classroom.google.com',
+      rawStatus: 'posted',
+      createdAt: threeDaysAgo.toISOString(),
+      updatedAt: threeDaysAgo.toISOString(),
+    },
+    {
+      id: 'ann-demo-2',
+      source: 'classroom',
+      itemType: 'announcement',
+      title: 'Source packet for next week\'s DBQ has been uploaded to the stream.',
+      description: 'Source packet for next week\'s DBQ has been uploaded to the stream. Please read documents 1-7 before Tuesday\'s class.',
+      text: 'Source packet for next week\'s DBQ has been uploaded to the stream. Please read documents 1-7 before Tuesday\'s class.',
+      dueAt: null,
+      isOverdue: false,
+      isDueToday: false,
+      isDueThisWeek: false,
+      completed: false,
+      courseId: 'course-hist',
+      courseName: 'AP World History',
+      courseColor: 'course-2',
+      link: 'https://classroom.google.com',
+      rawStatus: 'posted',
+      createdAt: yesterday.toISOString(),
+      updatedAt: yesterday.toISOString(),
+    },
+    // Demo grade
+    {
+      id: 'grade-demo-1',
+      source: 'classroom',
+      itemType: 'grade',
+      title: 'Grade received: Lab 2: Conservation of Linear Momentum',
+      description: '92/100 points',
+      dueAt: null,
+      isOverdue: false,
+      isDueToday: false,
+      isDueThisWeek: false,
+      completed: true,
+      courseId: 'course-phys',
+      courseName: 'AP Physics C: Mechanics',
+      courseColor: 'course-3',
+      link: 'https://classroom.google.com',
+      rawStatus: 'returned',
+      grade: 92,
+      maxPoints: 100,
+      createdAt: threeDaysAgo.toISOString(),
+      updatedAt: threeDaysAgo.toISOString(),
     },
   ];
 }

@@ -14,7 +14,8 @@ export interface UseClassroomDataReturn {
   isDemo: boolean;
   needsReauth: boolean;
   lastSynced: string | null;
-  user: { id?: string; email?: string; name?: string; avatar?: string } | null;
+  timeZone: string;
+  user: { id?: string; email?: string; name?: string; avatar?: string; timezone?: string } | null;
   syncNow: () => Promise<void>;
   addItem: (item: UnifiedItem) => void;
   updateItem: (item: UnifiedItem) => void;
@@ -30,7 +31,23 @@ export function useClassroomData(): UseClassroomDataReturn {
   const [isDemo, setIsDemo] = useState<boolean>(true);
   const [needsReauth, setNeedsReauth] = useState<boolean>(false);
   const [lastSynced, setLastSynced] = useState<string | null>(null);
-  const [user, setUser] = useState<{ id?: string; email?: string; name?: string; avatar?: string } | null>(null);
+  const [timeZone, setTimeZone] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('aulert-tz');
+      if (stored) return stored;
+      try {
+        const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (detected) {
+          localStorage.setItem('aulert-tz', detected);
+          return detected;
+        }
+      } catch {
+        // fallback
+      }
+    }
+    return 'UTC';
+  });
+  const [user, setUser] = useState<{ id?: string; email?: string; name?: string; avatar?: string; timezone?: string } | null>(null);
 
   // Load custom homework items created by user
   const getCustomHomework = (): UnifiedItem[] => {
@@ -51,7 +68,8 @@ export function useClassroomData(): UseClassroomDataReturn {
   const syncData = useCallback(async () => {
     setIsSyncing(true);
     try {
-      const res = await fetch('/api/classroom/sync', {
+      const tzParam = encodeURIComponent(timeZone);
+      const res = await fetch(`/api/classroom/sync?tz=${tzParam}`, {
         cache: 'no-store',
       });
       const data = await res.json();
@@ -116,7 +134,7 @@ export function useClassroomData(): UseClassroomDataReturn {
       setIsLoading(false);
       setIsSyncing(false);
     }
-  }, []);
+  }, [timeZone]);
 
   // Initial load
   useEffect(() => {
@@ -207,6 +225,7 @@ export function useClassroomData(): UseClassroomDataReturn {
     isDemo,
     needsReauth,
     lastSynced,
+    timeZone,
     user,
     syncNow: syncData,
     addItem,

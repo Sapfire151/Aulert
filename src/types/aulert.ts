@@ -1,8 +1,11 @@
 import { CourseColor, CourseRow } from './database';
 
+export type ClassroomItemType = 'assignment' | 'short_answer_question' | 'multiple_choice_question' | 'announcement' | 'material' | 'grade';
+
 export interface UnifiedItem {
   id: string;
   source: 'classroom' | 'homework';
+  itemType: ClassroomItemType | 'homework';
   title: string;
   description?: string | null;
   dueAt: string | null;
@@ -15,6 +18,12 @@ export interface UnifiedItem {
   courseColor?: CourseColor;
   link?: string | null;
   rawStatus: string;
+  /** Assigned grade (0-100) — present on grade-type items */
+  grade?: number | null;
+  /** Max possible points */
+  maxPoints?: number | null;
+  /** For announcements: the text content */
+  text?: string | null;
   createdAt: string;
   updatedAt: string;
 }

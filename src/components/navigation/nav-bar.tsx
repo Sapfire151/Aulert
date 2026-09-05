@@ -167,6 +167,8 @@ export function NavBar() {
                   <img
                     src={user.avatar}
                     alt={user.name || 'User'}
+                    referrerPolicy="no-referrer"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
                     style={{
                       width: '28px',
                       height: '28px',
@@ -343,6 +345,8 @@ export function NavBar() {
                   <img
                     src={user.avatar}
                     alt={user.name || 'User'}
+                    referrerPolicy="no-referrer"
+                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
                     style={{
                       width: '32px',
                       height: '32px',

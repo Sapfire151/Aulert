@@ -86,6 +86,7 @@ export default function HomeworkPage() {
       const newItem: UnifiedItem = {
         id: `hw-${Date.now()}`,
         source: 'homework',
+        itemType: 'homework',
         title: data.title,
         description: data.notes,
         dueAt: data.dueAt,

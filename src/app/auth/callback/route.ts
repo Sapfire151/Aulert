@@ -30,7 +30,7 @@ export async function GET(request: Request) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const redirectUri =
-    process.env.GOOGLE_REDIRECT_URI || `${url.origin}/auth/callback`;
+    process.env.GOOGLE_REDIRECT_URI || `${url.origin}/`;
 
   try {
     const oauth2Client = new google.auth.OAuth2(

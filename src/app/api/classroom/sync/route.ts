@@ -3,12 +3,15 @@ import { cookies } from 'next/headers';
 import { google } from 'googleapis';
 import { CourseRow, CourseColor } from '@/types/database';
 import { UnifiedItem } from '@/types/aulert';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 const COURSE_COLORS: CourseColor[] = ['course-1', 'course-2', 'course-3', 'course-4'];
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
+  let userSession: { id?: string; email?: string; name?: string; avatar?: string } = {};
+
   try {
     const cookieStore = await cookies();
     const tokenCookie = cookieStore.get('aulert_google_token')?.value;
@@ -33,7 +36,6 @@ export async function GET(request: Request) {
       });
     }
 
-    let userSession: { id?: string; email?: string; name?: string; avatar?: string } = {};
     if (sessionCookie) {
       try {
         userSession = JSON.parse(sessionCookie);
@@ -45,7 +47,18 @@ export async function GET(request: Request) {
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     const url = new URL(request.url);
-    const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${url.origin}/auth/callback`;
+    const redirectUri = process.env.GOOGLE_REDIRECT_URI || `${url.origin}/`;
+    const tz = url.searchParams.get('tz') || 'UTC';
+
+    // Auto-capture / silently refresh user timezone in Supabase
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY && userSession.id) {
+      try {
+        const supabase = createAdminClient();
+        await supabase.from('users').update({ timezone: tz, updated_at: new Date().toISOString() }).eq('id', userSession.id);
+      } catch (dbErr) {
+        console.warn('[Classroom Sync] Could not update timezone in Supabase:', dbErr);
+      }
+    }
 
     const oauth2Client = new google.auth.OAuth2(
       clientId,
@@ -81,6 +94,14 @@ export async function GET(request: Request) {
           refreshErr?.message?.includes('invalid_grant') ||
           refreshErr?.message?.includes('revoked')
         ) {
+          if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY && userSession.id) {
+            try {
+              const supabase = createAdminClient();
+              await supabase.from('users').update({ needs_reauth: true, updated_at: new Date().toISOString() }).eq('id', userSession.id);
+            } catch (dbErr) {
+              console.warn('[Classroom Sync] Could not set needs_reauth in Supabase:', dbErr);
+            }
+          }
           return NextResponse.json(
             {
               authenticated: false,
@@ -122,8 +143,9 @@ export async function GET(request: Request) {
       };
       courses.push(courseRow);
 
+      // 2. Fetch coursework, submissions, announcements for all courses
       try {
-        const [workRes, subRes] = await Promise.all([
+        const [workRes, subRes, announcementsRes] = await Promise.all([
           classroom.courses.courseWork.list({
             courseId: c.id,
             courseWorkStates: ['PUBLISHED'],
@@ -138,10 +160,19 @@ export async function GET(request: Request) {
             console.warn(`[Classroom Sync] Could not list submissions for ${c.id}:`, err?.message);
             return { data: { studentSubmissions: [] } };
           }),
+          classroom.courses.announcements.list({
+            courseId: c.id,
+            announcementStates: ['PUBLISHED'],
+            pageSize: 20,
+          }).catch((err) => {
+            console.warn(`[Classroom Sync] Could not list announcements for ${c.id}:`, err?.message);
+            return { data: { announcements: [] } };
+          }),
         ]);
 
         const courseWorkList = workRes.data.courseWork || [];
         const submissions = subRes.data.studentSubmissions || [];
+        const announcementList = (announcementsRes as any).data?.announcements || [];
 
         const submissionMap = new Map<string, any>();
         for (const sub of submissions) {
@@ -150,6 +181,7 @@ export async function GET(request: Request) {
           }
         }
 
+        // --- Assignments, Questions, Materials ---
         for (const work of courseWorkList) {
           if (!work.id || !work.title) continue;
 
@@ -166,6 +198,8 @@ export async function GET(request: Request) {
           const submission = submissionMap.get(work.id);
           const subState = submission?.state;
           const isTurnedIn = subState === 'TURNED_IN' || subState === 'RETURNED';
+          const assignedGrade: number | null = submission?.assignedGrade ?? null;
+          const maxPoints: number | null = (work as any).maxPoints ?? null;
 
           let rawStatus: 'assigned' | 'turned_in' | 'missing' = 'assigned';
           if (isTurnedIn) {
@@ -182,9 +216,17 @@ export async function GET(request: Request) {
           const isDueToday = !!(dueTime && Math.abs(dueTime - now) <= 24 * 60 * 60 * 1000);
           const isDueThisWeek = !!(dueTime && dueTime >= now && dueTime <= now + 7 * 24 * 60 * 60 * 1000);
 
+          // Map workType to itemType
+          const workType = (work as any).workType || 'ASSIGNMENT';
+          let itemType: 'assignment' | 'short_answer_question' | 'multiple_choice_question' | 'material' = 'assignment';
+          if (workType === 'SHORT_ANSWER_QUESTION') itemType = 'short_answer_question';
+          else if (workType === 'MULTIPLE_CHOICE_QUESTION') itemType = 'multiple_choice_question';
+          else if (workType === 'ASSIGNMENT') itemType = 'assignment';
+
           items.push({
             id: work.id,
             source: 'classroom',
+            itemType,
             courseId: c.id,
             courseName: c.name || 'Untitled Course',
             courseColor: courseColor,
@@ -196,9 +238,63 @@ export async function GET(request: Request) {
             isDueThisWeek,
             rawStatus: rawStatus,
             completed: isTurnedIn,
+            grade: assignedGrade,
+            maxPoints,
             link: work.alternateLink || `https://classroom.google.com/c/${c.id}`,
             createdAt: work.creationTime || new Date().toISOString(),
             updatedAt: work.updateTime || new Date().toISOString(),
+          });
+
+          // Also surface graded submissions as a separate "grade received" notification
+          if (subState === 'RETURNED' && assignedGrade !== null && assignedGrade !== undefined) {
+            items.push({
+              id: `grade-${work.id}`,
+              source: 'classroom',
+              itemType: 'grade',
+              courseId: c.id,
+              courseName: c.name || 'Untitled Course',
+              courseColor: courseColor,
+              title: `Grade received: ${work.title}`,
+              description: maxPoints != null ? `${assignedGrade}/${maxPoints} points` : `${assignedGrade} points`,
+              dueAt: null,
+              isOverdue: false,
+              isDueToday: false,
+              isDueThisWeek: false,
+              rawStatus: 'returned',
+              completed: true,
+              grade: assignedGrade,
+              maxPoints,
+              link: work.alternateLink || `https://classroom.google.com/c/${c.id}`,
+              createdAt: submission?.updateTime || work.creationTime || new Date().toISOString(),
+              updatedAt: submission?.updateTime || work.updateTime || new Date().toISOString(),
+            });
+          }
+        }
+
+        // --- Announcements ---
+        for (const ann of announcementList) {
+          if (!ann.id) continue;
+          const text = ann.text || '';
+          const title = text.length > 80 ? text.slice(0, 77) + '…' : (text || 'New Announcement');
+          items.push({
+            id: `ann-${ann.id}`,
+            source: 'classroom',
+            itemType: 'announcement',
+            courseId: c.id,
+            courseName: c.name || 'Untitled Course',
+            courseColor: courseColor,
+            title,
+            description: text,
+            text,
+            dueAt: null,
+            isOverdue: false,
+            isDueToday: false,
+            isDueThisWeek: false,
+            rawStatus: 'posted',
+            completed: false,
+            link: ann.alternateLink || `https://classroom.google.com/c/${c.id}`,
+            createdAt: ann.creationTime || new Date().toISOString(),
+            updatedAt: ann.updateTime || ann.creationTime || new Date().toISOString(),
           });
         }
       } catch (err: any) {
@@ -213,11 +309,28 @@ export async function GET(request: Request) {
       return new Date(a.dueAt).getTime() - new Date(b.dueAt).getTime();
     });
 
+    // Persist synced courses to Supabase
+    if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY && userSession.id && courses.length > 0) {
+      try {
+        const supabase = createAdminClient();
+        for (const c of courses) {
+          await supabase.from('courses').upsert({
+            user_id: userSession.id,
+            classroom_course_id: c.classroom_course_id,
+            name: c.name,
+            color: c.color,
+          }, { onConflict: 'user_id,classroom_course_id' });
+        }
+      } catch (dbErr) {
+        console.warn('[Classroom Sync] Could not persist courses to Supabase:', dbErr);
+      }
+    }
+
     const response = NextResponse.json({
       success: true,
       authenticated: true,
       isDemo: false,
-      user: userSession,
+      user: { ...userSession, timezone: tz },
       courses,
       items,
       lastSynced: new Date().toISOString(),
@@ -240,6 +353,14 @@ export async function GET(request: Request) {
     console.error('[Classroom Sync] Unexpected error:', errorMsg);
 
     if (errorMsg.includes('invalid_grant') || errorMsg.includes('revoked')) {
+      if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY && userSession.id) {
+        try {
+          const supabase = createAdminClient();
+          await supabase.from('users').update({ needs_reauth: true, updated_at: new Date().toISOString() }).eq('id', userSession.id);
+        } catch (dbErr) {
+          console.warn('[Classroom Sync] Could not set needs_reauth in Supabase:', dbErr);
+        }
+      }
       return NextResponse.json(
         {
           authenticated: false,

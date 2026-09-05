@@ -20,6 +20,9 @@ export const metadata: Metadata = {
   title: 'Aulert — Google Classroom Visual Timeline & Discord Alerts',
   description:
     'Turn Google Classroom into a unified visual timeline and get real-time deadline alerts on Discord.',
+  verification: {
+    google: 'wS3ouR6PoRcE4Eds8-vvprmc_1ptOPXTsFEwX21FkLM',
+  },
 };
 
 export default function RootLayout({

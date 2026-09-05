@@ -45,6 +45,7 @@ next-env.d.ts
 !tsconfig.json
 !next.config.mjs
 !.eslintrc.json
+!vercel.json
 
 # IDE & tools
 .vscode

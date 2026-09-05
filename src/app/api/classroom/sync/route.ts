@@ -116,13 +116,25 @@ export async function GET(request: Request) {
 
     const classroom = google.classroom({ version: 'v1', auth: oauth2Client });
 
-    // 1. Fetch active enrolled courses
-    const coursesRes = await classroom.courses.list({
-      courseStates: ['ACTIVE'],
-      studentId: 'me',
-    });
-
-    const rawCourses = coursesRes.data.courses || [];
+    // 1. Fetch active enrolled courses with fallback
+    let rawCourses: any[] = [];
+    try {
+      const coursesRes = await classroom.courses.list({
+        courseStates: ['ACTIVE'],
+        studentId: 'me',
+      });
+      rawCourses = coursesRes.data.courses || [];
+    } catch (courseErr: any) {
+      console.warn('[Classroom Sync] Could not fetch with studentId: me, trying without studentId filter:', courseErr?.message);
+      try {
+        const fallbackRes = await classroom.courses.list({
+          courseStates: ['ACTIVE'],
+        });
+        rawCourses = fallbackRes.data.courses || [];
+      } catch (fbErr: any) {
+        console.warn('[Classroom Sync] Could not fetch courses with fallback:', fbErr?.message);
+      }
+    }
 
     const courses: CourseRow[] = [];
     const items: UnifiedItem[] = [];
@@ -338,9 +350,10 @@ export async function GET(request: Request) {
 
     // Update refreshed cookie if refreshed
     if (tokensRefreshed) {
+      const isSecure = process.env.NODE_ENV === 'production' && !url.origin.startsWith('http://localhost') && !url.origin.startsWith('http://127.0.0.1');
       response.cookies.set('aulert_google_token', JSON.stringify(credentials), {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: isSecure,
         sameSite: 'lax',
         maxAge: 60 * 60 * 24 * 30,
         path: '/',

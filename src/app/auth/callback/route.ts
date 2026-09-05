@@ -53,26 +53,34 @@ export async function GET(request: Request) {
     const name = user.name || 'Student';
     const avatar = user.picture || null;
 
-    // 4. Update or Insert User into Supabase if configured
+    // 4. Update User in Supabase if configured (safe lookup by email or google_id)
     try {
       if (process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
         const supabase = createAdminClient();
-        await supabase.from('users').upsert(
-          {
-            id: googleUserId,
+        const { data: existingUser } = await supabase
+          .from('users')
+          .select('id')
+          .or(`email.eq.${email},google_id.eq.${googleUserId}`)
+          .maybeSingle();
+
+        if (existingUser) {
+          await supabase.from('users').update({
+            google_id: googleUserId,
             email,
             needs_reauth: false,
             updated_at: new Date().toISOString(),
-          },
-          { onConflict: 'id' }
-        );
+          }).eq('id', existingUser.id);
+        }
       }
     } catch (dbErr) {
-      console.warn('[Google Auth Callback] Supabase upsert non-blocking warning:', dbErr);
+      console.warn('[Google Auth Callback] Supabase user sync non-blocking warning:', dbErr);
     }
 
     // 5. Set session and token cookies, then redirect to dashboard
     const response = NextResponse.redirect(new URL('/dashboard?auth_success=1', url.origin));
+
+    // Never mark cookies as secure on localhost, otherwise browsers reject them over HTTP
+    const isSecure = process.env.NODE_ENV === 'production' && !url.origin.startsWith('http://localhost') && !url.origin.startsWith('http://127.0.0.1');
 
     // Store lightweight student profile in cookie for client hydration
     response.cookies.set('aulert_session', JSON.stringify({
@@ -84,7 +92,7 @@ export async function GET(request: Request) {
       hasRefreshToken: !!tokens.refresh_token,
     }), {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecure,
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
       path: '/',
@@ -97,7 +105,7 @@ export async function GET(request: Request) {
       expiryDate: tokens.expiry_date,
     }), {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: isSecure,
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30,
       path: '/',

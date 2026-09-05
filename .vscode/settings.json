@@ -1,5 +1,4 @@
 {
-    "liveServer.settings.port": 5501,
     "sonarlint.connectedMode.project": {
         "connectionId": "sapfire151",
         "projectKey": "Sapfire151_Aulert"

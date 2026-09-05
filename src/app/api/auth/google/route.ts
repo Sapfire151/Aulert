@@ -1,0 +1,45 @@
+import { NextResponse } from 'next/server';
+import { google } from 'googleapis';
+
+export async function GET(request: Request) {
+  try {
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const redirectUri =
+      process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/auth/callback';
+
+    if (!clientId || !clientSecret) {
+      console.warn('[Google Auth] Warning: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET not configured. Redirecting to dashboard demo.');
+      const url = new URL(request.url);
+      return NextResponse.redirect(new URL('/dashboard', url.origin));
+    }
+
+    const oauth2Client = new google.auth.OAuth2(
+      clientId,
+      clientSecret,
+      redirectUri
+    );
+
+    const scopes = [
+      'openid',
+      'email',
+      'profile',
+      'https://www.googleapis.com/auth/classroom.courses.readonly',
+      'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
+      'https://www.googleapis.com/auth/classroom.student-submissions.me.readonly',
+    ];
+
+    const authUrl = oauth2Client.generateAuthUrl({
+      access_type: 'offline',
+      scope: scopes,
+      prompt: 'consent',
+      include_granted_scopes: true,
+    });
+
+    return NextResponse.redirect(authUrl);
+  } catch (err: any) {
+    console.error('[Google Auth] Failed to generate auth URL:', err);
+    const url = new URL(request.url);
+    return NextResponse.redirect(new URL('/dashboard?auth_fallback=1', url.origin));
+  }
+}

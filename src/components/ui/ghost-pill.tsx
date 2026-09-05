@@ -35,6 +35,20 @@ export function GhostPill({
     .join(' ');
 
   if (href) {
+    const isExternalOrApi =
+      href.startsWith('/api/') ||
+      href.startsWith('/auth/') ||
+      href.startsWith('http://') ||
+      href.startsWith('https://');
+
+    if (isExternalOrApi) {
+      return (
+        <a href={href} target={target} rel={rel} className={classes}>
+          {children}
+        </a>
+      );
+    }
+
     return (
       <Link href={href} target={target} rel={rel} className={classes}>
         {children}

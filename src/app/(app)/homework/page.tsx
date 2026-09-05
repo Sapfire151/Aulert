@@ -8,7 +8,7 @@ import { HomeworkModal } from '@/components/homework/homework-modal';
 import { Plus, ChevronDown, ChevronRight } from 'lucide-react';
 import { UnifiedItem } from '@/types/aulert';
 import { CourseRow } from '@/types/database';
-import { DEMO_COURSES, getDemoItems } from '@/lib/data-provider';
+import { useClassroomData } from '@/lib/hooks/use-classroom-data';
 import { bucketUnifiedItems } from '@/lib/date-utils';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
@@ -16,8 +16,7 @@ import { useGSAP } from '@gsap/react';
 gsap.registerPlugin(useGSAP);
 
 export default function HomeworkPage() {
-  const [items, setItems] = useState<UnifiedItem[]>([]);
-  const [courses] = useState<CourseRow[]>(DEMO_COURSES);
+  const { items, courses, addItem, updateItem, toggleComplete } = useClassroomData();
   const [timeZone, setTimeZone] = useState<string>('UTC');
   const [selectedItem, setSelectedItem] = useState<UnifiedItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -48,37 +47,14 @@ export default function HomeworkPage() {
   useEffect(() => {
     const tz = localStorage.getItem('aulert-tz') || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
     setTimeZone(tz);
-
-    const stored = localStorage.getItem('aulert-items');
-    if (stored) {
-      try {
-        setItems(JSON.parse(stored));
-      } catch {
-        setItems(getDemoItems());
-      }
-    } else {
-      const demo = getDemoItems();
-      setItems(demo);
-      localStorage.setItem('aulert-items', JSON.stringify(demo));
-    }
   }, []);
-
-  const updateItems = (newItems: UnifiedItem[]) => {
-    setItems(newItems);
-    localStorage.setItem('aulert-items', JSON.stringify(newItems));
-  };
 
   // Filter to homework items only for this page
   const homeworkItems = items.filter((item) => item.source === 'homework');
   const bucketed = bucketUnifiedItems(homeworkItems, timeZone);
 
   const handleToggleComplete = (target: UnifiedItem) => {
-    const updated = items.map((i) =>
-      i.id === target.id
-        ? { ...i, completed: !i.completed, updatedAt: new Date().toISOString() }
-        : i
-    );
-    updateItems(updated);
+    toggleComplete(target.id);
     if (selectedItem && selectedItem.id === target.id) {
       setSelectedItem({ ...selectedItem, completed: !selectedItem.completed });
     }
@@ -93,21 +69,19 @@ export default function HomeworkPage() {
   }) => {
     const course = courses.find((c) => c.id === data.courseId);
     if (data.id) {
-      const updated = items.map((i) =>
-        i.id === data.id
-          ? {
-              ...i,
-              title: data.title,
-              courseId: data.courseId,
-              courseName: course ? course.name : null,
-              courseColor: course ? course.color : undefined,
-              dueAt: data.dueAt,
-              description: data.notes,
-              updatedAt: new Date().toISOString(),
-            }
-          : i
-      );
-      updateItems(updated);
+      const existing = items.find((i) => i.id === data.id);
+      if (existing) {
+        updateItem({
+          ...existing,
+          title: data.title,
+          courseId: data.courseId,
+          courseName: course ? course.name : null,
+          courseColor: course ? course.color : undefined,
+          dueAt: data.dueAt,
+          description: data.notes,
+          updatedAt: new Date().toISOString(),
+        });
+      }
     } else {
       const newItem: UnifiedItem = {
         id: `hw-${Date.now()}`,
@@ -123,17 +97,20 @@ export default function HomeworkPage() {
         courseName: course ? course.name : null,
         courseColor: course ? course.color : undefined,
         link: null,
-        rawStatus: 'pending',
+        rawStatus: 'assigned',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      updateItems([newItem, ...items]);
+      addItem(newItem);
     }
   };
 
   const handleDeleteHomework = (target: UnifiedItem) => {
     const updated = items.filter((i) => i.id !== target.id);
-    updateItems(updated);
+    localStorage.setItem(
+      'aulert-custom-homework',
+      JSON.stringify(updated.filter((it) => it.source === 'homework'))
+    );
     setSelectedItem(null);
   };
 

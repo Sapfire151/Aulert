@@ -1,16 +1,18 @@
 import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   try {
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+    const url = new URL(request.url);
     const redirectUri =
-      process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/auth/callback';
+      process.env.GOOGLE_REDIRECT_URI || `${url.origin}/auth/callback`;
 
     if (!clientId || !clientSecret) {
       console.warn('[Google Auth] Warning: GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET not configured. Redirecting to dashboard demo.');
-      const url = new URL(request.url);
       return NextResponse.redirect(new URL('/dashboard', url.origin));
     }
 
@@ -27,6 +29,7 @@ export async function GET(request: Request) {
       'https://www.googleapis.com/auth/classroom.courses.readonly',
       'https://www.googleapis.com/auth/classroom.coursework.me.readonly',
       'https://www.googleapis.com/auth/classroom.student-submissions.me.readonly',
+      'https://www.googleapis.com/auth/classroom.announcements.readonly',
     ];
 
     const authUrl = oauth2Client.generateAuthUrl({

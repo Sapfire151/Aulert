@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { createAdminClient } from '@/lib/supabase/admin';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const code = url.searchParams.get('code');
@@ -28,7 +30,7 @@ export async function GET(request: Request) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const redirectUri =
-    process.env.GOOGLE_REDIRECT_URI || 'http://localhost:3000/auth/callback';
+    process.env.GOOGLE_REDIRECT_URI || `${url.origin}/auth/callback`;
 
   try {
     const oauth2Client = new google.auth.OAuth2(
@@ -69,8 +71,8 @@ export async function GET(request: Request) {
       console.warn('[Google Auth Callback] Supabase upsert non-blocking warning:', dbErr);
     }
 
-    // 5. Set session cookie and redirect to dashboard
-    const response = NextResponse.redirect(new URL('/dashboard', url.origin));
+    // 5. Set session and token cookies, then redirect to dashboard
+    const response = NextResponse.redirect(new URL('/dashboard?auth_success=1', url.origin));
 
     // Store lightweight student profile in cookie for client hydration
     response.cookies.set('aulert_session', JSON.stringify({
@@ -78,12 +80,26 @@ export async function GET(request: Request) {
       email,
       name,
       avatar,
+      isLoggedIn: true,
       hasRefreshToken: !!tokens.refresh_token,
     }), {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 30, // 30 days
+      path: '/',
+    });
+
+    // Store Google API credentials in secure httpOnly cookie for Classroom syncing
+    response.cookies.set('aulert_google_token', JSON.stringify({
+      accessToken: tokens.access_token,
+      refreshToken: tokens.refresh_token,
+      expiryDate: tokens.expiry_date,
+    }), {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30,
       path: '/',
     });
 

@@ -7,24 +7,26 @@ import { ItemRow } from '@/components/items/item-row';
 import { DetailPanel } from '@/components/items/detail-panel';
 import { HomeworkModal } from '@/components/homework/homework-modal';
 import { GhostPill } from '@/components/ui/ghost-pill';
-import { Plus, Calendar as CalendarIcon } from 'lucide-react';
+import { Plus, Calendar as CalendarIcon, RefreshCw, Sparkles } from 'lucide-react';
 import { UnifiedItem, DashboardStats } from '@/types/aulert';
 import { CourseRow } from '@/types/database';
-import { DEMO_COURSES, getDemoItems, computeDashboardStats } from '@/lib/data-provider';
+import { computeDashboardStats } from '@/lib/data-provider';
 import { bucketUnifiedItems } from '@/lib/date-utils';
+import { useClassroomData } from '@/lib/hooks/use-classroom-data';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 
 gsap.registerPlugin(useGSAP);
 
 // Time-of-day greeting
-function getGreeting(): { headline: string; subtitle: string } {
+function getGreeting(userName?: string): { headline: string; subtitle: string } {
   const hour = new Date().getHours();
+  const nameSuffix = userName ? `, ${userName}` : '';
   let headline: string;
-  if (hour >= 5 && hour < 12) headline = 'Good morning';
-  else if (hour >= 12 && hour < 17) headline = 'Good afternoon';
-  else if (hour >= 17 && hour < 22) headline = 'Good evening';
-  else headline = 'Late night focus';
+  if (hour >= 5 && hour < 12) headline = `Good morning${nameSuffix}`;
+  else if (hour >= 12 && hour < 17) headline = `Good afternoon${nameSuffix}`;
+  else if (hour >= 17 && hour < 22) headline = `Good evening${nameSuffix}`;
+  else headline = `Late night focus${nameSuffix}`;
 
   const subtitles = [
     'Here is what needs your attention today.',
@@ -39,19 +41,33 @@ function getGreeting(): { headline: string; subtitle: string } {
 }
 
 export default function DashboardPage() {
-  const [items, setItems] = useState<UnifiedItem[]>([]);
-  const [courses] = useState<CourseRow[]>(DEMO_COURSES);
+  const {
+    items,
+    courses,
+    isLoading,
+    isSyncing,
+    isAuthenticated,
+    isDemo,
+    needsReauth,
+    lastSynced,
+    user,
+    syncNow,
+    addItem,
+    updateItem,
+    toggleComplete,
+  } = useClassroomData();
+
   const [timeZone, setTimeZone] = useState<string>('UTC');
   const [selectedItem, setSelectedItem] = useState<UnifiedItem | null>(null);
   const [isHomeworkModalOpen, setIsHomeworkModalOpen] = useState<boolean>(false);
-  const [greeting] = useState(() => getGreeting());
-  const [stats, setStats] = useState<DashboardStats>({
-    overdueCount: 0,
-    dueThisWeekCount: 0,
-    completedThisMonthCount: 0,
-    needsReauth: false,
-  });
+  const [greeting, setGreeting] = useState(() => getGreeting());
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (user?.name) {
+      setGreeting(getGreeting(user.name.split(' ')[0]));
+    }
+  }, [user]);
 
   useGSAP(
     () => {
@@ -74,45 +90,18 @@ export default function DashboardPage() {
   );
 
   useEffect(() => {
-    const tz = localStorage.getItem('aulert-tz') || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    const tz =
+      localStorage.getItem('aulert-tz') ||
+      Intl.DateTimeFormat().resolvedOptions().timeZone ||
+      'UTC';
     setTimeZone(tz);
-
-    // Load items (from local storage or default demo)
-    const stored = localStorage.getItem('aulert-items');
-    let loadedItems: UnifiedItem[] = [];
-    if (stored) {
-      try {
-        loadedItems = JSON.parse(stored);
-      } catch {
-        loadedItems = getDemoItems();
-      }
-    } else {
-      loadedItems = getDemoItems();
-      localStorage.setItem('aulert-items', JSON.stringify(loadedItems));
-    }
-
-    setItems(loadedItems);
-    setStats(computeDashboardStats(loadedItems, tz));
   }, []);
 
-  const updateItems = (newItems: UnifiedItem[]) => {
-    setItems(newItems);
-    localStorage.setItem('aulert-items', JSON.stringify(newItems));
-    setStats(computeDashboardStats(newItems, timeZone));
-  };
+  const stats = computeDashboardStats(items, timeZone);
 
   const handleToggleComplete = (targetItem: UnifiedItem) => {
-    if (targetItem.source === 'classroom') return; // Classroom completion is read-only
-    const updated = items.map((i) =>
-      i.id === targetItem.id
-        ? {
-            ...i,
-            completed: !i.completed,
-            updatedAt: new Date().toISOString(),
-          }
-        : i
-    );
-    updateItems(updated);
+    if (targetItem.source === 'classroom') return; // Classroom completion mirrors submission
+    toggleComplete(targetItem.id);
     if (selectedItem && selectedItem.id === targetItem.id) {
       setSelectedItem({
         ...selectedItem,
@@ -131,21 +120,19 @@ export default function DashboardPage() {
     const course = courses.find((c) => c.id === data.courseId);
     if (data.id) {
       // Edit existing
-      const updated = items.map((i) =>
-        i.id === data.id
-          ? {
-              ...i,
-              title: data.title,
-              courseId: data.courseId,
-              courseName: course ? course.name : null,
-              courseColor: course ? course.color : undefined,
-              dueAt: data.dueAt,
-              description: data.notes,
-              updatedAt: new Date().toISOString(),
-            }
-          : i
-      );
-      updateItems(updated);
+      const existing = items.find((i) => i.id === data.id);
+      if (existing) {
+        updateItem({
+          ...existing,
+          title: data.title,
+          courseId: data.courseId,
+          courseName: course ? course.name : null,
+          courseColor: course ? course.color : undefined,
+          dueAt: data.dueAt,
+          description: data.notes,
+          updatedAt: new Date().toISOString(),
+        });
+      }
     } else {
       // Create new homework item
       const newItem: UnifiedItem = {
@@ -162,18 +149,21 @@ export default function DashboardPage() {
         courseName: course ? course.name : null,
         courseColor: course ? course.color : undefined,
         link: null,
-        rawStatus: 'pending',
+        rawStatus: 'assigned',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      updateItems([newItem, ...items]);
+      addItem(newItem);
     }
   };
 
   const handleDeleteHomework = (targetItem: UnifiedItem) => {
     if (targetItem.source === 'classroom') return;
     const updated = items.filter((i) => i.id !== targetItem.id);
-    updateItems(updated);
+    localStorage.setItem(
+      'aulert-custom-homework',
+      JSON.stringify(updated.filter((it) => it.source === 'homework'))
+    );
     setSelectedItem(null);
   };
 
@@ -183,18 +173,80 @@ export default function DashboardPage() {
   return (
     <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       {/* Reconnect Banner if token expired or revoked */}
-      {stats.needsReauth && <ReconnectBanner />}
+      {needsReauth && <ReconnectBanner />}
+
+      {/* Preview Mode Callout Banner */}
+      {isDemo && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            gap: '12px',
+            padding: '14px 20px',
+            backgroundColor: 'var(--color-panel)',
+            border: '1px solid var(--color-hairline)',
+            borderRadius: 'var(--radius-card)',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Sparkles size={18} style={{ color: 'var(--color-primary)' }} />
+            <div>
+              <p style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                You are currently in Preview Mode with mock data.
+              </p>
+              <p style={{ margin: '2px 0 0', fontSize: '13px', color: 'var(--color-text-muted)' }}>
+                Sign in with Google to synchronize your live Google Classroom courses and assignments.
+              </p>
+            </div>
+          </div>
+          <GhostPill href="/api/auth/google" variant="google" size="sm">
+            Connect Google Classroom
+          </GhostPill>
+        </div>
+      )}
 
       {/* Hero Greeting — The SINGLE large display moment per screen */}
-      <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'space-between',
+          flexWrap: 'wrap',
+          gap: '16px',
+        }}
+      >
         <div>
           <h1 className="hero-headline">{greeting.headline}</h1>
           <p className="body-ui text-muted" style={{ marginTop: '4px' }}>
             {greeting.subtitle}
+            {isAuthenticated && lastSynced && (
+              <span style={{ marginLeft: '8px', fontSize: '13px' }}>
+                • Classroom synced {new Date(lastSynced).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
           </p>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          {isAuthenticated && (
+            <GhostPill
+              onClick={() => syncNow()}
+              variant="muted"
+              size="md"
+              disabled={isSyncing}
+              title="Fetch latest assignments from Google Classroom"
+            >
+              <RefreshCw
+                size={14}
+                style={{
+                  animation: isSyncing ? 'spin 1s linear infinite' : 'none',
+                }}
+              />
+              {isSyncing ? 'Syncing...' : 'Sync Classroom'}
+            </GhostPill>
+          )}
           <GhostPill onClick={() => setIsHomeworkModalOpen(true)}>
             <Plus size={14} />
             New Task

@@ -18,6 +18,29 @@ import {
 export function NavBar() {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [user, setUser] = useState<{ id?: string; email?: string; name?: string; avatar?: string } | null>(null);
+
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      const match = document.cookie.match(/aulert_session=([^;]+)/);
+      if (match) {
+        try {
+          setUser(JSON.parse(decodeURIComponent(match[1])));
+        } catch {
+          // ignore
+        }
+      }
+    }
+  }, []);
+
+  const handleSignOut = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('aulert-live-items');
+      localStorage.removeItem('aulert-live-courses');
+      localStorage.removeItem('aulert-last-synced');
+      localStorage.removeItem('aulert-custom-homework');
+    }
+  };
 
   // Lock body scroll and handle Escape key when mobile sidebar is open
   useEffect(() => {
@@ -133,15 +156,69 @@ export function NavBar() {
             })}
           </nav>
 
-          {/* Right: Theme + Desktop Sign Out */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
+          {/* Right: Theme + User Profile / Sign In / Sign Out */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0 }}>
             <ThemeToggle />
 
-            <div className="desktop-only-signout">
-              <GhostPill href="/auth/signout" size="sm" variant="alarm">
-                Sign out
-              </GhostPill>
-            </div>
+            {user ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }} className="desktop-only-signout">
+                {user.avatar ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={user.avatar}
+                    alt={user.name || 'User'}
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '1px solid var(--color-hairline)',
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      backgroundColor: 'var(--color-panel)',
+                      border: '1px solid var(--color-hairline)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: 'var(--color-text-primary)',
+                    }}
+                  >
+                    {(user.name || user.email || 'S')[0].toUpperCase()}
+                  </div>
+                )}
+                <span
+                  style={{
+                    fontSize: '13px',
+                    fontWeight: 500,
+                    maxWidth: '120px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                    color: 'var(--color-text-primary)',
+                  }}
+                  title={user.name || user.email}
+                >
+                  {user.name ? user.name.split(' ')[0] : user.email}
+                </span>
+                <GhostPill href="/auth/signout" size="sm" variant="alarm" onClick={handleSignOut}>
+                  Sign out
+                </GhostPill>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }} className="desktop-only-signout">
+                <GhostPill href="/api/auth/google" variant="google" size="sm">
+                  Sign in
+                </GhostPill>
+              </div>
+            )}
           </div>
         </div>
       </header>
@@ -258,15 +335,71 @@ export function NavBar() {
             <ThemeToggle />
           </div>
 
-          <GhostPill
-            href="/auth/signout"
-            size="sm"
-            variant="alarm"
-            style={{ width: '100%', justifyContent: 'center' }}
-          >
-            <LogOut size={14} />
-            Sign out
-          </GhostPill>
+          {user ? (
+            <>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '4px 0' }}>
+                {user.avatar ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={user.avatar}
+                    alt={user.name || 'User'}
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '1px solid var(--color-hairline)',
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      backgroundColor: 'var(--color-panel)',
+                      border: '1px solid var(--color-hairline)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '13px',
+                      fontWeight: 600,
+                    }}
+                  >
+                    {(user.name || user.email || 'S')[0].toUpperCase()}
+                  </div>
+                )}
+                <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+                  <span style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                    {user.name || 'Student'}
+                  </span>
+                  <span style={{ fontSize: '12px', color: 'var(--color-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {user.email}
+                  </span>
+                </div>
+              </div>
+
+              <GhostPill
+                href="/auth/signout"
+                size="sm"
+                variant="alarm"
+                onClick={handleSignOut}
+                style={{ width: '100%', justifyContent: 'center' }}
+              >
+                <LogOut size={14} />
+                Sign out
+              </GhostPill>
+            </>
+          ) : (
+            <GhostPill
+              href="/api/auth/google"
+              variant="google"
+              size="sm"
+              style={{ width: '100%', justifyContent: 'center' }}
+            >
+              Sign in with Google
+            </GhostPill>
+          )}
         </div>
       </aside>
     </>

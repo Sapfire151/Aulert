@@ -7,7 +7,7 @@ import { DetailPanel } from '@/components/items/detail-panel';
 import { ItemRow } from '@/components/items/item-row';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, List, Columns } from 'lucide-react';
 import { UnifiedItem } from '@/types/aulert';
-import { DEMO_COURSES, getDemoItems } from '@/lib/data-provider';
+import { useClassroomData } from '@/lib/hooks/use-classroom-data';
 import { getCourseColorClass } from '@/lib/course-colors';
 import { isOverdueInTimezone, isDueTodayInTimezone } from '@/lib/date-utils';
 import gsap from 'gsap';
@@ -18,7 +18,7 @@ gsap.registerPlugin(useGSAP);
 type CalendarView = 'month' | 'week' | 'agenda';
 
 export default function CalendarPage() {
-  const [items, setItems] = useState<UnifiedItem[]>([]);
+  const { items, toggleComplete } = useClassroomData();
   const [view, setView] = useState<CalendarView>('month');
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [timeZone, setTimeZone] = useState<string>('UTC');
@@ -46,19 +46,6 @@ export default function CalendarPage() {
   useEffect(() => {
     const tz = localStorage.getItem('aulert-tz') || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
     setTimeZone(tz);
-
-    const stored = localStorage.getItem('aulert-items');
-    if (stored) {
-      try {
-        setItems(JSON.parse(stored));
-      } catch {
-        setItems(getDemoItems());
-      }
-    } else {
-      const demo = getDemoItems();
-      setItems(demo);
-      localStorage.setItem('aulert-items', JSON.stringify(demo));
-    }
   }, []);
 
   const handlePrev = () => {

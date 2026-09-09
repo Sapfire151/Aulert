@@ -159,9 +159,6 @@ export default function HomeworkPage() {
       <div className="homework-section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <h2 className="section-header">Homework & Tasks</h2>
-          <p className="body-ui text-muted" style={{ marginTop: '2px' }}>
-            Personal task list with Discord alerts and calendar sync.
-          </p>
         </div>
 
         <GhostPill

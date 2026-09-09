@@ -321,15 +321,10 @@ export default function HomePage() {
                 color: 'var(--color-course-1)',
               }}
             >
-              Connected Architecture
             </span>
             <h2 className="section-heading-anim single-line-heading" style={{ fontSize: 'clamp(22px, 4vw, 34px)', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
               From Teacher Post to Discord Ping in 4 Steps
             </h2>
-            <p className="body-ui text-muted" style={{ fontSize: '15px', lineHeight: 1.6 }}>
-              Follow the automated lifecycle of an assignment as it travels through Google Cloud Pub/Sub,
-              taxonomy filtering, Discord dispatch, and encrypted vault storage.
-            </p>
           </div>
 
           {/* Connected Vertical Timeline */}
@@ -463,14 +458,10 @@ export default function HomePage() {
                 color: 'var(--color-alarm)',
               }}
             >
-              The Difference
             </span>
             <h2 className="section-heading-anim" style={{ fontSize: 'clamp(22px, 4vw, 34px)', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
-              Why Students Rely on Aulert
+              Why students should rely on Aulert
             </h2>
-            <p className="body-ui text-muted" style={{ fontSize: '15px', lineHeight: 1.6 }}>
-              Eliminate stream fatigue and replace manual tab refreshes with automated peace of mind.
-            </p>
           </div>
 
           <div className="comparison-container">
@@ -478,14 +469,12 @@ export default function HomePage() {
             <div className="comparison-card">
               <span
                 style={{
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
+                  fontSize: '29px',
+                  fontWeight: 700,
                   color: 'var(--color-alarm)',
-                  letterSpacing: '0.05em',
                 }}
               >
-                Google Classroom Alone
+                Google Classroom
               </span>
               <h3 style={{ fontSize: '18px', fontWeight: 600 }}>
                 Fragmented Stream Noise
@@ -523,14 +512,12 @@ export default function HomePage() {
             <div className="comparison-card highlight-card">
               <span
                 style={{
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  textTransform: 'uppercase',
+                  fontSize: '29px',
+                  fontWeight: 700,
                   color: 'var(--color-course-1)',
-                  letterSpacing: '0.05em',
                 }}
               >
-                Aulert + Discord
+                Aulert
               </span>
               <h3 style={{ fontSize: '18px', fontWeight: 600 }}>
                 Unified, Automated Delivery
@@ -586,7 +573,6 @@ export default function HomePage() {
                 color: 'var(--color-course-3)',
               }}
             >
-              Capabilities
             </span>
             <h2 className="section-heading-anim" style={{ fontSize: 'clamp(20px, 3.5vw, 30px)', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
               Engineered for Everyday Student Workflows
@@ -653,10 +639,6 @@ export default function HomePage() {
           <h2 style={{ fontSize: 'clamp(24px, 4.5vw, 36px)', lineHeight: 1.2, maxWidth: '580px', letterSpacing: '-0.02em' }}>
             Take control of your deadlines.
           </h2>
-
-          <p className="body-ui text-muted single-line-sub" style={{ fontSize: '15px', lineHeight: 1.6 }}>
-            Sync your Google Classroom schedule in seconds. No passwords required.
-          </p>
 
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
             <GhostPill href="/api/auth/google" size="md" variant="google">

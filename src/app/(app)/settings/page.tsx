@@ -93,8 +93,8 @@ export default function SettingsPage() {
     e.preventDefault();
     const cleanUrl = webhookUrl.trim();
     if (!cleanUrl.startsWith('https://discord.com/api/webhooks/') &&
-        !cleanUrl.startsWith('https://canary.discord.com/api/webhooks/') &&
-        !cleanUrl.startsWith('https://ptb.discord.com/api/webhooks/')) {
+      !cleanUrl.startsWith('https://canary.discord.com/api/webhooks/') &&
+      !cleanUrl.startsWith('https://ptb.discord.com/api/webhooks/')) {
       setFeedback('Please enter a valid Discord webhook URL (https://discord.com/api/webhooks/...).');
       return;
     }
@@ -247,9 +247,6 @@ export default function SettingsPage() {
     <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       <div>
         <h2 className="section-header">Settings & Integrations</h2>
-        <p className="body-ui text-muted" style={{ marginTop: '2px' }}>
-          Manage your Discord alert channels and account preferences.
-        </p>
       </div>
 
       {/* Animated notification bubble — no emojis, GSAP exit animation */}
@@ -266,9 +263,6 @@ export default function SettingsPage() {
         <h3 className="section-header" style={{ fontSize: '18px' }}>
           Connect Discord
         </h3>
-        <p className="body-ui text-muted">
-          Choose the integration style that fits your workflow. Both support Instant and Late pings.
-        </p>
 
         <div
           style={{
@@ -295,9 +289,6 @@ export default function SettingsPage() {
                 Webhook Mode
               </h4>
             </div>
-            <p className="body-ui text-muted" style={{ fontSize: '13px' }}>
-              Paste your Discord channel webhook URL. Uses the exact webhook you created in Discord.
-            </p>
 
             <form onSubmit={handleAddWebhook} style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: 'auto', opacity: isDemo ? 0.5 : 1, pointerEvents: isDemo ? 'none' : 'auto' }}>
               <input
@@ -346,9 +337,6 @@ export default function SettingsPage() {
                 Bot Mode
               </h4>
             </div>
-            <p className="body-ui text-muted" style={{ fontSize: '13px' }}>
-              Invite the official Aulert bot to your server or enable direct message (DM) alerts with interactive buttons.
-            </p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: 'auto' }}>
               <GhostPill
@@ -515,9 +503,6 @@ export default function SettingsPage() {
         <p className="body-ui text-muted">
           Current detected timezone: <strong style={{ color: 'var(--color-course-1)' }}>{timeZone}</strong>
         </p>
-        <p className="body-ui text-muted" style={{ fontSize: '12px', marginTop: '4px' }}>
-          Timezone is automatically captured from your browser and synced upon every login. All deadline calculations evaluate against this zone.
-        </p>
       </div>
 
       {/* Support & Legal Compliance Section */}
@@ -534,9 +519,6 @@ export default function SettingsPage() {
         <h3 className="section-header" style={{ fontSize: '16px' }}>
           Support & Compliance
         </h3>
-        <p className="body-ui text-muted" style={{ fontSize: '13px' }}>
-          Review our legal terms or get help with Aulert:
-        </p>
         <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
           <Link href="/terms?from=settings" className="nav-link" style={{ fontSize: '13px' }}>
             Terms of Service

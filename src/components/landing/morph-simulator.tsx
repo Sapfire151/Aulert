@@ -103,9 +103,6 @@ export function MorphSimulator() {
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-          <span style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--color-text-muted)', fontWeight: 600 }}>
-            Interactive Vector Signal
-          </span>
           <span style={{ fontSize: '16px', fontWeight: 600 }}>
             Simulate an Incoming Discord Notification
           </span>

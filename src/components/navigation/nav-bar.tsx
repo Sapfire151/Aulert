@@ -19,18 +19,54 @@ export function NavBar() {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState<{ id?: string; email?: string; name?: string; avatar?: string } | null>(null);
+  const [avatarImgError, setAvatarImgError] = useState(false);
 
   useEffect(() => {
-    if (typeof document !== 'undefined') {
-      const match = document.cookie.match(/aulert_session=([^;]+)/);
-      if (match) {
-        try {
-          setUser(JSON.parse(decodeURIComponent(match[1])));
-        } catch {
-          // ignore
+    const loadUser = () => {
+      let foundUser: { id?: string; email?: string; name?: string; avatar?: string } | null = null;
+      if (typeof document !== 'undefined') {
+        const match = document.cookie.match(/aulert_session=([^;]+)/);
+        if (match) {
+          try {
+            const raw = match[1];
+            let decoded = raw;
+            try {
+              decoded = decodeURIComponent(raw);
+            } catch {
+              decoded = raw;
+            }
+            foundUser = JSON.parse(decoded);
+          } catch {
+            // ignore malformed cookie
+          }
         }
       }
-    }
+      if (!foundUser && typeof window !== 'undefined') {
+        try {
+          const cached = localStorage.getItem('aulert-user-profile');
+          if (cached) {
+            foundUser = JSON.parse(cached);
+          }
+        } catch {}
+      }
+      if (foundUser) {
+        setUser(foundUser);
+      }
+    };
+
+    loadUser();
+
+    // Listen for updates from useClassroomData / classroom sync
+    const handleUserUpdate = (e: any) => {
+      if (e?.detail) {
+        setUser(e.detail);
+        setAvatarImgError(false);
+      }
+    };
+    window.addEventListener('aulert-user-updated', handleUserUpdate as EventListener);
+    return () => {
+      window.removeEventListener('aulert-user-updated', handleUserUpdate as EventListener);
+    };
   }, []);
 
   const handleSignOut = () => {
@@ -39,6 +75,7 @@ export function NavBar() {
       localStorage.removeItem('aulert-live-courses');
       localStorage.removeItem('aulert-last-synced');
       localStorage.removeItem('aulert-custom-homework');
+      localStorage.removeItem('aulert-user-profile');
     }
   };
 
@@ -160,15 +197,69 @@ export function NavBar() {
           <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexShrink: 0 }}>
             <ThemeToggle />
 
-            {user ? (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }} className="desktop-only-signout">
-                {user.avatar ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
+            {/* Mobile avatar thumbnail button to open drawer */}
+            {user && (
+              <button
+                type="button"
+                className="mobile-only-avatar"
+                onClick={() => setSidebarOpen(true)}
+                aria-label="Open user profile menu"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  cursor: 'pointer',
+                  borderRadius: '50%',
+                  outline: 'none',
+                  display: 'none',
+                }}
+              >
+                {user.avatar && !avatarImgError ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={user.avatar}
                     alt={user.name || 'User'}
                     referrerPolicy="no-referrer"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    onError={() => setAvatarImgError(true)}
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      border: '1px solid var(--color-hairline)',
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '28px',
+                      height: '28px',
+                      borderRadius: '50%',
+                      backgroundColor: 'var(--color-panel)',
+                      border: '1px solid var(--color-hairline)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      color: 'var(--color-text-primary)',
+                    }}
+                  >
+                    {(user.name || user.email || 'S')[0].toUpperCase()}
+                  </div>
+                )}
+              </button>
+            )}
+
+            {user ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }} className="desktop-only-signout">
+                {user.avatar && !avatarImgError ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={user.avatar}
+                    alt={user.name || 'User'}
+                    referrerPolicy="no-referrer"
+                    onError={() => setAvatarImgError(true)}
                     style={{
                       width: '28px',
                       height: '28px',
@@ -340,13 +431,13 @@ export function NavBar() {
           {user ? (
             <>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '4px 0' }}>
-                {user.avatar ? (
+                {user.avatar && !avatarImgError ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img
                     src={user.avatar}
                     alt={user.name || 'User'}
                     referrerPolicy="no-referrer"
-                    onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                    onError={() => setAvatarImgError(true)}
                     style={{
                       width: '32px',
                       height: '32px',

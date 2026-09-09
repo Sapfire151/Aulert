@@ -19,6 +19,7 @@ export interface UseClassroomDataReturn {
   syncNow: () => Promise<void>;
   addItem: (item: UnifiedItem) => void;
   updateItem: (item: UnifiedItem) => void;
+  deleteItem: (itemId: string) => void;
   toggleComplete: (itemId: string) => void;
 }
 
@@ -49,8 +50,8 @@ export function useClassroomData(): UseClassroomDataReturn {
   });
   const [user, setUser] = useState<{ id?: string; email?: string; name?: string; avatar?: string; timezone?: string } | null>(null);
 
-  // Load custom homework items created by user
-  const getCustomHomework = (): UnifiedItem[] => {
+  // Fallback cache helper
+  const getCachedHomework = (): UnifiedItem[] => {
     if (typeof window === 'undefined') return [];
     try {
       const stored = localStorage.getItem('aulert-custom-homework');
@@ -60,10 +61,29 @@ export function useClassroomData(): UseClassroomDataReturn {
     }
   };
 
-  const saveCustomHomework = (customItems: UnifiedItem[]) => {
+  const setCachedHomework = (customItems: UnifiedItem[]) => {
     if (typeof window === 'undefined') return;
-    localStorage.setItem('aulert-custom-homework', JSON.stringify(customItems));
+    try {
+      localStorage.setItem('aulert-custom-homework', JSON.stringify(customItems));
+    } catch {}
   };
+
+  // Fetch homework items from backend API
+  const fetchBackendHomework = useCallback(async (): Promise<UnifiedItem[]> => {
+    try {
+      const res = await fetch('/api/homework', { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success && Array.isArray(data.items)) {
+          setCachedHomework(data.items);
+          return data.items;
+        }
+      }
+    } catch (e) {
+      console.warn('[useClassroomData] Failed to fetch backend homework, using cache:', e);
+    }
+    return getCachedHomework();
+  }, []);
 
   const syncData = useCallback(async () => {
     setIsSyncing(true);
@@ -74,24 +94,33 @@ export function useClassroomData(): UseClassroomDataReturn {
       });
       const data = await res.json();
 
-      const customItems = getCustomHomework();
-
       if (data.authenticated && !data.isDemo) {
         setIsAuthenticated(true);
         setIsDemo(false);
         setNeedsReauth(false);
-        setUser(data.user || null);
+        if (data.user) {
+          setUser(data.user);
+          if (typeof window !== 'undefined') {
+            try {
+              localStorage.setItem('aulert-user-profile', JSON.stringify(data.user));
+              window.dispatchEvent(new CustomEvent('aulert-user-updated', { detail: data.user }));
+            } catch {}
+          }
+        } else {
+          setUser(null);
+        }
 
         const liveCourses: CourseRow[] = data.courses || [];
         const liveItems: UnifiedItem[] = data.items || [];
+        const backendHomework = await fetchBackendHomework();
 
-        // Merge live classroom items with local custom homework tasks
-        const combined = [...liveItems, ...customItems];
+        // Merge live classroom items with backend custom homework tasks
+        const combined = [...liveItems, ...backendHomework];
         setCourses(liveCourses);
         setItems(combined);
         setLastSynced(data.lastSynced || new Date().toISOString());
 
-        // Cache live data for instant subsequent loads
+        // Cache live data for subsequent loads
         localStorage.setItem('aulert-live-courses', JSON.stringify(liveCourses));
         localStorage.setItem('aulert-live-items', JSON.stringify(liveItems));
         if (data.lastSynced) {
@@ -102,26 +131,22 @@ export function useClassroomData(): UseClassroomDataReturn {
         setNeedsReauth(true);
         setIsDemo(false);
       } else {
-        // Preview Mode (Demo)
+        // Preview Mode (Demo) — strictly sample/mockup data only
         setIsAuthenticated(false);
         setIsDemo(true);
         setNeedsReauth(false);
         setCourses(DEMO_COURSES);
-
-        // In demo mode, load demo items combined with any custom user items
-        const demo = getDemoItems();
-        setItems([...demo, ...customItems]);
+        setItems(getDemoItems());
       }
     } catch (err) {
       console.warn('[useClassroomData] Failed to sync with server:', err);
-      // Fallback: if cached live items exist, retain them
       const cachedItems = localStorage.getItem('aulert-live-items');
       const cachedCourses = localStorage.getItem('aulert-live-courses');
       if (cachedItems && cachedCourses) {
         try {
           const liveItems = JSON.parse(cachedItems);
           const liveCourses = JSON.parse(cachedCourses);
-          setItems([...liveItems, ...getCustomHomework()]);
+          setItems([...liveItems, ...getCachedHomework()]);
           setCourses(liveCourses);
           setIsAuthenticated(true);
           setIsDemo(false);
@@ -129,67 +154,111 @@ export function useClassroomData(): UseClassroomDataReturn {
           setItems(getDemoItems());
           setCourses(DEMO_COURSES);
         }
+      } else {
+        setItems(getDemoItems());
+        setCourses(DEMO_COURSES);
       }
     } finally {
       setIsLoading(false);
       setIsSyncing(false);
     }
-  }, [timeZone]);
+  }, [timeZone, fetchBackendHomework]);
 
   // Initial load
   useEffect(() => {
-    // 1. Read session cookie if present
     if (typeof document !== 'undefined') {
+      let sessionUser: any = null;
       const match = document.cookie.match(/aulert_session=([^;]+)/);
       if (match) {
         try {
-          const parsed = JSON.parse(decodeURIComponent(match[1]));
-          setUser(parsed);
+          const raw = match[1];
+          let decoded = raw;
+          try {
+            decoded = decodeURIComponent(raw);
+          } catch {
+            decoded = raw;
+          }
+          sessionUser = JSON.parse(decoded);
+          setUser(sessionUser);
           setIsAuthenticated(true);
           setIsDemo(false);
-        } catch {
-          // ignore
-        }
+        } catch {}
       }
 
-      // Check cached last synced
+      if (!sessionUser) {
+        try {
+          const cachedUser = localStorage.getItem('aulert-user-profile');
+          if (cachedUser) {
+            sessionUser = JSON.parse(cachedUser);
+            setUser(sessionUser);
+            setIsAuthenticated(true);
+            setIsDemo(false);
+          }
+        } catch {}
+      }
+
       const cachedLast = localStorage.getItem('aulert-last-synced');
       if (cachedLast) setLastSynced(cachedLast);
 
-      // Pre-populate with cached live items if available to avoid flash
       const cachedItems = localStorage.getItem('aulert-live-items');
       const cachedCourses = localStorage.getItem('aulert-live-courses');
-      if (cachedItems && cachedCourses) {
+      if (cachedItems && cachedCourses && sessionUser) {
         try {
-          setItems([...JSON.parse(cachedItems), ...getCustomHomework()]);
+          setItems([...JSON.parse(cachedItems), ...getCachedHomework()]);
           setCourses(JSON.parse(cachedCourses));
           setIsLoading(false);
-        } catch {
-          // ignore
-        }
+        } catch {}
       }
     }
 
-    // 2. Fetch fresh live data from Classroom API
     syncData();
   }, [syncData]);
 
   const addItem = useCallback((item: UnifiedItem) => {
-    const custom = getCustomHomework();
-    const updatedCustom = [item, ...custom];
-    saveCustomHomework(updatedCustom);
+    // Optimistic UI update
     setItems((prev) => [item, ...prev]);
+
+    const cached = getCachedHomework();
+    setCachedHomework([item, ...cached]);
+
+    // Backend cloud persistence
+    fetch('/api/homework', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ item }),
+    }).catch((e) => console.warn('[useClassroomData] Failed to persist new homework:', e));
   }, []);
 
   const updateItem = useCallback((updatedItem: UnifiedItem) => {
+    // Optimistic UI update
     setItems((prev) =>
       prev.map((it) => (it.id === updatedItem.id ? updatedItem : it))
     );
+
     if (updatedItem.source === 'homework') {
-      const custom = getCustomHomework();
-      const updated = custom.map((it) => (it.id === updatedItem.id ? updatedItem : it));
-      saveCustomHomework(updated);
+      const cached = getCachedHomework();
+      setCachedHomework(cached.map((it) => (it.id === updatedItem.id ? updatedItem : it)));
+
+      // Backend cloud persistence
+      fetch('/api/homework', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item: updatedItem }),
+      }).catch((e) => console.warn('[useClassroomData] Failed to update homework in backend:', e));
     }
+  }, []);
+
+  const deleteItem = useCallback((itemId: string) => {
+    // Optimistic UI update
+    setItems((prev) => prev.filter((it) => it.id !== itemId));
+
+    const cached = getCachedHomework();
+    setCachedHomework(cached.filter((it) => it.id !== itemId));
+
+    // Backend cloud deletion
+    fetch(`/api/homework?id=${encodeURIComponent(itemId)}`, {
+      method: 'DELETE',
+    }).catch((e) => console.warn('[useClassroomData] Failed to delete homework in backend:', e));
   }, []);
 
   const toggleComplete = useCallback((itemId: string) => {
@@ -204,10 +273,16 @@ export function useClassroomData(): UseClassroomDataReturn {
             rawStatus: nextStatus,
             updatedAt: new Date().toISOString(),
           };
+
           if (it.source === 'homework') {
-            const custom = getCustomHomework();
-            const nextCustom = custom.map((c) => (c.id === itemId ? updated : c));
-            saveCustomHomework(nextCustom);
+            const cached = getCachedHomework();
+            setCachedHomework(cached.map((c) => (c.id === itemId ? updated : c)));
+
+            fetch('/api/homework', {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ item: updated }),
+            }).catch((e) => console.warn('[useClassroomData] Failed to update toggleComplete in backend:', e));
           }
           return updated;
         }
@@ -230,6 +305,7 @@ export function useClassroomData(): UseClassroomDataReturn {
     syncNow: syncData,
     addItem,
     updateItem,
+    deleteItem,
     toggleComplete,
   };
 }

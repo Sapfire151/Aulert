@@ -198,9 +198,13 @@ export default function CalendarPage() {
             <GhostPill size="sm" variant="muted" onClick={handlePrev} aria-label="Previous">
               <ChevronLeft size={14} />
             </GhostPill>
-            {/* Hide Today button when already viewing the current period */}
             {!isViewingCurrentPeriod && (
-              <GhostPill size="sm" variant="muted" onClick={handleToday}>
+              <GhostPill
+                size="sm"
+                variant="muted"
+                onClick={handleToday}
+                title="Jump to today"
+              >
                 Today
               </GhostPill>
             )}

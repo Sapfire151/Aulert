@@ -56,3 +56,8 @@ skills-lock.json
 /mdplan
 .env.example
 .vercel
+
+# Local data & temp
+/.data/
+/supabase/.temp/
+update.txt

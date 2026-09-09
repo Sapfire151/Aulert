@@ -6,6 +6,7 @@ import { GhostPill } from '@/components/ui/ghost-pill';
 import { NotificationBubble } from '@/components/ui/notification-bubble';
 import { Webhook, Bot, Bell, BellOff, AlertTriangle, ExternalLink, Send } from 'lucide-react';
 import { DiscordConnectionRow } from '@/types/database';
+import { useClassroomData } from '@/lib/hooks/use-classroom-data';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 
@@ -14,6 +15,7 @@ if (typeof window !== 'undefined') {
 }
 
 export default function SettingsPage() {
+  const { isDemo } = useClassroomData();
   const [webhookUrl, setWebhookUrl] = useState('');
   const [isResolving, setIsResolving] = useState(false);
   const [timeZone, setTimeZone] = useState('UTC');
@@ -46,22 +48,40 @@ export default function SettingsPage() {
     const tz = localStorage.getItem('aulert-tz') || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
     setTimeZone(tz);
 
-    const stored = localStorage.getItem('aulert-connections');
-    if (stored) {
+    // Fetch persistent connections from backend
+    const loadConnections = async () => {
       try {
-        const parsed: DiscordConnectionRow[] = JSON.parse(stored);
-        // Only keep real user-created webhooks, never placeholders
-        const real = parsed.filter(
-          (c) => c.id !== 'conn-demo-bot' && (!c.webhook_url_ciphertext || !c.webhook_url_ciphertext.includes('/demo/placeholder'))
-        );
-        setConnections(real);
-        localStorage.setItem('aulert-connections', JSON.stringify(real));
-      } catch {
+        const res = await fetch('/api/discord/connections', { cache: 'no-store' });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.success && Array.isArray(data.connections)) {
+            setConnections(data.connections);
+            localStorage.setItem('aulert-connections', JSON.stringify(data.connections));
+            return;
+          }
+        }
+      } catch (err) {
+        console.warn('[Settings] Failed to fetch backend connections, falling back to cache:', err);
+      }
+
+      // Fallback cache
+      const stored = localStorage.getItem('aulert-connections');
+      if (stored) {
+        try {
+          const parsed: DiscordConnectionRow[] = JSON.parse(stored);
+          const real = parsed.filter(
+            (c) => c.id !== 'conn-demo-bot' && (!c.webhook_url_ciphertext || !c.webhook_url_ciphertext.includes('/demo/placeholder'))
+          );
+          setConnections(real);
+        } catch {
+          setConnections([]);
+        }
+      } else {
         setConnections([]);
       }
-    } else {
-      setConnections([]);
-    }
+    };
+
+    loadConnections();
   }, []);
 
   const saveConnections = (updated: DiscordConnectionRow[]) => {
@@ -204,11 +224,23 @@ export default function SettingsPage() {
       c.id === connId ? { ...c, muted: !c.muted } : c
     );
     saveConnections(updated);
+
+    // Persist mute state to backend
+    fetch('/api/discord/connections', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: connId }),
+    }).catch((e) => console.warn('[Settings] Failed to toggle mute in backend:', e));
   };
 
   const handleDeleteConnection = (connId: string) => {
     const updated = connections.filter((c) => c.id !== connId);
     saveConnections(updated);
+
+    // Persist deletion to backend
+    fetch(`/api/discord/connections?id=${encodeURIComponent(connId)}`, {
+      method: 'DELETE',
+    }).catch((e) => console.warn('[Settings] Failed to delete connection in backend:', e));
   };
 
   return (
@@ -267,13 +299,14 @@ export default function SettingsPage() {
               Paste your Discord channel webhook URL. Uses the exact webhook you created in Discord.
             </p>
 
-            <form onSubmit={handleAddWebhook} style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: 'auto' }}>
+            <form onSubmit={handleAddWebhook} style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: 'auto', opacity: isDemo ? 0.5 : 1, pointerEvents: isDemo ? 'none' : 'auto' }}>
               <input
                 type="url"
                 value={webhookUrl}
                 onChange={(e) => setWebhookUrl(e.target.value)}
-                placeholder="Webhook URL (https://discord.com/api/webhooks/...)"
+                placeholder={isDemo ? 'Disabled in Preview Mode' : 'Webhook URL (https://discord.com/api/webhooks/...)'}
                 required
+                disabled={isDemo}
                 style={{
                   background: 'var(--color-bg)',
                   border: '1px solid var(--color-hairline)',
@@ -283,12 +316,13 @@ export default function SettingsPage() {
                   fontFamily: 'inherit',
                   fontSize: '13px',
                   outline: 'none',
+                  cursor: isDemo ? 'not-allowed' : 'text',
                 }}
               />
               <p className="body-ui text-muted" style={{ fontSize: '12px' }}>
-                Channel name is auto-detected from Discord when you save.
+                {isDemo ? 'Sign in to connect a webhook.' : 'Channel name is auto-detected from Discord when you save.'}
               </p>
-              <GhostPill type="submit" size="sm" disabled={isResolving}>
+              <GhostPill type="submit" size="sm" disabled={isResolving || isDemo}>
                 {isResolving ? 'Detecting channel...' : 'Save Webhook'}
               </GhostPill>
             </form>
@@ -318,24 +352,54 @@ export default function SettingsPage() {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: 'auto' }}>
               <GhostPill
-                href={`https://discord.com/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || '123456789'}&permissions=2048&scope=bot%20applications.commands`}
+                href={isDemo ? undefined : `https://discord.com/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID || '123456789'}&permissions=2048&scope=bot%20applications.commands`}
                 target="_blank"
                 rel="noopener noreferrer"
                 size="sm"
+                style={isDemo ? { opacity: 0.5, cursor: 'not-allowed', pointerEvents: 'none' } : {}}
               >
                 <ExternalLink size={14} />
                 Invite Aulert Bot
               </GhostPill>
+              {isDemo && (
+                <p className="body-ui text-muted" style={{ fontSize: '11px' }}>Sign in to invite the bot.</p>
+              )}
             </div>
           </div>
         </div>
       </div>
 
       {/* Active Connections List */}
-      <div className="settings-section" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-        <h3 className="section-header" style={{ fontSize: '18px' }}>
-          Active Alert Channels
-        </h3>
+      <div
+        className="settings-section"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          position: 'relative',
+          opacity: isDemo ? 0.45 : 1,
+          pointerEvents: isDemo ? 'none' : 'auto',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <h3 className="section-header" style={{ fontSize: '18px' }}>
+            Active Alert Channels
+          </h3>
+          {isDemo && (
+            <span
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                color: 'var(--color-alarm)',
+                backgroundColor: 'rgba(255, 69, 58, 0.12)',
+                padding: '2px 8px',
+                borderRadius: '100px',
+              }}
+            >
+              Disabled in Preview Mode
+            </span>
+          )}
+        </div>
 
         {connections.length === 0 ? (
           <div
@@ -344,10 +408,13 @@ export default function SettingsPage() {
               textAlign: 'center',
               borderTop: '1px solid var(--color-hairline)',
               borderBottom: '1px solid var(--color-hairline)',
+              opacity: isDemo ? 0.5 : 1,
             }}
           >
             <p className="body-ui text-muted">
-              No Discord alert channels configured yet. Add a webhook or invite the bot above.
+              {isDemo
+                ? 'Sign in with Google to connect Discord and receive alerts.'
+                : 'No Discord alert channels configured yet. Add a webhook or invite the bot above.'}
             </p>
           </div>
         ) : (
@@ -468,18 +535,18 @@ export default function SettingsPage() {
           Support & Compliance
         </h3>
         <p className="body-ui text-muted" style={{ fontSize: '13px' }}>
-          Review our legal terms or get help configuring Google Workspace and Discord:
+          Review our legal terms or get help with Aulert:
         </p>
         <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-          <Link href="/terms" className="nav-link" style={{ fontSize: '13px' }}>
+          <Link href="/terms?from=settings" className="nav-link" style={{ fontSize: '13px' }}>
             Terms of Service
           </Link>
-          <Link href="/privacy" className="nav-link" style={{ fontSize: '13px' }}>
+          <Link href="/privacy?from=settings" className="nav-link" style={{ fontSize: '13px' }}>
             Privacy Policy
           </Link>
-          <Link href="/auth/school-blocked" className="nav-link" style={{ fontSize: '13px' }}>
-            School IT Help
-          </Link>
+          <a href="https://forms.gle/FArG5TndGBnukNjn9" target="_blank" rel="noopener noreferrer" className="nav-link" style={{ fontSize: '13px' }}>
+            Support
+          </a>
         </div>
       </div>
     </div>

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { StatCard } from '@/components/dashboard/stat-card';
 import { ReconnectBanner } from '@/components/dashboard/reconnect-banner';
+import { StatCardSkeleton, ItemListSkeleton } from '@/components/dashboard/dashboard-skeleton';
 import { ItemRow } from '@/components/items/item-row';
 import { DetailPanel } from '@/components/items/detail-panel';
 import { HomeworkModal } from '@/components/homework/homework-modal';
@@ -228,6 +229,7 @@ export default function DashboardPage() {
     syncNow,
     addItem,
     updateItem,
+    deleteItem,
     toggleComplete,
   } = useClassroomData();
 
@@ -341,11 +343,7 @@ export default function DashboardPage() {
 
   const handleDeleteHomework = (targetItem: UnifiedItem) => {
     if (targetItem.source === 'classroom') return;
-    const updated = items.filter((i) => i.id !== targetItem.id);
-    localStorage.setItem(
-      'aulert-custom-homework',
-      JSON.stringify(updated.filter((it) => it.source === 'homework'))
-    );
+    deleteItem(targetItem.id);
     setSelectedItem(null);
   };
 
@@ -571,34 +569,41 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Stats Bar */}
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: '16px',
-        }}
-      >
-        <StatCard
-          number={stats.overdueCount}
-          label="Overdue"
-          isAlarm={stats.overdueCount > 0}
-        />
-        <StatCard
-          number={stats.dueThisWeekCount}
-          label="Due This Week"
-        />
-        <StatCard
-          number={stats.completedThisMonthCount}
-          label="Completed This Month"
-        />
-        <StatCard
-          number={grades.length}
-          label="Grades Received"
-        />
-      </div>
+      {isLoading ? (
+        <StatCardSkeleton />
+      ) : (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gap: '16px',
+          }}
+        >
+          <StatCard
+            number={stats.overdueCount}
+            label="Overdue"
+            isAlarm={stats.overdueCount > 0}
+          />
+          <StatCard
+            number={stats.dueThisWeekCount}
+            label="Due This Week"
+          />
+          <StatCard
+            number={stats.completedThisMonthCount}
+            label="Completed This Month"
+          />
+          <StatCard
+            number={grades.length}
+            label="Grades Received"
+          />
+        </div>
+      )}
 
       {/* Tab Navigation */}
-      <div>
+      {isLoading ? (
+        <ItemListSkeleton rows={6} />
+      ) : (
+        <div>
         {/* Tab Bar */}
         <div
           role="tablist"
@@ -825,7 +830,8 @@ export default function DashboardPage() {
             </div>
           )}
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Detail Panel */}
       <DetailPanel

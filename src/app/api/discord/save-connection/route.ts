@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { saveDiscordConnectionToDb } from '@/lib/database/server-db';
 
 export async function POST(request: Request) {
   try {
@@ -97,6 +98,24 @@ export async function POST(request: Request) {
       .eq('type', 'webhook')
       .limit(1);
 
+    // Save into persistent cloud server DB
+    const connectionId = (existingList && existingList.length > 0) ? existingList[0].id : `conn-wh-${Date.now()}`;
+    saveDiscordConnectionToDb({
+      id: connectionId,
+      user_id: userId,
+      type: 'webhook',
+      webhook_url_ciphertext: cleanUrl,
+      channel_id: channelId,
+      guild_id: guildId,
+      channel_name: normalizedChannelName,
+      guild_name: guildName,
+      muted: false,
+      status: 'active',
+      consecutive_failures: 0,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    });
+
     if (existingList && existingList.length > 0) {
       // 2. Reuse & update the existing webhook connection — do not create another one!
       const existingId = existingList[0].id;
@@ -130,7 +149,6 @@ export async function POST(request: Request) {
     }
 
     // 3. If none exists, create the primary webhook connection using the user's webhook
-    const connectionId = `conn-wh-${Date.now()}`;
     const { error: insertErr } = await supabase.from('discord_connections').insert({
       id: connectionId,
       user_id: userId,

@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;700&family=Prompt:wght@400;500;600;700&display=swap');
+
 /* ==========================================================================
    Aulert — Design System (Aulert_DESIGN.md)
    Dark-canvas, taxonomy-driven design language adapted from GSAP style reference.
@@ -514,7 +516,19 @@ input[type=number] {
   }
 }
 
-/* Calendar Grid */
+/* ============================================================
+   Skeleton Loading — shimmer animation for data sections
+   ============================================================ */
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
 .calendar-grid-container {
   border: 1px solid var(--color-hairline);
   border-radius: var(--radius-panel);
@@ -528,10 +542,12 @@ input[type=number] {
   border-bottom: 1px solid var(--color-hairline);
   background-color: var(--color-panel);
   text-align: center;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  padding: 10px 0;
+  padding: 7px 0;
   color: var(--color-text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .calendar-days-grid {
@@ -540,13 +556,13 @@ input[type=number] {
 }
 
 .calendar-cell {
-  min-height: 110px;
+  min-height: 82px;
   border-right: 1px solid var(--color-hairline);
   border-bottom: 1px solid var(--color-hairline);
-  padding: 8px;
+  padding: 5px 6px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .calendar-cell:nth-child(7n) {
@@ -558,15 +574,16 @@ input[type=number] {
 }
 
 .day-number-pill {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 400;
   color: var(--color-text-muted);
   border-radius: 50%;
+  line-height: 1;
 }
 
 .calendar-cell.is-today .day-number-pill {
@@ -821,6 +838,10 @@ input[type=number] {
   display: none;
 }
 
+.mobile-only-avatar {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .desktop-only-nav {
     display: none !important;
@@ -828,6 +849,12 @@ input[type=number] {
 
   .desktop-only-signout {
     display: none !important;
+  }
+
+  .mobile-only-avatar {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
   }
 
   .mobile-only-toggle {
@@ -1025,6 +1052,121 @@ input[type=number] {
   }
 }
 
+/* ==========================================================================
+   Landing Header & Theme Toggle Anchor
+   Guarantees theme toggle is securely anchored top-right without overflow,
+   and landing topbar has zero borders or dividers.
+   ========================================================================== */
+.landing-header {
+  border: none !important;
+  border-bottom: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
 
+.landing-header::after,
+.landing-header::before {
+  display: none !important;
+  content: none !important;
+}
+
+.theme-toggle-anchor {
+  position: fixed;
+  top: 18px;
+  right: 24px;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .theme-toggle-anchor {
+    top: 18px;
+    right: 16px;
+  }
+}
+
+/* ==========================================================================
+   Cinematic Landing Page — ambient glows, gradient text, hero aura
+   ========================================================================== */
+
+/* Hero ambient radial aura — behind the hero headline */
+.hero-aura {
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  height: 500px;
+  background: radial-gradient(
+    ellipse at 50% 50%,
+    rgba(99, 102, 241, 0.13) 0%,
+    rgba(139, 92, 246, 0.08) 40%,
+    transparent 70%
+  );
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(40px);
+}
+
+/* Gradient text highlight for hero value props */
+.gradient-text-aurora {
+  background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 50%, #34d399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Eyebrow badge — cinematic pill above the hero title */
+.hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(167, 139, 250, 0.25);
+  background: rgba(139, 92, 246, 0.08);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #a78bfa;
+  backdrop-filter: blur(8px);
+}
+
+/* Glassmorphism pillar card upgrade */
+.pillar-card {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-panel);
+  transition: transform 0.2s cubic-bezier(0.23, 1, 0.32, 1),
+              border-color 0.2s ease,
+              background 0.2s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .pillar-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+/* Feature card within pillar grid */
+.feature-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 22px 20px;
+}
+
+/* ==========================================================================
+   Homework page — container entrance class (mirrors Dashboard pattern)
+   ========================================================================== */
+.homework-entrance {
+  will-change: transform, opacity;
+}
 
 

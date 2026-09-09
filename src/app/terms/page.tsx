@@ -2,7 +2,11 @@ import React from 'react';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
-export default function TermsPage() {
+export default async function TermsPage({ searchParams }: { searchParams: Promise<{ from?: string }> }) {
+  const { from } = await searchParams;
+  const backHref = from === 'settings' ? '/settings' : '/';
+  const backLabel = from === 'settings' ? 'Back to Settings' : 'Back to Home';
+
   return (
     <div
       style={{
@@ -14,9 +18,9 @@ export default function TermsPage() {
         gap: '24px',
       }}
     >
-      <Link href="/" className="nav-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+      <Link href={backHref} className="nav-link" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
         <ArrowLeft size={16} />
-        Back to Home
+        {backLabel}
       </Link>
 
       <h1 className="section-header" style={{ fontSize: '28px' }}>

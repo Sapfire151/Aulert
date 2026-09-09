@@ -16,7 +16,7 @@ import { useGSAP } from '@gsap/react';
 gsap.registerPlugin(useGSAP);
 
 export default function HomeworkPage() {
-  const { items, courses, addItem, updateItem, toggleComplete } = useClassroomData();
+  const { items, courses, addItem, updateItem, deleteItem, toggleComplete } = useClassroomData();
   const [timeZone, setTimeZone] = useState<string>('UTC');
   const [selectedItem, setSelectedItem] = useState<UnifiedItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -32,17 +32,26 @@ export default function HomeworkPage() {
       if (prefersReducedMotion) return;
 
       if (containerRef.current) {
+        // Container entrance — matches Dashboard/Calendar tab opening feel
+        gsap.fromTo(
+          containerRef.current,
+          { opacity: 0, y: 8 },
+          { opacity: 1, y: 0, duration: 0.28, ease: 'power2.out' }
+        );
+        // Stagger child sections after container settles
         gsap.from('.homework-section', {
           opacity: 0,
-          y: 8,
-          stagger: 0.08,
+          y: 10,
+          stagger: 0.07,
           duration: 0.3,
           ease: 'power2.out',
+          delay: 0.06,
         });
       }
     },
     { scope: containerRef }
   );
+
 
   useEffect(() => {
     const tz = localStorage.getItem('aulert-tz') || Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
@@ -107,11 +116,7 @@ export default function HomeworkPage() {
   };
 
   const handleDeleteHomework = (target: UnifiedItem) => {
-    const updated = items.filter((i) => i.id !== target.id);
-    localStorage.setItem(
-      'aulert-custom-homework',
-      JSON.stringify(updated.filter((it) => it.source === 'homework'))
-    );
+    deleteItem(target.id);
     setSelectedItem(null);
   };
 
@@ -151,7 +156,7 @@ export default function HomeworkPage() {
   return (
     <div ref={containerRef} style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div className="homework-section" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
           <h2 className="section-header">Homework & Tasks</h2>
           <p className="body-ui text-muted" style={{ marginTop: '2px' }}>

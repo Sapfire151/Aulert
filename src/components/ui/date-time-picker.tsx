@@ -165,6 +165,14 @@ export function DateTimePicker({
     if (selDate) emitChange(selDate.y, selDate.m, selDate.d, hour, min);
   };
 
+  const handleToday = () => {
+    const t = new Date();
+    setViewYear(t.getFullYear());
+    setViewMonth(t.getMonth());
+    setSelDate({ y: t.getFullYear(), m: t.getMonth(), d: t.getDate() });
+    emitChange(t.getFullYear(), t.getMonth(), t.getDate(), hour, minute);
+  };
+
   const displayValue = selDate
     ? `${MONTHS[selDate.m].slice(0, 3)} ${pad(selDate.d)}, ${selDate.y}  ${pad(hour)}:${pad(minute)}`
     : '';
@@ -175,8 +183,8 @@ export function DateTimePicker({
     background: 'transparent',
     border: '1px solid var(--color-hairline)',
     borderRadius: '50%',
-    width: '28px',
-    height: '28px',
+    width: '20px',
+    height: '20px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -192,22 +200,22 @@ export function DateTimePicker({
     border: 'none',
     cursor: 'pointer',
     color: 'var(--color-text-muted)',
-    fontSize: '9px',
+    fontSize: '7px',
     lineHeight: 1,
-    padding: '1px 4px',
-    borderRadius: '3px',
+    padding: '0 2px',
+    borderRadius: '2px',
     fontFamily: 'inherit',
   };
 
   const timeInputStyle: React.CSSProperties = {
-    width: '40px',
+    width: '32px',
     textAlign: 'center',
     background: 'var(--color-bg)',
     border: '1px solid var(--color-hairline)',
-    borderRadius: '6px',
-    padding: '4px 2px',
+    borderRadius: '4px',
+    padding: '1px 0',
     color: 'var(--color-text-primary)',
-    fontSize: '15px',
+    fontSize: '12px',
     fontWeight: 600,
     fontFamily: 'inherit',
     outline: 'none',
@@ -223,27 +231,29 @@ export function DateTimePicker({
           width: '100%',
           display: 'flex',
           alignItems: 'center',
-          gap: '10px',
+          gap: '6px',
           background: 'var(--color-bg)',
           border: `1px solid ${open ? 'var(--color-text-primary)' : 'var(--color-hairline)'}`,
           borderRadius: 'var(--radius-panel)',
-          padding: '10px 14px',
+          padding: '5px 10px',
           color: displayValue ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
           fontFamily: 'inherit',
-          fontSize: '14px',
+          fontSize: '12px',
           cursor: 'pointer',
           textAlign: 'left',
           transition: 'border-color 0.15s ease',
+          minHeight: '32px',
+          boxSizing: 'border-box',
         }}
       >
-        <Calendar size={15} style={{ flexShrink: 0, color: 'var(--color-text-muted)' }} />
+        <Calendar size={13} style={{ flexShrink: 0, color: 'var(--color-text-muted)' }} />
         <span style={{ flex: 1 }}>{displayValue || placeholder}</span>
         {value && (
           <span
             role="button"
             tabIndex={0}
             onClick={(e) => { e.stopPropagation(); onChange(''); setSelDate(null); }}
-            style={{ color: 'var(--color-text-muted)', lineHeight: 1, fontSize: '18px', cursor: 'pointer' }}
+            style={{ color: 'var(--color-text-muted)', lineHeight: 1, fontSize: '14px', cursor: 'pointer' }}
           >
             &times;
           </span>
@@ -255,44 +265,77 @@ export function DateTimePicker({
           ref={dropRef}
           style={{
             position: 'absolute',
-            top: 'calc(100% + 6px)',
+            top: 'calc(100% + 3px)',
             left: 0,
-            right: 0,
             zIndex: 500,
             background: 'var(--color-panel)',
             border: '1px solid var(--color-hairline)',
             borderRadius: 'var(--radius-panel)',
-            padding: '16px',
+            padding: '8px 10px',
             display: 'flex',
             flexDirection: 'column',
-            gap: '12px',
-            minWidth: '280px',
+            gap: '6px',
+            width: '230px',
+            minWidth: '220px',
+            boxShadow: '0 6px 20px rgba(0, 0, 0, 0.3)',
           }}
         >
-          {/* Month navigation */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <button type="button" onClick={prevMonth} style={navBtnStyle}>
-              <ChevronLeft size={15} />
-            </button>
-            <span style={{ fontSize: '14px', fontWeight: 600 }}>
+          {/* Month navigation + Today */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingBottom: '1px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
               {MONTHS[viewMonth]} {viewYear}
             </span>
-            <button type="button" onClick={nextMonth} style={navBtnStyle}>
-              <ChevronRight size={15} />
-            </button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
+              <button
+                type="button"
+                onClick={prevMonth}
+                style={navBtnStyle}
+                aria-label="Previous month"
+              >
+                <ChevronLeft size={11} />
+              </button>
+              <button
+                type="button"
+                onClick={handleToday}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid var(--color-hairline)',
+                  borderRadius: 'var(--radius-pill)',
+                  padding: '1px 6px',
+                  fontSize: '10px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  color: 'var(--color-text-primary)',
+                  fontFamily: 'inherit',
+                  transition: 'background 0.12s ease',
+                  lineHeight: '16px',
+                }}
+                title="Jump to today"
+              >
+                Today
+              </button>
+              <button
+                type="button"
+                onClick={nextMonth}
+                style={navBtnStyle}
+                aria-label="Next month"
+              >
+                <ChevronRight size={11} />
+              </button>
+            </div>
           </div>
 
           {/* Day-of-week header */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px' }}>
             {DAYS.map((d) => (
               <div
                 key={d}
                 style={{
                   textAlign: 'center',
-                  fontSize: '11px',
+                  fontSize: '9px',
                   fontWeight: 600,
                   color: 'var(--color-text-muted)',
-                  paddingBottom: '4px',
+                  paddingBottom: '1px',
                 }}
               >
                 {d}
@@ -301,7 +344,7 @@ export function DateTimePicker({
           </div>
 
           {/* Calendar cells */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '2px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '1px' }}>
             {cells.map((cell, i) => {
               const isToday =
                 cell.thisMonth &&
@@ -322,9 +365,10 @@ export function DateTimePicker({
                   style={{
                     width: '100%',
                     aspectRatio: '1',
+                    maxHeight: '22px',
                     borderRadius: '50%',
                     border: isToday && !isSelected
-                      ? '1px solid var(--color-hairline)'
+                      ? '1px solid var(--color-text-primary)'
                       : '1px solid transparent',
                     background: isSelected ? 'var(--color-text-primary)' : 'transparent',
                     color: isSelected
@@ -332,8 +376,8 @@ export function DateTimePicker({
                       : cell.thisMonth
                       ? 'var(--color-text-primary)'
                       : 'var(--color-text-muted)',
-                    opacity: cell.thisMonth ? 1 : 0.3,
-                    fontSize: '12px',
+                    opacity: cell.thisMonth ? 1 : 0.28,
+                    fontSize: '10px',
                     fontWeight: isSelected || isToday ? 600 : 400,
                     cursor: 'pointer',
                     display: 'flex',
@@ -341,6 +385,7 @@ export function DateTimePicker({
                     justifyContent: 'center',
                     transition: 'background 0.12s ease, color 0.12s ease',
                     padding: 0,
+                    margin: '0 auto',
                     fontFamily: 'inherit',
                   }}
                 >
@@ -355,19 +400,19 @@ export function DateTimePicker({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '10px',
+              gap: '6px',
               borderTop: '1px solid var(--color-hairline)',
-              paddingTop: '12px',
+              paddingTop: '6px',
             }}
           >
-            <Clock size={14} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
-            <span style={{ fontSize: '12px', color: 'var(--color-text-muted)', minWidth: '30px' }}>
+            <Clock size={11} style={{ color: 'var(--color-text-muted)', flexShrink: 0 }} />
+            <span style={{ fontSize: '10px', color: 'var(--color-text-muted)', minWidth: '24px' }}>
               Time
             </span>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginLeft: 'auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2px', marginLeft: 'auto' }}>
               {/* Hour */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                <button type="button" onClick={() => handleHour(1)} style={spinnerBtnStyle}>▲</button>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' }}>
+                <button type="button" onClick={() => handleHour(1)} style={spinnerBtnStyle} aria-label="Hour up">▲</button>
                 <input
                   type="number"
                   min={0}
@@ -375,13 +420,14 @@ export function DateTimePicker({
                   value={pad(hour)}
                   onChange={(e) => handleHourInput(e.target.value)}
                   style={timeInputStyle}
+                  aria-label="Hour"
                 />
-                <button type="button" onClick={() => handleHour(-1)} style={spinnerBtnStyle}>▼</button>
+                <button type="button" onClick={() => handleHour(-1)} style={spinnerBtnStyle} aria-label="Hour down">▼</button>
               </div>
-              <span style={{ color: 'var(--color-text-muted)', fontWeight: 700, fontSize: '16px' }}>:</span>
+              <span style={{ color: 'var(--color-text-muted)', fontWeight: 700, fontSize: '12px', lineHeight: 1 }}>:</span>
               {/* Minute */}
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px' }}>
-                <button type="button" onClick={() => handleMinute(5)} style={spinnerBtnStyle}>▲</button>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1px' }}>
+                <button type="button" onClick={() => handleMinute(5)} style={spinnerBtnStyle} aria-label="Minute up">▲</button>
                 <input
                   type="number"
                   min={0}
@@ -389,13 +435,14 @@ export function DateTimePicker({
                   value={pad(minute)}
                   onChange={(e) => handleMinuteInput(e.target.value)}
                   style={timeInputStyle}
+                  aria-label="Minute"
                 />
-                <button type="button" onClick={() => handleMinute(-5)} style={spinnerBtnStyle}>▼</button>
+                <button type="button" onClick={() => handleMinute(-5)} style={spinnerBtnStyle} aria-label="Minute down">▼</button>
               </div>
             </div>
           </div>
 
-          {/* Done */}
+          {/* Done button */}
           <button
             type="button"
             onClick={handleClose}
@@ -408,11 +455,13 @@ export function DateTimePicker({
               color: 'var(--color-bg)',
               border: 'none',
               borderRadius: 'var(--radius-pill)',
-              padding: '8px 24px',
-              fontSize: '13px',
+              padding: '4px 12px',
+              fontSize: '11px',
               fontWeight: 600,
               cursor: 'pointer',
               fontFamily: 'inherit',
+              marginTop: '1px',
+              height: '24px',
             }}
           >
             Done

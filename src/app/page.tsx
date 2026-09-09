@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { GhostPill } from '@/components/ui/ghost-pill';
@@ -13,7 +13,6 @@ import {
   MessageSquare,
   ArrowRight,
   Clock,
-  ShieldCheck,
   CheckCircle2,
   XCircle,
 } from 'lucide-react';
@@ -53,6 +52,19 @@ const STEP_PATHS = {
 
 export default function HomePage() {
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Session persistence: if returning authenticated user, redirect directly to /dashboard
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('signed_out') === '1' || params.get('preview') === '1') return;
+
+    const hasCookieSession = document.cookie.includes('aulert_session=') || document.cookie.includes('aulert_google_token=');
+    const hasCachedProfile = Boolean(localStorage.getItem('aulert-user-profile'));
+    if (hasCookieSession || hasCachedProfile) {
+      window.location.replace('/dashboard');
+    }
+  }, []);
 
   useGSAP(
     () => {
@@ -151,11 +163,14 @@ export default function HomePage() {
         overflowX: 'hidden',
       }}
     >
-      {/* 1. Header (Stationary topbar matching exact 72px height, placement, and sizing across every page) */}
+      {/* 1. Header (Stationary topbar — no border divider, theme toggle fixed-safe) */}
       <header
-        className="app-header"
+        className="app-header landing-header"
         style={{
-          borderBottom: '1px solid var(--color-hairline)',
+          border: 'none',
+          borderBottom: 'none',
+          boxShadow: 'none',
+          outline: 'none',
           height: '72px',
           minHeight: '72px',
           boxSizing: 'border-box',
@@ -191,7 +206,10 @@ export default function HomePage() {
           >
             Aulert
           </span>
-          <ThemeToggle />
+          {/* ThemeToggle: inline inside header flex, falls back to fixed anchor on very narrow viewports */}
+          <div className="theme-toggle-anchor">
+            <ThemeToggle />
+          </div>
         </div>
       </header>
 
@@ -201,482 +219,485 @@ export default function HomePage() {
         className="landing-content"
       >
 
-      {/* 2. Hero Section */}
-      <section
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '40px',
-        }}
-      >
-        <div
+        {/* 2. Hero Section */}
+        <section
           style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '40px',
+            position: 'relative',
+          }}
+        >
+          {/* Ambient aura glow behind headline */}
+          <div className="hero-aura" aria-hidden="true" />
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '48px',
+              position: 'relative',
+              zIndex: 1,
+            }}
+          >
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '20px',
+                maxWidth: '620px',
+              }}
+            >
+
+              <h1
+                className="hero-headline hero-main-title"
+                style={{ lineHeight: 1.1, letterSpacing: '-0.028em' }}
+              >
+                Never miss a{' '}
+                <span className="gradient-text-aurora">deadline</span>{' '}
+                again.
+              </h1>
+
+              <p
+                className="body-ui text-muted"
+                style={{ fontSize: '17px', lineHeight: 1.65, maxWidth: '520px' }}
+              >
+                Aulert converts scattered classroom announcements into a single
+                visual calendar and delivers instant alerts straight to your
+                Discord server or DMs.
+              </p>
+
+              <div
+                className="hero-cta-group"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <GhostPill href="/api/auth/google" size="md" variant="google">
+                  <GoogleIcon size={16} />
+                  Continue with Google
+                  <ArrowRight size={16} />
+                </GhostPill>
+                <GhostPill href="/dashboard" variant="muted" size="md">
+                  Preview mode
+                </GhostPill>
+              </div>
+            </div>
+
+            <div style={{ flexShrink: 0, margin: '0 auto' }}>
+              <MorphVisual />
+            </div>
+          </div>
+
+          {/* Interactive Morph Simulator (dynamically loaded) */}
+          <div className="simulator-wrap" style={{ position: 'relative', zIndex: 1 }}>
+            <MorphSimulator />
+          </div>
+        </section>
+
+
+        {/* 3. Connected Animated Journey with GSAP Morph Nodes */}
+        <section
+          id="pipeline"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '32px',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '840px' }}>
+            <span
+              className="section-eyebrow"
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: 'var(--color-course-1)',
+              }}
+            >
+              Connected Architecture
+            </span>
+            <h2 className="section-heading-anim single-line-heading" style={{ fontSize: 'clamp(22px, 4vw, 34px)', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+              From Teacher Post to Discord Ping in 4 Steps
+            </h2>
+            <p className="body-ui text-muted" style={{ fontSize: '15px', lineHeight: 1.6 }}>
+              Follow the automated lifecycle of an assignment as it travels through Google Cloud Pub/Sub,
+              taxonomy filtering, Discord dispatch, and encrypted vault storage.
+            </p>
+          </div>
+
+          {/* Connected Vertical Timeline */}
+          <div className="journey-container">
+            <div className="journey-track-line" />
+            <div className="journey-progress-line" />
+
+            {/* Step 1: Ingestion */}
+            <div className="journey-step">
+              <JourneyMorphNode
+                stepNumber="01"
+                accent="var(--color-course-1)"
+                targetPath={STEP_PATHS.ingest}
+              />
+              <div className="journey-card">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--color-course-1)', letterSpacing: '0.05em' }}>
+                    Step 01 · Ingestion
+                  </span>
+                  <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+                    Google Cloud Pub/Sub
+                  </span>
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: 600 }}>
+                  Instant Push Event Detection
+                </h3>
+                <p className="body-ui text-muted" style={{ fontSize: '14px', lineHeight: 1.6 }}>
+                  The exact second work is published, Google Classroom dispatches an asynchronous push
+                  payload directly to our edge worker. Zero client polling, zero battery drain.
+                </p>
+              </div>
+            </div>
+
+            {/* Step 2: Taxonomy Engine */}
+            <div className="journey-step">
+              <JourneyMorphNode
+                stepNumber="02"
+                accent="var(--color-course-2)"
+                targetPath={STEP_PATHS.filter}
+              />
+              <div className="journey-card">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--color-course-2)', letterSpacing: '0.05em' }}>
+                    Step 02 · Normalization
+                  </span>
+                  <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+                    Taxonomy Engine
+                  </span>
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: 600 }}>
+                  Deduplication & Color-Coded Taxonomy
+                </h3>
+                <p className="body-ui text-muted" style={{ fontSize: '14px', lineHeight: 1.6 }}>
+                  Course titles are normalized into clean subjects, duplicate teacher edits are discarded,
+                  and timezones are automatically aligned to your local schedule.
+                </p>
+              </div>
+            </div>
+
+            {/* Step 3: Discord Dispatch */}
+            <div className="journey-step">
+              <JourneyMorphNode
+                stepNumber="03"
+                accent="var(--color-alarm)"
+                targetPath={STEP_PATHS.bell}
+              />
+              <div className="journey-card">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--color-alarm)', letterSpacing: '0.05em' }}>
+                    Step 03 · Dispatch
+                  </span>
+                  <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+                    Webhook Sync
+                  </span>
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: 600 }}>
+                  Precision Discord Pings with Deep Links
+                </h3>
+                <p className="body-ui text-muted" style={{ fontSize: '14px', lineHeight: 1.6 }}>
+                  Sends a rich embed with dynamic countdown timers (e.g. <i>Due in 3 hours</i>) and a single-click
+                  direct deep-link to the exact submission page in Google Classroom.
+                </p>
+              </div>
+            </div>
+
+            {/* Step 4: Security & Vault */}
+            <div className="journey-step">
+              <JourneyMorphNode
+                stepNumber="04"
+                accent="var(--color-course-4)"
+                targetPath={STEP_PATHS.shield}
+              />
+              <div className="journey-card">
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--color-course-4)', letterSpacing: '0.05em' }}>
+                    Step 04 · Security
+                  </span>
+                  <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
+                    Thailand PDPA Compliant
+                  </span>
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: 600 }}>
+                  Supabase Vault & Read-Only Scopes
+                </h3>
+                <p className="body-ui text-muted" style={{ fontSize: '14px', lineHeight: 1.6 }}>
+                  Institutional credentials are never exposed. Google OAuth tokens are isolated with AES-GCM-256
+                  encryption, with zero retention of student files or grades.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 4. Comparison Section */}
+        <section
+          id="comparison"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '32px',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '680px' }}>
+            <span
+              className="section-eyebrow"
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: 'var(--color-alarm)',
+              }}
+            >
+              The Difference
+            </span>
+            <h2 className="section-heading-anim" style={{ fontSize: 'clamp(22px, 4vw, 34px)', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+              Why Students Rely on Aulert
+            </h2>
+            <p className="body-ui text-muted" style={{ fontSize: '15px', lineHeight: 1.6 }}>
+              Eliminate stream fatigue and replace manual tab refreshes with automated peace of mind.
+            </p>
+          </div>
+
+          <div className="comparison-container">
+            {/* Without Aulert */}
+            <div className="comparison-card">
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  color: 'var(--color-alarm)',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Google Classroom Alone
+              </span>
+              <h3 style={{ fontSize: '18px', fontWeight: 600 }}>
+                Fragmented Stream Noise
+              </h3>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <XCircle size={16} color="var(--color-alarm)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <span className="body-ui text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
+                    Assignments drowned beneath stream announcements and comments
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <XCircle size={16} color="var(--color-alarm)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <span className="body-ui text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
+                    Notification emails easily missed or caught in spam filters
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <XCircle size={16} color="var(--color-alarm)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <span className="body-ui text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
+                    No relative countdown timer before 11:59 PM deadlines
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <XCircle size={16} color="var(--color-alarm)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <span className="body-ui text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
+                    Constantly opening multiple course tabs to verify pending work
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* With Aulert */}
+            <div className="comparison-card highlight-card">
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  color: 'var(--color-course-1)',
+                  letterSpacing: '0.05em',
+                }}
+              >
+                Aulert + Discord
+              </span>
+              <h3 style={{ fontSize: '18px', fontWeight: 600 }}>
+                Unified, Automated Delivery
+              </h3>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <CheckCircle2 size={16} color="var(--color-course-1)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <span className="body-ui" style={{ fontSize: '13px', lineHeight: 1.5 }}>
+                    Instant Discord channel or DM ping the exact moment work is assigned
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <CheckCircle2 size={16} color="var(--color-course-1)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <span className="body-ui" style={{ fontSize: '13px', lineHeight: 1.5 }}>
+                    Single-pane interactive calendar with month, week, and agenda modes
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <CheckCircle2 size={16} color="var(--color-course-1)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <span className="body-ui" style={{ fontSize: '13px', lineHeight: 1.5 }}>
+                    Actionable embeds with direct deep-links straight into the assignment
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <CheckCircle2 size={16} color="var(--color-course-1)" style={{ flexShrink: 0, marginTop: '2px' }} />
+                  <span className="body-ui" style={{ fontSize: '13px', lineHeight: 1.5 }}>
+                    Automated 24h reminders and overdue warnings for peace of mind
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* 5. Core Capabilities */}
+        <section
+          id="capabilities"
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '28px',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <span
+              className="section-eyebrow"
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                color: 'var(--color-course-3)',
+              }}
+            >
+              Capabilities
+            </span>
+            <h2 className="section-heading-anim" style={{ fontSize: 'clamp(20px, 3.5vw, 30px)', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
+              Engineered for Everyday Student Workflows
+            </h2>
+          </div>
+
+          <div
+            className="feature-grid"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: '20px',
+            }}
+          >
+            <div className="pillar-card feature-card">
+              <Calendar size={20} color="var(--color-course-1)" />
+              <h3 className="body-emphasis" style={{ fontSize: '15px' }}>
+                Multi-View Calendar
+              </h3>
+              <p className="body-ui text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
+                Month, Week, and Agenda views with one-click filtering by course taxonomy.
+              </p>
+            </div>
+
+            <div className="pillar-card feature-card">
+              <MessageSquare size={20} color="var(--color-alarm)" />
+              <h3 className="body-emphasis" style={{ fontSize: '15px' }}>
+                Custom Discord Webhooks
+              </h3>
+              <p className="body-ui text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
+                Route alerts to your private server or study channels with built-in live ping tests.
+              </p>
+            </div>
+
+            <div className="pillar-card feature-card">
+              <Clock size={20} color="var(--color-course-3)" />
+              <h3 className="body-emphasis hero-title-clamp" style={{ fontSize: '15px', whiteSpace: 'nowrap' }}>
+                Urgency Tiers
+              </h3>
+              <p className="body-ui text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
+                Sub-24h countdowns trigger high-contrast alarm badges for urgent tasks.
+              </p>
+            </div>
+
+
+          </div>
+        </section>
+
+        {/* 6. High-Conversion CTA */}
+        <section
+          className="cta-section"
+          style={{
+            backgroundColor: 'var(--color-panel)',
+            border: '1px solid var(--color-hairline)',
+            borderRadius: 'var(--radius-panel)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            gap: '20px',
+            padding: 'clamp(44px, 7vw, 80px) clamp(20px, 4vw, 48px)',
+          }}
+        >
+          <h2 style={{ fontSize: 'clamp(24px, 4.5vw, 36px)', lineHeight: 1.2, maxWidth: '580px', letterSpacing: '-0.02em' }}>
+            Take control of your deadlines.
+          </h2>
+
+          <p className="body-ui text-muted single-line-sub" style={{ fontSize: '15px', lineHeight: 1.6 }}>
+            Sync your Google Classroom schedule in seconds. No passwords required.
+          </p>
+
+          <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            <GhostPill href="/api/auth/google" size="md" variant="google">
+              <GoogleIcon size={16} />
+              Continue with Google
+              <ArrowRight size={16} />
+            </GhostPill>
+            <GhostPill href="/dashboard" variant="muted" size="md">
+              Preview mode
+            </GhostPill>
+          </div>
+        </section>
+
+        {/* 7. Footer */}
+        <footer
+          style={{
+            borderTop: '1px solid var(--color-hairline)',
+            paddingTop: '28px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             flexWrap: 'wrap',
-            gap: '48px',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '24px',
-              maxWidth: '620px',
-            }}
-          >
-            <h1
-              className="hero-headline hero-main-title"
-              style={{ lineHeight: 1.12, letterSpacing: '-0.025em' }}
-            >
-              Never miss a Google Classroom deadline again.
-            </h1>
-
-            <p
-              className="body-ui text-muted"
-              style={{ fontSize: '18px', lineHeight: 1.6, maxWidth: '560px' }}
-            >
-              Aulert converts scattered classroom announcements into a single visual calendar and
-              delivers instant, actionable alerts straight to your Discord server or DMs.
-            </p>
-
-            <div
-              className="hero-cta-group"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '16px',
-                flexWrap: 'wrap',
-              }}
-            >
-              <GhostPill href="/api/auth/google" size="md" variant="google">
-                <GoogleIcon size={16} />
-                Continue with Google
-                <ArrowRight size={16} />
-              </GhostPill>
-              <GhostPill href="/dashboard" variant="muted" size="md">
-                Preview mode
-              </GhostPill>
-            </div>
-          </div>
-
-          <div style={{ flexShrink: 0, margin: '0 auto' }}>
-            <MorphVisual />
-          </div>
-        </div>
-
-        {/* Interactive Morph Simulator (dynamically loaded) */}
-        <div className="simulator-wrap">
-          <MorphSimulator />
-        </div>
-      </section>
-
-      {/* 3. Connected Animated Journey with GSAP Morph Nodes */}
-      <section
-        id="pipeline"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '32px',
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '840px' }}>
-          <span
-            className="section-eyebrow"
-            style={{
-              fontSize: '11px',
-              fontWeight: 600,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: 'var(--color-course-1)',
-            }}
-          >
-            Connected Architecture
-          </span>
-          <h2 className="section-heading-anim single-line-heading" style={{ fontSize: 'clamp(22px, 4vw, 34px)', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
-            From Teacher Post to Discord Ping in 4 Steps
-          </h2>
-          <p className="body-ui text-muted" style={{ fontSize: '15px', lineHeight: 1.6 }}>
-            Follow the automated lifecycle of an assignment as it travels through Google Cloud Pub/Sub,
-            taxonomy filtering, Discord dispatch, and encrypted vault storage.
-          </p>
-        </div>
-
-        {/* Connected Vertical Timeline */}
-        <div className="journey-container">
-          <div className="journey-track-line" />
-          <div className="journey-progress-line" />
-
-          {/* Step 1: Ingestion */}
-          <div className="journey-step">
-            <JourneyMorphNode
-              stepNumber="01"
-              accent="var(--color-course-1)"
-              targetPath={STEP_PATHS.ingest}
-            />
-            <div className="journey-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--color-course-1)', letterSpacing: '0.05em' }}>
-                  Step 01 · Ingestion
-                </span>
-                <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
-                  Google Cloud Pub/Sub
-                </span>
-              </div>
-              <h3 style={{ fontSize: '18px', fontWeight: 600 }}>
-                Instant Push Event Detection
-              </h3>
-              <p className="body-ui text-muted" style={{ fontSize: '14px', lineHeight: 1.6 }}>
-                The exact second work is published, Google Classroom dispatches an asynchronous push
-                payload directly to our edge worker. Zero client polling, zero battery drain.
-              </p>
-            </div>
-          </div>
-
-          {/* Step 2: Taxonomy Engine */}
-          <div className="journey-step">
-            <JourneyMorphNode
-              stepNumber="02"
-              accent="var(--color-course-2)"
-              targetPath={STEP_PATHS.filter}
-            />
-            <div className="journey-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--color-course-2)', letterSpacing: '0.05em' }}>
-                  Step 02 · Normalization
-                </span>
-                <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
-                  Taxonomy Engine
-                </span>
-              </div>
-              <h3 style={{ fontSize: '18px', fontWeight: 600 }}>
-                Deduplication & Color-Coded Taxonomy
-              </h3>
-              <p className="body-ui text-muted" style={{ fontSize: '14px', lineHeight: 1.6 }}>
-                Course titles are normalized into clean subjects, duplicate teacher edits are discarded,
-                and timezones are automatically aligned to your local schedule.
-              </p>
-            </div>
-          </div>
-
-          {/* Step 3: Discord Dispatch */}
-          <div className="journey-step">
-            <JourneyMorphNode
-              stepNumber="03"
-              accent="var(--color-alarm)"
-              targetPath={STEP_PATHS.bell}
-            />
-            <div className="journey-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--color-alarm)', letterSpacing: '0.05em' }}>
-                  Step 03 · Dispatch
-                </span>
-                <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
-                  Webhook Sync
-                </span>
-              </div>
-              <h3 style={{ fontSize: '18px', fontWeight: 600 }}>
-                Precision Discord Pings with Deep Links
-              </h3>
-              <p className="body-ui text-muted" style={{ fontSize: '14px', lineHeight: 1.6 }}>
-                Sends a rich embed with dynamic countdown timers (e.g. <i>Due in 3 hours</i>) and a single-click
-                direct deep-link to the exact submission page in Google Classroom.
-              </p>
-            </div>
-          </div>
-
-          {/* Step 4: Security & Vault */}
-          <div className="journey-step">
-            <JourneyMorphNode
-              stepNumber="04"
-              accent="var(--color-course-4)"
-              targetPath={STEP_PATHS.shield}
-            />
-            <div className="journey-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', color: 'var(--color-course-4)', letterSpacing: '0.05em' }}>
-                  Step 04 · Security
-                </span>
-                <span style={{ fontSize: '12px', color: 'var(--color-text-muted)' }}>
-                  Thailand PDPA Compliant
-                </span>
-              </div>
-              <h3 style={{ fontSize: '18px', fontWeight: 600 }}>
-                Supabase Vault & Read-Only Scopes
-              </h3>
-              <p className="body-ui text-muted" style={{ fontSize: '14px', lineHeight: 1.6 }}>
-                Institutional credentials are never exposed. Google OAuth tokens are isolated with AES-GCM-256
-                encryption, with zero retention of student files or grades.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. Comparison Section */}
-      <section
-        id="comparison"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '32px',
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxWidth: '680px' }}>
-          <span
-            className="section-eyebrow"
-            style={{
-              fontSize: '11px',
-              fontWeight: 600,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: 'var(--color-alarm)',
-            }}
-          >
-            The Difference
-          </span>
-          <h2 className="section-heading-anim" style={{ fontSize: 'clamp(22px, 4vw, 34px)', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
-            Why Students Rely on Aulert
-          </h2>
-          <p className="body-ui text-muted" style={{ fontSize: '15px', lineHeight: 1.6 }}>
-            Eliminate stream fatigue and replace manual tab refreshes with automated peace of mind.
-          </p>
-        </div>
-
-        <div className="comparison-container">
-          {/* Without Aulert */}
-          <div className="comparison-card">
-            <span
-              style={{
-                fontSize: '11px',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                color: 'var(--color-alarm)',
-                letterSpacing: '0.05em',
-              }}
-            >
-              Google Classroom Alone
-            </span>
-            <h3 style={{ fontSize: '18px', fontWeight: 600 }}>
-              Fragmented Stream Noise
-            </h3>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                <XCircle size={16} color="var(--color-alarm)" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span className="body-ui text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
-                  Assignments drowned beneath stream announcements and comments
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                <XCircle size={16} color="var(--color-alarm)" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span className="body-ui text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
-                  Notification emails easily missed or caught in spam filters
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                <XCircle size={16} color="var(--color-alarm)" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span className="body-ui text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
-                  No relative countdown timer before 11:59 PM deadlines
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                <XCircle size={16} color="var(--color-alarm)" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span className="body-ui text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
-                  Constantly opening multiple course tabs to verify pending work
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* With Aulert */}
-          <div className="comparison-card highlight-card">
-            <span
-              style={{
-                fontSize: '11px',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                color: 'var(--color-course-1)',
-                letterSpacing: '0.05em',
-              }}
-            >
-              Aulert + Discord
-            </span>
-            <h3 style={{ fontSize: '18px', fontWeight: 600 }}>
-              Unified, Automated Delivery
-            </h3>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                <CheckCircle2 size={16} color="var(--color-course-1)" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span className="body-ui" style={{ fontSize: '13px', lineHeight: 1.5 }}>
-                  Instant Discord channel or DM ping the exact moment work is assigned
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                <CheckCircle2 size={16} color="var(--color-course-1)" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span className="body-ui" style={{ fontSize: '13px', lineHeight: 1.5 }}>
-                  Single-pane interactive calendar with month, week, and agenda modes
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                <CheckCircle2 size={16} color="var(--color-course-1)" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span className="body-ui" style={{ fontSize: '13px', lineHeight: 1.5 }}>
-                  Actionable embeds with direct deep-links straight into the assignment
-                </span>
-              </div>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
-                <CheckCircle2 size={16} color="var(--color-course-1)" style={{ flexShrink: 0, marginTop: '2px' }} />
-                <span className="body-ui" style={{ fontSize: '13px', lineHeight: 1.5 }}>
-                  Automated 24h reminders and overdue warnings for peace of mind
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. Core Capabilities */}
-      <section
-        id="capabilities"
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '28px',
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <span
-            className="section-eyebrow"
-            style={{
-              fontSize: '11px',
-              fontWeight: 600,
-              letterSpacing: '0.08em',
-              textTransform: 'uppercase',
-              color: 'var(--color-course-3)',
-            }}
-          >
-            Capabilities
-          </span>
-          <h2 className="section-heading-anim" style={{ fontSize: 'clamp(20px, 3.5vw, 30px)', lineHeight: 1.2, letterSpacing: '-0.02em' }}>
-            Engineered for Everyday Student Workflows
-          </h2>
-        </div>
-
-        <div
-          className="feature-grid"
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
             gap: '20px',
           }}
         >
-          <div className="pillar-card feature-card">
-            <Calendar size={20} color="var(--color-course-1)" />
-            <h3 className="body-emphasis" style={{ fontSize: '15px' }}>
-              Multi-View Calendar
-            </h3>
-            <p className="body-ui text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
-              Month, Week, and Agenda views with one-click filtering by course taxonomy.
-            </p>
+          <span className="footer-anim body-ui text-muted" style={{ fontSize: '13px' }}>
+            © {new Date().getFullYear()} Aulert. Built for students under Thailand PDPA.
+          </span>
+
+          <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
+            <Link href="/privacy?from=landing" className="footer-anim nav-link" style={{ fontSize: '13px' }}>
+              Privacy Policy
+            </Link>
+            <Link href="/terms?from=landing" className="footer-anim nav-link" style={{ fontSize: '13px' }}>
+              Terms of Service
+            </Link>
+            <a href="https://forms.gle/FArG5TndGBnukNjn9" target="_blank" rel="noopener noreferrer" className="footer-anim nav-link" style={{ fontSize: '13px' }}>
+              Support
+            </a>
           </div>
-
-          <div className="pillar-card feature-card">
-            <MessageSquare size={20} color="var(--color-alarm)" />
-            <h3 className="body-emphasis" style={{ fontSize: '15px' }}>
-              Custom Discord Webhooks
-            </h3>
-            <p className="body-ui text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
-              Route alerts to your private server or study channels with built-in live ping tests.
-            </p>
-          </div>
-
-          <div className="pillar-card feature-card">
-            <Clock size={20} color="var(--color-course-3)" />
-            <h3 className="body-emphasis hero-title-clamp" style={{ fontSize: '15px', whiteSpace: 'nowrap' }}>
-              Urgency Tiers
-            </h3>
-            <p className="body-ui text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
-              Sub-24h countdowns trigger high-contrast alarm badges for urgent tasks.
-            </p>
-          </div>
-
-          <div className="pillar-card feature-card">
-            <ShieldCheck size={20} color="var(--color-course-4)" />
-            <h3 className="body-emphasis hero-title-clamp" style={{ fontSize: '15px', whiteSpace: 'nowrap' }}>
-              School IT Help
-            </h3>
-            <p className="body-ui text-muted" style={{ fontSize: '13px', lineHeight: 1.5 }}>
-              Pre-written unblock requests and whitelist guidelines for restricted school networks.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. High-Conversion CTA */}
-      <section
-        className="cta-section"
-        style={{
-          backgroundColor: 'var(--color-panel)',
-          border: '1px solid var(--color-hairline)',
-          borderRadius: 'var(--radius-panel)',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          textAlign: 'center',
-          gap: '20px',
-          padding: 'clamp(44px, 7vw, 80px) clamp(20px, 4vw, 48px)',
-        }}
-      >
-        <h2 style={{ fontSize: 'clamp(24px, 4.5vw, 36px)', lineHeight: 1.2, maxWidth: '580px', letterSpacing: '-0.02em' }}>
-          Take control of your deadlines.
-        </h2>
-
-        <p className="body-ui text-muted single-line-sub" style={{ fontSize: '15px', lineHeight: 1.6 }}>
-          Sync your Google Classroom schedule in seconds. No passwords required.
-        </p>
-
-        <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <GhostPill href="/api/auth/google" size="md" variant="google">
-            <GoogleIcon size={16} />
-            Continue with Google
-            <ArrowRight size={16} />
-          </GhostPill>
-          <GhostPill href="/dashboard" variant="muted" size="md">
-            Preview mode
-          </GhostPill>
-        </div>
-      </section>
-
-      {/* 7. Footer */}
-      <footer
-        style={{
-          borderTop: '1px solid var(--color-hairline)',
-          paddingTop: '28px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          flexWrap: 'wrap',
-          gap: '20px',
-        }}
-      >
-        <span className="footer-anim body-ui text-muted" style={{ fontSize: '13px' }}>
-          © {new Date().getFullYear()} Aulert. Built for students under Thailand PDPA.
-        </span>
-
-        <div style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
-          <Link href="/privacy" className="footer-anim nav-link" style={{ fontSize: '13px' }}>
-            Privacy Policy
-          </Link>
-          <Link href="/terms" className="footer-anim nav-link" style={{ fontSize: '13px' }}>
-            Terms of Service
-          </Link>
-          <Link href="/auth/school-blocked" className="footer-anim nav-link" style={{ fontSize: '13px' }}>
-            School IT Help
-          </Link>
-        </div>
-      </footer>
+        </footer>
       </main>
     </div>
   );
